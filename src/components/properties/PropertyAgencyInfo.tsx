@@ -45,11 +45,11 @@ export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps
               )}
             </div>
             
-            {/* Localisation */}
+            {/* Localisation - utilise la vraie localisation de la propriété */}
             {property.location && (
               <div className="flex items-center mb-3 text-muted-foreground">
                 <MapPin className="h-4 w-4 mr-2" />
-                <span>{property.location} • Burkina Faso 🇧🇫</span>
+                <span>{property.location}</span>
               </div>
             )}
 
