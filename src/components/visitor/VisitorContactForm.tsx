@@ -21,7 +21,6 @@ export default function VisitorContactForm({ agencyName, onSubmit, isLoading }: 
     phone: '',
     purpose: 'contact_agency'
   });
-  const [contactMethod, setContactMethod] = useState<'email' | 'phone'>('email');
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const validateForm = () => {
@@ -35,18 +34,22 @@ export default function VisitorContactForm({ agencyName, onSubmit, isLoading }: 
       newErrors.last_name = 'Le nom est requis';
     }
 
-    if (contactMethod === 'email') {
-      if (!formData.email.trim()) {
-        newErrors.email = 'L\'email est requis';
-      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-        newErrors.email = 'Format d\'email invalide';
-      }
-    } else {
-      if (!formData.phone.trim()) {
-        newErrors.phone = 'Le téléphone est requis';
-      } else if (!/^[+]?[\d\s\-()]+$/.test(formData.phone)) {
-        newErrors.phone = 'Format de téléphone invalide';
-      }
+    // Au moins un contact (email ou téléphone) est requis
+    const hasEmail = formData.email.trim();
+    const hasPhone = formData.phone.trim();
+    
+    if (!hasEmail && !hasPhone) {
+      newErrors.contact = 'Veuillez fournir au moins un moyen de contact (email ou téléphone)';
+    }
+
+    // Validation de l'email si fourni
+    if (hasEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Format d\'email invalide';
+    }
+
+    // Validation du téléphone si fourni
+    if (hasPhone && !/^[+]?[\d\s\-()]+$/.test(formData.phone)) {
+      newErrors.phone = 'Format de téléphone invalide';
     }
 
     setErrors(newErrors);
@@ -62,10 +65,8 @@ export default function VisitorContactForm({ agencyName, onSubmit, isLoading }: 
       first_name: formData.first_name,
       last_name: formData.last_name,
       purpose: formData.purpose,
-      ...(contactMethod === 'email' 
-        ? { email: formData.email, phone: undefined } 
-        : { phone: formData.phone, email: undefined }
-      )
+      email: formData.email.trim() || undefined,
+      phone: formData.phone.trim() || undefined
     };
 
     const result = await onSubmit(submitData);
@@ -92,28 +93,6 @@ export default function VisitorContactForm({ agencyName, onSubmit, isLoading }: 
 
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Méthode de contact */}
-            <div className="grid grid-cols-2 gap-2 mb-4">
-              <Button
-                type="button"
-                variant={contactMethod === 'email' ? 'default' : 'outline'}
-                onClick={() => setContactMethod('email')}
-                className="flex items-center gap-2"
-              >
-                <Mail className="w-4 h-4" />
-                Email
-              </Button>
-              <Button
-                type="button"
-                variant={contactMethod === 'phone' ? 'default' : 'outline'}
-                onClick={() => setContactMethod('phone')}
-                className="flex items-center gap-2"
-              >
-                <Phone className="w-4 h-4" />
-                Téléphone
-              </Button>
-            </div>
-
             {/* Nom et prénom */}
             <div className="grid grid-cols-2 gap-3">
               <div>
@@ -144,36 +123,56 @@ export default function VisitorContactForm({ agencyName, onSubmit, isLoading }: 
               </div>
             </div>
 
-            {/* Contact method input */}
-            {contactMethod === 'email' ? (
-              <div>
-                <Label htmlFor="email">Adresse email *</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className={errors.email ? 'border-red-500' : ''}
-                  placeholder="votre.email@exemple.com"
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-sm mt-1">{errors.email}</p>
-                )}
-              </div>
-            ) : (
-              <div>
-                <Label htmlFor="phone">Numéro de téléphone *</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  className={errors.phone ? 'border-red-500' : ''}
-                  placeholder="+33 1 23 45 67 89"
-                />
-                {errors.phone && (
-                  <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
-                )}
+            {/* Message pour au moins un contact */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
+              <p className="text-sm text-blue-700 dark:text-blue-300 flex items-center">
+                <Mail className="w-4 h-4 mr-2" />
+                Veuillez fournir au moins un moyen de contact
+              </p>
+            </div>
+
+            {/* Email */}
+            <div>
+              <Label htmlFor="email" className="flex items-center">
+                <Mail className="w-4 h-4 mr-2" />
+                Adresse email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className={errors.email ? 'border-red-500' : ''}
+                placeholder="votre.email@exemple.com"
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
+            </div>
+
+            {/* Téléphone */}
+            <div>
+              <Label htmlFor="phone" className="flex items-center">
+                <Phone className="w-4 h-4 mr-2" />
+                Numéro de téléphone / WhatsApp
+              </Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className={errors.phone ? 'border-red-500' : ''}
+                placeholder="+33 1 23 45 67 89"
+              />
+              {errors.phone && (
+                <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+              )}
+            </div>
+
+            {/* Contact error */}
+            {errors.contact && (
+              <div className="text-red-500 text-sm text-center bg-red-50 dark:bg-red-900/20 p-2 rounded">
+                {errors.contact}
               </div>
             )}
 
