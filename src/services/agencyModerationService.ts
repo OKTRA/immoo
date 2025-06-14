@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 export const agencyModerationService = {
   /**
-   * Hide/Show an agency
+   * Toggle agency verification status
    */
   async toggleAgencyVisibility(agencyId: string, isVisible: boolean): Promise<{ success: boolean; error?: string }> {
     try {
@@ -26,7 +26,7 @@ export const agencyModerationService = {
   },
 
   /**
-   * Suspend an agency account
+   * Remove agency verification (suspend-like behavior)
    */
   async suspendAgency(agencyId: string): Promise<{ success: boolean; error?: string }> {
     try {
