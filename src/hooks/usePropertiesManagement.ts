@@ -25,15 +25,40 @@ export function usePropertiesManagement() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [locationFilter, setLocationFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [locations, setLocations] = useState<string[]>([]);
+  const itemsPerPage = 15;
 
   useEffect(() => {
     fetchProperties();
-  }, []);
+    fetchLocations();
+  }, [searchTerm, statusFilter, typeFilter, locationFilter, sortBy, sortOrder, currentPage]);
+
+  const fetchLocations = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('location')
+        .not('location', 'is', null);
+
+      if (error) throw error;
+
+      const uniqueLocations = [...new Set(data?.map(p => p.location).filter(Boolean))] as string[];
+      setLocations(uniqueLocations);
+    } catch (error) {
+      console.error('Error fetching locations:', error);
+    }
+  };
 
   const fetchProperties = async () => {
     try {
       setIsLoading(true);
-      const { data: propertiesData, error } = await supabase
+      
+      let query = supabase
         .from('properties')
         .select(`
           id,
@@ -48,8 +73,37 @@ export function usePropertiesManagement() {
           agency_id,
           created_at,
           updated_at
-        `)
-        .order('created_at', { ascending: false });
+        `, { count: 'exact' });
+
+      // Apply search filter
+      if (searchTerm) {
+        query = query.or(`title.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,type.ilike.%${searchTerm}%`);
+      }
+
+      // Apply status filter
+      if (statusFilter !== 'all') {
+        query = query.eq('status', statusFilter);
+      }
+
+      // Apply type filter
+      if (typeFilter !== 'all') {
+        query = query.ilike('type', `%${typeFilter}%`);
+      }
+
+      // Apply location filter
+      if (locationFilter !== 'all') {
+        query = query.eq('location', locationFilter);
+      }
+
+      // Apply sorting
+      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+
+      // Apply pagination
+      const from = (currentPage - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
+      query = query.range(from, to);
+
+      const { data: propertiesData, error, count } = await query;
 
       if (error) throw error;
 
@@ -88,6 +142,7 @@ export function usePropertiesManagement() {
       }) || [];
 
       setProperties(transformedProperties);
+      setTotalCount(count || 0);
     } catch (error) {
       console.error('Error fetching properties:', error);
       toast.error('Erreur lors du chargement des propriétés');
@@ -128,6 +183,7 @@ export function usePropertiesManagement() {
       if (error) throw error;
 
       setProperties(properties.filter(property => property.id !== propertyId));
+      setTotalCount(prev => prev - 1);
       toast.success('Propriété supprimée avec succès');
     } catch (error) {
       console.error('Error deleting property:', error);
@@ -135,20 +191,21 @@ export function usePropertiesManagement() {
     }
   };
 
-  const filteredProperties = properties.filter(property => {
-    const matchesSearch = 
-      property.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      property.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (property.agency_name && property.agency_name.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesStatusFilter = statusFilter === 'all' || property.status === statusFilter;
-    const matchesTypeFilter = typeFilter === 'all' || property.type.toLowerCase() === typeFilter.toLowerCase();
-    
-    return matchesSearch && matchesStatusFilter && matchesTypeFilter;
-  });
+  const moderateProperty = async (propertyId: string, action: 'approve' | 'reject') => {
+    try {
+      const newStatus = action === 'approve' ? 'available' : 'rejected';
+      await updatePropertyStatus(propertyId, newStatus);
+      toast.success(`Propriété ${action === 'approve' ? 'approuvée' : 'rejetée'} avec succès`);
+    } catch (error) {
+      console.error('Error moderating property:', error);
+      toast.error('Erreur lors de la modération de la propriété');
+    }
+  };
+
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return {
-    properties: filteredProperties,
+    properties,
     isLoading,
     searchTerm,
     setSearchTerm,
@@ -156,8 +213,20 @@ export function usePropertiesManagement() {
     setStatusFilter,
     typeFilter,
     setTypeFilter,
+    locationFilter,
+    setLocationFilter,
+    locations,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    currentPage,
+    setCurrentPage,
+    totalCount,
+    totalPages,
     updatePropertyStatus,
     deleteProperty,
+    moderateProperty,
     refreshProperties: fetchProperties
   };
 }

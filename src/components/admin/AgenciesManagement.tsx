@@ -8,9 +8,13 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue
+} from '@/components/ui/select';
 import { 
   Search, Filter, MoreHorizontal, Building2, CheckCircle, 
-  XCircle, ChevronDown, Star, Loader2, RefreshCw, Trash, Eye 
+  XCircle, ChevronDown, Star, Loader2, RefreshCw, Trash, Eye,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
@@ -23,11 +27,27 @@ export default function AgenciesManagement() {
     agencies, 
     isLoading, 
     searchTerm, 
-    setSearchTerm, 
+    setSearchTerm,
+    verificationFilter,
+    setVerificationFilter,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    currentPage,
+    setCurrentPage,
+    totalCount,
+    totalPages,
     toggleVerification, 
     deleteAgency,
     refreshAgencies 
   } = useAgenciesManagement();
+
+  const handleDelete = async (agencyId: string) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette agence ?')) {
+      await deleteAgency(agencyId);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -60,7 +80,7 @@ export default function AgenciesManagement() {
 
       <Card className="mb-6">
         <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col lg:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -71,10 +91,38 @@ export default function AgenciesManagement() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Filter className="h-4 w-4" />
-              Filtres
-              <ChevronDown className="h-4 w-4" />
+            <Select
+              value={verificationFilter}
+              onValueChange={setVerificationFilter}
+            >
+              <SelectTrigger className="w-full lg:w-[180px]">
+                <SelectValue placeholder="Vérification" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes</SelectItem>
+                <SelectItem value="verified">Vérifiées</SelectItem>
+                <SelectItem value="unverified">Non vérifiées</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={sortBy}
+              onValueChange={setSortBy}
+            >
+              <SelectTrigger className="w-full lg:w-[180px]">
+                <SelectValue placeholder="Trier par" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="created_at">Date de création</SelectItem>
+                <SelectItem value="name">Nom</SelectItem>
+                <SelectItem value="properties_count">Nb propriétés</SelectItem>
+                <SelectItem value="rating">Note</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button
+              variant="outline"
+              onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+            >
+              {sortOrder === 'asc' ? '↑' : '↓'}
             </Button>
           </div>
         </CardContent>
@@ -82,98 +130,132 @@ export default function AgenciesManagement() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Liste des Agences ({agencies.length})</CardTitle>
+          <CardTitle>Liste des Agences ({totalCount})</CardTitle>
           <CardDescription>
             Gérez toutes les agences immobilières sur la plateforme
           </CardDescription>
         </CardHeader>
         <CardContent>
           {agencies.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nom</TableHead>
-                  <TableHead>Localisation</TableHead>
-                  <TableHead>Propriétés</TableHead>
-                  <TableHead>Évaluation</TableHead>
-                  <TableHead>Vérification</TableHead>
-                  <TableHead>Date de création</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {agencies.map((agency) => (
-                  <TableRow key={agency.id}>
-                    <TableCell className="font-medium">{agency.name}</TableCell>
-                    <TableCell>{agency.location}</TableCell>
-                    <TableCell>{agency.properties_count}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Star className="h-4 w-4 text-yellow-500 mr-1 fill-yellow-500" />
-                        <span>{agency.rating.toFixed(1)}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {agency.verified ? (
-                        <div className="flex items-center text-green-500">
-                          <CheckCircle className="h-4 w-4 mr-1" />
-                          <span>Vérifiée</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center text-red-500">
-                          <XCircle className="h-4 w-4 mr-1" />
-                          <span>Non vérifiée</span>
-                        </div>
-                      )}
-                    </TableCell>
-                    <TableCell>{agency.created_at}</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Voir détails
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>Modifier</DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => toggleVerification(agency.id, agency.verified)}
-                            className={agency.verified ? "text-yellow-500" : "text-green-500"}
-                          >
-                            {agency.verified ? (
-                              <>
-                                <XCircle className="h-4 w-4 mr-2" />
-                                Retirer vérification
-                              </>
-                            ) : (
-                              <>
-                                <CheckCircle className="h-4 w-4 mr-2" />
-                                Vérifier
-                              </>
-                            )}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="text-red-500"
-                            onClick={() => deleteAgency(agency.id)}
-                          >
-                            <Trash className="h-4 w-4 mr-2" />
-                            Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nom</TableHead>
+                    <TableHead>Localisation</TableHead>
+                    <TableHead>Propriétés</TableHead>
+                    <TableHead>Évaluation</TableHead>
+                    <TableHead>Vérification</TableHead>
+                    <TableHead>Date de création</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {agencies.map((agency) => (
+                    <TableRow key={agency.id}>
+                      <TableCell className="font-medium">{agency.name}</TableCell>
+                      <TableCell>{agency.location}</TableCell>
+                      <TableCell>{agency.properties_count}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <Star className="h-4 w-4 text-yellow-500 mr-1 fill-yellow-500" />
+                          <span>{agency.rating.toFixed(1)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {agency.verified ? (
+                          <div className="flex items-center text-green-500">
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            <span>Vérifiée</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center text-red-500">
+                            <XCircle className="h-4 w-4 mr-1" />
+                            <span>Non vérifiée</span>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>{agency.created_at}</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem>
+                              <Eye className="h-4 w-4 mr-2" />
+                              Voir détails
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>Modifier</DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => toggleVerification(agency.id, agency.verified)}
+                              className={agency.verified ? "text-yellow-500" : "text-green-500"}
+                            >
+                              {agency.verified ? (
+                                <>
+                                  <XCircle className="h-4 w-4 mr-2" />
+                                  Retirer vérification
+                                </>
+                              ) : (
+                                <>
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Vérifier
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="text-red-500"
+                              onClick={() => handleDelete(agency.id)}
+                            >
+                              <Trash className="h-4 w-4 mr-2" />
+                              Supprimer
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <div className="text-sm text-muted-foreground">
+                    Page {currentPage} sur {totalPages} ({totalCount} agences)
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Précédent
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Suivant
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              {searchTerm ? 'Aucune agence trouvée pour cette recherche' : 'Aucune agence enregistrée'}
+              {searchTerm || verificationFilter !== 'all' 
+                ? 'Aucune agence trouvée pour ces critères' 
+                : 'Aucune agence enregistrée'
+              }
             </div>
           )}
         </CardContent>

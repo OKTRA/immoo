@@ -21,18 +21,44 @@ export function useAgenciesManagement() {
   const [agencies, setAgencies] = useState<Agency[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [verificationFilter, setVerificationFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const itemsPerPage = 10;
 
   useEffect(() => {
     fetchAgencies();
-  }, []);
+  }, [searchTerm, verificationFilter, sortBy, sortOrder, currentPage]);
 
   const fetchAgencies = async () => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
+      
+      let query = supabase
         .from('agencies')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*', { count: 'exact' });
+
+      // Apply search filter
+      if (searchTerm) {
+        query = query.or(`name.ilike.%${searchTerm}%,location.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+      }
+
+      // Apply verification filter
+      if (verificationFilter !== 'all') {
+        query = query.eq('verified', verificationFilter === 'verified');
+      }
+
+      // Apply sorting
+      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+
+      // Apply pagination
+      const from = (currentPage - 1) * itemsPerPage;
+      const to = from + itemsPerPage - 1;
+      query = query.range(from, to);
+
+      const { data, error, count } = await query;
 
       if (error) throw error;
 
@@ -51,6 +77,7 @@ export function useAgenciesManagement() {
       })) || [];
 
       setAgencies(transformedAgencies);
+      setTotalCount(count || 0);
     } catch (error) {
       console.error('Error fetching agencies:', error);
       toast.error('Erreur lors du chargement des agences');
@@ -95,6 +122,7 @@ export function useAgenciesManagement() {
       if (error) throw error;
 
       setAgencies(agencies.filter(agency => agency.id !== agencyId));
+      setTotalCount(prev => prev - 1);
       toast.success('Agence supprimée avec succès');
     } catch (error) {
       console.error('Error deleting agency:', error);
@@ -102,18 +130,55 @@ export function useAgenciesManagement() {
     }
   };
 
-  const filteredAgencies = agencies.filter(agency => 
-    agency.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    agency.location.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const updateAgency = async (agencyId: string, updates: Partial<Agency>) => {
+    try {
+      const { error } = await supabase
+        .from('agencies')
+        .update({
+          name: updates.name,
+          location: updates.location,
+          email: updates.email,
+          phone: updates.phone,
+          website: updates.website,
+          description: updates.description
+        })
+        .eq('id', agencyId);
+
+      if (error) throw error;
+
+      setAgencies(agencies.map(agency => 
+        agency.id === agencyId 
+          ? { ...agency, ...updates }
+          : agency
+      ));
+
+      toast.success('Agence mise à jour avec succès');
+    } catch (error) {
+      console.error('Error updating agency:', error);
+      toast.error('Erreur lors de la mise à jour de l\'agence');
+    }
+  };
+
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return {
-    agencies: filteredAgencies,
+    agencies,
     isLoading,
     searchTerm,
     setSearchTerm,
+    verificationFilter,
+    setVerificationFilter,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    currentPage,
+    setCurrentPage,
+    totalCount,
+    totalPages,
     toggleVerification,
     deleteAgency,
+    updateAgency,
     refreshAgencies: fetchAgencies
   };
 }
