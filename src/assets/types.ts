@@ -54,6 +54,13 @@ export interface Property {
   agencyEmail?: string;
   agencyWebsite?: string;
   agencyVerified?: boolean;
+  agencyRating?: number;
+  agencyDescription?: string;
+  agencySpecialties?: string[];
+  agencyServiceAreas?: string[];
+  agencyPropertiesCount?: number;
+  agencyYearsActive?: number;
+  agencyJoinDate?: string;
 }
 
 export interface PropertyOwner {
