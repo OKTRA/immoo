@@ -342,6 +342,12 @@ export default function PublicAgencyPage() {
                     property={property} 
                     isPublicView={true}
                     showFavorite={false}
+                    agencyContactInfo={{
+                      phone: agency.phone,
+                      email: agency.email,
+                      website: agency.website
+                    }}
+                    hasContactAccess={isAuthorized}
                   />
                 ))}
               </div>

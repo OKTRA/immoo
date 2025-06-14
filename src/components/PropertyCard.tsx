@@ -17,6 +17,12 @@ interface PropertyCardProps {
   featured?: boolean;
   isPublicView?: boolean;
   onToggleFavorite?: (propertyId: string) => void;
+  agencyContactInfo?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  hasContactAccess?: boolean;
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({
@@ -26,7 +32,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   isFavorite = false,
   featured = false,
   isPublicView = false,
-  onToggleFavorite
+  onToggleFavorite,
+  agencyContactInfo,
+  hasContactAccess = false
 }) => {
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -84,7 +92,10 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       {showActions && (
         <CardFooter className="pt-0">
           {isPublicView ? (
-            <PublicPropertyActions />
+            <PublicPropertyActions 
+              agencyContactInfo={agencyContactInfo}
+              hasContactAccess={hasContactAccess}
+            />
           ) : (
             <PropertyActions property={property} />
           )}
@@ -94,16 +105,55 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   );
 };
 
-const PublicPropertyActions = () => {
-  return (
-    <div className="flex space-x-2 mt-4">
-      <Button size="sm" variant="outline" className="flex-1" disabled>
-        <span className="mr-1">Contact</span>
-        <Phone className="h-3.5 w-3.5" />
-      </Button>
-      <div className="text-xs text-muted-foreground flex-1 text-center py-2">
-        Remplissez le formulaire pour contacter l'agence
+const PublicPropertyActions = ({ 
+  agencyContactInfo, 
+  hasContactAccess 
+}: { 
+  agencyContactInfo?: {
+    phone?: string;
+    email?: string;
+    website?: string;
+  };
+  hasContactAccess?: boolean;
+}) => {
+  if (!hasContactAccess || !agencyContactInfo) {
+    return (
+      <div className="flex space-x-2 mt-4">
+        <Button size="sm" variant="outline" className="flex-1" disabled>
+          <span className="mr-1">Contact</span>
+          <Phone className="h-3.5 w-3.5" />
+        </Button>
+        <div className="text-xs text-muted-foreground flex-1 text-center py-2">
+          Remplissez le formulaire pour contacter l'agence
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-2 mt-4">
+      {agencyContactInfo.phone && (
+        <a 
+          href={`tel:${agencyContactInfo.phone}`}
+          className="flex items-center justify-center w-full"
+        >
+          <Button size="sm" variant="outline" className="w-full">
+            <Phone className="h-3.5 w-3.5 mr-2" />
+            {agencyContactInfo.phone}
+          </Button>
+        </a>
+      )}
+      {agencyContactInfo.email && (
+        <a 
+          href={`mailto:${agencyContactInfo.email}`}
+          className="flex items-center justify-center w-full"
+        >
+          <Button size="sm" variant="outline" className="w-full">
+            <Mail className="h-3.5 w-3.5 mr-2" />
+            {agencyContactInfo.email}
+          </Button>
+        </a>
+      )}
     </div>
   );
 };
