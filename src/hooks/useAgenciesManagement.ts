@@ -15,10 +15,6 @@ export interface Agency {
   phone?: string;
   website?: string;
   description?: string;
-  is_blocked?: boolean;
-  hidden_from_index?: boolean;
-  blocked_reason?: string;
-  blocked_at?: string;
 }
 
 export function useAgenciesManagement() {
@@ -51,20 +47,7 @@ export function useAgenciesManagement() {
 
       // Apply verification filter
       if (verificationFilter !== 'all') {
-        switch (verificationFilter) {
-          case 'verified':
-            query = query.eq('verified', true);
-            break;
-          case 'unverified':
-            query = query.eq('verified', false);
-            break;
-          case 'blocked':
-            query = query.eq('is_blocked', true);
-            break;
-          case 'hidden':
-            query = query.eq('hidden_from_index', true);
-            break;
-        }
+        query = query.eq('verified', verificationFilter === 'verified');
       }
 
       // Apply sorting
@@ -90,11 +73,7 @@ export function useAgenciesManagement() {
         email: agency.email,
         phone: agency.phone,
         website: agency.website,
-        description: agency.description,
-        is_blocked: agency.is_blocked || false,
-        hidden_from_index: agency.hidden_from_index || false,
-        blocked_reason: agency.blocked_reason,
-        blocked_at: agency.blocked_at
+        description: agency.description
       })) || [];
 
       setAgencies(transformedAgencies);
