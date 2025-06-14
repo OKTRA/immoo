@@ -26,8 +26,8 @@ import { Loader2, Search } from 'lucide-react';
 interface Profile {
   id: string;
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name: string | null;
+  last_name: string | null;
   role: string;
 }
 
@@ -54,10 +54,13 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = profiles.filter(profile => 
-        profile.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        `${profile.first_name} ${profile.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      const filtered = profiles.filter(profile => {
+        const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+        const email = profile.email || '';
+        
+        return email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+               fullName.toLowerCase().includes(searchTerm.toLowerCase());
+      });
       setFilteredProfiles(filtered);
     } else {
       setFilteredProfiles(profiles);
@@ -67,20 +70,28 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
   const fetchNonAdminProfiles = async () => {
     setIsLoading(true);
     try {
-      console.log('Fetching profiles from the profiles table...');
+      console.log('=== DÉBUT DE LA RÉCUPÉRATION DES PROFILS ===');
       
-      // Récupérer tous les profils depuis la table profiles
+      // Récupérer tous les profils depuis la table profiles avec une requête simple
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email, first_name, last_name, role')
-        .order('first_name');
+        .select('*')
+        .order('email');
 
       if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
+        console.error('Erreur lors de la récupération des profils:', profilesError);
         throw profilesError;
       }
 
-      console.log('Profiles fetched:', profilesData?.length || 0);
+      console.log('Profils bruts récupérés:', profilesData);
+      console.log('Nombre de profils trouvés:', profilesData?.length || 0);
+
+      if (!profilesData || profilesData.length === 0) {
+        console.warn('Aucun profil trouvé dans la base de données');
+        setProfiles([]);
+        setFilteredProfiles([]);
+        return;
+      }
 
       // Récupérer les utilisateurs qui ont déjà des rôles admin
       const { data: adminRoles, error: adminError } = await supabase
@@ -88,26 +99,32 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
         .select('user_id');
 
       if (adminError && adminError.code !== 'PGRST116') {
-        console.error('Error fetching admin roles:', adminError);
-        throw adminError;
+        console.error('Erreur lors de la récupération des rôles admin:', adminError);
+        // On continue même en cas d'erreur pour afficher les profils
       }
 
-      console.log('Admin roles found:', adminRoles?.length || 0);
+      console.log('Rôles admin trouvés:', adminRoles);
 
       const adminUserIds = adminRoles?.map(role => role.user_id) || [];
+      console.log('IDs des utilisateurs admin:', adminUserIds);
       
       // Filtrer les profils pour exclure ceux qui sont déjà admin
-      const nonAdminProfiles = profilesData?.filter(profile => 
-        !adminUserIds.includes(profile.id)
-      ) || [];
+      const nonAdminProfiles = profilesData.filter(profile => {
+        const isAdmin = adminUserIds.includes(profile.id);
+        console.log(`Profil ${profile.id} (${profile.email}) - Est admin: ${isAdmin}`);
+        return !isAdmin;
+      });
 
-      console.log('Non-admin profiles available for promotion:', nonAdminProfiles.length);
+      console.log('Profils non-admin disponibles:', nonAdminProfiles);
+      console.log('Nombre final de profils disponibles pour promotion:', nonAdminProfiles.length);
       
       setProfiles(nonAdminProfiles);
       setFilteredProfiles(nonAdminProfiles);
     } catch (error) {
-      console.error('Error in fetchNonAdminProfiles:', error);
+      console.error('Erreur générale dans fetchNonAdminProfiles:', error);
       toast.error('Erreur lors du chargement des profils utilisateurs');
+      setProfiles([]);
+      setFilteredProfiles([]);
     } finally {
       setIsLoading(false);
     }
@@ -121,7 +138,7 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
 
     setIsPromoting(true);
     try {
-      console.log('Promoting user:', selectedUserId, 'to role:', adminRole);
+      console.log('Promotion de l\'utilisateur:', selectedUserId, 'au rôle:', adminRole);
       
       const { success, error } = await assignAdminRole(selectedUserId, adminRole);
       
@@ -130,12 +147,16 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
       }
       
       const selectedProfile = profiles.find(p => p.id === selectedUserId);
-      toast.success(`${selectedProfile?.first_name} ${selectedProfile?.last_name} a été promu au rôle ${adminRole}`);
+      const userName = selectedProfile 
+        ? `${selectedProfile.first_name || ''} ${selectedProfile.last_name || ''}`.trim() || selectedProfile.email
+        : 'Utilisateur';
+      
+      toast.success(`${userName} a été promu au rôle ${adminRole}`);
       
       onUserPromoted();
       handleClose();
     } catch (error: any) {
-      console.error('Error promoting user:', error);
+      console.error('Erreur lors de la promotion:', error);
       toast.error(error.message || 'Erreur lors de la promotion');
     } finally {
       setIsPromoting(false);
@@ -150,6 +171,11 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
   };
 
   const selectedProfile = profiles.find(p => p.id === selectedUserId);
+
+  const getDisplayName = (profile: Profile) => {
+    const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();
+    return fullName || 'Nom non renseigné';
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -198,7 +224,7 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
                       <SelectItem key={profile.id} value={profile.id}>
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            {profile.first_name} {profile.last_name}
+                            {getDisplayName(profile)}
                           </span>
                           <span className="text-sm text-muted-foreground">
                             {profile.email}
@@ -216,7 +242,7 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
             <div className="p-3 bg-muted rounded-lg">
               <h4 className="font-medium mb-2">Profil sélectionné:</h4>
               <div className="text-sm">
-                <p><strong>Nom:</strong> {selectedProfile.first_name} {selectedProfile.last_name}</p>
+                <p><strong>Nom:</strong> {getDisplayName(selectedProfile)}</p>
                 <p><strong>Email:</strong> {selectedProfile.email}</p>
                 <p><strong>Rôle actuel:</strong> {selectedProfile.role}</p>
               </div>
