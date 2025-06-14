@@ -71,7 +71,7 @@ export default function AgencyDetailPage() {
   // Fix: Access the stats directly, not through a 'statistics' property
   const stats = {
     propertiesCount: statsData?.totalProperties || 0,
-    avgRating: statsData?.rating || 0,
+    avgRating: agency?.rating || 0, // Use the agency's rating instead of statsData?.rating
     recentListings: []
   };
 

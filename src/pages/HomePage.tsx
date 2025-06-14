@@ -31,7 +31,7 @@ export default function HomePage() {
           setFeaturedProperties(propertiesResult.properties);
         }
         
-        // Load featured agencies
+        // Load featured agencies  
         const agenciesResult = await getFeaturedAgencies(6);
         if (agenciesResult?.agencies) {
           setFeaturedAgencies(agenciesResult.agencies);
