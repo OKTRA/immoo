@@ -25,11 +25,13 @@ export function NavbarDesktopMenu({
 }: NavbarDesktopMenuProps) {
   const navigate = useNavigate();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [selectedUserType, setSelectedUserType] = useState<'agency' | 'admin'>('agency');
 
   const handleUserTypeClick = (type: UserType) => {
     if (user) {
       navigate(type.path);
     } else {
+      setSelectedUserType(type.role === 'admin' ? 'admin' : 'agency');
       setLoginDialogOpen(true);
     }
   };
@@ -72,7 +74,7 @@ export function NavbarDesktopMenu({
       <LoginDialog 
         open={loginDialogOpen} 
         onOpenChange={setLoginDialogOpen}
-        defaultMode="login"
+        userType={selectedUserType}
       />
     </>
   );

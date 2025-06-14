@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -24,12 +23,14 @@ export function NavbarMobileMenu({
 }: NavbarMobileMenuProps) {
   const navigate = useNavigate();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [selectedUserType, setSelectedUserType] = useState<'agency' | 'admin'>('agency');
 
   const handleUserTypeClick = (type: UserType) => {
     setMobileMenuOpen(false);
     if (user) {
       navigate(type.path);
     } else {
+      setSelectedUserType(type.role === 'admin' ? 'admin' : 'agency');
       setLoginDialogOpen(true);
     }
   };
@@ -73,7 +74,7 @@ export function NavbarMobileMenu({
       <LoginDialog 
         open={loginDialogOpen} 
         onOpenChange={setLoginDialogOpen}
-        defaultMode="login"
+        userType={selectedUserType}
       />
     </>
   );
