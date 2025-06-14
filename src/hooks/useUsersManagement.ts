@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -37,6 +36,7 @@ export function useUsersManagement() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
+      console.log('=== DÉBUT DE LA RÉCUPÉRATION DES UTILISATEURS ===');
       
       // Fetch visitor contacts
       const { data: visitors, error: visitorsError } = await supabase
@@ -51,14 +51,16 @@ export function useUsersManagement() {
           last_seen_at,
           ip_address,
           agency_id,
-          agencies!inner(name)
+          agencies(name)
         `);
 
       if (visitorsError && visitorsError.code !== 'PGRST116') {
         console.error('Error fetching visitors:', visitorsError);
       }
 
-      // Fetch profiles with admin roles
+      console.log('Visiteurs récupérés:', visitors?.length || 0);
+
+      // Fetch ALL profiles (without filtering yet)
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
         .select(`
@@ -72,7 +74,13 @@ export function useUsersManagement() {
           agencies(name)
         `);
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
+
+      console.log('Profils récupérés:', profiles?.length || 0);
+      console.log('Détails des profils:', profiles);
 
       // Fetch admin roles
       const { data: adminRoles, error: adminRolesError } = await supabase
@@ -82,6 +90,8 @@ export function useUsersManagement() {
       if (adminRolesError && adminRolesError.code !== 'PGRST116') {
         console.error('Error fetching admin roles:', adminRolesError);
       }
+
+      console.log('Rôles admin récupérés:', adminRoles?.length || 0);
 
       // Transform data
       const allUsers: User[] = [];
@@ -103,7 +113,7 @@ export function useUsersManagement() {
         });
       });
 
-      // Add profiles (admins and agencies)
+      // Add ALL profiles (including admins) - we'll just mark them as admin
       profiles?.forEach(profile => {
         const adminRole = adminRoles?.find(ar => ar.user_id === profile.id);
         const isAdmin = !!adminRole;
@@ -130,6 +140,9 @@ export function useUsersManagement() {
         });
       });
 
+      console.log('Tous les utilisateurs transformés:', allUsers.length);
+      console.log('Détails des utilisateurs:', allUsers);
+
       // Apply filters
       let filteredUsers = allUsers;
 
@@ -148,9 +161,13 @@ export function useUsersManagement() {
         filteredUsers = filteredUsers.filter(user => user.user_type === userTypeFilter);
       }
 
+      console.log('Utilisateurs après filtrage:', filteredUsers.length);
+
       // Apply pagination
       const startIndex = (currentPage - 1) * itemsPerPage;
       const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
+
+      console.log('Utilisateurs paginés:', paginatedUsers.length);
 
       setUsers(paginatedUsers);
       setTotalCount(filteredUsers.length);

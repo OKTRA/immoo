@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAgencyById, getPropertiesByAgencyId } from "@/services/agency";
@@ -33,9 +34,10 @@ export default function PublicAgencyPage() {
   console.log('PublicAgencyPage - Contact state:', { isAuthorized, isContactLoading });
   
   // Cette page est ENTIÈREMENT PUBLIQUE - aucune authentification requise
+  // MAIS on vérifie la visibilité publique (agences bloquées/masquées)
   const { data: agencyData, isLoading: isLoadingAgency } = useQuery({
     queryKey: ['public-agency', agencyId],
-    queryFn: () => getAgencyById(agencyId || ''),
+    queryFn: () => getAgencyById(agencyId || '', true), // true = public access check
     enabled: !!agencyId
   });
 
@@ -98,8 +100,8 @@ export default function PublicAgencyPage() {
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
           <div className="container mx-auto px-4 py-16 text-center">
             <Building className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Agence introuvable</h1>
-            <p className="text-muted-foreground mb-6">Cette agence n'existe pas ou a été supprimée.</p>
+            <h1 className="text-2xl font-bold mb-2">Agence non disponible</h1>
+            <p className="text-muted-foreground mb-6">Cette agence n'est pas accessible ou n'existe pas.</p>
             <Button asChild>
               <Link to="/browse-agencies">Retour aux agences</Link>
             </Button>
