@@ -8,6 +8,8 @@ import {
 import { Toaster } from "sonner";
 import HomePage from "@/pages/HomePage";
 import AgenciesPage from "@/pages/AgenciesPage";
+import BrowseAgenciesPage from "@/pages/BrowseAgenciesPage";
+import AgencyProfilePage from "@/pages/AgencyProfilePage";
 import AgencyDetailPage from "@/pages/AgencyDetailPage";
 import CreateAgencyPage from "@/pages/CreateAgencyPage";
 import PropertyDetailPage from "@/pages/PropertyDetailPage";
@@ -54,6 +56,8 @@ function App() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/owner" element={<OwnerPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/browse-agencies" element={<BrowseAgenciesPage />} />
+              <Route path="/agency-profile/:agencyId" element={<AgencyProfilePage />} />
               <Route path="/agencies" element={<AgenciesPage />} />
               <Route path="/agencies/create" element={<CreateAgencyPage />} />
 

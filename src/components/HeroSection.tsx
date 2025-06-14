@@ -18,7 +18,7 @@ export default function HeroSection() {
   const handleSearch = () => {
     if (searchTerm.trim()) {
       if (searchType === "agencies") {
-        navigate("/agencies");
+        navigate("/browse-agencies");
       } else {
         navigate("/search");
       }
@@ -196,7 +196,7 @@ export default function HeroSection() {
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Agences de confiance</h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">Connectez-vous avec les meilleures agences locales</p>
               <button 
-                onClick={() => navigate("/agencies")}
+                onClick={() => navigate("/browse-agencies")}
                 className="text-purple-600 dark:text-purple-400 font-medium text-sm group-hover:text-purple-700 dark:group-hover:text-purple-300 transition-colors flex items-center"
               >
                 Voir les agences <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -217,8 +217,7 @@ export default function HeroSection() {
         </motion.div>
       </div>
 
-      {/* Add custom animations to tailwind */}
-      <style jsx>{`
+      <style>{`
         @keyframes blob {
           0% {
             transform: translate(0px, 0px) scale(1);
