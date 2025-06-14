@@ -5,6 +5,7 @@ import {
   DialogContent,
 } from '@/components/ui/dialog';
 import BecomeAgencyForm from './BecomeAgencyForm';
+import AgencyLoginForm from './AgencyLoginForm';
 import AdminLoginForm from './AdminLoginForm';
 
 interface LoginDialogProps {
@@ -18,6 +19,8 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
   onOpenChange, 
   userType = 'agency'
 }) => {
+  const [agencyMode, setAgencyMode] = useState<'login' | 'signup'>('login');
+
   const handleSuccess = () => {
     onOpenChange(false);
   };
@@ -27,8 +30,29 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
       return <AdminLoginForm onSuccess={handleSuccess} />;
     }
     
-    return <BecomeAgencyForm onSuccess={handleSuccess} />;
+    if (agencyMode === 'login') {
+      return (
+        <AgencyLoginForm 
+          onSuccess={handleSuccess}
+          onSwitchToSignup={() => setAgencyMode('signup')}
+        />
+      );
+    }
+    
+    return (
+      <BecomeAgencyForm 
+        onSuccess={handleSuccess}
+        onSwitchToLogin={() => setAgencyMode('login')}
+      />
+    );
   };
+
+  // Reset to login mode when dialog opens for agency
+  React.useEffect(() => {
+    if (open && userType === 'agency') {
+      setAgencyMode('login');
+    }
+  }, [open, userType]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

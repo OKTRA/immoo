@@ -10,9 +10,10 @@ import { toast } from 'sonner';
 
 interface BecomeAgencyFormProps {
   onSuccess: () => void;
+  onSwitchToLogin?: () => void;
 }
 
-const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess }) => {
+const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitchToLogin }) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -227,6 +228,21 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess }) => {
           ) : 'Soumettre ma demande'}
         </Button>
       </form>
+
+      {onSwitchToLogin && (
+        <div className="text-center space-y-2">
+          <p className="text-sm text-gray-600">
+            Déjà une agence?{' '}
+            <button 
+              type="button"
+              className="text-primary hover:underline font-medium"
+              onClick={onSwitchToLogin}
+            >
+              Se connecter
+            </button>
+          </p>
+        </div>
+      )}
     </div>
   );
 };
