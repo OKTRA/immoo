@@ -47,14 +47,7 @@ export function useAgenciesManagement() {
 
       // Apply verification filter
       if (verificationFilter !== 'all') {
-        switch (verificationFilter) {
-          case 'verified':
-            query = query.eq('verified', true);
-            break;
-          case 'unverified':
-            query = query.eq('verified', false);
-            break;
-        }
+        query = query.eq('verified', verificationFilter === 'verified');
       }
 
       // Apply sorting

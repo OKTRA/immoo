@@ -8,33 +8,19 @@ import {
 } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import { 
   Search, Filter, MoreHorizontal, Building2, CheckCircle, 
   XCircle, ChevronDown, Star, Loader2, RefreshCw, Trash, Eye,
-  ChevronLeft, ChevronRight, Shield, AlertTriangle
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
   DropdownMenuTrigger, DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
 import { useAgenciesManagement } from '@/hooks/useAgenciesManagement';
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 export default function AgenciesManagement() {
   const { 
@@ -57,98 +43,10 @@ export default function AgenciesManagement() {
     refreshAgencies 
   } = useAgenciesManagement();
 
-  const [actionLoading, setActionLoading] = useState<string | null>(null);
-
   const handleDelete = async (agencyId: string) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette agence ?')) {
       await deleteAgency(agencyId);
     }
-  };
-
-  const handleUpdateRating = async (agency: any, newRating: number) => {
-    setActionLoading(agency.id);
-    try {
-      const { error } = await supabase
-        .from('agencies')
-        .update({ 
-          rating: newRating,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', agency.id);
-
-      if (error) throw error;
-
-      toast.success('Note mise à jour avec succès');
-      refreshAgencies();
-    } catch (error) {
-      console.error('Error updating rating:', error);
-      toast.error('Erreur lors de la mise à jour de la note');
-    } finally {
-      setActionLoading(null);
-    }
-  };
-
-  const getAgencyStatusBadge = (agency: any) => {
-    if (agency.verified) {
-      return <Badge variant="success" className="flex items-center gap-1">
-        <Shield className="h-3 w-3" />
-        Vérifiée
-      </Badge>;
-    }
-    return <Badge variant="outline" className="flex items-center gap-1">
-      <AlertTriangle className="h-3 w-3" />
-      En attente
-    </Badge>;
-  };
-
-  const RatingEditor = ({ agency }: { agency: any }) => {
-    const [editing, setEditing] = useState(false);
-    const [tempRating, setTempRating] = useState(agency.rating);
-
-    if (editing) {
-      return (
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            min="0"
-            max="5"
-            step="0.1"
-            value={tempRating}
-            onChange={(e) => setTempRating(parseFloat(e.target.value))}
-            className="w-16 px-2 py-1 border rounded text-sm"
-          />
-          <Button
-            size="sm"
-            onClick={() => {
-              handleUpdateRating(agency, tempRating);
-              setEditing(false);
-            }}
-          >
-            ✓
-          </Button>
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => {
-              setTempRating(agency.rating);
-              setEditing(false);
-            }}
-          >
-            ✗
-          </Button>
-        </div>
-      );
-    }
-
-    return (
-      <div 
-        className="flex items-center cursor-pointer hover:bg-muted p-1 rounded"
-        onClick={() => setEditing(true)}
-      >
-        <Star className="h-4 w-4 text-yellow-500 mr-1 fill-yellow-500" />
-        <span>{agency.rating.toFixed(1)}</span>
-      </div>
-    );
   };
 
   if (isLoading) {
@@ -198,7 +96,7 @@ export default function AgenciesManagement() {
               onValueChange={setVerificationFilter}
             >
               <SelectTrigger className="w-full lg:w-[180px]">
-                <SelectValue placeholder="Statut" />
+                <SelectValue placeholder="Vérification" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toutes</SelectItem>
@@ -247,7 +145,7 @@ export default function AgenciesManagement() {
                     <TableHead>Localisation</TableHead>
                     <TableHead>Propriétés</TableHead>
                     <TableHead>Évaluation</TableHead>
-                    <TableHead>Statut</TableHead>
+                    <TableHead>Vérification</TableHead>
                     <TableHead>Date de création</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -255,49 +153,43 @@ export default function AgenciesManagement() {
                 <TableBody>
                   {agencies.map((agency) => (
                     <TableRow key={agency.id}>
-                      <TableCell className="font-medium">
-                        <div className="flex items-center gap-2">
-                          {agency.name}
-                          {agency.verified && (
-                            <Badge variant="success" className="text-xs">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              Vérifié
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
+                      <TableCell className="font-medium">{agency.name}</TableCell>
                       <TableCell>{agency.location}</TableCell>
                       <TableCell>{agency.properties_count}</TableCell>
                       <TableCell>
-                        <RatingEditor agency={agency} />
+                        <div className="flex items-center">
+                          <Star className="h-4 w-4 text-yellow-500 mr-1 fill-yellow-500" />
+                          <span>{agency.rating.toFixed(1)}</span>
+                        </div>
                       </TableCell>
                       <TableCell>
-                        {getAgencyStatusBadge(agency)}
+                        {agency.verified ? (
+                          <div className="flex items-center text-green-500">
+                            <CheckCircle className="h-4 w-4 mr-1" />
+                            <span>Vérifiée</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center text-red-500">
+                            <XCircle className="h-4 w-4 mr-1" />
+                            <span>Non vérifiée</span>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>{agency.created_at}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              disabled={actionLoading === agency.id}
-                            >
-                              {actionLoading === agency.id ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <MoreHorizontal className="h-4 w-4" />
-                              )}
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-56">
+                          <DropdownMenuContent align="end">
                             <DropdownMenuItem>
                               <Eye className="h-4 w-4 mr-2" />
                               Voir détails
                             </DropdownMenuItem>
                             <DropdownMenuItem>Modifier</DropdownMenuItem>
                             <DropdownMenuSeparator />
-                            
                             <DropdownMenuItem
                               onClick={() => toggleVerification(agency.id, agency.verified)}
                               className={agency.verified ? "text-yellow-500" : "text-green-500"}
@@ -314,8 +206,6 @@ export default function AgenciesManagement() {
                                 </>
                               )}
                             </DropdownMenuItem>
-
-                            <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               className="text-red-500"
                               onClick={() => handleDelete(agency.id)}

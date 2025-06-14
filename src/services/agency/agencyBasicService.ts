@@ -14,6 +14,7 @@ export const getAllAgencies = async (
   try {
     console.log("Fetching public agencies for browsing...");
 
+    // For public browsing, we don't filter by user_id - we want to show all agencies
     const { data, error, count } = await supabase
       .from('agencies')
       .select('*', { count: 'exact' })
@@ -26,7 +27,6 @@ export const getAllAgencies = async (
     }
     
     console.log(`Agences publiques récupérées: ${data?.length || 0}`);
-    console.log('Données des agences:', data);
     
     const transformedData = data?.map((item) => transformAgencyData(item));
     
@@ -85,22 +85,18 @@ export const getUserAgencies = async (
 };
 
 /**
- * Get an agency by ID - with visibility checks for public access
+ * Get an agency by ID
  */
-export const getAgencyById = async (id: string, isPublicAccess: boolean = true) => {
+export const getAgencyById = async (id: string) => {
   try {
     const { data, error } = await supabase
       .from('agencies')
       .select('*')
       .eq('id', id)
-      .maybeSingle();
+      .single();
 
     if (error) throw error;
     
-    if (!data) {
-      return { agency: null, error: 'Agency not found' };
-    }
-
     const agency = transformAgencyData(data);
     
     return { agency, error: null };
@@ -115,17 +111,34 @@ export const getAgencyById = async (id: string, isPublicAccess: boolean = true) 
  */
 export const getFeaturedAgencies = async (limit = 6) => {
   try {
-    const { data, error } = await supabase
-      .from('agencies')
-      .select('*')
-      .order('rating', { ascending: false })
-      .limit(limit);
+    // First attempt to fetch from Supabase with verified filter
+    try {
+      const { data, error } = await supabase
+        .from('agencies')
+        .select('*')
+        .order('rating', { ascending: false })
+        .limit(limit);
 
-    if (error) throw error;
-    
-    const agencies = data.map((item) => transformAgencyData(item));
-    
-    return { agencies, error: null };
+      if (error) throw error;
+      
+      const agencies = data.map((item) => transformAgencyData(item));
+      
+      return { agencies, error: null };
+    } catch (error) {
+      // If verified column doesn't exist, try without the filter
+      console.warn('Falling back to query without verified filter:', error);
+      const { data, error: fallbackError } = await supabase
+        .from('agencies')
+        .select('*')
+        .order('rating', { ascending: false })
+        .limit(limit);
+
+      if (fallbackError) throw fallbackError;
+      
+      const agencies = data.map((item) => transformAgencyData(item, true));
+      
+      return { agencies, error: null };
+    }
   } catch (error: any) {
     console.error('Error getting featured agencies:', error);
     const mockData = getMockData('agencies', limit);

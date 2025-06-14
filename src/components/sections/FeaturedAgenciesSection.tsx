@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { AnimatedCard } from "../ui/AnimatedCard";
 import { useInView } from "framer-motion";
@@ -26,7 +25,6 @@ export default function FeaturedAgenciesSection() {
     checkConnection();
   }, []);
 
-  // getFeaturedAgencies filtre déjà les agences bloquées et masquées
   const { data: agenciesResult, error, isLoading } = useQuery({
     queryKey: ['featured-agencies'],
     queryFn: () => getFeaturedAgencies(6),
