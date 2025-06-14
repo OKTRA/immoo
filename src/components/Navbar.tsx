@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -98,23 +99,11 @@ export default function Navbar() {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
-  const navLinks = [
-    { name: "Recherche", path: "/search" },
-    { name: "Propriétés", path: "/#properties" },
-    { name: "Agences", path: "/#agencies" },
-    { name: "Tarifs", path: "/#pricing" },
-  ];
-
   const userTypes: UserType[] = [
     { 
       name: "Espace Agence", 
       path: user ? "/agencies" : `/auth?redirectTo=${encodeURIComponent("/agencies")}`,
       role: "agency" 
-    },
-    { 
-      name: "Espace Propriétaire", 
-      path: user ? "/owner" : `/auth?redirectTo=${encodeURIComponent("/owner")}`,
-      role: "owner" 
     },
     { 
       name: "Admin", 
@@ -150,34 +139,10 @@ export default function Navbar() {
               <span className="text-primary">immo</span>
               <span>connect</span>
             </div>
-
-            <div className="hidden md:flex space-x-6">
-              {navLinks.map((link) => (
-                <div
-                  key={link.name}
-                  className="text-sm font-medium text-foreground/80 hover:text-foreground transition-colors relative link-underline cursor-pointer"
-                  onClick={() => {
-                    if (link.path.startsWith('#')) {
-                      navigate('/');
-                      setTimeout(() => {
-                        const element = document.querySelector(link.path);
-                        if (element) {
-                          element.scrollIntoView({ behavior: 'smooth' });
-                        }
-                      }, 100);
-                    } else {
-                      navigate(link.path);
-                    }
-                  }}
-                >
-                  {link.name}
-                </div>
-              ))}
-            </div>
           </div>
 
           <NavbarDesktopMenu 
-            navLinks={navLinks}
+            navLinks={[]}
             userTypes={userTypes}
             user={user}
             userRole={userRole}
@@ -201,7 +166,7 @@ export default function Navbar() {
       <NavbarMobileMenu 
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
-        navLinks={navLinks}
+        navLinks={[]}
         userTypes={userTypes}
         handleLogout={handleLogout}
         user={user}
