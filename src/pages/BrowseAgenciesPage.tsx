@@ -17,6 +17,7 @@ export default function BrowseAgenciesPage() {
   const [filterLocation, setFilterLocation] = useState("");
   const navigate = useNavigate();
   
+  // getAllAgencies filtre déjà les agences bloquées et masquées
   const { data, isLoading, error } = useQuery({
     queryKey: ['public-agencies'],
     queryFn: () => getAllAgencies(50, 0, 'rating', 'desc'),

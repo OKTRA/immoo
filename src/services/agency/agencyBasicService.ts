@@ -1,4 +1,3 @@
-
 import { supabase, handleSupabaseError, getMockData } from '@/lib/supabase';
 import { Agency } from '@/assets/types';
 
@@ -14,10 +13,12 @@ export const getAllAgencies = async (
   try {
     console.log("Fetching public agencies for browsing...");
 
-    // For public browsing, we don't filter by user_id - we want to show all agencies
+    // For public browsing, filter out blocked and hidden agencies
     const { data, error, count } = await supabase
       .from('agencies')
       .select('*', { count: 'exact' })
+      .eq('is_blocked', false)
+      .eq('hidden_from_index', false)
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + limit - 1);
 
@@ -85,15 +86,23 @@ export const getUserAgencies = async (
 };
 
 /**
- * Get an agency by ID
+ * Get an agency by ID - with visibility checks for public access
  */
-export const getAgencyById = async (id: string) => {
+export const getAgencyById = async (id: string, isPublicAccess: boolean = true) => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('agencies')
       .select('*')
-      .eq('id', id)
-      .single();
+      .eq('id', id);
+
+    // For public access, filter out blocked and hidden agencies
+    if (isPublicAccess) {
+      query = query
+        .eq('is_blocked', false)
+        .eq('hidden_from_index', false);
+    }
+
+    const { data, error } = await query.single();
 
     if (error) throw error;
     
@@ -111,11 +120,13 @@ export const getAgencyById = async (id: string) => {
  */
 export const getFeaturedAgencies = async (limit = 6) => {
   try {
-    // First attempt to fetch from Supabase with verified filter
+    // First attempt to fetch from Supabase with verified filter and visibility checks
     try {
       const { data, error } = await supabase
         .from('agencies')
         .select('*')
+        .eq('is_blocked', false)
+        .eq('hidden_from_index', false)
         .order('rating', { ascending: false })
         .limit(limit);
 
@@ -130,6 +141,8 @@ export const getFeaturedAgencies = async (limit = 6) => {
       const { data, error: fallbackError } = await supabase
         .from('agencies')
         .select('*')
+        .eq('is_blocked', false)
+        .eq('hidden_from_index', false)
         .order('rating', { ascending: false })
         .limit(limit);
 
