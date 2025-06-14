@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -31,10 +32,10 @@ export default function IndexPage() {
           <Card>
             <CardHeader>
               <CardTitle>Découvrez nos Agences</CardTitle>
-              <CardDescription>Explorez les meilleures agences immobilières</CardDescription>
+              <CardDescription>Explorez les meilleures agences immobilières vérifiées</CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="mb-4">Trouvez l'agence qui correspond à vos besoins.</p>
+              <p className="mb-4">Trouvez l'agence qui correspond à vos besoins parmi nos partenaires de confiance.</p>
               <Button onClick={() => navigate('/agencies')}>Voir les agences</Button>
             </CardContent>
           </Card>
