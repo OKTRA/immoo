@@ -44,9 +44,19 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     }
   };
 
+  // Déterminer l'URL de destination en fonction du contexte
+  const getPropertyUrl = () => {
+    if (isPublicView) {
+      // En vue publique, aller vers la page de détail publique
+      return `/properties/${property.id}`;
+    }
+    // En vue privée, utiliser l'URL avec l'agence
+    return `/properties/${property.id}`;
+  };
+
   return (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-md">
-      <Link to={`/properties/${property.id}`} className="block">
+      <Link to={getPropertyUrl()} className="block">
         <div className="relative h-48 overflow-hidden">
           <img
             src={property.imageUrl || 'https://placehold.co/600x400?text=No+Image'}
@@ -69,25 +79,25 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
             </Badge>
           </div>
         </div>
+
+        <CardContent className="pt-4">
+          <div className="mb-2">
+            <h3 className="font-semibold text-lg line-clamp-1">{property.title}</h3>
+            <p className="text-muted-foreground text-sm">{property.location}</p>
+          </div>
+
+          <div className="flex justify-between items-center mb-2">
+            <span className="font-bold text-primary">{formatCurrency(property.price)}</span>
+            <span className="text-sm text-muted-foreground">{property.area} m²</span>
+          </div>
+
+          <div className="flex space-x-4 text-sm text-muted-foreground">
+            <div>{property.bedrooms} chambres</div>
+            <div>{property.bathrooms} SdB</div>
+            {property.propertyCategory && <div>{property.propertyCategory}</div>}
+          </div>
+        </CardContent>
       </Link>
-
-      <CardContent className="pt-4">
-        <div className="mb-2">
-          <h3 className="font-semibold text-lg line-clamp-1">{property.title}</h3>
-          <p className="text-muted-foreground text-sm">{property.location}</p>
-        </div>
-
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-bold text-primary">{formatCurrency(property.price)}</span>
-          <span className="text-sm text-muted-foreground">{property.area} m²</span>
-        </div>
-
-        <div className="flex space-x-4 text-sm text-muted-foreground">
-          <div>{property.bedrooms} chambres</div>
-          <div>{property.bathrooms} SdB</div>
-          {property.propertyCategory && <div>{property.propertyCategory}</div>}
-        </div>
-      </CardContent>
 
       {showActions && (
         <CardFooter className="pt-0">
@@ -136,6 +146,7 @@ const PublicPropertyActions = ({
         <a 
           href={`tel:${agencyContactInfo.phone}`}
           className="flex items-center justify-center w-full"
+          onClick={(e) => e.stopPropagation()}
         >
           <Button size="sm" variant="outline" className="w-full">
             <Phone className="h-3.5 w-3.5 mr-2" />
@@ -147,6 +158,7 @@ const PublicPropertyActions = ({
         <a 
           href={`mailto:${agencyContactInfo.email}`}
           className="flex items-center justify-center w-full"
+          onClick={(e) => e.stopPropagation()}
         >
           <Button size="sm" variant="outline" className="w-full">
             <Mail className="h-3.5 w-3.5 mr-2" />
