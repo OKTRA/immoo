@@ -46,14 +46,10 @@ export type Database = {
       }
       agencies: {
         Row: {
-          blocked_at: string | null
-          blocked_reason: string | null
           created_at: string
           description: string | null
           email: string | null
-          hidden_from_index: boolean | null
           id: string
-          is_blocked: boolean | null
           location: string | null
           logo_url: string | null
           name: string
@@ -68,14 +64,10 @@ export type Database = {
           website: string | null
         }
         Insert: {
-          blocked_at?: string | null
-          blocked_reason?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
-          hidden_from_index?: boolean | null
           id?: string
-          is_blocked?: boolean | null
           location?: string | null
           logo_url?: string | null
           name: string
@@ -90,14 +82,10 @@ export type Database = {
           website?: string | null
         }
         Update: {
-          blocked_at?: string | null
-          blocked_reason?: string | null
           created_at?: string
           description?: string | null
           email?: string | null
-          hidden_from_index?: boolean | null
           id?: string
-          is_blocked?: boolean | null
           location?: string | null
           logo_url?: string | null
           name?: string
