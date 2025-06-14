@@ -75,6 +75,8 @@ export default function AgencyProfilePage() {
     );
   }
 
+  const safeRating = typeof agency.rating === 'number' ? agency.rating : 0;
+
   return (
     <>
       <Navbar />
@@ -129,7 +131,7 @@ export default function AgencyProfilePage() {
                     <div className="flex items-center space-x-6 mb-4">
                       <div className="flex items-center">
                         <Star className="h-5 w-5 text-yellow-400 fill-current" />
-                        <span className="ml-2 text-lg font-semibold">{agency.rating.toFixed(1)}</span>
+                        <span className="ml-2 text-lg font-semibold">{safeRating.toFixed(1)}</span>
                         <span className="ml-1 text-gray-600 dark:text-gray-400">/ 5</span>
                       </div>
                       <div className="flex items-center text-gray-600 dark:text-gray-400">
@@ -210,7 +212,7 @@ export default function AgencyProfilePage() {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600 dark:text-gray-400">Note moyenne</span>
-                      <span className="font-semibold">{agency.rating.toFixed(1)}/5</span>
+                      <span className="font-semibold">{safeRating.toFixed(1)}/5</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600 dark:text-gray-400">Certifiée</span>
