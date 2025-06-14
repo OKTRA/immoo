@@ -3,9 +3,46 @@ import { supabase, handleSupabaseError, getMockData } from '@/lib/supabase';
 import { Agency } from '@/assets/types';
 
 /**
- * Get all agencies with pagination
+ * Get all agencies with pagination - PUBLIC VERSION for browsing
  */
 export const getAllAgencies = async (
+  limit = 10,
+  offset = 0,
+  sortBy = 'properties_count',
+  sortOrder: 'asc' | 'desc' = 'desc'
+) => {
+  try {
+    console.log("Fetching public agencies for browsing...");
+
+    // For public browsing, we don't filter by user_id - we want to show all agencies
+    const { data, error, count } = await supabase
+      .from('agencies')
+      .select('*', { count: 'exact' })
+      .order(sortBy, { ascending: sortOrder === 'asc' })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error('Erreur Supabase:', error);
+      throw error;
+    }
+    
+    console.log(`Agences publiques récupérées: ${data?.length || 0}`);
+    
+    const transformedData = data?.map((item) => transformAgencyData(item));
+    
+    return { agencies: transformedData, count, error: null };
+  } catch (error: any) {
+    console.error('Error getting public agencies:', error);
+    // Utiliser les données mockées si la requête échoue
+    const mockData = getMockData('agencies', limit);
+    return { agencies: mockData, count: mockData.length, error: error.message };
+  }
+};
+
+/**
+ * Get user's own agencies with pagination - USER VERSION for management
+ */
+export const getUserAgencies = async (
   limit = 10,
   offset = 0,
   sortBy = 'properties_count',
@@ -16,6 +53,10 @@ export const getAllAgencies = async (
     const { data: sessionData } = await supabase.auth.getSession();
     const userId = sessionData?.session?.user?.id;
     console.log("Session utilisateur:", userId ? `Connecté (${userId})` : "Non connecté");
+
+    if (!userId) {
+      throw new Error("Utilisateur non connecté");
+    }
 
     // Récupérer uniquement les agences de l'utilisateur connecté
     const { data, error, count } = await supabase
@@ -30,13 +71,13 @@ export const getAllAgencies = async (
       throw error;
     }
     
-    console.log(`Agences récupérées: ${data?.length || 0}`);
+    console.log(`Agences utilisateur récupérées: ${data?.length || 0}`);
     
     const transformedData = data?.map((item) => transformAgencyData(item));
     
     return { agencies: transformedData, count, error: null };
   } catch (error: any) {
-    console.error('Error getting agencies:', error);
+    console.error('Error getting user agencies:', error);
     // Utiliser les données mockées si la requête échoue
     const mockData = getMockData('agencies', limit);
     return { agencies: mockData, count: mockData.length, error: error.message };
@@ -109,13 +150,17 @@ export const getFeaturedAgencies = async (limit = 6) => {
  * Fonction utilitaire pour transformer les données d'agence du format de la base de données au format de l'application
  */
 export const transformAgencyData = (data: any, useFallbackValues = false): Agency => {
+  // Ensure rating is always a number
+  const rating = typeof data.rating === 'number' ? data.rating : 
+                 typeof data.rating === 'string' ? parseFloat(data.rating) || 0 : 0;
+
   return {
     id: data.id,
     name: data.name,
     logoUrl: data.logo_url || (useFallbackValues ? '' : data.logo_url),
     location: data.location || (useFallbackValues ? '' : data.location),
     properties: data.properties_count || (useFallbackValues ? 0 : data.properties_count),
-    rating: data.rating || (useFallbackValues ? 0 : data.rating),
+    rating: rating,
     verified: data.verified || false,
     description: data.description || (useFallbackValues ? '' : data.description),
     email: data.email || (useFallbackValues ? '' : data.email),

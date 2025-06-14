@@ -10,6 +10,7 @@ import { Building, MapPin, Star, Phone, Mail, Globe, BadgeCheck, Search } from "
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Agency } from "@/assets/types";
 
 export default function BrowseAgenciesPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -20,10 +21,10 @@ export default function BrowseAgenciesPage() {
     queryFn: () => getAllAgencies(50, 0, 'rating', 'desc'),
   });
 
-  const agencies = data?.agencies || [];
+  const agencies: Agency[] = data?.agencies || [];
 
   // Filter agencies based on search term and location
-  const filteredAgencies = agencies.filter(agency => {
+  const filteredAgencies = agencies.filter((agency: Agency) => {
     const matchesSearch = !searchTerm || 
       agency.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (agency.description && agency.description.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -117,111 +118,116 @@ export default function BrowseAgenciesPage() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredAgencies.map((agency) => (
-                <AnimatedCard key={agency.id} className="p-6 hover:shadow-xl transition-all duration-300 group">
-                  {/* Agency Header */}
-                  <div className="flex items-start space-x-4 mb-6">
-                    <div className="relative flex-shrink-0">
-                      <div className="w-16 h-16 rounded-full border-2 border-gray-200 dark:border-gray-700 overflow-hidden bg-background">
-                        {agency.logoUrl ? (
-                          <img 
-                            src={agency.logoUrl} 
-                            alt={agency.name} 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-                            <Building className="w-8 h-8 text-white" />
+              {filteredAgencies.map((agency: Agency) => {
+                // Ensure rating is a number with proper fallback
+                const safeRating = typeof agency.rating === 'number' ? agency.rating : 0;
+                
+                return (
+                  <AnimatedCard key={agency.id} className="p-6 hover:shadow-xl transition-all duration-300 group">
+                    {/* Agency Header */}
+                    <div className="flex items-start space-x-4 mb-6">
+                      <div className="relative flex-shrink-0">
+                        <div className="w-16 h-16 rounded-full border-2 border-gray-200 dark:border-gray-700 overflow-hidden bg-background">
+                          {agency.logoUrl ? (
+                            <img 
+                              src={agency.logoUrl} 
+                              alt={agency.name} 
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
+                              <Building className="w-8 h-8 text-white" />
+                            </div>
+                          )}
+                        </div>
+                        {agency.verified && (
+                          <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
+                            <BadgeCheck className="w-4 h-4 text-white" />
                           </div>
                         )}
                       </div>
-                      {agency.verified && (
-                        <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-1">
-                          <BadgeCheck className="w-4 h-4 text-white" />
-                        </div>
-                      )}
-                    </div>
-                    
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
-                        {agency.name}
-                      </h3>
-                      {agency.location && (
-                        <div className="flex items-center text-gray-600 dark:text-gray-400 mt-1">
-                          <MapPin className="h-4 w-4 mr-1" />
-                          <span className="text-sm truncate">{agency.location}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center mt-2">
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                          <span className="ml-1 text-sm font-medium">{agency.rating.toFixed(1)}</span>
-                        </div>
-                        <span className="mx-2 text-gray-300">•</span>
-                        <span className="text-sm text-gray-600 dark:text-gray-400">
-                          {agency.properties} propriété{agency.properties > 1 ? 's' : ''}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  {agency.description && (
-                    <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
-                      {agency.description}
-                    </p>
-                  )}
-
-                  {/* Specialties */}
-                  {agency.specialties && agency.specialties.length > 0 && (
-                    <div className="mb-4">
-                      <div className="flex flex-wrap gap-2">
-                        {agency.specialties.slice(0, 3).map((specialty, index) => (
-                          <Badge key={index} variant="secondary" className="text-xs">
-                            {specialty}
-                          </Badge>
-                        ))}
-                        {agency.specialties.length > 3 && (
-                          <Badge variant="outline" className="text-xs">
-                            +{agency.specialties.length - 3} autres
-                          </Badge>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors truncate">
+                          {agency.name}
+                        </h3>
+                        {agency.location && (
+                          <div className="flex items-center text-gray-600 dark:text-gray-400 mt-1">
+                            <MapPin className="h-4 w-4 mr-1" />
+                            <span className="text-sm truncate">{agency.location}</span>
+                          </div>
                         )}
+                        <div className="flex items-center mt-2">
+                          <div className="flex items-center">
+                            <Star className="h-4 w-4 text-yellow-400 fill-current" />
+                            <span className="ml-1 text-sm font-medium">{safeRating.toFixed(1)}</span>
+                          </div>
+                          <span className="mx-2 text-gray-300">•</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">
+                            {agency.properties} propriété{agency.properties > 1 ? 's' : ''}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  )}
 
-                  {/* Contact Information */}
-                  <div className="space-y-2 mb-6">
-                    {agency.phone && (
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Phone className="h-4 w-4 mr-2" />
-                        <span>{agency.phone}</span>
-                      </div>
+                    {/* Description */}
+                    {agency.description && (
+                      <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
+                        {agency.description}
+                      </p>
                     )}
-                    {agency.email && (
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Mail className="h-4 w-4 mr-2" />
-                        <span className="truncate">{agency.email}</span>
-                      </div>
-                    )}
-                    {agency.website && (
-                      <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                        <Globe className="h-4 w-4 mr-2" />
-                        <span className="truncate">{agency.website}</span>
-                      </div>
-                    )}
-                  </div>
 
-                  {/* Action Button */}
-                  <div className="mt-auto">
-                    <Button asChild className="w-full group-hover:bg-blue-600 group-hover:text-white transition-all duration-200">
-                      <Link to={`/agency-profile/${agency.id}`}>
-                        Voir le profil complet
-                      </Link>
-                    </Button>
-                  </div>
-                </AnimatedCard>
-              ))}
+                    {/* Specialties */}
+                    {agency.specialties && agency.specialties.length > 0 && (
+                      <div className="mb-4">
+                        <div className="flex flex-wrap gap-2">
+                          {agency.specialties.slice(0, 3).map((specialty, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs">
+                              {specialty}
+                            </Badge>
+                          ))}
+                          {agency.specialties.length > 3 && (
+                            <Badge variant="outline" className="text-xs">
+                              +{agency.specialties.length - 3} autres
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Contact Information */}
+                    <div className="space-y-2 mb-6">
+                      {agency.phone && (
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                          <Phone className="h-4 w-4 mr-2" />
+                          <span>{agency.phone}</span>
+                        </div>
+                      )}
+                      {agency.email && (
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                          <Mail className="h-4 w-4 mr-2" />
+                          <span className="truncate">{agency.email}</span>
+                        </div>
+                      )}
+                      {agency.website && (
+                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                          <Globe className="h-4 w-4 mr-2" />
+                          <span className="truncate">{agency.website}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Action Button */}
+                    <div className="mt-auto">
+                      <Button asChild className="w-full group-hover:bg-blue-600 group-hover:text-white transition-all duration-200">
+                        <Link to={`/agency-profile/${agency.id}`}>
+                          Voir le profil complet
+                        </Link>
+                      </Button>
+                    </div>
+                  </AnimatedCard>
+                );
+              })}
             </div>
           )}
         </div>
