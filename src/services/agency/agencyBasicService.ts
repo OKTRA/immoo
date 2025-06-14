@@ -1,3 +1,4 @@
+
 import { supabase, handleSupabaseError, getMockData } from '@/lib/supabase';
 import { Agency } from '@/assets/types';
 
@@ -14,11 +15,12 @@ export const getAllAgencies = async (
     console.log("Fetching public agencies for browsing...");
 
     // For public browsing, filter out blocked and hidden agencies
+    // Handle null values properly by using COALESCE or explicit null checks
     const { data, error, count } = await supabase
       .from('agencies')
       .select('*', { count: 'exact' })
-      .eq('is_blocked', false)
-      .eq('hidden_from_index', false)
+      .or('is_blocked.is.null,is_blocked.eq.false')
+      .or('hidden_from_index.is.null,hidden_from_index.eq.false')
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + limit - 1);
 
@@ -28,6 +30,7 @@ export const getAllAgencies = async (
     }
     
     console.log(`Agences publiques récupérées: ${data?.length || 0}`);
+    console.log('Données des agences:', data);
     
     const transformedData = data?.map((item) => transformAgencyData(item));
     

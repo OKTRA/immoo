@@ -23,7 +23,10 @@ export default function BrowseAgenciesPage() {
     queryFn: () => getAllAgencies(50, 0, 'rating', 'desc'),
   });
 
+  console.log('BrowseAgenciesPage - Query result:', { data, isLoading, error });
+
   const rawAgencies = data?.agencies || [];
+  console.log('BrowseAgenciesPage - Raw agencies:', rawAgencies);
 
   // Ensure all agencies have numeric ratings
   const agencies: Agency[] = rawAgencies.map(agency => ({
@@ -31,6 +34,8 @@ export default function BrowseAgenciesPage() {
     rating: typeof agency.rating === 'number' ? agency.rating : 
             typeof agency.rating === 'string' ? parseFloat(agency.rating) || 0 : 0
   }));
+
+  console.log('BrowseAgenciesPage - Processed agencies:', agencies);
 
   // Filter agencies based on search term and location
   const filteredAgencies = agencies.filter((agency: Agency) => {
@@ -43,6 +48,8 @@ export default function BrowseAgenciesPage() {
     
     return matchesSearch && matchesLocation;
   });
+
+  console.log('BrowseAgenciesPage - Filtered agencies:', filteredAgencies);
 
   const handleAgencyClick = (agencyId: string) => {
     console.log('BrowseAgenciesPage - Navigating to public agency:', agencyId);
@@ -96,6 +103,17 @@ export default function BrowseAgenciesPage() {
             </div>
           </div>
 
+          {/* Debug Information - Temporary */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="mb-8 p-4 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+              <h3 className="font-bold mb-2">Debug Info:</h3>
+              <p>Loading: {isLoading ? 'Yes' : 'No'}</p>
+              <p>Error: {error ? String(error) : 'None'}</p>
+              <p>Raw agencies count: {rawAgencies.length}</p>
+              <p>Filtered agencies count: {filteredAgencies.length}</p>
+            </div>
+          )}
+
           {/* Agencies Grid */}
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -122,13 +140,17 @@ export default function BrowseAgenciesPage() {
               <Building className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-medium mb-2">Impossible de charger les agences</h3>
               <p className="text-muted-foreground">Veuillez réessayer ultérieurement</p>
+              <p className="text-sm text-red-500 mt-2">Erreur: {String(error)}</p>
             </div>
           ) : filteredAgencies.length === 0 ? (
             <div className="text-center py-16">
               <Building className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-xl font-medium mb-2">Aucune agence trouvée</h3>
               <p className="text-muted-foreground">
-                Essayez de modifier vos critères de recherche
+                {rawAgencies.length === 0 
+                  ? "Aucune agence n'est disponible pour le moment"
+                  : "Essayez de modifier vos critères de recherche"
+                }
               </p>
             </div>
           ) : (
