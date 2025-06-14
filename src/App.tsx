@@ -56,8 +56,12 @@ function App() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/owner" element={<OwnerPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              
+              {/* Routes publiques pour les visiteurs */}
               <Route path="/browse-agencies" element={<BrowseAgenciesPage />} />
               <Route path="/agency-profile/:agencyId" element={<AgencyProfilePage />} />
+              
+              {/* Routes protégées pour les agences */}
               <Route path="/agencies" element={<AgenciesPage />} />
               <Route path="/agencies/create" element={<CreateAgencyPage />} />
 

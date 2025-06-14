@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAgencyById, getPropertiesByAgencyId } from "@/services/agency";
@@ -17,14 +16,15 @@ import PropertyCard from "@/components/PropertyCard";
 export default function AgencyProfilePage() {
   const { agencyId } = useParams();
   
+  // Cette page doit être PUBLIQUE - pas d'authentification requise
   const { data: agencyData, isLoading: isLoadingAgency } = useQuery({
-    queryKey: ['agency-profile', agencyId],
+    queryKey: ['public-agency-profile', agencyId],
     queryFn: () => getAgencyById(agencyId || ''),
     enabled: !!agencyId
   });
 
   const { data: propertiesData, isLoading: isLoadingProperties } = useQuery({
-    queryKey: ['agency-properties', agencyId],
+    queryKey: ['public-agency-properties', agencyId],
     queryFn: () => getPropertiesByAgencyId(agencyId || ''),
     enabled: !!agencyId
   });
