@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   DropdownMenu,
@@ -234,7 +235,7 @@ export function UserActionsManager({
         onConfirm={handleDelete}
         title="Supprimer l'utilisateur"
         description={`Êtes-vous sûr de vouloir supprimer ${user.name} ? Cette action est irréversible.`}
-        confirmText="Supprimer"
+        confirmLabel="Supprimer"
         variant="destructive"
       />
 
@@ -244,7 +245,7 @@ export function UserActionsManager({
         onConfirm={handleSuspend}
         title="Suspendre le compte"
         description={`Êtes-vous sûr de vouloir suspendre le compte de ${user.name} ?`}
-        confirmText="Suspendre"
+        confirmLabel="Suspendre"
         variant="destructive"
       />
     </>
