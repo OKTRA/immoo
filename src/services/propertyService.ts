@@ -36,9 +36,7 @@ export const getFeaturedProperties = async (limit: number = 6) => {
           service_areas,
           properties_count,
           rating,
-          created_at,
-          is_blocked,
-          hidden_from_index
+          created_at
         )
       `)
       .eq('status', 'available')
@@ -52,23 +50,8 @@ export const getFeaturedProperties = async (limit: number = 6) => {
     console.log(`Propriétés récupérées: ${data?.length || 0}`);
     console.log('Données des propriétés:', data);
 
-    // Filtrer les propriétés dont les agences ne sont PAS bloquées ou masquées
-    const filteredData = data?.filter(property => {
-      if (!property.agency) return true; // Garder les propriétés sans agence
-      
-      const agency = property.agency;
-      const isBlocked = agency.is_blocked === true;
-      const isHidden = agency.hidden_from_index === true;
-      
-      console.log(`Propriété ${property.title} - Agence: ${agency.name}, Bloquée: ${isBlocked}, Masquée: ${isHidden}`);
-      
-      return !isBlocked && !isHidden;
-    }) || [];
-
-    console.log(`Propriétés après filtrage: ${filteredData.length}`);
-
     // Transformer les données au format attendu
-    const properties = filteredData.map(property => {
+    const properties = data?.map(property => {
       const formatted = {
         id: property.id,
         title: property.title,
@@ -114,7 +97,7 @@ export const getFeaturedProperties = async (limit: number = 6) => {
       }
       
       return formatted;
-    });
+    }) || [];
 
     console.log('Propriétés formatées finales:', properties);
     
@@ -152,9 +135,7 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
           service_areas,
           properties_count,
           rating,
-          created_at,
-          is_blocked,
-          hidden_from_index
+          created_at
         )
       `);
     
@@ -169,20 +150,9 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
     const { data, error } = await query;
     
     if (error) throw error;
-
-    // Filtrer les propriétés des agences non bloquées/masquées
-    const filteredData = data?.filter(property => {
-      if (!property.agency) return true;
-      
-      const agency = property.agency;
-      const isBlocked = agency.is_blocked === true;
-      const isHidden = agency.hidden_from_index === true;
-      
-      return !isBlocked && !isHidden;
-    }) || [];
     
     // Transformer les données au format attendu
-    const properties = filteredData.map(property => ({
+    const properties = data?.map(property => ({
       id: property.id,
       title: property.title,
       type: property.type,
@@ -199,7 +169,7 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
       ownerId: property.owner_id,
       createdAt: property.created_at,
       updatedAt: property.updated_at
-    }));
+    })) || [];
     
     return { properties, error: null };
   } catch (error: any) {

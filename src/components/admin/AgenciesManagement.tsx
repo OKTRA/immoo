@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -14,7 +15,7 @@ import {
 import { 
   Search, Filter, MoreHorizontal, Building2, CheckCircle, 
   XCircle, ChevronDown, Star, Loader2, RefreshCw, Trash, Eye,
-  ChevronLeft, ChevronRight, Shield, Ban, EyeOff, AlertTriangle
+  ChevronLeft, ChevronRight, Shield, AlertTriangle
 } from 'lucide-react';
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
@@ -57,71 +58,10 @@ export default function AgenciesManagement() {
   } = useAgenciesManagement();
 
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [showBlockDialog, setShowBlockDialog] = useState(false);
-  const [showHideDialog, setShowHideDialog] = useState(false);
-  const [selectedAgency, setSelectedAgency] = useState<any>(null);
 
   const handleDelete = async (agencyId: string) => {
     if (confirm('Êtes-vous sûr de vouloir supprimer cette agence ?')) {
       await deleteAgency(agencyId);
-    }
-  };
-
-  const handleBlockAgency = async (agency: any) => {
-    setActionLoading(agency.id);
-    try {
-      const { error } = await supabase
-        .from('agencies')
-        .update({ 
-          is_blocked: !agency.is_blocked,
-          blocked_reason: !agency.is_blocked ? 'Bloqué par l\'administration' : null,
-          blocked_at: !agency.is_blocked ? new Date().toISOString() : null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', agency.id);
-
-      if (error) throw error;
-
-      toast.success(
-        agency.is_blocked 
-          ? 'Agence débloquée avec succès' 
-          : 'Agence bloquée avec succès'
-      );
-      refreshAgencies();
-    } catch (error) {
-      console.error('Error blocking agency:', error);
-      toast.error('Erreur lors du blocage/déblocage');
-    } finally {
-      setActionLoading(null);
-      setShowBlockDialog(false);
-    }
-  };
-
-  const handleHideFromIndex = async (agency: any) => {
-    setActionLoading(agency.id);
-    try {
-      const { error } = await supabase
-        .from('agencies')
-        .update({ 
-          hidden_from_index: !agency.hidden_from_index,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', agency.id);
-
-      if (error) throw error;
-
-      toast.success(
-        agency.hidden_from_index 
-          ? 'Agence visible publiquement' 
-          : 'Agence complètement masquée'
-      );
-      refreshAgencies();
-    } catch (error) {
-      console.error('Error hiding agency:', error);
-      toast.error('Erreur lors du masquage/affichage');
-    } finally {
-      setActionLoading(null);
-      setShowHideDialog(false);
     }
   };
 
@@ -149,18 +89,6 @@ export default function AgenciesManagement() {
   };
 
   const getAgencyStatusBadge = (agency: any) => {
-    if (agency.is_blocked) {
-      return <Badge variant="destructive" className="flex items-center gap-1">
-        <Ban className="h-3 w-3" />
-        Bloquée
-      </Badge>;
-    }
-    if (agency.hidden_from_index) {
-      return <Badge variant="secondary" className="flex items-center gap-1">
-        <EyeOff className="h-3 w-3" />
-        Masquée
-      </Badge>;
-    }
     if (agency.verified) {
       return <Badge variant="success" className="flex items-center gap-1">
         <Shield className="h-3 w-3" />
@@ -276,8 +204,6 @@ export default function AgenciesManagement() {
                 <SelectItem value="all">Toutes</SelectItem>
                 <SelectItem value="verified">Vérifiées</SelectItem>
                 <SelectItem value="unverified">Non vérifiées</SelectItem>
-                <SelectItem value="blocked">Bloquées</SelectItem>
-                <SelectItem value="hidden">Masquées</SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -328,7 +254,7 @@ export default function AgenciesManagement() {
                 </TableHeader>
                 <TableBody>
                   {agencies.map((agency) => (
-                    <TableRow key={agency.id} className={agency.is_blocked ? 'opacity-60' : ''}>
+                    <TableRow key={agency.id}>
                       <TableCell className="font-medium">
                         <div className="flex items-center gap-2">
                           {agency.name}
@@ -389,46 +315,6 @@ export default function AgenciesManagement() {
                               )}
                             </DropdownMenuItem>
 
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedAgency(agency);
-                                setShowBlockDialog(true);
-                              }}
-                              className={agency.is_blocked ? "text-green-500" : "text-orange-500"}
-                            >
-                              {agency.is_blocked ? (
-                                <>
-                                  <CheckCircle className="h-4 w-4 mr-2" />
-                                  Débloquer agence
-                                </>
-                              ) : (
-                                <>
-                                  <Ban className="h-4 w-4 mr-2" />
-                                  Bloquer agence
-                                </>
-                              )}
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedAgency(agency);
-                                setShowHideDialog(true);
-                              }}
-                              className="text-blue-500"
-                            >
-                              {agency.hidden_from_index ? (
-                                <>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  Afficher sur l'index
-                                </>
-                              ) : (
-                                <>
-                                  <EyeOff className="h-4 w-4 mr-2" />
-                                  Masquer de l'index
-                                </>
-                              )}
-                            </DropdownMenuItem>
-
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
                               className="text-red-500"
@@ -484,57 +370,6 @@ export default function AgenciesManagement() {
           )}
         </CardContent>
       </Card>
-
-      {/* Dialog de confirmation pour bloquer */}
-      <AlertDialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {selectedAgency?.is_blocked ? 'Débloquer' : 'Bloquer'} l'agence
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {selectedAgency?.is_blocked 
-                ? `Êtes-vous sûr de vouloir débloquer l'agence "${selectedAgency?.name}" ? Elle pourra à nouveau effectuer toutes les actions.`
-                : `Êtes-vous sûr de vouloir bloquer l'agence "${selectedAgency?.name}" ? Elle ne pourra plus effectuer aucune action sur la plateforme.`
-              }
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => handleBlockAgency(selectedAgency)}
-              className={selectedAgency?.is_blocked ? "bg-green-600 hover:bg-green-700" : "bg-red-600 hover:bg-red-700"}
-            >
-              {selectedAgency?.is_blocked ? 'Débloquer' : 'Bloquer'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Dialog de confirmation pour masquer */}
-      <AlertDialog open={showHideDialog} onOpenChange={setShowHideDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {selectedAgency?.hidden_from_index ? 'Rendre visible' : 'Masquer complètement'} l'agence
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {selectedAgency?.hidden_from_index 
-                ? `Êtes-vous sûr de vouloir rendre visible l'agence "${selectedAgency?.name}" ? Elle sera accessible publiquement.`
-                : `Êtes-vous sûr de vouloir masquer complètement l'agence "${selectedAgency?.name}" ? Elle ne sera plus accessible dans aucune partie publique de l'application (recherche, index, pages de profil).`
-              }
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => handleHideFromIndex(selectedAgency)}
-            >
-              {selectedAgency?.hidden_from_index ? 'Rendre visible' : 'Masquer complètement'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 }

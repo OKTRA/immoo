@@ -1,3 +1,4 @@
+
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
@@ -11,6 +12,15 @@ export const handleSupabaseError = (error: any, customMessage: string = 'Supabas
     throw new Error(`${customMessage}: ${error.message}`);
   } else {
     throw new Error(customMessage);
+  }
+};
+
+export const isSupabaseConnected = async (): Promise<boolean> => {
+  try {
+    const { data, error } = await supabase.from('profiles').select('id').limit(1);
+    return !error;
+  } catch (error) {
+    return false;
   }
 };
 
