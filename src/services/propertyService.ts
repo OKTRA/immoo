@@ -11,6 +11,23 @@ export * from './property/propertyMedia';
 // Export agency-specific property functions
 export { getPropertiesByAgencyId } from './agency/agencyPropertiesService';
 
+// Extended Property type with agency information
+interface PropertyWithAgency extends Property {
+  agencyName?: string;
+  agencyLogo?: string;
+  agencyPhone?: string;
+  agencyEmail?: string;
+  agencyWebsite?: string;
+  agencyVerified?: boolean;
+  agencyRating?: number;
+  agencyDescription?: string;
+  agencySpecialties?: string[];
+  agencyServiceAreas?: string[];
+  agencyPropertiesCount?: number;
+  agencyYearsActive?: number;
+  agencyJoinDate?: string;
+}
+
 /**
  * Get featured properties for homepage - FIXED VERSION
  */
@@ -51,8 +68,8 @@ export const getFeaturedProperties = async (limit: number = 6) => {
     console.log('Données des propriétés:', data);
 
     // Transformer les données au format attendu
-    const properties = data?.map(property => {
-      const formatted = {
+    const properties: PropertyWithAgency[] = data?.map(property => {
+      const formatted: PropertyWithAgency = {
         id: property.id,
         title: property.title,
         type: property.type,
@@ -66,9 +83,7 @@ export const getFeaturedProperties = async (limit: number = 6) => {
         features: property.features || [],
         status: property.status || 'available',
         agencyId: property.agency_id,
-        ownerId: property.owner_id,
-        createdAt: property.created_at,
-        updatedAt: property.updated_at
+        ownerId: property.owner_id
       };
 
       // Ajouter les informations de l'agence si disponibles
@@ -166,9 +181,7 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
       features: property.features || [],
       status: property.status || 'available',
       agencyId: property.agency_id,
-      ownerId: property.owner_id,
-      createdAt: property.created_at,
-      updatedAt: property.updated_at
+      ownerId: property.owner_id
     })) || [];
     
     return { properties, error: null };
