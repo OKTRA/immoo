@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
-import { getCurrentUser, signOut } from "@/services/authService";
+import { getCurrentUser } from "@/services/authService";
 import { toast } from "sonner";
 import { NavbarDesktopMenu } from "./navbar/NavbarDesktopMenu";
 import { NavbarMobileMenu } from "./navbar/NavbarMobileMenu";
@@ -112,11 +113,30 @@ export default function Navbar() {
   ];
 
   const handleLogout = async () => {
-    await signOut();
-    setUser(null);
-    setUserRole(null);
-    navigate("/");
-    toast.success("Vous avez été déconnecté avec succès");
+    try {
+      console.log('Starting logout process...');
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Supabase signOut error:', error);
+        throw error;
+      }
+      
+      // Clear local state
+      setUser(null);
+      setUserRole(null);
+      
+      console.log('Logout successful');
+      toast.success("Vous avez été déconnecté avec succès");
+      
+      // Navigate to home page
+      navigate("/");
+    } catch (error: any) {
+      console.error('Logout error:', error);
+      toast.error("Erreur lors de la déconnexion");
+    }
   };
 
   return (

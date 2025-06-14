@@ -36,6 +36,15 @@ export function NavbarDesktopMenu({
     }
   };
 
+  const onLogoutClick = async () => {
+    try {
+      await handleLogout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   return (
     <>
       <div className="hidden md:flex items-center space-x-4">
@@ -62,7 +71,7 @@ export function NavbarDesktopMenu({
               variant="ghost"
               size="sm"
               className="mx-1"
-              onClick={handleLogout}
+              onClick={onLogoutClick}
             >
               <LogOut className="h-4 w-4 mr-1" />
               Déconnexion

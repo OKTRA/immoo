@@ -4,7 +4,6 @@ import { LogOut, User, Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getAgencyById } from "@/services/agency";
-import { signOut } from "@/services/authService";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
@@ -23,12 +22,17 @@ export default function AgencyHeader() {
 
   const handleSignOut = async () => {
     try {
+      console.log('Starting agency logout...');
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Logout error:', error);
+        throw error;
+      }
       
       toast.success("Déconnexion réussie");
       navigate("/");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error signing out:", error);
       toast.error("Erreur lors de la déconnexion");
     }

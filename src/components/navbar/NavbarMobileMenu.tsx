@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -35,6 +36,16 @@ export function NavbarMobileMenu({
     }
   };
 
+  const onLogoutClick = async () => {
+    setMobileMenuOpen(false);
+    try {
+      await handleLogout();
+      navigate('/');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   return (
     <>
       <div 
@@ -59,10 +70,7 @@ export function NavbarMobileMenu({
             {user && (
               <div
                 className="block px-4 py-2 text-foreground hover:bg-muted rounded-md cursor-pointer"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  handleLogout();
-                }}
+                onClick={onLogoutClick}
               >
                 Déconnexion
               </div>

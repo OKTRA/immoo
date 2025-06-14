@@ -11,7 +11,7 @@ import { isSupabaseConnected, supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { getCurrentUser, signOut } from "@/services/authService";
+import { getCurrentUser } from "@/services/authService";
 
 export default function AgenciesPage() {
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
@@ -69,12 +69,20 @@ export default function AgenciesPage() {
 
   const handleLogout = async () => {
     try {
-      await signOut();
+      console.log('Starting agencies page logout...');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Agencies logout error:', error);
+        throw error;
+      }
+      
       setUser(null);
       setUserRole(null);
       toast.success("Vous avez été déconnecté avec succès");
       navigate("/");
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error during agencies logout:', error);
       toast.error("Erreur lors de la déconnexion");
     }
   };

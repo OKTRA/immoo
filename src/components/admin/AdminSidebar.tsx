@@ -22,12 +22,20 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error('Erreur lors de la déconnexion');
-    } else {
+    try {
+      console.log('Starting admin logout...');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Admin logout error:', error);
+        throw error;
+      }
+      
       toast.success('Déconnexion réussie');
       navigate('/');
+    } catch (error: any) {
+      console.error('Error during admin logout:', error);
+      toast.error('Erreur lors de la déconnexion');
     }
   };
 
