@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { getAllAgencies } from "@/services/agency";
 import Navbar from "@/components/Navbar";
@@ -21,7 +20,14 @@ export default function BrowseAgenciesPage() {
     queryFn: () => getAllAgencies(50, 0, 'rating', 'desc'),
   });
 
-  const agencies: Agency[] = data?.agencies || [];
+  const rawAgencies = data?.agencies || [];
+
+  // Ensure all agencies have numeric ratings
+  const agencies: Agency[] = rawAgencies.map(agency => ({
+    ...agency,
+    rating: typeof agency.rating === 'number' ? agency.rating : 
+            typeof agency.rating === 'string' ? parseFloat(agency.rating) || 0 : 0
+  }));
 
   // Filter agencies based on search term and location
   const filteredAgencies = agencies.filter((agency: Agency) => {
