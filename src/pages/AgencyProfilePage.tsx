@@ -1,3 +1,4 @@
+
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAgencyById, getPropertiesByAgencyId } from "@/services/agency";
@@ -8,13 +9,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { 
   Building, MapPin, Star, Phone, Mail, Globe, BadgeCheck, 
-  Home, ArrowLeft, Users, Award, Calendar, TrendingUp
+  Home, ArrowLeft, Users, Award, Calendar, TrendingUp, Lock
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import PropertyCard from "@/components/PropertyCard";
+import { useVisitorContact } from "@/hooks/useVisitorContact";
+import VisitorContactForm from "@/components/visitor/VisitorContactForm";
+import { toast } from "sonner";
 
 export default function AgencyProfilePage() {
   const { agencyId } = useParams();
+  
+  const { 
+    isAuthorized, 
+    isLoading: isContactLoading, 
+    submitContactForm 
+  } = useVisitorContact(agencyId || '');
   
   // Cette page doit être PUBLIQUE - pas d'authentification requise
   const { data: agencyData, isLoading: isLoadingAgency } = useQuery({
@@ -32,7 +42,23 @@ export default function AgencyProfilePage() {
   const agency = agencyData?.agency;
   const properties = propertiesData?.properties || [];
 
-  if (isLoadingAgency) {
+  const handleContactFormSubmit = async (formData: any) => {
+    const result = await submitContactForm(formData);
+    
+    if (result.success) {
+      toast.success(
+        result.isNewVisitor 
+          ? "Merci ! Vous avez maintenant accès aux informations de contact." 
+          : "Bon retour ! Vous avez toujours accès aux informations de contact."
+      );
+    } else {
+      toast.error(result.error || "Une erreur s'est produite");
+    }
+    
+    return result;
+  };
+
+  if (isLoadingAgency || isContactLoading) {
     return (
       <>
         <Navbar />
@@ -77,9 +103,83 @@ export default function AgencyProfilePage() {
 
   const safeRating = typeof agency.rating === 'number' ? agency.rating : 0;
 
+  // Composant pour afficher les informations de contact protégées
+  const ContactInfo = () => {
+    if (!isAuthorized) {
+      return (
+        <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/20 text-center">
+          <Lock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
+          <h3 className="text-lg font-semibold mb-2">Informations de contact</h3>
+          <p className="text-sm text-muted-foreground mb-4">
+            Pour accéder aux coordonnées de cette agence, veuillez vous identifier.
+          </p>
+          <p className="text-xs text-muted-foreground">
+            Cette démarche nous aide à vous offrir un service personnalisé.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+        <h3 className="text-lg font-semibold mb-4 flex items-center">
+          <Phone className="h-5 w-5 mr-2" />
+          Informations de contact
+        </h3>
+        <div className="space-y-3">
+          {agency.phone && (
+            <div className="flex items-center">
+              <Phone className="h-4 w-4 mr-3 text-gray-400" />
+              <a 
+                href={`tel:${agency.phone}`}
+                className="text-sm hover:text-blue-600 transition-colors"
+              >
+                {agency.phone}
+              </a>
+            </div>
+          )}
+          {agency.email && (
+            <div className="flex items-center">
+              <Mail className="h-4 w-4 mr-3 text-gray-400" />
+              <a 
+                href={`mailto:${agency.email}`}
+                className="text-sm hover:text-blue-600 transition-colors"
+              >
+                {agency.email}
+              </a>
+            </div>
+          )}
+          {agency.website && (
+            <div className="flex items-center">
+              <Globe className="h-4 w-4 mr-3 text-gray-400" />
+              <a 
+                href={agency.website} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-blue-600 hover:underline"
+              >
+                Site web
+              </a>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <Navbar />
+      
+      {/* Formulaire de contact visiteur */}
+      {!isAuthorized && (
+        <VisitorContactForm
+          agencyName={agency.name}
+          onSubmit={handleContactFormSubmit}
+          isLoading={isContactLoading}
+        />
+      )}
+
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
         <div className="container mx-auto px-4 py-16">
           {/* Back Button */}
@@ -164,40 +264,8 @@ export default function AgencyProfilePage() {
 
               {/* Contact & Stats */}
               <div className="space-y-6">
-                {/* Contact Information */}
-                <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/20">
-                  <h3 className="text-lg font-semibold mb-4 flex items-center">
-                    <Phone className="h-5 w-5 mr-2" />
-                    Informations de contact
-                  </h3>
-                  <div className="space-y-3">
-                    {agency.phone && (
-                      <div className="flex items-center">
-                        <Phone className="h-4 w-4 mr-3 text-gray-400" />
-                        <span className="text-sm">{agency.phone}</span>
-                      </div>
-                    )}
-                    {agency.email && (
-                      <div className="flex items-center">
-                        <Mail className="h-4 w-4 mr-3 text-gray-400" />
-                        <span className="text-sm">{agency.email}</span>
-                      </div>
-                    )}
-                    {agency.website && (
-                      <div className="flex items-center">
-                        <Globe className="h-4 w-4 mr-3 text-gray-400" />
-                        <a 
-                          href={agency.website} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-sm text-blue-600 hover:underline"
-                        >
-                          Site web
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                {/* Contact Information - Now Protected */}
+                <ContactInfo />
 
                 {/* Quick Stats */}
                 <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/20">

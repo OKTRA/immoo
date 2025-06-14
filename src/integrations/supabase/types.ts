@@ -181,6 +181,52 @@ export type Database = {
           },
         ]
       }
+      agency_contact_access_logs: {
+        Row: {
+          access_type: string | null
+          accessed_at: string | null
+          agency_id: string | null
+          id: string
+          visitor_contact_id: string | null
+        }
+        Insert: {
+          access_type?: string | null
+          accessed_at?: string | null
+          agency_id?: string | null
+          id?: string
+          visitor_contact_id?: string | null
+        }
+        Update: {
+          access_type?: string | null
+          accessed_at?: string | null
+          agency_id?: string | null
+          id?: string
+          visitor_contact_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agency_contact_access_logs_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_contact_access_logs_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_with_agencies"
+            referencedColumns: ["agency_id"]
+          },
+          {
+            foreignKeyName: "agency_contact_access_logs_visitor_contact_id_fkey"
+            columns: ["visitor_contact_id"]
+            isOneToOne: false
+            referencedRelation: "visitor_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       agency_fees: {
         Row: {
           agency_id: string | null
@@ -2017,6 +2063,93 @@ export type Database = {
           visitor_id?: string
         }
         Relationships: []
+      }
+      visitor_contacts: {
+        Row: {
+          agency_id: string | null
+          created_at: string | null
+          email: string | null
+          first_name: string | null
+          id: string
+          ip_address: string | null
+          is_verified: boolean | null
+          last_name: string | null
+          last_seen_at: string | null
+          phone: string | null
+          property_id: string | null
+          purpose: string | null
+          user_agent: string | null
+          verification_token: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          ip_address?: string | null
+          is_verified?: boolean | null
+          last_name?: string | null
+          last_seen_at?: string | null
+          phone?: string | null
+          property_id?: string | null
+          purpose?: string | null
+          user_agent?: string | null
+          verification_token?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string | null
+          email?: string | null
+          first_name?: string | null
+          id?: string
+          ip_address?: string | null
+          is_verified?: boolean | null
+          last_name?: string | null
+          last_seen_at?: string | null
+          phone?: string | null
+          property_id?: string | null
+          purpose?: string | null
+          user_agent?: string | null
+          verification_token?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitor_contacts_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_contacts_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_with_agencies"
+            referencedColumns: ["agency_id"]
+          },
+          {
+            foreignKeyName: "visitor_contacts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_with_agencies"
+            referencedColumns: ["property_id"]
+          },
+          {
+            foreignKeyName: "visitor_contacts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "owner_revenue_summary"
+            referencedColumns: ["property_id"]
+          },
+          {
+            foreignKeyName: "visitor_contacts_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
