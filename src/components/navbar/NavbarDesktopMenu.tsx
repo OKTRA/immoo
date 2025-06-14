@@ -6,6 +6,7 @@ import { LogOut } from "lucide-react";
 import { UserType } from "./types";
 import { cn } from "@/lib/utils";
 import LoginDialog from "@/components/auth/LoginDialog";
+import { toast } from "sonner";
 
 interface NavbarDesktopMenuProps {
   navLinks: { name: string; path: string }[];
@@ -26,6 +27,7 @@ export function NavbarDesktopMenu({
   const navigate = useNavigate();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState<'agency' | 'admin'>('agency');
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleUserTypeClick = (type: UserType) => {
     if (user) {
@@ -37,11 +39,24 @@ export function NavbarDesktopMenu({
   };
 
   const onLogoutClick = async () => {
+    if (isLoggingOut) return; // Prevent multiple clicks
+    
     try {
+      setIsLoggingOut(true);
+      console.log('Initiating logout...');
+      
       await handleLogout();
-      navigate('/');
+      console.log('Logout completed successfully');
+      
+      // Force navigation to home page
+      navigate('/', { replace: true });
+      
+      toast.success("Vous avez été déconnecté avec succès");
     } catch (error) {
       console.error('Logout error:', error);
+      toast.error("Erreur lors de la déconnexion");
+    } finally {
+      setIsLoggingOut(false);
     }
   };
 
@@ -72,9 +87,10 @@ export function NavbarDesktopMenu({
               size="sm"
               className="mx-1"
               onClick={onLogoutClick}
+              disabled={isLoggingOut}
             >
               <LogOut className="h-4 w-4 mr-1" />
-              Déconnexion
+              {isLoggingOut ? "Déconnexion..." : "Déconnexion"}
             </ButtonEffects>
           )}
         </div>
