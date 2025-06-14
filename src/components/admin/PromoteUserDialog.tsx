@@ -67,7 +67,6 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
   const fetchNonAdminProfiles = async () => {
     setIsLoading(true);
     try {
-      console.log('=== DEBUT DEBUG PROMOTION ADMIN ===');
       console.log('Fetching profiles from the profiles table...');
       
       // Récupérer tous les profils depuis la table profiles
@@ -81,56 +80,28 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
         throw profilesError;
       }
 
-      console.log('=== TOUS LES PROFILS DANS LA TABLE ===');
-      console.log('Nombre total de profils:', profilesData?.length || 0);
-      console.log('Détails des profils:', profilesData);
-      
-      // Vérifier spécifiquement les IDs mentionnés
-      const mentionnedIds = [
-        '774c938a-9ae2-4ab5-98a5-cc95c6fa6686',
-        '776f66dd-6e28-46e9-b0f1-781a7050e1ae',
-        '82765cbb-8b5d-469f-a060-0e073237a3ea'
-      ];
-      
-      mentionnedIds.forEach(id => {
-        const found = profilesData?.find(p => p.id === id);
-        console.log(`Profile ${id}:`, found ? 'TROUVÉ' : 'NON TROUVÉ', found);
-      });
+      console.log('Profiles fetched:', profilesData?.length || 0);
 
       // Récupérer les utilisateurs qui ont déjà des rôles admin
       const { data: adminRoles, error: adminError } = await supabase
         .from('admin_roles')
-        .select('user_id, role_level');
+        .select('user_id');
 
       if (adminError && adminError.code !== 'PGRST116') {
         console.error('Error fetching admin roles:', adminError);
         throw adminError;
       }
 
-      console.log('=== ROLES ADMIN EXISTANTS ===');
       console.log('Admin roles found:', adminRoles?.length || 0);
-      console.log('Détails des rôles admin:', adminRoles);
 
       const adminUserIds = adminRoles?.map(role => role.user_id) || [];
-      console.log('IDs déjà admin:', adminUserIds);
-      
-      // Vérifier si les IDs mentionnés sont déjà admin
-      mentionnedIds.forEach(id => {
-        const isAdmin = adminUserIds.includes(id);
-        console.log(`${id} est déjà admin:`, isAdmin);
-      });
       
       // Filtrer les profils pour exclure ceux qui sont déjà admin
-      const nonAdminProfiles = profilesData?.filter(profile => {
-        const isNotAdmin = !adminUserIds.includes(profile.id);
-        console.log(`Profile ${profile.id} (${profile.email}) - Peut être promu:`, isNotAdmin);
-        return isNotAdmin;
-      }) || [];
+      const nonAdminProfiles = profilesData?.filter(profile => 
+        !adminUserIds.includes(profile.id)
+      ) || [];
 
-      console.log('=== RESULTAT FINAL ===');
       console.log('Non-admin profiles available for promotion:', nonAdminProfiles.length);
-      console.log('Profils disponibles pour promotion:', nonAdminProfiles);
-      console.log('=== FIN DEBUG PROMOTION ADMIN ===');
       
       setProfiles(nonAdminProfiles);
       setFilteredProfiles(nonAdminProfiles);
@@ -240,19 +211,6 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
               </Select>
             )}
           </div>
-
-          {filteredProfiles.length === 0 && !isLoading && (
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-sm text-yellow-800">
-                <strong>Aucun profil disponible.</strong> Cela peut signifier que :
-              </p>
-              <ul className="text-xs text-yellow-700 mt-1 ml-4 list-disc">
-                <li>Tous les utilisateurs sont déjà administrateurs</li>
-                <li>Il n'y a pas d'utilisateurs dans la table profiles</li>
-                <li>Vérifiez la console pour plus de détails</li>
-              </ul>
-            </div>
-          )}
 
           {selectedProfile && (
             <div className="p-3 bg-muted rounded-lg">
