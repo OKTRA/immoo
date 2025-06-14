@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -102,12 +101,12 @@ export default function Navbar() {
   const userTypes: UserType[] = [
     { 
       name: "Espace Agence", 
-      path: user ? "/agencies" : `/auth?redirectTo=${encodeURIComponent("/agencies")}`,
+      path: "/agencies",
       role: "agency" 
     },
     { 
       name: "Admin", 
-      path: user ? "/admin" : `/auth?redirectTo=${encodeURIComponent("/admin")}`,
+      path: "/admin",
       role: "admin" 
     },
   ];

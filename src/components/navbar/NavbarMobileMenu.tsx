@@ -1,7 +1,9 @@
 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { UserType } from "./types";
+import LoginDialog from "@/components/auth/LoginDialog";
 
 interface NavbarMobileMenuProps {
   mobileMenuOpen: boolean;
@@ -21,43 +23,58 @@ export function NavbarMobileMenu({
   user,
 }: NavbarMobileMenuProps) {
   const navigate = useNavigate();
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+
+  const handleUserTypeClick = (type: UserType) => {
+    setMobileMenuOpen(false);
+    if (user) {
+      navigate(type.path);
+    } else {
+      setLoginDialogOpen(true);
+    }
+  };
 
   return (
-    <div 
-      className={cn(
-        "fixed inset-0 top-[58px] bg-background/95 backdrop-blur-sm z-40 md:hidden transform transition-transform duration-200 ease-in-out", 
-        mobileMenuOpen ? "translate-x-0" : "translate-x-full"
-      )}
-    >
-      <nav className="container px-4 py-8 flex flex-col">
-        <div className="space-y-3 border-t border-border pt-6">
-          <p className="px-4 text-sm font-medium text-muted-foreground mb-2">Espaces</p>
-          {userTypes.map((type) => (
-            <div
-              key={type.name}
-              className="block px-4 py-2 text-foreground hover:bg-muted rounded-md cursor-pointer"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                navigate(type.path);
-              }}
-            >
-              {type.name}
-            </div>
-          ))}
-          
-          {user && (
-            <div
-              className="block px-4 py-2 text-foreground hover:bg-muted rounded-md cursor-pointer"
-              onClick={() => {
-                setMobileMenuOpen(false);
-                handleLogout();
-              }}
-            >
-              Déconnexion
-            </div>
-          )}
-        </div>
-      </nav>
-    </div>
+    <>
+      <div 
+        className={cn(
+          "fixed inset-0 top-[58px] bg-background/95 backdrop-blur-sm z-40 md:hidden transform transition-transform duration-200 ease-in-out", 
+          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        <nav className="container px-4 py-8 flex flex-col">
+          <div className="space-y-3 border-t border-border pt-6">
+            <p className="px-4 text-sm font-medium text-muted-foreground mb-2">Espaces</p>
+            {userTypes.map((type) => (
+              <div
+                key={type.name}
+                className="block px-4 py-2 text-foreground hover:bg-muted rounded-md cursor-pointer"
+                onClick={() => handleUserTypeClick(type)}
+              >
+                {type.name}
+              </div>
+            ))}
+            
+            {user && (
+              <div
+                className="block px-4 py-2 text-foreground hover:bg-muted rounded-md cursor-pointer"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  handleLogout();
+                }}
+              >
+                Déconnexion
+              </div>
+            )}
+          </div>
+        </nav>
+      </div>
+
+      <LoginDialog 
+        open={loginDialogOpen} 
+        onOpenChange={setLoginDialogOpen}
+        defaultMode="login"
+      />
+    </>
   );
 }
