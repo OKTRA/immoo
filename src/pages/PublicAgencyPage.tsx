@@ -1,4 +1,3 @@
-
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAgencyById, getPropertiesByAgencyId } from "@/services/agency";
@@ -27,7 +26,8 @@ export default function PublicAgencyPage() {
   const { 
     isAuthorized, 
     isLoading: isContactLoading, 
-    submitContactForm 
+    submitContactForm,
+    checkAccess
   } = useVisitorContact(agencyId || '');
   
   console.log('PublicAgencyPage - Contact state:', { isAuthorized, isContactLoading });
@@ -58,6 +58,8 @@ export default function PublicAgencyPage() {
           ? "Merci ! Vous avez maintenant accès aux informations de contact." 
           : "Bon retour ! Vous avez toujours accès aux informations de contact."
       );
+      // Force recheck access after successful form submission
+      await checkAccess();
     } else {
       toast.error(result.error || "Une erreur s'est produite");
     }
@@ -112,6 +114,8 @@ export default function PublicAgencyPage() {
 
   // Composant pour afficher les informations de contact protégées
   const ContactInfo = () => {
+    console.log('ContactInfo - isAuthorized:', isAuthorized, 'agency contact info:', { phone: agency.phone, email: agency.email, website: agency.website });
+    
     if (!isAuthorized) {
       return (
         <div className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-6 border border-white/20 text-center">
