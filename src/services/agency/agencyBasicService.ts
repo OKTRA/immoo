@@ -14,13 +14,10 @@ export const getAllAgencies = async (
   try {
     console.log("Fetching public agencies for browsing...");
 
-    // For public browsing, filter out blocked and hidden agencies
-    // Handle null values properly by using COALESCE or explicit null checks
+    // For public browsing, we don't filter by user_id - we want to show all agencies
     const { data, error, count } = await supabase
       .from('agencies')
       .select('*', { count: 'exact' })
-      .or('is_blocked.is.null,is_blocked.eq.false')
-      .or('hidden_from_index.is.null,hidden_from_index.eq.false')
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + limit - 1);
 
@@ -30,7 +27,6 @@ export const getAllAgencies = async (
     }
     
     console.log(`Agences publiques récupérées: ${data?.length || 0}`);
-    console.log('Données des agences:', data);
     
     const transformedData = data?.map((item) => transformAgencyData(item));
     
@@ -89,23 +85,15 @@ export const getUserAgencies = async (
 };
 
 /**
- * Get an agency by ID - with visibility checks for public access
+ * Get an agency by ID
  */
-export const getAgencyById = async (id: string, isPublicAccess: boolean = true) => {
+export const getAgencyById = async (id: string) => {
   try {
-    let query = supabase
+    const { data, error } = await supabase
       .from('agencies')
       .select('*')
-      .eq('id', id);
-
-    // For public access, filter out blocked and hidden agencies
-    if (isPublicAccess) {
-      query = query
-        .eq('is_blocked', false)
-        .eq('hidden_from_index', false);
-    }
-
-    const { data, error } = await query.single();
+      .eq('id', id)
+      .single();
 
     if (error) throw error;
     
@@ -123,13 +111,11 @@ export const getAgencyById = async (id: string, isPublicAccess: boolean = true) 
  */
 export const getFeaturedAgencies = async (limit = 6) => {
   try {
-    // First attempt to fetch from Supabase with verified filter and visibility checks
+    // First attempt to fetch from Supabase with verified filter
     try {
       const { data, error } = await supabase
         .from('agencies')
         .select('*')
-        .eq('is_blocked', false)
-        .eq('hidden_from_index', false)
         .order('rating', { ascending: false })
         .limit(limit);
 
@@ -144,8 +130,6 @@ export const getFeaturedAgencies = async (limit = 6) => {
       const { data, error: fallbackError } = await supabase
         .from('agencies')
         .select('*')
-        .eq('is_blocked', false)
-        .eq('hidden_from_index', false)
         .order('rating', { ascending: false })
         .limit(limit);
 

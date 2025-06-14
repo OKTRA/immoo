@@ -1,61 +1,106 @@
+
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://hzbogwleoszwtneveuvx.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh6Ym9nd2xlb3N6d3RuZXZldXZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA1MDk2NjMsImV4cCI6MjA1NjA4NTY2M30.JLSK18Kn9GXxF0hZkNqhGOMFohui10N5Mbswz0uAKWc';
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export const handleSupabaseError = (error: any, customMessage: string = 'Supabase error') => {
-  console.error(customMessage, error);
-  if (error && error.message) {
-    throw new Error(`${customMessage}: ${error.message}`);
-  } else {
-    throw new Error(customMessage);
+// Helper to check if Supabase is connected
+export const isSupabaseConnected = async () => {
+  try {
+    const { data } = await supabase.from('profiles').select('id').limit(1);
+    return !!data;
+  } catch (error) {
+    console.error('Error checking Supabase connection:', error);
+    return false;
   }
 };
 
+// Generic error handler for Supabase errors
+export const handleSupabaseError = (error: any) => {
+  console.error('Supabase error:', error);
+  return { 
+    data: null, 
+    error: error?.message || 'An unexpected error occurred' 
+  };
+};
+
+// Mock data generator for fallback when Supabase is not connected
 export const getMockData = (type: string, limit: number = 10) => {
-  console.log(`Generating mock data for ${type}, limit: ${limit}`);
-  
   switch (type) {
-    case 'properties':
-      return Array.from({ length: Math.min(limit, 6) }, (_, i) => ({
-        id: `mock-property-${i + 1}`,
-        title: `Propriété ${i + 1}`,
-        type: i % 2 === 0 ? 'Appartement' : 'Maison',
-        location: `Localisation ${i + 1}`,
-        price: 500000 + (i * 50000),
-        area: 80 + (i * 10),
-        bedrooms: 2 + (i % 3),
-        bathrooms: 1 + (i % 2),
-        imageUrl: null,
-        description: `Description de la propriété ${i + 1}`,
-        features: ['Parking', 'Balcon'],
-        status: 'available',
-        agencyId: `mock-agency-${i + 1}`,
-        agencyName: `Agence Mock ${i + 1}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      }));
-    
     case 'agencies':
-      return Array.from({ length: Math.min(limit, 6) }, (_, i) => ({
-        id: `mock-agency-${i + 1}`,
-        name: `Agence Mock ${i + 1}`,
-        logoUrl: null,
-        location: `Ville ${i + 1}`,
-        properties: 5 + i,
-        rating: 4 + (i * 0.1),
-        verified: i % 2 === 0,
-        description: `Description de l'agence ${i + 1}`,
-        email: `contact${i + 1}@agence.com`,
-        phone: `+33 1 23 45 67 ${80 + i}`,
-        website: `https://agence${i + 1}.com`,
-        specialties: ['Vente', 'Location'],
-        serviceAreas: [`Zone ${i + 1}`]
+      return Array(limit).fill(null).map((_, i) => ({
+        id: `mock-agency-${i}`,
+        name: `Mock Agency ${i}`,
+        logoUrl: '',
+        location: 'Mock Location',
+        properties: Math.floor(Math.random() * 50),
+        rating: (Math.random() * 5).toFixed(1),
+        verified: Math.random() > 0.5,
+        description: 'This is a mock agency description',
+        email: 'mock@example.com',
+        phone: '+1234567890',
+        website: 'https://example.com',
+        specialties: ['Residential', 'Commercial'],
+        serviceAreas: ['Paris', 'Lyon']
       }));
-    
+    case 'properties':
+      return Array(limit).fill(null).map((_, i) => ({
+        id: `mock-property-${i}`,
+        title: `Mock Property ${i}`,
+        type: Math.random() > 0.5 ? 'Apartment' : 'House',
+        price: Math.floor(Math.random() * 900000) + 100000,
+        location: 'Mock Location',
+        area: Math.floor(Math.random() * 200) + 50,
+        bedrooms: Math.floor(Math.random() * 5) + 1,
+        bathrooms: Math.floor(Math.random() * 3) + 1,
+        features: ['Garden', 'Parking'],
+        imageUrl: '',
+        status: 'available'
+      }));
     default:
       return [];
+  }
+};
+
+// Date utility functions
+export const addDatePeriod = (date: Date, amount: number, unit: 'days' | 'weeks' | 'months' | 'years'): Date => {
+  const result = new Date(date);
+  
+  switch (unit) {
+    case 'days':
+      result.setDate(result.getDate() + amount);
+      break;
+    case 'weeks':
+      result.setDate(result.getDate() + (amount * 7));
+      break;
+    case 'months':
+      result.setMonth(result.getMonth() + amount);
+      break;
+    case 'years':
+      result.setFullYear(result.getFullYear() + amount);
+      break;
+  }
+  
+  return result;
+};
+
+export const getDateDiff = (date1: Date, date2: Date, unit: 'days' | 'weeks' | 'months' | 'years'): number => {
+  const diffTime = Math.abs(date2.getTime() - date1.getTime());
+  
+  switch (unit) {
+    case 'days':
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    case 'weeks':
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
+    case 'months':
+      // Approximate
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 30.44));
+    case 'years':
+      // Approximate
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 365.25));
+    default:
+      return diffTime;
   }
 };

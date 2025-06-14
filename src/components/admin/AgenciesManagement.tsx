@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -112,8 +113,8 @@ export default function AgenciesManagement() {
 
       toast.success(
         agency.hidden_from_index 
-          ? 'Agence visible publiquement' 
-          : 'Agence complètement masquée'
+          ? 'Agence visible sur l\'index' 
+          : 'Agence masquée de l\'index'
       );
       refreshAgencies();
     } catch (error) {
@@ -516,12 +517,12 @@ export default function AgenciesManagement() {
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {selectedAgency?.hidden_from_index ? 'Rendre visible' : 'Masquer complètement'} l'agence
+              {selectedAgency?.hidden_from_index ? 'Afficher' : 'Masquer'} de l'index
             </AlertDialogTitle>
             <AlertDialogDescription>
               {selectedAgency?.hidden_from_index 
-                ? `Êtes-vous sûr de vouloir rendre visible l'agence "${selectedAgency?.name}" ? Elle sera accessible publiquement.`
-                : `Êtes-vous sûr de vouloir masquer complètement l'agence "${selectedAgency?.name}" ? Elle ne sera plus accessible dans aucune partie publique de l'application (recherche, index, pages de profil).`
+                ? `Êtes-vous sûr de vouloir rendre visible l'agence "${selectedAgency?.name}" sur la page d'accueil ?`
+                : `Êtes-vous sûr de vouloir masquer l'agence "${selectedAgency?.name}" de la page d'accueil ? Elle restera accessible via recherche directe.`
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -530,7 +531,7 @@ export default function AgenciesManagement() {
             <AlertDialogAction
               onClick={() => handleHideFromIndex(selectedAgency)}
             >
-              {selectedAgency?.hidden_from_index ? 'Rendre visible' : 'Masquer complètement'}
+              {selectedAgency?.hidden_from_index ? 'Afficher' : 'Masquer'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
