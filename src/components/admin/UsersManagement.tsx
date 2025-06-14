@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -24,6 +23,8 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { useUsersManagement } from '@/hooks/useUsersManagement';
 
+import { UserActionsManager } from './UserActionsManager';
+
 export default function UsersManagement() {
   const { 
     users, 
@@ -44,9 +45,11 @@ export default function UsersManagement() {
   } = useUsersManagement();
 
   const handleDelete = async (userId: string, userType: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')) {
-      await deleteUser(userId, userType);
-    }
+    await deleteUser(userId, userType);
+  };
+
+  const handleToggleStatus = async (userId: string, currentStatus: string, userType: string) => {
+    await toggleUserStatus(userId, currentStatus, userType);
   };
 
   const getUserTypeBadge = (userType: string) => {
@@ -229,43 +232,12 @@ export default function UsersManagement() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="h-4 w-4 mr-2" />
-                              Voir détails
-                            </DropdownMenuItem>
-                            
-                            {user.user_type !== 'visitor' && (
-                              <>
-                                <DropdownMenuItem>
-                                  Modifier le rôle
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  onClick={() => toggleUserStatus(user.id, user.status, user.user_type)}
-                                >
-                                  <X className="h-4 w-4 mr-2" />
-                                  Suspendre
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem 
-                              className="text-red-500"
-                              onClick={() => handleDelete(user.id, user.user_type)}
-                            >
-                              <Trash className="h-4 w-4 mr-2" />
-                              Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <UserActionsManager
+                          user={user}
+                          onUserUpdate={refreshUsers}
+                          onUserDelete={handleDelete}
+                          onToggleStatus={handleToggleStatus}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
