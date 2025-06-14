@@ -12,15 +12,12 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
 import { 
-  Search, Filter, MoreHorizontal, Building2, CheckCircle, 
-  XCircle, ChevronDown, Star, Loader2, RefreshCw, Trash, Eye,
+  Search, Filter, Building2, CheckCircle, 
+  XCircle, ChevronDown, Star, Loader2, RefreshCw,
   ChevronLeft, ChevronRight
 } from 'lucide-react';
-import { 
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
-  DropdownMenuTrigger, DropdownMenuSeparator 
-} from '@/components/ui/dropdown-menu';
 import { useAgenciesManagement } from '@/hooks/useAgenciesManagement';
+import { AgencyActionsManager } from './AgencyActionsManager';
 
 export default function AgenciesManagement() {
   const { 
@@ -42,12 +39,6 @@ export default function AgenciesManagement() {
     deleteAgency,
     refreshAgencies 
   } = useAgenciesManagement();
-
-  const handleDelete = async (agencyId: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette agence ?')) {
-      await deleteAgency(agencyId);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -177,44 +168,12 @@ export default function AgenciesManagement() {
                       </TableCell>
                       <TableCell>{agency.created_at}</TableCell>
                       <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Eye className="h-4 w-4 mr-2" />
-                              Voir détails
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>Modifier</DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => toggleVerification(agency.id, agency.verified)}
-                              className={agency.verified ? "text-yellow-500" : "text-green-500"}
-                            >
-                              {agency.verified ? (
-                                <>
-                                  <XCircle className="h-4 w-4 mr-2" />
-                                  Retirer vérification
-                                </>
-                              ) : (
-                                <>
-                                  <CheckCircle className="h-4 w-4 mr-2" />
-                                  Vérifier
-                                </>
-                              )}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-red-500"
-                              onClick={() => handleDelete(agency.id)}
-                            >
-                              <Trash className="h-4 w-4 mr-2" />
-                              Supprimer
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <AgencyActionsManager
+                          agency={agency}
+                          onAgencyUpdate={refreshAgencies}
+                          onAgencyDelete={deleteAgency}
+                          onToggleVerification={toggleVerification}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
