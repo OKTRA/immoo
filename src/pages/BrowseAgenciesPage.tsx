@@ -201,20 +201,16 @@ export default function BrowseAgenciesPage() {
                       </div>
                     )}
 
-                    {/* Contact Information */}
+                    {/* Contact Information - Maintenant masqué */}
                     <div className="space-y-2 mb-6">
-                      {agency.phone && (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                          <Phone className="h-4 w-4 mr-2" />
-                          <span>{agency.phone}</span>
-                        </div>
-                      )}
-                      {agency.email && (
-                        <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                          <Mail className="h-4 w-4 mr-2" />
-                          <span className="truncate">{agency.email}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
+                        <Phone className="h-4 w-4 mr-2" />
+                        <span>Informations disponibles après contact</span>
+                      </div>
+                      <div className="flex items-center text-sm text-gray-500 dark:text-gray-500">
+                        <Mail className="h-4 w-4 mr-2" />
+                        <span>Email disponible après contact</span>
+                      </div>
                       {agency.website && (
                         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
                           <Globe className="h-4 w-4 mr-2" />
@@ -223,7 +219,7 @@ export default function BrowseAgenciesPage() {
                       )}
                     </div>
 
-                    {/* Action Button */}
+                    {/* Action Button - Maintenant pointe vers le bon profil public */}
                     <div className="mt-auto">
                       <Button asChild className="w-full group-hover:bg-blue-600 group-hover:text-white transition-all duration-200">
                         <Link to={`/agency-profile/${agency.id}`}>
