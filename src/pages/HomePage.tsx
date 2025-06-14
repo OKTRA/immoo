@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -21,12 +20,20 @@ export default function HomePage() {
     const fetchProperties = async () => {
       setLoading(true);
       try {
+        console.log("HomePage - Début du chargement des propriétés");
         const { properties } = await getProperties(undefined, 6);
+        console.log("HomePage - Propriétés reçues:", properties);
+        console.log("HomePage - Nombre de propriétés:", properties?.length || 0);
         setFeaturedProperties(properties || []);
       } catch (error) {
-        console.error("Error fetching properties:", error);
+        console.error("HomePage - Erreur lors du chargement des propriétés:", error);
+        // En cas d'erreur, essayer de charger des données de secours
+        const mockProperties = getMockData('properties', 6);
+        console.log("HomePage - Utilisation des données mock:", mockProperties);
+        setFeaturedProperties(mockProperties);
       } finally {
         setLoading(false);
+        console.log("HomePage - Fin du chargement");
       }
     };
 
@@ -55,6 +62,16 @@ export default function HomePage() {
                 Découvrez notre sélection de biens d'exception, soigneusement choisis pour leur qualité, leur emplacement privilégié et leur potentiel d'investissement.
               </p>
             </div>
+
+            {/* Debug Info */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="mb-8 p-4 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
+                <h3 className="font-bold mb-2">Debug Info HomePage:</h3>
+                <p>Loading: {loading ? 'Yes' : 'No'}</p>
+                <p>Featured properties count: {featuredProperties.length}</p>
+                <p>Featured properties: {JSON.stringify(featuredProperties.map(p => ({ id: p.id, title: p.title })), null, 2)}</p>
+              </div>
+            )}
 
             {/* Properties Grid */}
             {loading ? (
