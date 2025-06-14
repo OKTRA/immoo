@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { getAllAgencies } from "@/services/agency";
 import Navbar from "@/components/Navbar";
@@ -6,7 +7,7 @@ import { AnimatedCard } from "@/components/ui/AnimatedCard";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Building, MapPin, Star, Phone, Mail, Globe, BadgeCheck, Search } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Agency } from "@/assets/types";
@@ -14,6 +15,7 @@ import { Agency } from "@/assets/types";
 export default function BrowseAgenciesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterLocation, setFilterLocation] = useState("");
+  const navigate = useNavigate();
   
   const { data, isLoading, error } = useQuery({
     queryKey: ['public-agencies'],
@@ -40,6 +42,12 @@ export default function BrowseAgenciesPage() {
     
     return matchesSearch && matchesLocation;
   });
+
+  const handleAgencyClick = (agencyId: string) => {
+    console.log('BrowseAgenciesPage - Navigating to public agency:', agencyId);
+    console.log('BrowseAgenciesPage - Target URL:', `/public-agency/${agencyId}`);
+    navigate(`/public-agency/${agencyId}`);
+  };
 
   return (
     <>
@@ -219,12 +227,13 @@ export default function BrowseAgenciesPage() {
                       )}
                     </div>
 
-                    {/* Action Button - Navigation vers la nouvelle page publique */}
+                    {/* Action Button - Navigation directe vers la page publique */}
                     <div className="mt-auto">
-                      <Button asChild className="w-full group-hover:bg-blue-600 group-hover:text-white transition-all duration-200">
-                        <Link to={`/public-agency/${agency.id}`}>
-                          Découvrir cette agence
-                        </Link>
+                      <Button 
+                        onClick={() => handleAgencyClick(agency.id)}
+                        className="w-full group-hover:bg-blue-600 group-hover:text-white transition-all duration-200"
+                      >
+                        Découvrir cette agence
                       </Button>
                     </div>
                   </AnimatedCard>

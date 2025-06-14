@@ -16,11 +16,13 @@ import PropertyCard from "@/components/PropertyCard";
 import { useVisitorContact } from "@/hooks/useVisitorContact";
 import VisitorContactForm from "@/components/visitor/VisitorContactForm";
 import { toast } from "sonner";
+import PublicPageWrapper from "@/components/PublicPageWrapper";
 
 export default function PublicAgencyPage() {
   const { agencyId } = useParams();
   
-  console.log('PublicAgencyPage - agencyId:', agencyId);
+  console.log('PublicAgencyPage - Rendering with agencyId:', agencyId);
+  console.log('PublicAgencyPage - Current URL:', window.location.href);
   
   const { 
     isAuthorized, 
@@ -28,7 +30,7 @@ export default function PublicAgencyPage() {
     submitContactForm 
   } = useVisitorContact(agencyId || '');
   
-  console.log('PublicAgencyPage - isAuthorized:', isAuthorized, 'isContactLoading:', isContactLoading);
+  console.log('PublicAgencyPage - Contact state:', { isAuthorized, isContactLoading });
   
   // Cette page est ENTIÈREMENT PUBLIQUE - aucune authentification requise
   const { data: agencyData, isLoading: isLoadingAgency } = useQuery({
@@ -47,7 +49,7 @@ export default function PublicAgencyPage() {
   const properties = propertiesData?.properties || [];
 
   const handleContactFormSubmit = async (formData: any) => {
-    console.log('Submitting contact form:', formData);
+    console.log('PublicAgencyPage - Submitting contact form:', formData);
     const result = await submitContactForm(formData);
     
     if (result.success) {
@@ -65,7 +67,7 @@ export default function PublicAgencyPage() {
 
   if (isLoadingAgency || isContactLoading) {
     return (
-      <>
+      <PublicPageWrapper>
         <Navbar />
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
           <div className="container mx-auto px-4 py-16">
@@ -83,13 +85,13 @@ export default function PublicAgencyPage() {
           </div>
         </div>
         <Footer />
-      </>
+      </PublicPageWrapper>
     );
   }
 
   if (!agency) {
     return (
-      <>
+      <PublicPageWrapper>
         <Navbar />
         <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
           <div className="container mx-auto px-4 py-16 text-center">
@@ -102,7 +104,7 @@ export default function PublicAgencyPage() {
           </div>
         </div>
         <Footer />
-      </>
+      </PublicPageWrapper>
     );
   }
 
@@ -173,7 +175,7 @@ export default function PublicAgencyPage() {
   };
 
   return (
-    <>
+    <PublicPageWrapper>
       <Navbar />
       
       {/* Formulaire de contact visiteur - affiché SEULEMENT si pas autorisé */}
@@ -354,6 +356,6 @@ export default function PublicAgencyPage() {
         </div>
       </div>
       <Footer />
-    </>
+    </PublicPageWrapper>
   );
 }

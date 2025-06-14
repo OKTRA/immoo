@@ -15,20 +15,36 @@ export const useVisitorContact = (agencyId: string) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!agencyId) {
+      setIsLoading(false);
+      return;
+    }
+    
+    console.log('useVisitorContact - Checking access for agency:', agencyId);
     checkAccess();
   }, [agencyId]);
 
   const checkAccess = async () => {
     setIsLoading(true);
     
-    // Vérifier d'abord le localStorage
-    const accessKey = `visitor_access_${agencyId}`;
-    const storedVisitorId = localStorage.getItem(accessKey);
-    
-    if (storedVisitorId) {
-      setIsAuthorized(true);
-      setVisitorContact({ id: storedVisitorId });
-    } else {
+    try {
+      // Vérifier d'abord le localStorage
+      const accessKey = `visitor_access_${agencyId}`;
+      const storedVisitorId = localStorage.getItem(accessKey);
+      
+      console.log('useVisitorContact - Stored visitor ID:', storedVisitorId);
+      
+      if (storedVisitorId) {
+        setIsAuthorized(true);
+        setVisitorContact({ id: storedVisitorId });
+        console.log('useVisitorContact - User is authorized via localStorage');
+      } else {
+        setIsAuthorized(false);
+        setVisitorContact(null);
+        console.log('useVisitorContact - User is NOT authorized');
+      }
+    } catch (error) {
+      console.error('useVisitorContact - Error in checkAccess:', error);
       setIsAuthorized(false);
       setVisitorContact(null);
     }
@@ -40,16 +56,20 @@ export const useVisitorContact = (agencyId: string) => {
     setIsLoading(true);
     
     try {
+      console.log('useVisitorContact - Submitting contact form:', formData);
+      
       const { visitor, error, isNewVisitor } = await createOrUpdateVisitorContact({
         ...formData,
         agency_id: agencyId
       });
 
       if (error) {
+        console.error('useVisitorContact - Error from service:', error);
         throw new Error(error);
       }
 
       if (visitor) {
+        console.log('useVisitorContact - Contact form submitted successfully:', visitor);
         setVisitorContact(visitor);
         grantContactAccess(visitor.id!, agencyId);
         setIsAuthorized(true);
@@ -59,7 +79,7 @@ export const useVisitorContact = (agencyId: string) => {
       
       return { success: false, isNewVisitor: false, visitor: null };
     } catch (error: any) {
-      console.error('Erreur lors de la soumission du formulaire:', error);
+      console.error('useVisitorContact - Error submitting form:', error);
       return { success: false, error: error.message, isNewVisitor: false, visitor: null };
     } finally {
       setIsLoading(false);
@@ -71,6 +91,7 @@ export const useVisitorContact = (agencyId: string) => {
     localStorage.removeItem(accessKey);
     setIsAuthorized(false);
     setVisitorContact(null);
+    console.log('useVisitorContact - Access reset for agency:', agencyId);
   };
 
   return {
