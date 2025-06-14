@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -69,7 +68,12 @@ export default function AgencyDetailPage() {
   const agency: Agency | null = agencyData?.agency || null;
   const properties = propertiesData?.properties || [];
   const propertiesCount = propertiesData?.count || 0;
-  const stats = statsData?.statistics || { propertiesCount: 0, avgRating: 0, recentListings: [] };
+  // Fix: Access the stats directly, not through a 'statistics' property
+  const stats = {
+    propertiesCount: statsData?.totalProperties || 0,
+    avgRating: statsData?.rating || 0,
+    recentListings: []
+  };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -418,4 +422,3 @@ export default function AgencyDetailPage() {
     </div>
   );
 }
-
