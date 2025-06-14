@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Eye, Home, MapPin, Ruler, Hotel, Bath, Tag, Edit, Heart } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import PropertyDetailsDialog from "./PropertyDetailsDialog";
+import VisitorContactForm from "@/components/visitor/VisitorContactForm";
+import { useVisitorContact } from "@/hooks/useVisitorContact";
 import { Link } from "react-router-dom";
 
 interface PropertyListProps {
@@ -17,14 +19,43 @@ interface PropertyListProps {
 export default function PropertyList({ properties, agencyId }: PropertyListProps) {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [showContactForm, setShowContactForm] = useState(false);
+  
+  // Use the visitor contact hook only for public view (when no agencyId)
+  const { isAuthorized, isLoading, submitContactForm } = useVisitorContact(
+    !agencyId && selectedProperty?.agencyId ? selectedProperty.agencyId : ""
+  );
   
   const openPropertyDetails = (property: Property) => {
     setSelectedProperty(property);
-    setIsDialogOpen(true);
+    
+    // If this is public view and user doesn't have access, show contact form
+    if (!agencyId && property.agencyId && !isAuthorized) {
+      setShowContactForm(true);
+    } else {
+      // Direct access to details (agency view or already authorized)
+      setIsDialogOpen(true);
+    }
   };
   
   const closePropertyDetails = () => {
     setIsDialogOpen(false);
+    setShowContactForm(false);
+    setSelectedProperty(null);
+  };
+
+  const handleContactFormSubmit = async (formData: any) => {
+    if (!selectedProperty?.agencyId) return { success: false };
+    
+    const result = await submitContactForm(formData);
+    
+    if (result.success) {
+      // Close contact form and open property details
+      setShowContactForm(false);
+      setIsDialogOpen(true);
+    }
+    
+    return result;
   };
   
   if (properties.length === 0) {
@@ -171,9 +202,10 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
                     variant="default" 
                     className="w-full h-12 font-medium rounded-xl bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-md hover:shadow-lg transition-all duration-300" 
                     onClick={() => openPropertyDetails(property)}
+                    disabled={isLoading}
                   >
                     <Eye className="h-4 w-4 mr-2" />
-                    Voir les détails
+                    {isLoading ? "Chargement..." : "Voir les détails"}
                   </Button>
                 )}
               </div>
@@ -182,8 +214,17 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
         ))}
       </div>
       
-      {/* Property Details Dialog */}
-      {!agencyId && (
+      {/* Visitor Contact Form */}
+      {!agencyId && showContactForm && selectedProperty && (
+        <VisitorContactForm
+          agencyName={selectedProperty.agencyName || "cette agence"}
+          onSubmit={handleContactFormSubmit}
+          isLoading={isLoading}
+        />
+      )}
+      
+      {/* Property Details Dialog - Only show when authorized or in agency context */}
+      {isDialogOpen && selectedProperty && (agencyId || isAuthorized) && (
         <PropertyDetailsDialog 
           property={selectedProperty} 
           isOpen={isDialogOpen} 
