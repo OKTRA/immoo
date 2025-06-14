@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Property } from "@/assets/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -220,6 +219,7 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
           agencyName={selectedProperty.agencyName || "cette agence"}
           onSubmit={handleContactFormSubmit}
           isLoading={isLoading}
+          onClose={closePropertyDetails}
         />
       )}
       
