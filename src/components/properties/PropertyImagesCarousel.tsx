@@ -7,9 +7,14 @@ import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 interface PropertyImagesCarouselProps {
   propertyId: string;
   mainImageUrl?: string;
+  height?: string;
 }
 
-export default function PropertyImagesCarousel({ propertyId, mainImageUrl }: PropertyImagesCarouselProps) {
+export default function PropertyImagesCarousel({ 
+  propertyId, 
+  mainImageUrl, 
+  height = "h-96" 
+}: PropertyImagesCarouselProps) {
   const [images, setImages] = useState<{id: string, url: string}[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -62,7 +67,7 @@ export default function PropertyImagesCarousel({ propertyId, mainImageUrl }: Pro
 
   if (loading) {
     return (
-      <div className="w-full h-96 bg-muted flex items-center justify-center rounded-lg animate-pulse">
+      <div className={`w-full ${height} bg-muted flex items-center justify-center rounded-lg animate-pulse`}>
         <ImageIcon className="h-12 w-12 text-muted-foreground opacity-20" />
       </div>
     );
@@ -70,9 +75,9 @@ export default function PropertyImagesCarousel({ propertyId, mainImageUrl }: Pro
 
   if (error || images.length === 0) {
     return (
-      <div className="w-full h-96 bg-muted flex flex-col items-center justify-center rounded-lg">
-        <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
-        <p className="text-muted-foreground">
+      <div className={`w-full ${height} bg-muted flex flex-col items-center justify-center rounded-lg`}>
+        <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
+        <p className="text-xs text-muted-foreground text-center px-2">
           {error || "Aucune image disponible"}
         </p>
       </div>
@@ -80,7 +85,7 @@ export default function PropertyImagesCarousel({ propertyId, mainImageUrl }: Pro
   }
 
   return (
-    <div className="relative w-full h-96 rounded-lg overflow-hidden">
+    <div className={`relative w-full ${height} rounded-lg overflow-hidden`}>
       {images.map((image, index) => (
         <div
           key={image.id}
@@ -91,7 +96,7 @@ export default function PropertyImagesCarousel({ propertyId, mainImageUrl }: Pro
           <img
             src={image.url}
             alt={`Vue de la propriété ${index + 1}`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
           />
         </div>
       ))}
@@ -101,26 +106,26 @@ export default function PropertyImagesCarousel({ propertyId, mainImageUrl }: Pro
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-1/2 left-2 transform -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/30 hover:bg-black/50 text-white"
+            className="absolute top-1/2 left-2 transform -translate-y-1/2 z-20 h-8 w-8 rounded-full bg-black/30 hover:bg-black/50 text-white"
             onClick={goToPrevSlide}
           >
-            <ChevronLeft className="h-6 w-6" />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
           <Button
             variant="ghost"
             size="icon"
-            className="absolute top-1/2 right-2 transform -translate-y-1/2 z-20 h-10 w-10 rounded-full bg-black/30 hover:bg-black/50 text-white"
+            className="absolute top-1/2 right-2 transform -translate-y-1/2 z-20 h-8 w-8 rounded-full bg-black/30 hover:bg-black/50 text-white"
             onClick={goToNextSlide}
           >
-            <ChevronRight className="h-6 w-6" />
+            <ChevronRight className="h-4 w-4" />
           </Button>
           
-          <div className="absolute bottom-4 left-0 right-0 z-20 flex items-center justify-center gap-1.5">
+          <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 z-20 flex items-center justify-center gap-1">
             {images.map((_, index) => (
               <button
                 key={index}
-                className={`h-2 rounded-full transition-all ${
-                  index === currentIndex ? 'w-4 bg-white' : 'w-2 bg-white/50'
+                className={`h-1.5 rounded-full transition-all ${
+                  index === currentIndex ? 'w-3 bg-white' : 'w-1.5 bg-white/50'
                 }`}
                 onClick={() => setCurrentIndex(index)}
               />
