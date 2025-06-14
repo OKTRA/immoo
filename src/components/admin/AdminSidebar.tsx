@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Users, Building2, Home, Settings, LayoutDashboard, 
@@ -24,18 +23,28 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
   const handleSignOut = async () => {
     try {
       console.log('Starting admin logout...');
-      const { error } = await supabase.auth.signOut();
       
-      if (error) {
-        console.error('Admin logout error:', error);
-        throw error;
+      // Clear local storage first
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-hzbogwleoszwtneveuvx-auth-token');
+      
+      // Try to sign out, but don't fail if the session is already invalid
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error && error.message !== 'Auth session missing!') {
+          console.warn('Logout warning:', error);
+        }
+      } catch (authError: any) {
+        console.log('Auth session already invalid, continuing logout...');
       }
       
       toast.success('Déconnexion réussie');
       navigate('/');
     } catch (error: any) {
       console.error('Error during admin logout:', error);
-      toast.error('Erreur lors de la déconnexion');
+      // Even if there's an error, still navigate away and show success
+      toast.success('Déconnexion réussie');
+      navigate('/');
     }
   };
 

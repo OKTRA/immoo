@@ -116,12 +116,18 @@ export default function Navbar() {
     try {
       console.log('Starting logout process...');
       
-      // Sign out from Supabase
-      const { error } = await supabase.auth.signOut();
+      // Clear local storage first
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('sb-hzbogwleoszwtneveuvx-auth-token');
       
-      if (error) {
-        console.error('Supabase signOut error:', error);
-        throw error;
+      // Try to sign out, but don't fail if the session is already invalid
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error && error.message !== 'Auth session missing!') {
+          console.warn('Logout warning:', error);
+        }
+      } catch (authError: any) {
+        console.log('Auth session already invalid, continuing logout...');
       }
       
       // Clear local state
@@ -135,7 +141,11 @@ export default function Navbar() {
       navigate("/");
     } catch (error: any) {
       console.error('Logout error:', error);
-      toast.error("Erreur lors de la déconnexion");
+      // Even if there's an error, still clear state and navigate
+      setUser(null);
+      setUserRole(null);
+      toast.success("Vous avez été déconnecté avec succès");
+      navigate("/");
     }
   };
 
