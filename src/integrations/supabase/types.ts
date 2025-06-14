@@ -2067,6 +2067,8 @@ export type Database = {
       visitor_contacts: {
         Row: {
           agency_id: string | null
+          auto_recognition_enabled: boolean | null
+          browser_fingerprint: string | null
           created_at: string | null
           email: string | null
           first_name: string | null
@@ -2074,15 +2076,20 @@ export type Database = {
           ip_address: string | null
           is_verified: boolean | null
           last_name: string | null
+          last_recognition_at: string | null
           last_seen_at: string | null
           phone: string | null
           property_id: string | null
           purpose: string | null
+          recognition_count: number | null
+          session_duration_days: number | null
           user_agent: string | null
           verification_token: string | null
         }
         Insert: {
           agency_id?: string | null
+          auto_recognition_enabled?: boolean | null
+          browser_fingerprint?: string | null
           created_at?: string | null
           email?: string | null
           first_name?: string | null
@@ -2090,15 +2097,20 @@ export type Database = {
           ip_address?: string | null
           is_verified?: boolean | null
           last_name?: string | null
+          last_recognition_at?: string | null
           last_seen_at?: string | null
           phone?: string | null
           property_id?: string | null
           purpose?: string | null
+          recognition_count?: number | null
+          session_duration_days?: number | null
           user_agent?: string | null
           verification_token?: string | null
         }
         Update: {
           agency_id?: string | null
+          auto_recognition_enabled?: boolean | null
+          browser_fingerprint?: string | null
           created_at?: string | null
           email?: string | null
           first_name?: string | null
@@ -2106,10 +2118,13 @@ export type Database = {
           ip_address?: string | null
           is_verified?: boolean | null
           last_name?: string | null
+          last_recognition_at?: string | null
           last_seen_at?: string | null
           phone?: string | null
           property_id?: string | null
           purpose?: string | null
+          recognition_count?: number | null
+          session_duration_days?: number | null
           user_agent?: string | null
           verification_token?: string | null
         }
@@ -2147,6 +2162,125 @@ export type Database = {
             columns: ["property_id"]
             isOneToOne: false
             referencedRelation: "properties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visitor_recognition_stats: {
+        Row: {
+          agency_id: string | null
+          created_at: string | null
+          id: string
+          recognition_date: string | null
+          recognition_method: string
+          time_since_last_visit: unknown | null
+          visitor_contact_id: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          created_at?: string | null
+          id?: string
+          recognition_date?: string | null
+          recognition_method: string
+          time_since_last_visit?: unknown | null
+          visitor_contact_id?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          created_at?: string | null
+          id?: string
+          recognition_date?: string | null
+          recognition_method?: string
+          time_since_last_visit?: unknown | null
+          visitor_contact_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitor_recognition_stats_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_recognition_stats_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_with_agencies"
+            referencedColumns: ["agency_id"]
+          },
+          {
+            foreignKeyName: "visitor_recognition_stats_visitor_contact_id_fkey"
+            columns: ["visitor_contact_id"]
+            isOneToOne: false
+            referencedRelation: "visitor_contacts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      visitor_sessions: {
+        Row: {
+          agency_id: string | null
+          browser_fingerprint: string | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          ip_address: string | null
+          is_active: boolean | null
+          last_activity_at: string | null
+          recognition_method: string | null
+          session_token: string
+          user_agent: string | null
+          visitor_contact_id: string | null
+        }
+        Insert: {
+          agency_id?: string | null
+          browser_fingerprint?: string | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          last_activity_at?: string | null
+          recognition_method?: string | null
+          session_token: string
+          user_agent?: string | null
+          visitor_contact_id?: string | null
+        }
+        Update: {
+          agency_id?: string | null
+          browser_fingerprint?: string | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          is_active?: boolean | null
+          last_activity_at?: string | null
+          recognition_method?: string | null
+          session_token?: string
+          user_agent?: string | null
+          visitor_contact_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitor_sessions_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_sessions_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "owner_properties_with_agencies"
+            referencedColumns: ["agency_id"]
+          },
+          {
+            foreignKeyName: "visitor_sessions_visitor_contact_id_fkey"
+            columns: ["visitor_contact_id"]
+            isOneToOne: false
+            referencedRelation: "visitor_contacts"
             referencedColumns: ["id"]
           },
         ]
@@ -2235,6 +2369,10 @@ export type Database = {
       }
     }
     Functions: {
+      cleanup_expired_visitor_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       create_lease_with_payments: {
         Args: {
           lease_data: Json
@@ -2248,12 +2386,42 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      create_visitor_session: {
+        Args: {
+          p_visitor_contact_id: string
+          p_agency_id: string
+          p_browser_fingerprint?: string
+          p_ip_address?: string
+          p_user_agent?: string
+          p_duration_days?: number
+          p_recognition_method?: string
+        }
+        Returns: {
+          session_token: string
+          expires_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["user_role"]
         }
         Returns: boolean
+      }
+      recognize_returning_visitor: {
+        Args: {
+          p_email?: string
+          p_phone?: string
+          p_browser_fingerprint?: string
+          p_session_token?: string
+          p_agency_id?: string
+        }
+        Returns: {
+          visitor_contact_id: string
+          recognition_method: string
+          session_valid: boolean
+          days_since_last_visit: number
+        }[]
       }
     }
     Enums: {
