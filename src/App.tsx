@@ -10,6 +10,7 @@ import HomePage from "@/pages/HomePage";
 import AgenciesPage from "@/pages/AgenciesPage";
 import BrowseAgenciesPage from "@/pages/BrowseAgenciesPage";
 import AgencyProfilePage from "@/pages/AgencyProfilePage";
+import PublicAgencyPage from "@/pages/PublicAgencyPage";
 import AgencyDetailPage from "@/pages/AgencyDetailPage";
 import CreateAgencyPage from "@/pages/CreateAgencyPage";
 import PropertyDetailPage from "@/pages/PropertyDetailPage";
@@ -53,6 +54,7 @@ function App() {
               <Route path="/" element={<HomePage />} />
               <Route path="/browse-agencies" element={<BrowseAgenciesPage />} />
               <Route path="/agency-profile/:agencyId" element={<AgencyProfilePage />} />
+              <Route path="/public-agency/:agencyId" element={<PublicAgencyPage />} />
               <Route path="/search" element={<SearchPage />} />
               
               {/* Routes d'authentification */}

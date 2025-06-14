@@ -219,10 +219,10 @@ export default function BrowseAgenciesPage() {
                       )}
                     </div>
 
-                    {/* Action Button - Navigation directe vers le profil public */}
+                    {/* Action Button - Navigation vers la nouvelle page publique */}
                     <div className="mt-auto">
                       <Button asChild className="w-full group-hover:bg-blue-600 group-hover:text-white transition-all duration-200">
-                        <Link to={`/agency-profile/${agency.id}`}>
+                        <Link to={`/public-agency/${agency.id}`}>
                           Découvrir cette agence
                         </Link>
                       </Button>
