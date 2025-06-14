@@ -79,29 +79,45 @@ export function useAdminDashboard() {
       const occupancyRate = totalProperties?.length ? 
         Math.round((rentedProperties?.length || 0) / totalProperties.length * 100) : 0;
 
-      // Fetch recent activities
+      // Fetch recent activities - simplified query without join to profiles
       const { data: activities, error: activitiesError } = await supabase
         .from('user_activities')
-        .select(`
-          id,
-          activity_type,
-          description,
-          created_at,
-          profiles!inner(first_name, last_name)
-        `)
+        .select('id, activity_type, description, created_at, user_id')
         .order('created_at', { ascending: false })
         .limit(5);
 
       if (activitiesError) throw activitiesError;
 
-      // Transform activities
-      const transformedActivities: RecentActivity[] = activities?.map(activity => ({
-        id: activity.id,
-        user: `${activity.profiles.first_name || ''} ${activity.profiles.last_name || ''}`.trim() || 'Utilisateur',
-        action: activity.description || activity.activity_type,
-        time: getRelativeTime(new Date(activity.created_at)),
-        status: getActivityStatus(activity.activity_type)
-      })) || [];
+      // Fetch user names separately for activities
+      const userIds = activities?.map(a => a.user_id).filter(Boolean) || [];
+      let userProfiles: any[] = [];
+      
+      if (userIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, email')
+          .in('id', userIds);
+        
+        if (!profilesError) {
+          userProfiles = profiles || [];
+        }
+      }
+
+      // Transform activities with user names
+      const transformedActivities: RecentActivity[] = activities?.map(activity => {
+        const userProfile = userProfiles.find(p => p.id === activity.user_id);
+        const userName = userProfile ? 
+          `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || userProfile.email || 'Utilisateur'
+          : 'Utilisateur';
+
+        return {
+          id: activity.id,
+          user: userName,
+          action: activity.description || activity.activity_type,
+          time: getRelativeTime(new Date(activity.created_at)),
+          status: getActivityStatus(activity.activity_type)
+        };
+      }) || [];
 
       // Fetch pending verifications
       const { count: unverifiedAgencies } = await supabase
@@ -123,19 +139,19 @@ export function useAdminDashboard() {
 
       const pendingItemsData: PendingItem[] = [
         {
-          type: 'verification',
+          type: 'verification' as const,
           count: unverifiedAgencies || 0,
           description: 'demandes de vérification d\'agence',
           daysWaiting: 2
         },
         {
-          type: 'report',
+          type: 'report' as const,
           count: openTickets || 0,
           description: 'signalements d\'utilisateurs',
           daysWaiting: 1
         },
         {
-          type: 'moderation',
+          type: 'moderation' as const,
           count: pendingProperties || 0,
           description: 'propriétés en attente de modération',
           daysWaiting: 0
