@@ -49,17 +49,21 @@ function App() {
           <main className="flex-1">
             <TempoRoutes />
             <Routes>
+              {/* Routes publiques - AUCUNE authentification requise */}
               <Route path="/" element={<HomePage />} />
+              <Route path="/browse-agencies" element={<BrowseAgenciesPage />} />
+              <Route path="/agency-profile/:agencyId" element={<AgencyProfilePage />} />
+              <Route path="/search" element={<SearchPage />} />
+              
+              {/* Routes d'authentification */}
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin-auth" element={<AdminAuth />} />
-              <Route path="/search" element={<SearchPage />} />
+              <Route path="/login" element={<Auth />} />
+              
+              {/* Routes protégées pour les utilisateurs connectés */}
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/owner" element={<OwnerPage />} />
               <Route path="/admin" element={<AdminPage />} />
-              
-              {/* Routes publiques pour les visiteurs */}
-              <Route path="/browse-agencies" element={<BrowseAgenciesPage />} />
-              <Route path="/agency-profile/:agencyId" element={<AgencyProfilePage />} />
               
               {/* Routes protégées pour les agences */}
               <Route path="/agencies" element={<AgenciesPage />} />
@@ -123,8 +127,6 @@ function App() {
                   element={<PropertyLeasePaymentsPage />}
                 />
               </Route>
-
-              <Route path="/login" element={<Auth />} />
 
               {import.meta.env.VITE_TEMPO && <Route path="/tempobook/*" />}
               <Route path="*" element={<NotFoundPage />} />

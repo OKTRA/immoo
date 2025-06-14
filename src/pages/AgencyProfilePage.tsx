@@ -20,13 +20,17 @@ import { toast } from "sonner";
 export default function AgencyProfilePage() {
   const { agencyId } = useParams();
   
+  console.log('AgencyProfilePage - agencyId:', agencyId);
+  
   const { 
     isAuthorized, 
     isLoading: isContactLoading, 
     submitContactForm 
   } = useVisitorContact(agencyId || '');
   
-  // Cette page doit être PUBLIQUE - pas d'authentification requise
+  console.log('AgencyProfilePage - isAuthorized:', isAuthorized, 'isContactLoading:', isContactLoading);
+  
+  // Cette page est PUBLIQUE - pas d'authentification requise
   const { data: agencyData, isLoading: isLoadingAgency } = useQuery({
     queryKey: ['public-agency-profile', agencyId],
     queryFn: () => getAgencyById(agencyId || ''),
@@ -43,6 +47,7 @@ export default function AgencyProfilePage() {
   const properties = propertiesData?.properties || [];
 
   const handleContactFormSubmit = async (formData: any) => {
+    console.log('Submitting contact form:', formData);
     const result = await submitContactForm(formData);
     
     if (result.success) {
@@ -171,7 +176,7 @@ export default function AgencyProfilePage() {
     <>
       <Navbar />
       
-      {/* Formulaire de contact visiteur */}
+      {/* Formulaire de contact visiteur - affiché SEULEMENT si pas autorisé */}
       {!isAuthorized && (
         <VisitorContactForm
           agencyName={agency.name}
