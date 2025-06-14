@@ -1,3 +1,4 @@
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -18,8 +19,6 @@ import PropertyLeasePaymentsPage from "@/pages/PropertyLeasePaymentsPage";
 import AgencyPaymentsPage from "@/pages/AgencyPaymentsPage";
 import AgencySettingsPage from "@/pages/AgencySettingsPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useEffect } from "react";
-import { supabase } from "@/lib/supabase";
 import AgencyLayout from "@/components/agency/AgencyLayout";
 import Auth from "@/pages/Auth";
 import AdminAuth from "@/pages/AdminAuth";
@@ -34,36 +33,8 @@ import routes from "tempo-routes";
 const queryClient = new QueryClient();
 
 function App() {
-  useEffect(() => {
-    const createBucketIfNotExists = async () => {
-      try {
-        const { data: buckets } = await supabase.storage.listBuckets();
-        const bucketExists = buckets?.some(
-          (bucket) => bucket.name === "tenant-photos",
-        );
-
-        if (!bucketExists) {
-          const { error } = await supabase.storage.createBucket(
-            "tenant-photos",
-            {
-              public: true,
-              fileSizeLimit: 5242880, // 5MB
-            },
-          );
-
-          if (error) {
-            console.error("Error creating tenant-photos bucket:", error);
-          } else {
-            console.log("Created tenant-photos bucket");
-          }
-        }
-      } catch (error) {
-        console.error("Error checking/creating bucket:", error);
-      }
-    };
-
-    createBucketIfNotExists();
-  }, []);
+  // Removed bucket creation logic that was causing RLS policy violations
+  // This prevents the storage errors on app initialization
 
   // Create a component to handle Tempo routes
   const TempoRoutes = () =>
