@@ -24,8 +24,11 @@ import { Badge } from '@/components/ui/badge';
 import { useUsersManagement } from '@/hooks/useUsersManagement';
 
 import { UserActionsManager } from './UserActionsManager';
+import { PromoteUserDialog } from './PromoteUserDialog';
 
 export default function UsersManagement() {
+  const [showPromoteDialog, setShowPromoteDialog] = useState(false);
+  
   const { 
     users, 
     isLoading, 
@@ -89,9 +92,9 @@ export default function UsersManagement() {
             <Shield className="h-4 w-4" />
             Actualiser
           </Button>
-          <Button>
+          <Button onClick={() => setShowPromoteDialog(true)}>
             <UserPlus className="h-4 w-4 mr-2" />
-            Nouvel Utilisateur
+            Promouvoir en Admin
           </Button>
         </div>
       </div>
@@ -283,6 +286,12 @@ export default function UsersManagement() {
           )}
         </CardContent>
       </Card>
+
+      <PromoteUserDialog
+        isOpen={showPromoteDialog}
+        onClose={() => setShowPromoteDialog(false)}
+        onUserPromoted={refreshUsers}
+      />
     </>
   );
 }
