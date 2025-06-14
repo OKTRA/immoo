@@ -48,7 +48,7 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
 
   useEffect(() => {
     if (isOpen) {
-      fetchProfiles();
+      fetchNonAdminProfiles();
     }
   }, [isOpen]);
 
@@ -64,15 +64,23 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
     }
   }, [searchTerm, profiles]);
 
-  const fetchProfiles = async () => {
+  const fetchNonAdminProfiles = async () => {
     setIsLoading(true);
     try {
-      // Récupérer tous les profils qui ne sont pas déjà admin
+      console.log('Fetching profiles from the profiles table...');
+      
+      // Récupérer tous les profils depuis la table profiles
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email, first_name, last_name, role');
+        .select('id, email, first_name, last_name, role')
+        .order('first_name');
 
-      if (profilesError) throw profilesError;
+      if (profilesError) {
+        console.error('Error fetching profiles:', profilesError);
+        throw profilesError;
+      }
+
+      console.log('Profiles fetched:', profilesData?.length || 0);
 
       // Récupérer les utilisateurs qui ont déjà des rôles admin
       const { data: adminRoles, error: adminError } = await supabase
@@ -80,8 +88,11 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
         .select('user_id');
 
       if (adminError && adminError.code !== 'PGRST116') {
+        console.error('Error fetching admin roles:', adminError);
         throw adminError;
       }
+
+      console.log('Admin roles found:', adminRoles?.length || 0);
 
       const adminUserIds = adminRoles?.map(role => role.user_id) || [];
       
@@ -90,11 +101,13 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
         !adminUserIds.includes(profile.id)
       ) || [];
 
+      console.log('Non-admin profiles available for promotion:', nonAdminProfiles.length);
+      
       setProfiles(nonAdminProfiles);
       setFilteredProfiles(nonAdminProfiles);
     } catch (error) {
-      console.error('Error fetching profiles:', error);
-      toast.error('Erreur lors du chargement des profils');
+      console.error('Error in fetchNonAdminProfiles:', error);
+      toast.error('Erreur lors du chargement des profils utilisateurs');
     } finally {
       setIsLoading(false);
     }
@@ -108,6 +121,8 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
 
     setIsPromoting(true);
     try {
+      console.log('Promoting user:', selectedUserId, 'to role:', adminRole);
+      
       const { success, error } = await assignAdminRole(selectedUserId, adminRole);
       
       if (!success) {
@@ -142,13 +157,13 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
         <DialogHeader>
           <DialogTitle>Promouvoir un utilisateur en Admin</DialogTitle>
           <DialogDescription>
-            Sélectionnez un utilisateur existant et choisissez son niveau d'administration.
+            Sélectionnez un profil utilisateur existant et choisissez son niveau d'administration.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="search">Rechercher un utilisateur</Label>
+            <Label htmlFor="search">Rechercher dans les profils</Label>
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -162,7 +177,7 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="user">Utilisateur</Label>
+            <Label htmlFor="user">Profil utilisateur</Label>
             {isLoading ? (
               <div className="flex items-center justify-center p-4">
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -171,12 +186,12 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
             ) : (
               <Select value={selectedUserId} onValueChange={setSelectedUserId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un utilisateur" />
+                  <SelectValue placeholder="Sélectionner un profil utilisateur" />
                 </SelectTrigger>
                 <SelectContent>
                   {filteredProfiles.length === 0 ? (
                     <div className="p-2 text-sm text-muted-foreground">
-                      {searchTerm ? 'Aucun utilisateur trouvé' : 'Aucun utilisateur disponible'}
+                      {searchTerm ? 'Aucun profil trouvé pour cette recherche' : 'Aucun profil disponible pour promotion'}
                     </div>
                   ) : (
                     filteredProfiles.map((profile) => (
@@ -199,7 +214,7 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
 
           {selectedProfile && (
             <div className="p-3 bg-muted rounded-lg">
-              <h4 className="font-medium mb-2">Utilisateur sélectionné:</h4>
+              <h4 className="font-medium mb-2">Profil sélectionné:</h4>
               <div className="text-sm">
                 <p><strong>Nom:</strong> {selectedProfile.first_name} {selectedProfile.last_name}</p>
                 <p><strong>Email:</strong> {selectedProfile.email}</p>
