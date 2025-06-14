@@ -25,7 +25,13 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
           email,
           phone,
           website,
-          verified
+          verified,
+          description,
+          specialties,
+          service_areas,
+          properties_count,
+          rating,
+          created_at
         )
       `);
     
@@ -41,7 +47,36 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
     
     if (error) throw error;
     
-    const properties = data.map(formatPropertyFromDb);
+    const properties = data.map(property => {
+      const formatted = formatPropertyFromDb(property);
+      
+      // Add complete agency information to each property
+      if (property.agency) {
+        formatted.agencyName = property.agency.name;
+        formatted.agencyLogo = property.agency.logo_url;
+        formatted.agencyPhone = property.agency.phone;
+        formatted.agencyEmail = property.agency.email;
+        formatted.agencyWebsite = property.agency.website;
+        formatted.agencyVerified = property.agency.verified;
+        formatted.agencyRating = typeof property.agency.rating === 'number' ? property.agency.rating : 0;
+        formatted.agencyDescription = property.agency.description;
+        formatted.agencySpecialties = property.agency.specialties || [];
+        formatted.agencyServiceAreas = property.agency.service_areas || [];
+        formatted.agencyPropertiesCount = property.agency.properties_count || 0;
+        
+        // Calculate years active from creation date
+        if (property.agency.created_at) {
+          const createdDate = new Date(property.agency.created_at);
+          const currentDate = new Date();
+          const yearsDiff = currentDate.getFullYear() - createdDate.getFullYear();
+          formatted.agencyYearsActive = yearsDiff > 0 ? yearsDiff : 1;
+        }
+        
+        formatted.agencyJoinDate = property.agency.created_at;
+      }
+      
+      return formatted;
+    });
     
     return { properties, error: null };
   } catch (error: any) {
@@ -72,12 +107,17 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
           email,
           phone,
           website,
-          verified
+          verified,
+          description,
+          specialties,
+          service_areas,
+          properties_count,
+          rating,
+          created_at
         )
       `)
       .eq('agency_id', agencyId);
     
-    // Si un statut est fourni, filtrer par ce statut
     if (status) {
       query = query.eq('status', status);
     }
@@ -86,7 +126,36 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
     
     if (error) throw error;
     
-    const properties = data.map(formatPropertyFromDb);
+    const properties = data.map(property => {
+      const formatted = formatPropertyFromDb(property);
+      
+      // Add complete agency information to each property
+      if (property.agency) {
+        formatted.agencyName = property.agency.name;
+        formatted.agencyLogo = property.agency.logo_url;
+        formatted.agencyPhone = property.agency.phone;
+        formatted.agencyEmail = property.agency.email;
+        formatted.agencyWebsite = property.agency.website;
+        formatted.agencyVerified = property.agency.verified;
+        formatted.agencyRating = typeof property.agency.rating === 'number' ? property.agency.rating : 0;
+        formatted.agencyDescription = property.agency.description;
+        formatted.agencySpecialties = property.agency.specialties || [];
+        formatted.agencyServiceAreas = property.agency.service_areas || [];
+        formatted.agencyPropertiesCount = property.agency.properties_count || 0;
+        
+        // Calculate years active from creation date
+        if (property.agency.created_at) {
+          const createdDate = new Date(property.agency.created_at);
+          const currentDate = new Date();
+          const yearsDiff = currentDate.getFullYear() - createdDate.getFullYear();
+          formatted.agencyYearsActive = yearsDiff > 0 ? yearsDiff : 1;
+        }
+        
+        formatted.agencyJoinDate = property.agency.created_at;
+      }
+      
+      return formatted;
+    });
     
     return { properties, error: null };
   } catch (error: any) {
@@ -100,15 +169,12 @@ export const getFeaturedProperties = async (limit: number = 6) => {
   return getProperties(undefined, limit);
 };
 
-// Function to get popular properties
 export const getPopularProperties = async (limit: number = 6) => {
   return getProperties(undefined, limit);
 };
 
-// Function to get a specific property by ID
 export const getPropertyById = async (propertyId: string) => {
   try {
-    // First get the property with its basic information
     const { data, error } = await supabase
       .from('properties')
       .select(`
@@ -128,7 +194,13 @@ export const getPropertyById = async (propertyId: string) => {
           email,
           phone,
           website,
-          verified
+          verified,
+          description,
+          specialties,
+          service_areas,
+          properties_count,
+          rating,
+          created_at
         )
       `)
       .eq('id', propertyId)
@@ -136,7 +208,6 @@ export const getPropertyById = async (propertyId: string) => {
     
     if (error) throw error;
     
-    // Check for active leases to ensure status is consistent
     const { data: leases, error: leaseError } = await supabase
       .from('leases')
       .select('id, status')
@@ -147,15 +218,38 @@ export const getPropertyById = async (propertyId: string) => {
       console.error('Error checking leases:', leaseError);
     }
     
-    // If there are active leases, update the property status to reflect that
     const hasActiveLeases = leases && leases.length > 0;
     
-    // Override the status if necessary for UI consistency
     if (hasActiveLeases && data.status === 'available') {
       data.status = 'rented';
     }
     
     const property = formatPropertyFromDb(data);
+    
+    // Add complete agency information
+    if (data.agency) {
+      property.agencyName = data.agency.name;
+      property.agencyLogo = data.agency.logo_url;
+      property.agencyPhone = data.agency.phone;
+      property.agencyEmail = data.agency.email;
+      property.agencyWebsite = data.agency.website;
+      property.agencyVerified = data.agency.verified;
+      property.agencyRating = typeof data.agency.rating === 'number' ? data.agency.rating : 0;
+      property.agencyDescription = data.agency.description;
+      property.agencySpecialties = data.agency.specialties || [];
+      property.agencyServiceAreas = data.agency.service_areas || [];
+      property.agencyPropertiesCount = data.agency.properties_count || 0;
+      
+      // Calculate years active from creation date
+      if (data.agency.created_at) {
+        const createdDate = new Date(data.agency.created_at);
+        const currentDate = new Date();
+        const yearsDiff = currentDate.getFullYear() - createdDate.getFullYear();
+        property.agencyYearsActive = yearsDiff > 0 ? yearsDiff : 1;
+      }
+      
+      property.agencyJoinDate = data.agency.created_at;
+    }
     
     return { property, error: null, hasActiveLeases };
   } catch (error: any) {
