@@ -153,7 +153,7 @@ export default function HeroSection() {
                     </span>
                     <span className="flex items-center px-4 py-2 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 border border-white/30">
                       <Building className="h-4 w-4 mr-2 text-purple-500" />
-                      < 1500€
+                      {"< 1500€"}
                     </span>
                   </>
                 ) : (
