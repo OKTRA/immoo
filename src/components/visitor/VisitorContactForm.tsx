@@ -5,12 +5,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, UserCheck, Phone, Mail, Lock, X } from 'lucide-react';
 import { VisitorContactForm as VisitorContactFormData } from '@/services/visitorContactService';
+
 interface VisitorContactFormProps {
   agencyName: string;
   onSubmit: (data: Omit<VisitorContactFormData, 'agency_id'>) => Promise<any>;
   isLoading: boolean;
   onClose?: () => void;
 }
+
 export default function VisitorContactForm({
   agencyName,
   onSubmit,
@@ -70,14 +72,20 @@ export default function VisitorContactForm({
       });
     }
   };
-  return <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+  return (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="w-full max-w-md mx-auto animate-fade-in">
         <Card className="w-full bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-0 shadow-2xl rounded-2xl overflow-hidden">
           {/* Header avec close button */}
           <CardHeader className="text-center bg-gradient-to-br from-blue-50/80 to-purple-50/80 dark:from-blue-900/20 dark:to-purple-900/20 border-b border-white/20 relative px-4 py-5">
-            {onClose && <button onClick={onClose} className="absolute top-3 right-3 p-1.5 rounded-full bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 transition-colors">
+            {onClose && (
+              <button 
+                onClick={onClose}
+                className="absolute top-3 right-3 p-1.5 rounded-full bg-white/80 dark:bg-gray-800/80 hover:bg-white dark:hover:bg-gray-800 transition-colors"
+              >
                 <X className="w-4 h-4" />
-              </button>}
+              </button>
+            )}
             
             <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-3 shadow-lg">
               <UserCheck className="w-6 h-6 text-white" />
@@ -189,5 +197,6 @@ export default function VisitorContactForm({
           </CardContent>
         </Card>
       </div>
-    </div>;
+    </div>
+  );
 }
