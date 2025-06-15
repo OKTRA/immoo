@@ -1,7 +1,7 @@
 
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import Loading from '@/components/ui/spinner';
+import { Loading } from '@/components/ui/spinner';
 
 // Lazy-loaded components that exist
 const HomePage = lazy(() => import('@/pages/HomePage'));
