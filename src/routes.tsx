@@ -1,54 +1,28 @@
+
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { MainLayout } from '@/layout/MainLayout';
-import { AuthLayout } from '@/layout/AuthLayout';
-import Loading from '@/components/ui/Loading';
+import Loading from '@/components/ui/spinner';
 
-// Lazy-loaded components
+// Lazy-loaded components that exist
 const HomePage = lazy(() => import('@/pages/HomePage'));
-const AboutPage = lazy(() => import('@/pages/AboutPage'));
-const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
-const RegisterPage = lazy(() => import('@/pages/RegisterPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const BrowseAgenciesPage = lazy(() => import('@/pages/BrowseAgenciesPage'));
-const AgencyDetailsPage = lazy(() => import('@/pages/AgencyDetailsPage'));
 const CreateAgencyPage = lazy(() => import('@/pages/CreateAgencyPage'));
 const EditAgencyPage = lazy(() => import('@/pages/EditAgencyPage'));
-const BrowsePropertiesPage = lazy(() => import('@/pages/BrowsePropertiesPage'));
-const PropertyDetailsPage = lazy(() => import('@/pages/PropertyDetailsPage'));
-const CreatePropertyPage = lazy(() => import('@/pages/CreatePropertyPage'));
-const EditPropertyPage = lazy(() => import('@/pages/EditPropertyPage'));
-const AdminDashboardPage = lazy(() => import('@/pages/AdminDashboardPage'));
+const AdminDashboardPage = lazy(() => import('@/pages/AdminPage'));
 const SubscriptionPlansManagement = lazy(() => import('@/components/admin/SubscriptionPlansManagement'));
 import PricingPage from '@/pages/PricingPage';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <MainLayout />,
     children: [
       {
         index: true,
         element: (
           <Suspense fallback={<Loading />}>
             <HomePage />
-          </Suspense>
-        ),
-      },
-      {
-        path: '/about',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <AboutPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: '/contact',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <ContactPage />
           </Suspense>
         ),
       },
@@ -69,14 +43,6 @@ export const router = createBrowserRouter([
         ),
       },
       {
-        path: '/agencies/:id',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <AgencyDetailsPage />
-          </Suspense>
-        ),
-      },
-      {
         path: '/create-agency',
         element: (
           <Suspense fallback={<Loading />}>
@@ -89,38 +55,6 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Loading />}>
             <EditAgencyPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: '/properties',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <BrowsePropertiesPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: '/properties/:id',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <PropertyDetailsPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: '/create-property',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <CreatePropertyPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: '/edit-property/:id',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <EditPropertyPage />
           </Suspense>
         ),
       },
@@ -150,25 +84,11 @@ export const router = createBrowserRouter([
         path: "/pricing",
         element: <PricingPage />
       },
-    ],
-  },
-  {
-    path: '/',
-    element: <AuthLayout />,
-    children: [
       {
         path: '/login',
         element: (
           <Suspense fallback={<Loading />}>
             <LoginPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: '/register',
-        element: (
-          <Suspense fallback={<Loading />}>
-            <RegisterPage />
           </Suspense>
         ),
       },

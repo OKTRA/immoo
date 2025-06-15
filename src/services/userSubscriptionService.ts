@@ -209,30 +209,37 @@ export const getAgenciesWithSubscriptions = async (): Promise<{
 
     if (error) throw error;
 
-    const agencies = (data || []).map(agency => ({
-      id: agency.id,
-      name: agency.name,
-      logoUrl: agency.logo_url,
-      subscription: agency.user_subscriptions[0] ? {
-        id: agency.user_subscriptions[0].id,
-        userId: agency.user_id,
-        agencyId: agency.id,
-        planId: agency.user_subscriptions[0].plan_id,
-        status: agency.user_subscriptions[0].status,
-        startDate: agency.user_subscriptions[0].start_date,
-        paymentMethod: '',
-        autoRenew: true,
-        plan: agency.user_subscriptions[0].subscription_plans ? {
-          name: agency.user_subscriptions[0].subscription_plans.name,
-          price: agency.user_subscriptions[0].subscription_plans.price,
-          maxProperties: agency.user_subscriptions[0].subscription_plans.max_properties,
-          maxAgencies: agency.user_subscriptions[0].subscription_plans.max_agencies,
-          maxLeases: agency.user_subscriptions[0].subscription_plans.max_leases,
-          maxUsers: agency.user_subscriptions[0].subscription_plans.max_users,
-          features: agency.user_subscriptions[0].subscription_plans.features || []
+    const agencies = (data || []).map(agency => {
+      // Fix the array access issue by checking if user_subscriptions exists and has elements
+      const userSubscription = agency.user_subscriptions && agency.user_subscriptions.length > 0 
+        ? agency.user_subscriptions[0] 
+        : null;
+
+      return {
+        id: agency.id,
+        name: agency.name,
+        logoUrl: agency.logo_url,
+        subscription: userSubscription ? {
+          id: userSubscription.id,
+          userId: agency.user_id,
+          agencyId: agency.id,
+          planId: userSubscription.plan_id,
+          status: userSubscription.status,
+          startDate: userSubscription.start_date,
+          paymentMethod: '',
+          autoRenew: true,
+          plan: userSubscription.subscription_plans ? {
+            name: userSubscription.subscription_plans.name,
+            price: userSubscription.subscription_plans.price,
+            maxProperties: userSubscription.subscription_plans.max_properties,
+            maxAgencies: userSubscription.subscription_plans.max_agencies,
+            maxLeases: userSubscription.subscription_plans.max_leases,
+            maxUsers: userSubscription.subscription_plans.max_users,
+            features: userSubscription.subscription_plans.features || []
+          } : undefined
         } : undefined
-      } : undefined
-    }));
+      };
+    });
 
     return { agencies, error: null };
   } catch (error: any) {
