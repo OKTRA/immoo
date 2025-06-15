@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -68,10 +69,10 @@ export const useSubscriptionManagement = () => {
       // Calculate stats from actual data with correct reduce syntax
       const totalPlans = allPlans.length;
       const activePlans = allPlans.filter(p => p.isActive).length;
-      // Explicitly type the initial value as number
-      const totalRevenue = allPlans.reduce(
+      // Explicitly define the accumulator type for reduce
+      const totalRevenue = allPlans.reduce<number>(
         (sum, plan) => sum + plan.price,
-        0 as number
+        0
       );
       
       setStats({
