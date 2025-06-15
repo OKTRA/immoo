@@ -21,6 +21,7 @@ import ManageTenantsPage from "@/pages/ManageTenantsPage";
 import PropertyLeasePaymentsPage from "@/pages/PropertyLeasePaymentsPage";
 import AgencyPaymentsPage from "@/pages/AgencyPaymentsPage";
 import AgencySettingsPage from "@/pages/AgencySettingsPage";
+import PricingPage from "@/pages/PricingPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AgencyLayout from "@/components/agency/AgencyLayout";
 import Auth from "@/pages/Auth";
@@ -56,6 +57,7 @@ function App() {
               <Route path="/agency-profile/:agencyId" element={<AgencyProfilePage />} />
               <Route path="/public-agency/:agencyId" element={<PublicAgencyPage />} />
               <Route path="/search" element={<SearchPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
               
               {/* Routes d'authentification */}
               <Route path="/auth" element={<Auth />} />
@@ -130,7 +132,6 @@ function App() {
                 />
               </Route>
 
-              {import.meta.env.VITE_TEMPO && <Route path="/tempobook/*" />}
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </main>
