@@ -23,7 +23,6 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { formatCurrency } from '@/lib/utils';
 import { usePropertiesManagement } from '@/hooks/usePropertiesManagement';
-import { useNavigate } from 'react-router-dom';
 
 export default function PropertiesManagement() {
   const { 
@@ -51,7 +50,6 @@ export default function PropertiesManagement() {
     moderateProperty,
     refreshProperties 
   } = usePropertiesManagement();
-  const navigate = useNavigate();
 
   const handleStatusChange = async (propertyId: string, newStatus: string) => {
     await updatePropertyStatus(propertyId, newStatus);
@@ -253,17 +251,11 @@ export default function PropertiesManagement() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => navigate(`/agencies/${property.agency_id}/properties/${property.id}`)}
-                              disabled={!property.agency_id}
-                            >
+                            <DropdownMenuItem>
                               <Eye className="h-4 w-4 mr-2" />
                               Voir détails
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => navigate(`/agencies/${property.agency_id}/properties/${property.id}/edit`)}
-                              disabled={!property.agency_id}
-                            >
+                            <DropdownMenuItem>
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
                             </DropdownMenuItem>
