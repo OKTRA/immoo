@@ -8,7 +8,7 @@ import {
   upgradeUserSubscription,
   type UserSubscription,
   type SubscriptionLimit
-} from '@/services/userSubscriptionService';
+} from '@/services/subscription';
 
 export const useUserSubscription = () => {
   const { user } = useAuth();

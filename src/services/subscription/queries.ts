@@ -1,34 +1,6 @@
+
 import { supabase } from '@/lib/supabase';
-
-export interface UserSubscription {
-  id: string;
-  userId: string;
-  agencyId?: string;
-  planId: string;
-  status: 'active' | 'inactive' | 'expired';
-  startDate: string;
-  endDate?: string;
-  paymentMethod?: string;
-  autoRenew: boolean;
-  plan?: {
-    name: string;
-    price: number;
-    maxProperties: number;
-    maxAgencies: number;
-    maxLeases: number;
-    maxUsers: number;
-    features: string[];
-  };
-}
-
-export interface SubscriptionLimit {
-  allowed: boolean;
-  currentCount: number;
-  maxAllowed: number;
-  planName?: string;
-  percentageUsed?: number;
-  error?: string;
-}
+import type { UserSubscription } from './types';
 
 /**
  * Obtenir l'abonnement actuel de l'utilisateur
@@ -89,90 +61,6 @@ export const getCurrentUserSubscription = async (userId: string): Promise<{
   } catch (error: any) {
     console.error('Error getting user subscription:', error);
     return { subscription: null, error: error.message };
-  }
-};
-
-/**
- * Vérifier les limites d'une ressource pour l'utilisateur
- */
-export const checkUserResourceLimit = async (
-  userId: string,
-  resourceType: 'properties' | 'agencies' | 'leases' | 'users',
-  agencyId?: string
-): Promise<SubscriptionLimit> => {
-  try {
-    const params = {
-      user_id: userId,
-      resource_type: resourceType,
-      agency_id: agencyId || null
-    };
-    console.log('Attempting to call check_subscription_limit with params:', params);
-
-    const { data, error } = await supabase.rpc('check_subscription_limit', params);
-
-    if (error) {
-      console.error('Error calling check_subscription_limit RPC:', error);
-      throw error;
-    }
-    
-    console.log('RPC check_subscription_limit successful, data:', data);
-
-    return {
-      allowed: data.allowed,
-      currentCount: data.current_count,
-      maxAllowed: data.max_allowed,
-      planName: data.plan_name,
-      percentageUsed: data.percentage_used,
-      error: data.error
-    };
-  } catch (error: any) {
-    console.error('Error checking resource limit:', error);
-    return {
-      allowed: false,
-      currentCount: 0,
-      maxAllowed: 0,
-      error: `Failed to check limit: ${error.message}`
-    };
-  }
-};
-
-/**
- * Mettre à niveau l'abonnement d'un utilisateur
- */
-export const upgradeUserSubscription = async (
-  userId: string,
-  newPlanId: string,
-  agencyId?: string,
-  paymentMethod?: string
-): Promise<{ success: boolean; error: string | null }> => {
-  try {
-    // Désactiver l'ancien abonnement
-    const { error: deactivateError } = await supabase
-      .from('user_subscriptions')
-      .update({ status: 'inactive' })
-      .eq('user_id', userId)
-      .eq('status', 'active');
-
-    if (deactivateError) throw deactivateError;
-
-    // Créer le nouvel abonnement
-    const { error: createError } = await supabase
-      .from('user_subscriptions')
-      .insert({
-        user_id: userId,
-        agency_id: agencyId,
-        plan_id: newPlanId,
-        status: 'active',
-        payment_method: paymentMethod,
-        start_date: new Date().toISOString()
-      });
-
-    if (createError) throw createError;
-
-    return { success: true, error: null };
-  } catch (error: any) {
-    console.error('Error upgrading subscription:', error);
-    return { success: false, error: error.message };
   }
 };
 
