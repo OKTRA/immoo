@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -36,7 +35,6 @@ export default function AgenciesManagement() {
     setCurrentPage,
     totalCount,
     totalPages,
-    toggleVerification, 
     deleteAgency,
     refreshAgencies 
   } = useAgenciesManagement();
@@ -195,7 +193,6 @@ export default function AgenciesManagement() {
                           agency={agency}
                           onAgencyUpdate={refreshAgencies}
                           onAgencyDelete={deleteAgency}
-                          onToggleVerification={toggleVerification}
                         />
                       </TableCell>
                     </TableRow>

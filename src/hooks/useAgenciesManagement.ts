@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -90,27 +89,6 @@ export function useAgenciesManagement() {
     }
   };
 
-  const toggleVerification = async (agencyId: string, currentVerified: boolean) => {
-    try {
-      const { error } = await supabase
-        .from('agencies')
-        .update({ verified: !currentVerified, updated_at: new Date().toISOString() })
-        .eq('id', agencyId);
-
-      if (error) throw error;
-
-      await fetchAgencies();
-      toast.success(
-        !currentVerified 
-          ? 'Agence vérifiée avec succès' 
-          : 'Vérification de l\'agence retirée'
-      );
-    } catch (error) {
-      console.error('Error toggling verification:', error);
-      toast.error('Erreur lors de la modification de la vérification');
-    }
-  };
-
   const deleteAgency = async (agencyId: string) => {
     try {
       const { error } = await supabase
@@ -172,7 +150,6 @@ export function useAgenciesManagement() {
     setCurrentPage,
     totalCount,
     totalPages,
-    toggleVerification,
     deleteAgency,
     updateAgency,
     refreshAgencies: fetchAgencies

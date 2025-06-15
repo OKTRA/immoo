@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Agency } from '@/hooks/useAgenciesManagement';
 import { AgencyActionDropdown } from './dropdowns/AgencyActionDropdown';
@@ -9,14 +8,12 @@ interface AgencyActionsManagerProps {
   agency: Agency;
   onAgencyUpdate: () => void;
   onAgencyDelete: (agencyId: string) => void;
-  onToggleVerification: (agencyId: string, currentVerified: boolean) => void;
 }
 
 export function AgencyActionsManager({ 
   agency, 
   onAgencyUpdate, 
-  onAgencyDelete, 
-  onToggleVerification 
+  onAgencyDelete,
 }: AgencyActionsManagerProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
