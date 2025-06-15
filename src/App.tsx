@@ -1,3 +1,4 @@
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -20,7 +21,6 @@ import ManageTenantsPage from "@/pages/ManageTenantsPage";
 import PropertyLeasePaymentsPage from "@/pages/PropertyLeasePaymentsPage";
 import AgencyPaymentsPage from "@/pages/AgencyPaymentsPage";
 import AgencySettingsPage from "@/pages/AgencySettingsPage";
-import PricingPage from "@/pages/PricingPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AgencyLayout from "@/components/agency/AgencyLayout";
 import Auth from "@/pages/Auth";
@@ -39,11 +39,16 @@ function App() {
   // Removed bucket creation logic that was causing RLS policy violations
   // This prevents the storage errors on app initialization
 
+  // Create a component to handle Tempo routes
+  const TempoRoutes = () =>
+    import.meta.env.VITE_TEMPO ? useRoutes(routes) : null;
+
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
         <div className="min-h-screen flex flex-col">
           <main className="flex-1">
+            <TempoRoutes />
             <Routes>
               {/* Routes publiques - AUCUNE authentification requise */}
               <Route path="/" element={<HomePage />} />
@@ -51,7 +56,6 @@ function App() {
               <Route path="/agency-profile/:agencyId" element={<AgencyProfilePage />} />
               <Route path="/public-agency/:agencyId" element={<PublicAgencyPage />} />
               <Route path="/search" element={<SearchPage />} />
-              <Route path="/pricing" element={<PricingPage />} />
               
               {/* Routes d'authentification */}
               <Route path="/auth" element={<Auth />} />
