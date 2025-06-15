@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getAllSubscriptionPlans } from '@/services/subscriptionService';
 import { useUserSubscription } from '@/hooks/useUserSubscription';
@@ -10,11 +11,12 @@ import PricingLoadingState from '@/components/pricing/PricingLoadingState';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function PricingPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [upgrading, setUpgrading] = useState<string | null>(null);
   const { subscription, upgradeSubscription } = useUserSubscription();
   const navigate = useNavigate();
@@ -25,17 +27,29 @@ export default function PricingPage() {
 
   const loadPlans = async () => {
     try {
+      setLoading(true);
+      setError(null);
+      console.log('Loading subscription plans...');
+      
       const { plans: allPlans, error } = await getAllSubscriptionPlans(true);
+      
       if (error) {
+        console.error('Error loading plans:', error);
+        setError(`Erreur: ${error}`);
         toast.error(`Erreur: ${error}`);
         return;
       }
+      
       // Trier par prix croissant
       const sortedPlans = allPlans.sort((a, b) => a.price - b.price);
       setPlans(sortedPlans);
+      console.log('Plans loaded successfully:', sortedPlans);
+      
     } catch (error) {
       console.error('Error loading plans:', error);
-      toast.error('Erreur lors du chargement des plans');
+      const errorMessage = 'Erreur lors du chargement des plans';
+      setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -94,22 +108,42 @@ export default function PricingPage() {
 
       {/* Plans Section */}
       <div className="container mx-auto px-4 pb-20">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {plans.map((plan, index) => (
-            <div 
-              key={plan.id} 
-              className="transform transition-all duration-300 hover:scale-105"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <PricingCard
-                plan={plan}
-                subscription={subscription}
-                upgrading={upgrading}
-                onUpgrade={handleUpgrade}
-              />
-            </div>
-          ))}
-        </div>
+        {error ? (
+          <div className="text-center py-16">
+            <h3 className="text-xl font-medium mb-2 text-red-600 dark:text-red-400">Erreur de chargement</h3>
+            <p className="text-muted-foreground mb-6">{error}</p>
+            <Button onClick={loadPlans}>
+              Réessayer
+            </Button>
+          </div>
+        ) : plans.length === 0 ? (
+          <div className="text-center py-16">
+            <h3 className="text-xl font-medium mb-2">Aucun plan disponible</h3>
+            <p className="text-muted-foreground mb-6">
+              Les plans d'abonnement ne sont pas encore configurés
+            </p>
+            <Button onClick={loadPlans}>
+              Actualiser
+            </Button>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 max-w-7xl mx-auto">
+            {plans.map((plan, index) => (
+              <div 
+                key={plan.id} 
+                className="transform transition-all duration-300 hover:scale-105"
+                style={{ animationDelay: `${index * 100}ms` }}
+              >
+                <PricingCard
+                  plan={plan}
+                  subscription={subscription}
+                  upgrading={upgrading}
+                  onUpgrade={handleUpgrade}
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         <PricingFooter />
       </div>
