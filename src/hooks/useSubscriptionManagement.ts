@@ -65,15 +65,15 @@ export const useSubscriptionManagement = () => {
       }
       setPlans(allPlans);
       
-      // Calculate stats - fix the reduce function
+      // Calculate stats from actual data
       const totalPlans = allPlans.length;
       const activePlans = allPlans.filter(p => p.isActive).length;
-      const totalRevenue = allPlans.reduce((sum, plan) => sum + (plan.price * 10), 0);
+      const totalRevenue = allPlans.reduce((sum, plan) => sum + plan.price, 0);
       
       setStats({
         totalPlans,
         activePlans,
-        totalSubscribers: Math.floor(Math.random() * 150) + 50,
+        totalSubscribers: 0, // This should come from actual subscription data
         monthlyRevenue: totalRevenue
       });
     } catch (error) {
