@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Star, Zap, Sparkles } from 'lucide-react';
 import { SubscriptionPlan } from '@/assets/types';
-import { UserSubscription } from '@/services/userSubscriptionService';
+import { UserSubscription } from '@/services/subscription';
 
 interface PricingCardProps {
   plan: SubscriptionPlan;

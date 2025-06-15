@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Building2, MapPin, Star, Users, Search, Plus } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserSubscription } from '@/hooks/useUserSubscription';
-import { getAgenciesWithSubscriptions } from '@/services/userSubscriptionService';
+import { getAgenciesWithSubscriptions } from '@/services/subscription';
 import UpgradeButton from '@/components/subscription/UpgradeButton';
 import LimitWarning from '@/components/subscription/LimitWarning';
 import { toast } from 'sonner';

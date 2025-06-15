@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
-import { UserSubscription } from '@/services/userSubscriptionService';
+import { UserSubscription } from '@/services/subscription';
 import { Sparkles, Crown } from 'lucide-react';
 
 interface PricingHeaderProps {
