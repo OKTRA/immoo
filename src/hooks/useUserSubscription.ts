@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -44,7 +43,6 @@ export const useUserSubscription = () => {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           plan: {
-            id: 'free-plan',
             name: 'free',
             price: 0,
             max_agencies: 1,
@@ -93,7 +91,6 @@ export const useUserSubscription = () => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         plan: {
-          id: 'free-plan',
           name: 'free',
           price: 0,
           max_agencies: 1,
