@@ -1,5 +1,4 @@
 
-
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Spinner } from '@/components/ui/spinner';
@@ -13,7 +12,7 @@ const CreateAgencyPage = lazy(() => import('@/pages/CreateAgencyPage'));
 const EditAgencyPage = lazy(() => import('@/pages/EditAgencyPage'));
 const AdminDashboardPage = lazy(() => import('@/pages/AdminPage'));
 const SubscriptionPlansManagement = lazy(() => import('@/components/admin/SubscriptionPlansManagement'));
-import PricingPage from '@/pages/PricingPage';
+const PricingPage = lazy(() => import('@/pages/PricingPage'));
 
 export const router = createBrowserRouter([
   {
@@ -83,7 +82,11 @@ export const router = createBrowserRouter([
       },
       {
         path: "/pricing",
-        element: <PricingPage />
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <PricingPage />
+          </Suspense>
+        )
       },
       {
         path: '/login',
@@ -96,4 +99,3 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
-
