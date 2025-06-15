@@ -65,13 +65,13 @@ export const useSubscriptionManagement = () => {
       }
       setPlans(allPlans);
       
-      // Calculate stats from actual data - fix the reduce function
+      // Calculate stats from actual data with correct reduce syntax
       const totalPlans = allPlans.length;
       const activePlans = allPlans.filter(p => p.isActive).length;
-      // Fix: Provide explicit types for accumulator and initial value
+      // Explicitly type the initial value as number
       const totalRevenue = allPlans.reduce(
-        (sum: number, plan: SubscriptionPlan) => sum + plan.price,
-        0
+        (sum, plan) => sum + plan.price,
+        0 as number
       );
       
       setStats({
