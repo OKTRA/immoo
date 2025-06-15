@@ -452,7 +452,6 @@ export default function SubscriptionPlansManagement() {
         <TabsList>
           <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
           <TabsTrigger value="limits">Gestion des limites</TabsTrigger>
-          <TabsTrigger value="incentives">Incitations Premium</TabsTrigger>
           <TabsTrigger value="analytics">Analyses</TabsTrigger>
         </TabsList>
 
@@ -608,87 +607,6 @@ export default function SubscriptionPlansManagement() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="incentives">
-          <Card>
-            <CardHeader>
-              <CardTitle>Incitations Premium</CardTitle>
-              <CardDescription>
-                Stratégies pour encourager la mise à niveau vers les plans premium
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6">
-                <div className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-indigo-50">
-                  <h3 className="font-semibold mb-3">Notifications de limite atteinte</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Alertes automatiques quand les utilisateurs approchent leurs limites
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="bg-white p-3 rounded border">
-                      <div className="font-medium text-orange-600">Propriétés</div>
-                      <div className="text-sm">Alerte à 80% de la limite</div>
-                    </div>
-                    <div className="bg-white p-3 rounded border">
-                      <div className="font-medium text-red-600">Baux</div>
-                      <div className="text-sm">Notification à 90% de la limite</div>
-                    </div>
-                    <div className="bg-white p-3 rounded border">
-                      <div className="font-medium text-purple-600">Utilisateurs</div>
-                      <div className="text-sm">Blocage à 100% de la limite</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border rounded-lg p-4 bg-gradient-to-r from-green-50 to-emerald-50">
-                  <h3 className="font-semibold mb-3">Fonctionnalités Premium exclusives</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="bg-white p-3 rounded border">
-                      <Crown className="h-5 w-5 text-yellow-500 mb-2" />
-                      <div className="font-medium">Rapports avancés</div>
-                      <div className="text-sm text-muted-foreground">Analytics détaillées et exports</div>
-                    </div>
-                    <div className="bg-white p-3 rounded border">
-                      <Settings className="h-5 w-5 text-blue-500 mb-2" />
-                      <div className="font-medium">API Access</div>
-                      <div className="text-sm text-muted-foreground">Intégrations tierces</div>
-                    </div>
-                    <div className="bg-white p-3 rounded border">
-                      <Users className="h-5 w-5 text-purple-500 mb-2" />
-                      <div className="font-medium">Support prioritaire</div>
-                      <div className="text-sm text-muted-foreground">Assistance 24/7</div>
-                    </div>
-                    <div className="bg-white p-3 rounded border">
-                      <BarChart3 className="h-5 w-5 text-green-500 mb-2" />
-                      <div className="font-medium">Tableaux de bord personnalisés</div>
-                      <div className="text-sm text-muted-foreground">Widgets configurables</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="border rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50">
-                  <h3 className="font-semibold mb-3">Offres promotionnelles</h3>
-                  <div className="space-y-3">
-                    <div className="bg-white p-3 rounded border flex justify-between items-center">
-                      <div>
-                        <div className="font-medium">Réduction premier mois</div>
-                        <div className="text-sm text-muted-foreground">50% sur le premier mois pour nouveaux abonnés</div>
-                      </div>
-                      <Badge variant="secondary">Active</Badge>
-                    </div>
-                    <div className="bg-white p-3 rounded border flex justify-between items-center">
-                      <div>
-                        <div className="font-medium">Upgrade gratuit</div>
-                        <div className="text-sm text-muted-foreground">1 mois gratuit lors du passage annuel</div>
-                      </div>
-                      <Badge variant="secondary">Active</Badge>
-                    </div>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
