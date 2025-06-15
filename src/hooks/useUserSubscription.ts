@@ -16,10 +16,14 @@ export const useUserSubscription = () => {
   const [loading, setLoading] = useState(true);
 
   const loadSubscription = async () => {
-    if (!user?.id) return;
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);
+      console.log('useUserSubscription: Loading subscription for user:', user.id);
       const { subscription: userSub, error } = await getCurrentUserSubscription(user.id);
       
       if (error) {
@@ -29,6 +33,19 @@ export const useUserSubscription = () => {
       }
       
       setSubscription(userSub);
+      console.log('useUserSubscription: Subscription loaded:', userSub);
+      
+      // Log les limitations du plan actuel
+      if (userSub?.plan) {
+        console.log('useUserSubscription: Plan limits:', {
+          planName: userSub.plan.name,
+          price: userSub.plan.price,
+          maxAgencies: userSub.plan.maxAgencies,
+          maxProperties: userSub.plan.maxProperties,
+          maxLeases: userSub.plan.maxLeases,
+          maxUsers: userSub.plan.maxUsers
+        });
+      }
     } catch (error) {
       console.error('Error loading subscription:', error);
     } finally {
@@ -41,6 +58,7 @@ export const useUserSubscription = () => {
     agencyId?: string
   ): Promise<SubscriptionLimit> => {
     if (!user?.id) {
+      console.log('useUserSubscription: No user ID for limit check');
       return {
         allowed: false,
         currentCount: 0,
@@ -49,7 +67,11 @@ export const useUserSubscription = () => {
       };
     }
 
-    return await checkUserResourceLimit(user.id, resourceType, agencyId);
+    console.log('useUserSubscription: Checking limit for:', { resourceType, userId: user.id, agencyId });
+    const result = await checkUserResourceLimit(user.id, resourceType, agencyId);
+    console.log('useUserSubscription: Limit check result:', result);
+    
+    return result;
   };
 
   const upgradeSubscription = async (
@@ -63,6 +85,7 @@ export const useUserSubscription = () => {
     }
 
     try {
+      console.log('useUserSubscription: Upgrading subscription:', { userId: user.id, newPlanId, agencyId });
       const { success, error } = await upgradeUserSubscription(
         user.id,
         newPlanId,
@@ -90,7 +113,11 @@ export const useUserSubscription = () => {
   };
 
   const isFreePlan = (): boolean => {
-    return subscription?.plan?.price === 0 || subscription?.plan?.name?.toLowerCase().includes('free') || false;
+    const isFree = subscription?.plan?.price === 0 || 
+                   subscription?.plan?.name?.toLowerCase().includes('free') || 
+                   !subscription?.plan;
+    console.log('useUserSubscription: Is free plan?', isFree, subscription?.plan);
+    return isFree;
   };
 
   const getUsagePercentage = (currentCount: number, maxAllowed: number): number => {
