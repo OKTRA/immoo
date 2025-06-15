@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -12,7 +13,6 @@ import PaymentsManagement from './PaymentsManagement';
 import AnalyticsManagement from './analytics/AnalyticsManagement';
 import SupportManagement from './SupportManagement';
 import SubscriptionPlansManagement from './SubscriptionPlansManagement';
-import SubscriptionPaymentsManagement from './SubscriptionPaymentsManagement';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
@@ -79,7 +79,6 @@ export default function AdminLayout() {
               <TabsTrigger value="payments">Paiements</TabsTrigger>
               <TabsTrigger value="analytics">Rapports & Analyses</TabsTrigger>
               <TabsTrigger value="subscriptions">Abonnements</TabsTrigger>
-              <TabsTrigger value="subscription-payments">Paiements Abonnements</TabsTrigger>
               <TabsTrigger value="promo">Codes Promo</TabsTrigger>
               <TabsTrigger value="support">Support Utilisateur</TabsTrigger>
               <TabsTrigger value="settings">Paramètres</TabsTrigger>
@@ -111,10 +110,6 @@ export default function AdminLayout() {
 
             <TabsContent value="subscriptions" className="space-y-6">
               <SubscriptionPlansManagement />
-            </TabsContent>
-
-            <TabsContent value="subscription-payments" className="space-y-6">
-              <SubscriptionPaymentsManagement />
             </TabsContent>
 
             <TabsContent value="promo" className="space-y-6">
