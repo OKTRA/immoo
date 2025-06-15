@@ -14,7 +14,9 @@ export const useUserSubscription = () => {
   const { isFreePlan } = useSubscriptionUtils(subscription);
 
   useEffect(() => {
-    loadSubscription();
+    if (user?.id) {
+      loadSubscription();
+    }
   }, [user?.id]);
 
   return {

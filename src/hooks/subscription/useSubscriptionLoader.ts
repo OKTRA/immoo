@@ -11,6 +11,7 @@ export const useSubscriptionLoader = () => {
 
   const loadSubscription = async (forceReload = false) => {
     if (!user?.id) {
+      console.log('useSubscriptionLoader: No user ID available');
       setLoading(false);
       return;
     }
@@ -23,8 +24,8 @@ export const useSubscriptionLoader = () => {
       console.log('useSubscriptionLoader: Loading subscription for user:', user.id);
       const { subscription: userSub, error } = await getCurrentUserSubscription(user.id);
       
-      if (error) {
-        console.log('useSubscriptionLoader: No subscription found, setting default free plan');
+      if (error || !userSub) {
+        console.log('useSubscriptionLoader: No subscription found, creating default free plan');
         const defaultSub = createDefaultFreeSubscription(user.id);
         setSubscription(defaultSub as UserSubscription);
         return;
