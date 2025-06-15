@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -45,10 +46,10 @@ export const useUserSubscription = () => {
           plan: {
             name: 'free',
             price: 0,
-            max_agencies: 1,
-            max_properties: 1,
-            max_leases: 2,
-            max_users: 1,
+            maxAgencies: 1,
+            maxProperties: 1,
+            maxLeases: 2,
+            maxUsers: 1,
             features: [],
             billing_cycle: 'monthly',
             is_active: true,
@@ -67,10 +68,10 @@ export const useUserSubscription = () => {
         console.log('useUserSubscription: Plan limits loaded:', {
           planName: userSub.plan.name,
           price: userSub.plan.price,
-          maxAgencies: userSub.plan.max_agencies,
-          maxProperties: userSub.plan.max_properties,
-          maxLeases: userSub.plan.max_leases,
-          maxUsers: userSub.plan.max_users,
+          maxAgencies: userSub.plan.maxAgencies,
+          maxProperties: userSub.plan.maxProperties,
+          maxLeases: userSub.plan.maxLeases,
+          maxUsers: userSub.plan.maxUsers,
           features: userSub.plan.features
         });
       } else {
@@ -93,10 +94,10 @@ export const useUserSubscription = () => {
         plan: {
           name: 'free',
           price: 0,
-          max_agencies: 1,
-          max_properties: 1,
-          max_leases: 2,
-          max_users: 1,
+          maxAgencies: 1,
+          maxProperties: 1,
+          maxLeases: 2,
+          maxUsers: 1,
           features: [],
           billing_cycle: 'monthly',
           is_active: true,
