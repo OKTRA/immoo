@@ -76,8 +76,8 @@ export function useAgenciesManagement() {
         phone: agency.phone,
         website: agency.website,
         description: agency.description,
-        status: agency.status || 'active',
-        is_visible: agency.is_visible !== false
+        status: (agency as any).status || 'active',
+        is_visible: (agency as any).is_visible !== false
       })) || [];
 
       setAgencies(transformedAgencies);
@@ -94,11 +94,12 @@ export function useAgenciesManagement() {
     try {
       const { error } = await supabase
         .from('agencies')
-        .update({ verified: !currentVerified })
+        .update({ verified: !currentVerified, updated_at: new Date().toISOString() })
         .eq('id', agencyId);
 
       if (error) throw error;
 
+      // Update local state immediately
       setAgencies(agencies.map(agency => 
         agency.id === agencyId 
           ? { ...agency, verified: !currentVerified }
@@ -145,7 +146,8 @@ export function useAgenciesManagement() {
           phone: updates.phone,
           website: updates.website,
           description: updates.description,
-          rating: updates.rating
+          rating: updates.rating,
+          updated_at: new Date().toISOString()
         })
         .eq('id', agencyId);
 

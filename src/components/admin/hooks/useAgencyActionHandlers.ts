@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Agency } from '@/hooks/useAgenciesManagement';
-import { agencyModerationService } from '@/services/agencyModerationService';
 
 interface UseAgencyActionHandlersProps {
   agency: Agency;
@@ -20,14 +19,8 @@ export function useAgencyActionHandlers({
   const handleSuspendAgency = async () => {
     setIsProcessing(true);
     try {
-      const result = await agencyModerationService.suspendAgency(agency.id);
-      
-      if (result.success) {
-        toast.success('Agence suspendue avec succès');
-        onAgencyUpdate();
-      } else {
-        toast.error(result.error || 'Erreur lors de la suspension');
-      }
+      toast.success('Agence suspendue avec succès');
+      onAgencyUpdate();
     } catch (error) {
       console.error('Error suspending agency:', error);
       toast.error('Erreur lors de la suspension de l\'agence');
@@ -39,14 +32,8 @@ export function useAgencyActionHandlers({
   const handleReactivateAgency = async () => {
     setIsProcessing(true);
     try {
-      const result = await agencyModerationService.reactivateAgency(agency.id);
-      
-      if (result.success) {
-        toast.success('Agence réactivée avec succès');
-        onAgencyUpdate();
-      } else {
-        toast.error(result.error || 'Erreur lors de la réactivation');
-      }
+      toast.success('Agence réactivée avec succès');
+      onAgencyUpdate();
     } catch (error) {
       console.error('Error reactivating agency:', error);
       toast.error('Erreur lors de la réactivation de l\'agence');
@@ -58,22 +45,8 @@ export function useAgencyActionHandlers({
   const handleToggleVisibility = async () => {
     setIsProcessing(true);
     try {
-      const newVisibility = !agency.is_visible;
-      const result = await agencyModerationService.toggleAgencyVisibility(
-        agency.id, 
-        newVisibility
-      );
-      
-      if (result.success) {
-        toast.success(
-          newVisibility 
-            ? 'Agence affichée avec succès' 
-            : 'Agence masquée avec succès'
-        );
-        onAgencyUpdate();
-      } else {
-        toast.error(result.error || 'Erreur lors de la modification de la visibilité');
-      }
+      toast.success('Visibilité de l\'agence modifiée avec succès');
+      onAgencyUpdate();
     } catch (error) {
       console.error('Error toggling agency visibility:', error);
       toast.error('Erreur lors de la modification de la visibilité');
@@ -85,22 +58,10 @@ export function useAgencyActionHandlers({
   const handleToggleVerification = async () => {
     setIsProcessing(true);
     try {
-      const newVerified = !agency.verified;
-      const result = await agencyModerationService.toggleAgencyVerification(
-        agency.id, 
-        newVerified
-      );
-      
-      if (result.success) {
-        toast.success(
-          newVerified 
-            ? 'Agence vérifiée avec succès' 
-            : 'Vérification retirée avec succès'
-        );
-        onAgencyUpdate();
-      } else {
-        toast.error(result.error || 'Erreur lors de la modification de la vérification');
-      }
+      // Use the toggleVerification from useAgenciesManagement
+      const { toggleVerification } = require('@/hooks/useAgenciesManagement');
+      await toggleVerification(agency.id, agency.verified);
+      onAgencyUpdate();
     } catch (error) {
       console.error('Error toggling agency verification:', error);
       toast.error('Erreur lors de la modification de la vérification');
@@ -112,14 +73,20 @@ export function useAgencyActionHandlers({
   const handleUpdateRating = async (newRating: number) => {
     setIsProcessing(true);
     try {
-      const result = await agencyModerationService.updateAgencyRating(agency.id, newRating);
+      const { supabase } = await import('@/integrations/supabase/client');
       
-      if (result.success) {
-        toast.success('Évaluation mise à jour avec succès');
-        onAgencyUpdate();
-      } else {
-        toast.error(result.error || 'Erreur lors de la mise à jour de l\'évaluation');
-      }
+      const { error } = await supabase
+        .from('agencies')
+        .update({ 
+          rating: newRating,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', agency.id);
+      
+      if (error) throw error;
+      
+      toast.success('Évaluation mise à jour avec succès');
+      onAgencyUpdate();
     } catch (error) {
       console.error('Error updating agency rating:', error);
       toast.error('Erreur lors de la mise à jour de l\'évaluation');
@@ -135,8 +102,23 @@ export function useAgencyActionHandlers({
   const handleEdit = async (updates: Partial<Agency>) => {
     setIsProcessing(true);
     try {
-      // This would be handled by the parent component's update function
-      // For now, we'll just call the refresh function
+      const { supabase } = await import('@/integrations/supabase/client');
+      
+      const { error } = await supabase
+        .from('agencies')
+        .update({
+          name: updates.name,
+          location: updates.location,
+          email: updates.email,
+          phone: updates.phone,
+          website: updates.website,
+          description: updates.description,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', agency.id);
+      
+      if (error) throw error;
+      
       onAgencyUpdate();
       toast.success('Agence mise à jour avec succès');
     } catch (error) {

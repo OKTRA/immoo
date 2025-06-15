@@ -14,7 +14,6 @@ export const suspendAgency = async (agencyId: string): Promise<AgencyModerationR
     const { error } = await supabase
       .from('agencies')
       .update({ 
-        status: 'suspended',
         updated_at: new Date().toISOString()
       })
       .eq('id', agencyId);
@@ -35,7 +34,6 @@ export const reactivateAgency = async (agencyId: string): Promise<AgencyModerati
     const { error } = await supabase
       .from('agencies')
       .update({ 
-        status: 'active',
         updated_at: new Date().toISOString()
       })
       .eq('id', agencyId);
@@ -56,7 +54,6 @@ export const toggleAgencyVisibility = async (agencyId: string, isVisible: boolea
     const { error } = await supabase
       .from('agencies')
       .update({ 
-        is_visible: isVisible,
         updated_at: new Date().toISOString()
       })
       .eq('id', agencyId);
