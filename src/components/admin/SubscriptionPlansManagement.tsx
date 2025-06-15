@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -79,7 +78,7 @@ export default function SubscriptionPlansManagement() {
       // Calculate stats
       const totalPlans = allPlans.length;
       const activePlans = allPlans.filter(p => p.isActive).length;
-      const totalRevenue = allPlans.reduce((sum, p) => sum + (p.price * 10), 0);
+      const totalRevenue = allPlans.reduce((sum, plan) => sum + (plan.price * 10), 0);
       
       setStats({
         totalPlans,
