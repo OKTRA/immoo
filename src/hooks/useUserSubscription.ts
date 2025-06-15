@@ -15,14 +15,17 @@ export const useUserSubscription = () => {
   const [subscription, setSubscription] = useState<UserSubscription | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadSubscription = async () => {
+  const loadSubscription = async (forceReload = false) => {
     if (!user?.id) {
       setLoading(false);
       return;
     }
     
     try {
-      setLoading(true);
+      if (forceReload) {
+        setLoading(true);
+      }
+      
       console.log('useUserSubscription: Loading subscription for user:', user.id);
       const { subscription: userSub, error } = await getCurrentUserSubscription(user.id);
       
@@ -35,19 +38,23 @@ export const useUserSubscription = () => {
       setSubscription(userSub);
       console.log('useUserSubscription: Subscription loaded:', userSub);
       
-      // Log les limitations du plan actuel
+      // Log les limitations du plan actuel avec plus de détails
       if (userSub?.plan) {
-        console.log('useUserSubscription: Plan limits:', {
+        console.log('useUserSubscription: Plan limits loaded:', {
           planName: userSub.plan.name,
           price: userSub.plan.price,
           maxAgencies: userSub.plan.maxAgencies,
           maxProperties: userSub.plan.maxProperties,
           maxLeases: userSub.plan.maxLeases,
-          maxUsers: userSub.plan.maxUsers
+          maxUsers: userSub.plan.maxUsers,
+          features: userSub.plan.features
         });
+      } else {
+        console.warn('useUserSubscription: No plan found in subscription:', userSub);
       }
     } catch (error) {
       console.error('Error loading subscription:', error);
+      toast.error('Erreur lors du chargement de l\'abonnement');
     } finally {
       setLoading(false);
     }
@@ -67,9 +74,21 @@ export const useUserSubscription = () => {
       };
     }
 
-    console.log('useUserSubscription: Checking limit for:', { resourceType, userId: user.id, agencyId });
+    console.log('useUserSubscription: Checking limit for:', { 
+      resourceType, 
+      userId: user.id, 
+      agencyId,
+      currentSubscription: subscription
+    });
+    
     const result = await checkUserResourceLimit(user.id, resourceType, agencyId);
     console.log('useUserSubscription: Limit check result:', result);
+    
+    // Si on a une erreur dans la vérification des limites, on peut essayer de recharger l'abonnement
+    if (result.error && result.error.includes('No active subscription')) {
+      console.log('useUserSubscription: No active subscription found, attempting to reload...');
+      await loadSubscription(true);
+    }
     
     return result;
   };
@@ -100,7 +119,7 @@ export const useUserSubscription = () => {
 
       if (success) {
         toast.success('Abonnement mis à niveau avec succès!');
-        await loadSubscription(); // Recharger l'abonnement
+        await loadSubscription(true); // Force reload after upgrade
         return true;
       }
 
@@ -113,10 +132,21 @@ export const useUserSubscription = () => {
   };
 
   const isFreePlan = (): boolean => {
-    const isFree = subscription?.plan?.price === 0 || 
-                   subscription?.plan?.name?.toLowerCase().includes('free') || 
-                   !subscription?.plan;
-    console.log('useUserSubscription: Is free plan?', isFree, subscription?.plan);
+    if (!subscription?.plan) {
+      console.log('useUserSubscription: No plan found, assuming free plan');
+      return true;
+    }
+    
+    const isFree = subscription.plan.price === 0 || 
+                   subscription.plan.name?.toLowerCase().includes('free') || 
+                   subscription.plan.name?.toLowerCase().includes('gratuit');
+                   
+    console.log('useUserSubscription: Is free plan?', {
+      isFree,
+      planName: subscription.plan.name,
+      planPrice: subscription.plan.price
+    });
+    
     return isFree;
   };
 
@@ -136,6 +166,6 @@ export const useUserSubscription = () => {
     upgradeSubscription,
     isFreePlan,
     getUsagePercentage,
-    reloadSubscription: loadSubscription
+    reloadSubscription: () => loadSubscription(true)
   };
 };

@@ -14,7 +14,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function AgenciesPage() {
   const { user, isLoading: authLoading } = useAuth();
-  const { subscription, checkLimit, isFreePlan, loading: subscriptionLoading } = useUserSubscription();
+  const { subscription, checkLimit, isFreePlan, loading: subscriptionLoading, reloadSubscription } = useUserSubscription();
   const [agencyLimit, setAgencyLimit] = useState<any>(null);
   const navigate = useNavigate();
   
@@ -26,19 +26,39 @@ export default function AgenciesPage() {
 
   const agencies = data?.agencies || [];
 
+  // Forcer le rechargement de l'abonnement au montage du composant
+  useEffect(() => {
+    if (user?.id && !subscriptionLoading) {
+      console.log('AgenciesPage: Reloading subscription data for user:', user.id);
+      reloadSubscription();
+    }
+  }, [user?.id, reloadSubscription]);
+
   // Vérifier les limites dès que l'abonnement est chargé
   useEffect(() => {
     const checkAgencyLimits = async () => {
-      if (user?.id && !subscriptionLoading) {
+      if (user?.id && subscription) {
         console.log('AgenciesPage: Checking agency limits for user:', user.id);
+        console.log('AgenciesPage: Current subscription:', subscription);
+        
         const limit = await checkLimit('agencies');
         setAgencyLimit(limit);
         console.log('AgenciesPage: Agency limit result:', limit);
+        
+        // Log des informations détaillées pour debug
+        if (subscription.plan) {
+          console.log('AgenciesPage: Plan details from subscription:', {
+            planName: subscription.plan.name,
+            maxAgencies: subscription.plan.maxAgencies,
+            currentAgencies: agencies.length,
+            limitResult: limit
+          });
+        }
       }
     };
 
     checkAgencyLimits();
-  }, [user?.id, subscriptionLoading, checkLimit]);
+  }, [user?.id, subscription, checkLimit, agencies.length]);
 
   // Log des informations de l'utilisateur et de l'abonnement
   useEffect(() => {
@@ -48,7 +68,8 @@ export default function AgenciesPage() {
         email: user.email,
         subscription: subscription,
         isFreePlan: isFreePlan(),
-        agenciesCount: agencies.length
+        agenciesCount: agencies.length,
+        planLimits: subscription.plan
       });
     }
   }, [user, subscription, agencies.length, isFreePlan]);
@@ -147,30 +168,45 @@ export default function AgenciesPage() {
         </div>
       )}
 
-      {/* Information sur les limitations */}
-      {subscription && (
+      {/* Information sur les limitations - Affichage corrigé */}
+      {subscription?.plan && (
         <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <h3 className="font-semibold mb-2">Limitations de votre plan {subscription.plan?.name}</h3>
+          <h3 className="font-semibold mb-2">Limitations de votre plan {subscription.plan.name}</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
               <span className="text-muted-foreground">Agences:</span>
               <span className="ml-2 font-medium">
-                {agencyLimit ? `${agencyLimit.currentCount}/${agencyLimit.maxAllowed}` : 'Chargement...'}
+                {agencyLimit ? `${agencyLimit.currentCount}/${agencyLimit.maxAllowed}` : `${agencies.length}/${subscription.plan.maxAgencies || 1}`}
               </span>
             </div>
             <div>
               <span className="text-muted-foreground">Propriétés:</span>
-              <span className="ml-2 font-medium">{subscription.plan?.maxProperties || '∞'}</span>
+              <span className="ml-2 font-medium">{subscription.plan.maxProperties || 1}</span>
             </div>
             <div>
               <span className="text-muted-foreground">Baux:</span>
-              <span className="ml-2 font-medium">{subscription.plan?.maxLeases || '∞'}</span>
+              <span className="ml-2 font-medium">{subscription.plan.maxLeases || 1}</span>
             </div>
             <div>
               <span className="text-muted-foreground">Utilisateurs:</span>
-              <span className="ml-2 font-medium">{subscription.plan?.maxUsers || '∞'}</span>
+              <span className="ml-2 font-medium">{subscription.plan.maxUsers || 1}</span>
             </div>
           </div>
+          
+          {/* Debug info en mode développement */}
+          {process.env.NODE_ENV === 'development' && (
+            <details className="mt-4">
+              <summary className="cursor-pointer text-sm text-muted-foreground">Debug Info (Dev only)</summary>
+              <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
+                {JSON.stringify({
+                  subscription: subscription,
+                  agencyLimit: agencyLimit,
+                  agenciesCount: agencies.length,
+                  isFreePlan: isFreePlan()
+                }, null, 2)}
+              </pre>
+            </details>
+          )}
         </div>
       )}
 
