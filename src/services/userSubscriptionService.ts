@@ -1,0 +1,242 @@
+
+import { supabase } from '@/lib/supabase';
+
+export interface UserSubscription {
+  id: string;
+  userId: string;
+  agencyId?: string;
+  planId: string;
+  status: 'active' | 'inactive' | 'expired';
+  startDate: string;
+  endDate?: string;
+  paymentMethod?: string;
+  autoRenew: boolean;
+  plan?: {
+    name: string;
+    price: number;
+    maxProperties: number;
+    maxAgencies: number;
+    maxLeases: number;
+    maxUsers: number;
+    features: string[];
+  };
+}
+
+export interface SubscriptionLimit {
+  allowed: boolean;
+  currentCount: number;
+  maxAllowed: number;
+  planName?: string;
+  percentageUsed?: number;
+  error?: string;
+}
+
+/**
+ * Obtenir l'abonnement actuel de l'utilisateur
+ */
+export const getCurrentUserSubscription = async (userId: string): Promise<{
+  subscription: UserSubscription | null;
+  error: string | null;
+}> => {
+  try {
+    const { data, error } = await supabase
+      .from('user_subscriptions')
+      .select(`
+        *,
+        subscription_plans:plan_id (
+          name,
+          price,
+          max_properties,
+          max_agencies,
+          max_leases,
+          max_users,
+          features
+        )
+      `)
+      .eq('user_id', userId)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (error) throw error;
+
+    if (!data) {
+      return { subscription: null, error: null };
+    }
+
+    const subscription: UserSubscription = {
+      id: data.id,
+      userId: data.user_id,
+      agencyId: data.agency_id,
+      planId: data.plan_id,
+      status: data.status,
+      startDate: data.start_date,
+      endDate: data.end_date,
+      paymentMethod: data.payment_method,
+      autoRenew: data.auto_renew,
+      plan: data.subscription_plans ? {
+        name: data.subscription_plans.name,
+        price: data.subscription_plans.price,
+        maxProperties: data.subscription_plans.max_properties,
+        maxAgencies: data.subscription_plans.max_agencies,
+        maxLeases: data.subscription_plans.max_leases,
+        maxUsers: data.subscription_plans.max_users,
+        features: data.subscription_plans.features || []
+      } : undefined
+    };
+
+    return { subscription, error: null };
+  } catch (error: any) {
+    console.error('Error getting user subscription:', error);
+    return { subscription: null, error: error.message };
+  }
+};
+
+/**
+ * Vérifier les limites d'une ressource pour l'utilisateur
+ */
+export const checkUserResourceLimit = async (
+  userId: string,
+  resourceType: 'properties' | 'agencies' | 'leases' | 'users',
+  agencyId?: string
+): Promise<SubscriptionLimit> => {
+  try {
+    const { data, error } = await supabase.rpc('check_subscription_limit', {
+      user_id_param: userId,
+      resource_type: resourceType,
+      agency_id_param: agencyId || null
+    });
+
+    if (error) throw error;
+
+    return {
+      allowed: data.allowed,
+      currentCount: data.current_count,
+      maxAllowed: data.max_allowed,
+      planName: data.plan_name,
+      percentageUsed: data.percentage_used,
+      error: data.error
+    };
+  } catch (error: any) {
+    console.error('Error checking resource limit:', error);
+    return {
+      allowed: false,
+      currentCount: 0,
+      maxAllowed: 0,
+      error: error.message
+    };
+  }
+};
+
+/**
+ * Mettre à niveau l'abonnement d'un utilisateur
+ */
+export const upgradeUserSubscription = async (
+  userId: string,
+  newPlanId: string,
+  agencyId?: string,
+  paymentMethod?: string
+): Promise<{ success: boolean; error: string | null }> => {
+  try {
+    // Désactiver l'ancien abonnement
+    const { error: deactivateError } = await supabase
+      .from('user_subscriptions')
+      .update({ status: 'inactive' })
+      .eq('user_id', userId)
+      .eq('status', 'active');
+
+    if (deactivateError) throw deactivateError;
+
+    // Créer le nouvel abonnement
+    const { error: createError } = await supabase
+      .from('user_subscriptions')
+      .insert({
+        user_id: userId,
+        agency_id: agencyId,
+        plan_id: newPlanId,
+        status: 'active',
+        payment_method: paymentMethod,
+        start_date: new Date().toISOString()
+      });
+
+    if (createError) throw createError;
+
+    return { success: true, error: null };
+  } catch (error: any) {
+    console.error('Error upgrading subscription:', error);
+    return { success: false, error: error.message };
+  }
+};
+
+/**
+ * Obtenir toutes les agences avec leurs abonnements
+ */
+export const getAgenciesWithSubscriptions = async (): Promise<{
+  agencies: Array<{
+    id: string;
+    name: string;
+    logoUrl?: string;
+    subscription?: UserSubscription;
+  }>;
+  error: string | null;
+}> => {
+  try {
+    const { data, error } = await supabase
+      .from('agencies')
+      .select(`
+        id,
+        name,
+        logo_url,
+        user_id,
+        user_subscriptions!inner (
+          id,
+          plan_id,
+          status,
+          start_date,
+          subscription_plans:plan_id (
+            name,
+            price,
+            max_properties,
+            max_agencies,
+            max_leases,
+            max_users,
+            features
+          )
+        )
+      `)
+      .eq('user_subscriptions.status', 'active');
+
+    if (error) throw error;
+
+    const agencies = (data || []).map(agency => ({
+      id: agency.id,
+      name: agency.name,
+      logoUrl: agency.logo_url,
+      subscription: agency.user_subscriptions[0] ? {
+        id: agency.user_subscriptions[0].id,
+        userId: agency.user_id,
+        agencyId: agency.id,
+        planId: agency.user_subscriptions[0].plan_id,
+        status: agency.user_subscriptions[0].status,
+        startDate: agency.user_subscriptions[0].start_date,
+        paymentMethod: '',
+        autoRenew: true,
+        plan: agency.user_subscriptions[0].subscription_plans ? {
+          name: agency.user_subscriptions[0].subscription_plans.name,
+          price: agency.user_subscriptions[0].subscription_plans.price,
+          maxProperties: agency.user_subscriptions[0].subscription_plans.max_properties,
+          maxAgencies: agency.user_subscriptions[0].subscription_plans.max_agencies,
+          maxLeases: agency.user_subscriptions[0].subscription_plans.max_leases,
+          maxUsers: agency.user_subscriptions[0].subscription_plans.max_users,
+          features: agency.user_subscriptions[0].subscription_plans.features || []
+        } : undefined
+      } : undefined
+    }));
+
+    return { agencies, error: null };
+  } catch (error: any) {
+    console.error('Error getting agencies with subscriptions:', error);
+    return { agencies: [], error: error.message };
+  }
+};
