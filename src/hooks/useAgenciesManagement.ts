@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -38,7 +39,7 @@ export function useAgenciesManagement() {
       setIsLoading(true);
       
       let query = supabase
-        .from('agencies')
+        .from('agencies_with_property_count')
         .select('*', { count: 'exact' });
 
       // Apply search filter
@@ -52,7 +53,8 @@ export function useAgenciesManagement() {
       }
 
       // Apply sorting
-      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
+      const sortColumn = sortBy === 'properties_count' ? 'computed_properties_count' : sortBy;
+      query = query.order(sortColumn, { ascending: sortOrder === 'asc' });
 
       // Apply pagination
       const from = (currentPage - 1) * itemsPerPage;
@@ -67,7 +69,7 @@ export function useAgenciesManagement() {
         id: agency.id,
         name: agency.name,
         location: agency.location || 'Non spécifié',
-        properties_count: agency.properties_count || 0,
+        properties_count: agency.computed_properties_count ?? agency.properties_count ?? 0,
         verified: agency.verified || false,
         rating: agency.rating ? Number(agency.rating) : 0,
         created_at: new Date(agency.created_at).toLocaleDateString(),

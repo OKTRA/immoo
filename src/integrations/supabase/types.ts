@@ -161,6 +161,13 @@ export type Database = {
             foreignKeyName: "agency_commissions_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_commissions_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
             referencedRelation: "owner_properties_with_agencies"
             referencedColumns: ["agency_id"]
           },
@@ -215,6 +222,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_contact_access_logs_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
             referencedColumns: ["id"]
           },
           {
@@ -276,6 +290,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agency_fees_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
             referencedColumns: ["id"]
           },
           {
@@ -414,6 +435,13 @@ export type Database = {
             foreignKeyName: "apartment_leases_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "apartment_leases_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
             referencedRelation: "owner_properties_with_agencies"
             referencedColumns: ["agency_id"]
           },
@@ -502,6 +530,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_history_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
             referencedColumns: ["id"]
           },
           {
@@ -754,6 +789,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
             referencedColumns: ["id"]
           },
           {
@@ -1072,6 +1114,13 @@ export type Database = {
             foreignKeyName: "owner_properties_details_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "owner_properties_details_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
             referencedRelation: "owner_properties_with_agencies"
             referencedColumns: ["agency_id"]
           },
@@ -1309,6 +1358,13 @@ export type Database = {
             foreignKeyName: "profiles_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
             referencedRelation: "owner_properties_with_agencies"
             referencedColumns: ["agency_id"]
           },
@@ -1427,6 +1483,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "properties_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
             referencedColumns: ["id"]
           },
           {
@@ -1825,6 +1888,13 @@ export type Database = {
             foreignKeyName: "tenants_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tenants_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
             referencedRelation: "owner_properties_with_agencies"
             referencedColumns: ["agency_id"]
           },
@@ -2146,6 +2216,13 @@ export type Database = {
             foreignKeyName: "visitor_contacts_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_contacts_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
             referencedRelation: "owner_properties_with_agencies"
             referencedColumns: ["agency_id"]
           },
@@ -2206,6 +2283,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_recognition_stats_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
             referencedColumns: ["id"]
           },
           {
@@ -2279,6 +2363,13 @@ export type Database = {
             foreignKeyName: "visitor_sessions_agency_id_fkey"
             columns: ["agency_id"]
             isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_sessions_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
             referencedRelation: "owner_properties_with_agencies"
             referencedColumns: ["agency_id"]
           },
@@ -2293,6 +2384,80 @@ export type Database = {
       }
     }
     Views: {
+      agencies_with_property_count: {
+        Row: {
+          computed_properties_count: number | null
+          created_at: string | null
+          description: string | null
+          email: string | null
+          id: string | null
+          is_visible: boolean | null
+          location: string | null
+          logo_url: string | null
+          name: string | null
+          phone: string | null
+          properties_count: number | null
+          rating: number | null
+          service_areas: string[] | null
+          specialties: string[] | null
+          status: string | null
+          updated_at: string | null
+          user_id: string | null
+          verified: boolean | null
+          website: string | null
+        }
+        Insert: {
+          computed_properties_count?: never
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string | null
+          is_visible?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string | null
+          phone?: string | null
+          properties_count?: number | null
+          rating?: number | null
+          service_areas?: string[] | null
+          specialties?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          verified?: boolean | null
+          website?: string | null
+        }
+        Update: {
+          computed_properties_count?: never
+          created_at?: string | null
+          description?: string | null
+          email?: string | null
+          id?: string | null
+          is_visible?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string | null
+          phone?: string | null
+          properties_count?: number | null
+          rating?: number | null
+          service_areas?: string[] | null
+          specialties?: string[] | null
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+          verified?: boolean | null
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agencies_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       owner_properties_with_agencies: {
         Row: {
           agency_id: string | null
@@ -2362,6 +2527,13 @@ export type Database = {
             columns: ["agency_id"]
             isOneToOne: false
             referencedRelation: "agencies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_agency_id_fkey"
+            columns: ["agency_id"]
+            isOneToOne: false
+            referencedRelation: "agencies_with_property_count"
             referencedColumns: ["id"]
           },
           {

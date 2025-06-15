@@ -15,11 +15,11 @@ export const getAllAgencies = async (
 
     // For public browsing, we don't filter by user_id - we want to show all agencies
     const { data, error, count } = await supabase
-      .from('agencies')
+      .from('agencies_with_property_count')
       .select('*', { count: 'exact' })
       .eq('status', 'active')
       .eq('is_visible', true)
-      .order(sortBy, { ascending: sortOrder === 'asc' })
+      .order(sortBy === 'properties_count' ? 'computed_properties_count' : sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + limit - 1);
 
     if (error) {
@@ -61,10 +61,10 @@ export const getUserAgencies = async (
 
     // Récupérer uniquement les agences de l'utilisateur connecté
     const { data, error, count } = await supabase
-      .from('agencies')
+      .from('agencies_with_property_count')
       .select('*', { count: 'exact' })
       .eq('user_id', userId) // Filtrer explicitement par l'ID utilisateur actuel
-      .order(sortBy, { ascending: sortOrder === 'asc' })
+      .order(sortBy === 'properties_count' ? 'computed_properties_count' : sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + limit - 1);
 
     if (error) {
@@ -91,7 +91,7 @@ export const getUserAgencies = async (
 export const getAgencyById = async (id: string) => {
   try {
     const { data, error } = await supabase
-      .from('agencies')
+      .from('agencies_with_property_count')
       .select('*')
       .eq('id', id)
       .eq('status', 'active')
@@ -115,7 +115,7 @@ export const getAgencyById = async (id: string) => {
 export const getFeaturedAgencies = async (limit = 6) => {
   try {
     const { data, error } = await supabase
-      .from('agencies')
+      .from('agencies_with_property_count')
       .select('*')
       .eq('status', 'active')
       .eq('is_visible', true)
@@ -147,7 +147,7 @@ export const transformAgencyData = (data: any, useFallbackValues = false): Agenc
     name: data.name,
     logoUrl: data.logo_url || (useFallbackValues ? '' : data.logo_url),
     location: data.location || (useFallbackValues ? '' : data.location),
-    properties: data.properties_count || (useFallbackValues ? 0 : data.properties_count),
+    properties: data.computed_properties_count ?? data.properties_count ?? (useFallbackValues ? 0 : data.properties_count),
     rating: rating,
     verified: data.verified || false,
     description: data.description || (useFallbackValues ? '' : data.description),
