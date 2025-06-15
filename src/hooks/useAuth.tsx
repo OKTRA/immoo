@@ -33,21 +33,30 @@ export function useAuth() {
       }
     };
 
+    // Fetch user immediately
     fetchUser();
     
     // Listen for auth state changes
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log(`Auth state changed: ${event}`);
+        
         if (session?.user) {
           setUser(session.user);
           
           // Fetch user profile to get role
-          const { profile } = await getUserProfile(session.user.id);
-          setUserRole(profile?.role || null);
+          try {
+            const { profile } = await getUserProfile(session.user.id);
+            setUserRole(profile?.role || null);
+          } catch (error) {
+            console.error('Error fetching user profile after auth change:', error);
+            setUserRole(null);
+          }
         } else {
           setUser(null);
           setUserRole(null);
         }
+        setIsLoading(false);
       }
     );
 

@@ -7,15 +7,36 @@ import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
 import UpgradeButton from "@/components/subscription/UpgradeButton";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AgenciesPage() {
+  const { user, isLoading: authLoading } = useAuth();
+  
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['user-agencies'],
+    queryKey: ['user-agencies', user?.id], // Ajouter l'ID utilisateur à la clé de requête
     queryFn: () => getUserAgencies(),
+    enabled: !!user && !authLoading, // N'exécuter que si l'utilisateur est connecté
   });
+  
   const { isFreePlan } = useUserSubscription();
 
   const agencies = data?.agencies || [];
+
+  // Afficher un loading pendant que l'auth se charge
+  if (authLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="animate-pulse">
+          <div className="h-8 bg-muted/50 rounded w-1/4 mb-4"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-64 bg-muted/50 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (

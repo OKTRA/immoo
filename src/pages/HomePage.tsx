@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -12,11 +11,13 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PropertyList from '@/components/properties/PropertyList';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth(); // Ajouter la dépendance à l'état d'auth
 
   useEffect(() => {
     const fetchProperties = async () => {
@@ -67,7 +68,7 @@ export default function HomePage() {
     };
 
     fetchProperties();
-  }, []);
+  }, [user]); // Ajouter user comme dépendance pour recharger quand l'auth change
   
   return (
     <div className="flex flex-col min-h-screen">
