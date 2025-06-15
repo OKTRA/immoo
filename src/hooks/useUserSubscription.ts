@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,11 +49,7 @@ export const useUserSubscription = () => {
             maxProperties: 1,
             maxLeases: 2,
             maxUsers: 1,
-            features: [],
-            billing_cycle: 'monthly',
-            is_active: true,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            features: []
           }
         });
         return;
@@ -98,11 +93,7 @@ export const useUserSubscription = () => {
           maxProperties: 1,
           maxLeases: 2,
           maxUsers: 1,
-          features: [],
-          billing_cycle: 'monthly',
-          is_active: true,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
+          features: []
         }
       });
     } finally {
