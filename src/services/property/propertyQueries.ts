@@ -33,7 +33,8 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
           rating,
           created_at
         )
-      `);
+      `)
+      .eq('is_visible', true); // Only show visible properties in public views
     
     if (agencyId) {
       query = query.eq('agency_id', agencyId);
@@ -117,6 +118,7 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
         )
       `)
       .eq('agency_id', agencyId);
+      // Note: For agency management view, we show ALL properties (visible and hidden)
     
     if (status) {
       query = query.eq('status', status);
@@ -204,6 +206,7 @@ export const getPropertyById = async (propertyId: string) => {
         )
       `)
       .eq('id', propertyId)
+      .eq('is_visible', true) // Only return visible properties for public access
       .single();
     
     if (error) throw error;
