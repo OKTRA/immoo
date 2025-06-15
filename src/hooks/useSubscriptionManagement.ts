@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -65,12 +66,14 @@ export const useSubscriptionManagement = () => {
       }
       setPlans(allPlans);
       
-      // Calculate stats from actual data with correct reduce syntax
+      // Calculate stats from actual data
       const totalPlans = allPlans.length;
       const activePlans = allPlans.filter(p => p.isActive).length;
-      const totalRevenue = allPlans.reduce((sum: number, plan: SubscriptionPlan) => {
-        return sum + plan.price;
-      }, 0);
+      
+      let totalRevenue = 0;
+      for (const plan of allPlans) {
+        totalRevenue += plan.price;
+      }
       
       setStats({
         totalPlans,
