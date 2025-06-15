@@ -18,6 +18,7 @@ export function useAgencyActionHandlers({
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleSuspendAgency = async () => {
+    console.log(`[ACTION] Attempting to suspend agency: ${agency.name} (${agency.id})`);
     setIsProcessing(true);
     try {
       const { success, error } = await agencyModerationService.suspendAgency(agency.id);
@@ -35,6 +36,7 @@ export function useAgencyActionHandlers({
   };
 
   const handleReactivateAgency = async () => {
+    console.log(`[ACTION] Attempting to reactivate agency: ${agency.name} (${agency.id})`);
     setIsProcessing(true);
     try {
       const { success, error } = await agencyModerationService.reactivateAgency(agency.id);
@@ -52,6 +54,7 @@ export function useAgencyActionHandlers({
   };
 
   const handleToggleVisibility = async () => {
+    console.log(`[ACTION] Attempting to toggle visibility for agency: ${agency.name} (${agency.id}). Current: ${agency.is_visible}`);
     setIsProcessing(true);
     try {
       const { success, error } = await agencyModerationService.toggleAgencyVisibility(
@@ -72,6 +75,7 @@ export function useAgencyActionHandlers({
   };
 
   const handleToggleVerification = async () => {
+    console.log(`[ACTION] Attempting to toggle verification for agency: ${agency.name} (${agency.id}). Current: ${agency.verified}`);
     setIsProcessing(true);
     try {
       const { success, error } = await agencyModerationService.toggleAgencyVerification(
