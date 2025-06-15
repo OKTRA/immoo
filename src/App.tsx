@@ -1,4 +1,3 @@
-
 import {
   BrowserRouter as Router,
   Routes,
@@ -40,16 +39,11 @@ function App() {
   // Removed bucket creation logic that was causing RLS policy violations
   // This prevents the storage errors on app initialization
 
-  // Create a component to handle Tempo routes
-  const TempoRoutes = () =>
-    import.meta.env.VITE_TEMPO ? useRoutes(routes) : null;
-
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
         <div className="min-h-screen flex flex-col">
           <main className="flex-1">
-            <TempoRoutes />
             <Routes>
               {/* Routes publiques - AUCUNE authentification requise */}
               <Route path="/" element={<HomePage />} />
