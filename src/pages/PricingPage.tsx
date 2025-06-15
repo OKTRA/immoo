@@ -1,5 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { useUserSubscription } from '@/hooks/useUserSubscription';
+import { useSubscriptionPayment } from '@/hooks/subscription/useSubscriptionPayment';
 import { SubscriptionPlan } from '@/assets/types';
 import { toast } from 'sonner';
 import PricingHeader from '@/components/pricing/PricingHeader';
@@ -9,7 +11,7 @@ import PricingLoadingState from '@/components/pricing/PricingLoadingState';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 
@@ -18,9 +20,11 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [upgrading, setUpgrading] = useState<string | null>(null);
-  const { subscription, upgradeSubscription } = useUserSubscription();
+  const { subscription, upgradeSubscription, reloadSubscription } = useUserSubscription();
+  const { processSubscriptionPayment } = useSubscriptionPayment();
   const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   useEffect(() => {
     console.log('PricingPage: Auth state', { user: user?.id, authLoading, subscription: subscription?.id });
@@ -32,6 +36,24 @@ export default function PricingPage() {
       loadPlans();
     }
   }, [authLoading]);
+
+  // Gérer le retour de paiement
+  useEffect(() => {
+    const paymentStatus = searchParams.get('payment');
+    const transactionId = searchParams.get('transaction_id');
+
+    if (paymentStatus === 'success' && transactionId) {
+      toast.success('Paiement effectué avec succès!');
+      // Recharger l'abonnement après un paiement réussi
+      reloadSubscription();
+      
+      // Nettoyer les paramètres URL
+      navigate('/pricing', { replace: true });
+    } else if (paymentStatus === 'cancel') {
+      toast.info('Paiement annulé');
+      navigate('/pricing', { replace: true });
+    }
+  }, [searchParams, navigate, reloadSubscription]);
 
   const loadPlans = async () => {
     try {
@@ -78,10 +100,25 @@ export default function PricingPage() {
     setUpgrading(planId);
     try {
       console.log('PricingPage: Upgrading to plan:', planId);
-      const success = await upgradeSubscription(planId, undefined, 'manual');
-      if (success) {
-        console.log('PricingPage: Upgrade successful');
-        toast.success('Plan mis à jour avec succès');
+      
+      // Trouver le plan sélectionné
+      const selectedPlan = plans.find(p => p.id === planId);
+      if (!selectedPlan) {
+        toast.error('Plan non trouvé');
+        return;
+      }
+
+      // Si c'est un plan gratuit, l'activer directement
+      if (selectedPlan.price === 0) {
+        const success = await upgradeSubscription(planId, undefined, 'free');
+        if (success) {
+          console.log('PricingPage: Free plan upgrade successful');
+          toast.success('Plan mis à jour avec succès');
+        }
+      } else {
+        // Pour les plans payants, le paiement sera géré par le dialog
+        // La mise à niveau se fera après confirmation du paiement
+        console.log('PricingPage: Paid plan selected, payment dialog will handle upgrade');
       }
     } catch (error) {
       console.error('PricingPage: Error upgrading:', error);
