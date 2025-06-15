@@ -56,7 +56,7 @@ export function useAgencyActionHandlers({
     try {
       const { success, error } = await agencyModerationService.toggleAgencyVisibility(
         agency.id, 
-        agency.is_visible !== false
+        agency.is_visible
       );
       if (!success) {
         throw new Error(error || 'Erreur lors de la modification de la visibilité');

@@ -50,6 +50,7 @@ export type Database = {
           description: string | null
           email: string | null
           id: string
+          is_visible: boolean | null
           location: string | null
           logo_url: string | null
           name: string
@@ -58,6 +59,7 @@ export type Database = {
           rating: number | null
           service_areas: string[] | null
           specialties: string[] | null
+          status: string | null
           updated_at: string
           user_id: string | null
           verified: boolean | null
@@ -68,6 +70,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          is_visible?: boolean | null
           location?: string | null
           logo_url?: string | null
           name: string
@@ -76,6 +79,7 @@ export type Database = {
           rating?: number | null
           service_areas?: string[] | null
           specialties?: string[] | null
+          status?: string | null
           updated_at?: string
           user_id?: string | null
           verified?: boolean | null
@@ -86,6 +90,7 @@ export type Database = {
           description?: string | null
           email?: string | null
           id?: string
+          is_visible?: boolean | null
           location?: string | null
           logo_url?: string | null
           name?: string
@@ -94,6 +99,7 @@ export type Database = {
           rating?: number | null
           service_areas?: string[] | null
           specialties?: string[] | null
+          status?: string | null
           updated_at?: string
           user_id?: string | null
           verified?: boolean | null

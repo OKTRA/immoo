@@ -15,8 +15,8 @@ export interface Agency {
   phone?: string;
   website?: string;
   description?: string;
-  status?: 'active' | 'suspended';
-  is_visible?: boolean;
+  status: 'active' | 'suspended';
+  is_visible: boolean;
 }
 
 export function useAgenciesManagement() {
@@ -76,8 +76,8 @@ export function useAgenciesManagement() {
         phone: agency.phone,
         website: agency.website,
         description: agency.description,
-        status: (agency as any).status || 'active',
-        is_visible: (agency as any).is_visible !== false
+        status: agency.status || 'active',
+        is_visible: agency.is_visible !== false
       })) || [];
 
       setAgencies(transformedAgencies);
@@ -99,13 +99,7 @@ export function useAgenciesManagement() {
 
       if (error) throw error;
 
-      // Update local state immediately
-      setAgencies(agencies.map(agency => 
-        agency.id === agencyId 
-          ? { ...agency, verified: !currentVerified }
-          : agency
-      ));
-
+      await fetchAgencies();
       toast.success(
         !currentVerified 
           ? 'Agence vérifiée avec succès' 
@@ -153,12 +147,7 @@ export function useAgenciesManagement() {
 
       if (error) throw error;
 
-      setAgencies(agencies.map(agency => 
-        agency.id === agencyId 
-          ? { ...agency, ...updates }
-          : agency
-      ));
-
+      await fetchAgencies();
       toast.success('Agence mise à jour avec succès');
     } catch (error) {
       console.error('Error updating agency:', error);
