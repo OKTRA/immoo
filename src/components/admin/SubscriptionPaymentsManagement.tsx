@@ -76,48 +76,102 @@ export default function SubscriptionPaymentsManagement() {
     try {
       setLoading(true);
       
-      // Charger les paiements d'abonnement depuis billing_history
+      // Charger les paiements d'abonnement depuis billing_history avec les bonnes jointures
       const { data: billingData, error } = await supabase
         .from('billing_history')
         .select(`
           *,
-          agencies:agency_id(name),
-          subscription_plans:plan_id(name),
-          profiles:user_id(email)
+          agencies!billing_history_agency_id_fkey(name),
+          subscription_plans!billing_history_plan_id_fkey(name),
+          profiles!billing_history_user_id_fkey(email)
         `)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading payments:', error);
+        // Utiliser une requête alternative sans les jointures complexes
+        const { data: alternativeData, error: altError } = await supabase
+          .from('billing_history')
+          .select('*')
+          .order('created_at', { ascending: false });
+        
+        if (altError) throw altError;
+        
+        // Charger les données associées séparément
+        const paymentsData = [];
+        
+        for (const payment of alternativeData || []) {
+          // Charger l'agence
+          const { data: agencyData } = await supabase
+            .from('agencies')
+            .select('name')
+            .eq('id', payment.agency_id)
+            .single();
+          
+          // Charger le plan
+          const { data: planData } = await supabase
+            .from('subscription_plans')
+            .select('name')
+            .eq('id', payment.plan_id)
+            .single();
+          
+          // Charger l'utilisateur
+          const { data: userData } = await supabase
+            .from('profiles')
+            .select('email')
+            .eq('id', payment.user_id)
+            .single();
+          
+          paymentsData.push({
+            id: payment.id,
+            userId: payment.user_id,
+            agencyId: payment.agency_id,
+            planId: payment.plan_id,
+            amount: payment.amount,
+            status: payment.status,
+            paymentMethod: payment.payment_method || 'unknown',
+            transactionId: payment.transaction_id,
+            createdAt: payment.created_at,
+            paidAt: payment.payment_date,
+            agencyName: agencyData?.name || 'N/A',
+            planName: planData?.name || 'N/A',
+            userEmail: userData?.email || 'N/A'
+          });
+        }
+        
+        setPayments(paymentsData);
+      } else {
+        const paymentsData = billingData?.map(payment => ({
+          id: payment.id,
+          userId: payment.user_id,
+          agencyId: payment.agency_id,
+          planId: payment.plan_id,
+          amount: payment.amount,
+          status: payment.status,
+          paymentMethod: payment.payment_method || 'unknown',
+          transactionId: payment.transaction_id,
+          createdAt: payment.created_at,
+          paidAt: payment.payment_date,
+          agencyName: payment.agencies?.name || 'N/A',
+          planName: payment.subscription_plans?.name || 'N/A',
+          userEmail: payment.profiles?.email || 'N/A'
+        })) || [];
 
-      const paymentsData = billingData?.map(payment => ({
-        id: payment.id,
-        userId: payment.user_id,
-        agencyId: payment.agency_id,
-        planId: payment.plan_id,
-        amount: payment.amount,
-        status: payment.status,
-        paymentMethod: payment.payment_method || 'unknown',
-        transactionId: payment.transaction_id,
-        createdAt: payment.created_at,
-        paidAt: payment.payment_date,
-        agencyName: payment.agencies?.name || 'N/A',
-        planName: payment.subscription_plans?.name || 'N/A',
-        userEmail: payment.profiles?.email || 'N/A'
-      })) || [];
-
-      setPayments(paymentsData);
+        setPayments(paymentsData);
+      }
       
       // Calculer les statistiques
-      const totalPayments = paymentsData.length;
-      const pendingPayments = paymentsData.filter(p => p.status === 'pending').length;
-      const paidPayments = paymentsData.filter(p => p.status === 'paid').length;
-      const totalRevenue = paymentsData
+      const currentPayments = payments.length > 0 ? payments : [];
+      const totalPayments = currentPayments.length;
+      const pendingPayments = currentPayments.filter(p => p.status === 'pending').length;
+      const paidPayments = currentPayments.filter(p => p.status === 'paid').length;
+      const totalRevenue = currentPayments
         .filter(p => p.status === 'paid')
         .reduce((sum, p) => sum + p.amount, 0);
       
       const thisMonth = new Date();
       thisMonth.setDate(1);
-      const monthlyRevenue = paymentsData
+      const monthlyRevenue = currentPayments
         .filter(p => p.status === 'paid' && new Date(p.paidAt || p.createdAt) >= thisMonth)
         .reduce((sum, p) => sum + p.amount, 0);
 
@@ -143,7 +197,7 @@ export default function SubscriptionPaymentsManagement() {
         .from('system_config')
         .select('config_value')
         .eq('config_key', 'auto_subscription_activation')
-        .single();
+        .maybeSingle();
       
       if (data) {
         setAutoActivation(data.config_value?.enabled || true);
@@ -177,8 +231,7 @@ export default function SubscriptionPaymentsManagement() {
           agency_id: payment.agencyId,
           plan_id: payment.planId,
           status: 'active',
-          start_date: new Date().toISOString(),
-          payment_method: payment.paymentMethod
+          start_date: new Date().toISOString()
         });
 
       if (subscriptionError) throw subscriptionError;
@@ -215,22 +268,45 @@ export default function SubscriptionPaymentsManagement() {
 
   const handleAutoActivationToggle = async (enabled: boolean) => {
     try {
-      const { error } = await supabase
+      // Essayer de mettre à jour d'abord
+      const { data: existingConfig } = await supabase
         .from('system_config')
-        .upsert({
-          config_key: 'auto_subscription_activation',
-          config_value: { enabled },
-          category: 'payments',
-          description: 'Activation automatique des abonnements après paiement'
-        });
+        .select('id')
+        .eq('config_key', 'auto_subscription_activation')
+        .maybeSingle();
 
-      if (error) throw error;
+      if (existingConfig) {
+        // Mettre à jour l'existant
+        const { error } = await supabase
+          .from('system_config')
+          .update({
+            config_value: { enabled },
+            updated_at: new Date().toISOString()
+          })
+          .eq('config_key', 'auto_subscription_activation');
+
+        if (error) throw error;
+      } else {
+        // Créer une nouvelle entrée
+        const { error } = await supabase
+          .from('system_config')
+          .insert({
+            config_key: 'auto_subscription_activation',
+            config_value: { enabled },
+            category: 'payments',
+            description: 'Activation automatique des abonnements après paiement'
+          });
+
+        if (error) throw error;
+      }
 
       setAutoActivation(enabled);
       toast.success(`Activation automatique ${enabled ? 'activée' : 'désactivée'}`);
     } catch (error) {
       console.error('Error updating auto activation:', error);
-      toast.error('Erreur lors de la mise à jour');
+      // Fallback: simplement mettre à jour l'état local
+      setAutoActivation(enabled);
+      toast.warning(`Configuration mise à jour localement (${enabled ? 'activée' : 'désactivée'})`);
     }
   };
 
