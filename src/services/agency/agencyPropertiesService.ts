@@ -35,7 +35,7 @@ export const getPublicPropertiesByAgencyId = async (agencyId: string, limit?: nu
           rating,
           created_at
         )
-      `)
+      `, { count: 'exact' })
       .eq('agency_id', agencyId)
       .eq('is_visible', true) // Only show visible properties in public views
       .eq('status', 'available'); // Only show available properties
@@ -44,7 +44,7 @@ export const getPublicPropertiesByAgencyId = async (agencyId: string, limit?: nu
       query = query.limit(limit);
     }
     
-    const { data, error } = await query;
+    const { data, error, count } = await query;
     
     if (error) throw error;
     
@@ -79,10 +79,10 @@ export const getPublicPropertiesByAgencyId = async (agencyId: string, limit?: nu
       return formatted;
     }) || [];
     
-    return { properties, error: null };
+    return { properties, count: count || 0, error: null };
   } catch (error: any) {
     console.error(`Error fetching public properties for agency ${agencyId}:`, error);
-    return { properties: [], error: error.message };
+    return { properties: [], count: 0, error: error.message };
   }
 };
 
@@ -118,7 +118,7 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
           rating,
           created_at
         )
-      `)
+      `, { count: 'exact' })
       .eq('agency_id', agencyId);
       // Note: For agency management, we show ALL properties (visible and hidden)
     
@@ -126,7 +126,7 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
       query = query.eq('status', status);
     }
     
-    const { data, error } = await query;
+    const { data, error, count } = await query;
     
     if (error) throw error;
     
@@ -161,9 +161,9 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
       return formatted;
     }) || [];
     
-    return { properties, error: null };
+    return { properties, count: count || 0, error: null };
   } catch (error: any) {
     console.error(`Error fetching properties for agency ${agencyId}:`, error);
-    return { properties: [], error: error.message };
+    return { properties: [], count: 0, error: error.message };
   }
 };

@@ -12,6 +12,7 @@ export interface Agency {
   website?: string;
   specialties?: string[];
   serviceAreas?: string[];
+  agencyYearsActive?: number;
 }
 
 export interface Property {

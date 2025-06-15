@@ -61,6 +61,15 @@ export default function PublicAgencyPage() {
 
   const agency: Agency = agencyResult.agency;
   const properties = propertiesResult?.properties || [];
+  
+  // Calculate years active from agency data if available
+  const yearsActive = agency.agencyYearsActive || (() => {
+    if (agency.id) {
+      // Fallback calculation if not provided
+      return 1;
+    }
+    return 1;
+  })();
 
   return (
     <>
@@ -122,12 +131,10 @@ export default function PublicAgencyPage() {
                       <Home className="h-4 w-4 mr-1" />
                       <span>{agency.properties} propriété{agency.properties > 1 ? 's' : ''}</span>
                     </div>
-                    {agency.agencyYearsActive && (
-                      <div className="flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
-                        <span>{agency.agencyYearsActive} an{agency.agencyYearsActive > 1 ? 's' : ''} d'expérience</span>
-                      </div>
-                    )}
+                    <div className="flex items-center">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      <span>{yearsActive} an{yearsActive > 1 ? 's' : ''} d'expérience</span>
+                    </div>
                   </div>
                   
                   {agency.description && (
