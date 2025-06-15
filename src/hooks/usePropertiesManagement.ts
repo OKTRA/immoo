@@ -15,7 +15,6 @@ export interface Property {
   area: number;
   agency_id: string;
   agency_name?: string;
-  is_visible?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -72,7 +71,6 @@ export function usePropertiesManagement() {
           bathrooms,
           area,
           agency_id,
-          is_visible,
           created_at,
           updated_at
         `, { count: 'exact' });
@@ -138,7 +136,6 @@ export function usePropertiesManagement() {
           area: property.area || 0,
           agency_id: property.agency_id,
           agency_name: agency?.name || 'Agence inconnue',
-          is_visible: property.is_visible !== false,
           created_at: new Date(property.created_at).toLocaleDateString(),
           updated_at: new Date(property.updated_at).toLocaleDateString()
         };
@@ -173,33 +170,6 @@ export function usePropertiesManagement() {
     } catch (error) {
       console.error('Error updating property status:', error);
       toast.error('Erreur lors de la mise à jour du statut');
-    }
-  };
-
-  const togglePropertyVisibility = async (propertyId: string) => {
-    try {
-      const property = properties.find(p => p.id === propertyId);
-      if (!property) return;
-
-      const newVisibility = !property.is_visible;
-      
-      const { error } = await supabase
-        .from('properties')
-        .update({ is_visible: newVisibility })
-        .eq('id', propertyId);
-
-      if (error) throw error;
-
-      setProperties(properties.map(p => 
-        p.id === propertyId 
-          ? { ...p, is_visible: newVisibility }
-          : p
-      ));
-
-      toast.success(`Propriété ${newVisibility ? 'affichée' : 'masquée'} avec succès`);
-    } catch (error) {
-      console.error('Error toggling property visibility:', error);
-      toast.error('Erreur lors de la modification de la visibilité');
     }
   };
 
@@ -255,7 +225,6 @@ export function usePropertiesManagement() {
     totalCount,
     totalPages,
     updatePropertyStatus,
-    togglePropertyVisibility,
     deleteProperty,
     moderateProperty,
     refreshProperties: fetchProperties

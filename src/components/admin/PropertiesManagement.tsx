@@ -14,7 +14,7 @@ import {
 import { 
   Search, Filter, MoreHorizontal, Home, MapPin,
   Eye, Edit, Trash, Loader2, RefreshCw, CheckCircle, XCircle,
-  ChevronLeft, ChevronRight, EyeOff
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
@@ -46,7 +46,6 @@ export default function PropertiesManagement() {
     totalCount,
     totalPages,
     updatePropertyStatus,
-    togglePropertyVisibility,
     deleteProperty,
     moderateProperty,
     refreshProperties 
@@ -54,10 +53,6 @@ export default function PropertiesManagement() {
 
   const handleStatusChange = async (propertyId: string, newStatus: string) => {
     await updatePropertyStatus(propertyId, newStatus);
-  };
-
-  const handleToggleVisibility = async (propertyId: string) => {
-    await togglePropertyVisibility(propertyId);
   };
 
   const handleDelete = async (propertyId: string) => {
@@ -210,7 +205,6 @@ export default function PropertiesManagement() {
                     <TableHead>Agence</TableHead>
                     <TableHead>Superficie</TableHead>
                     <TableHead>Chambres</TableHead>
-                    <TableHead>Visibilité</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -249,13 +243,6 @@ export default function PropertiesManagement() {
                       <TableCell>{property.agency_name}</TableCell>
                       <TableCell>{property.area} m²</TableCell>
                       <TableCell>{property.bedrooms}</TableCell>
-                      <TableCell>
-                        {property.is_visible ? (
-                          <Badge variant="default" className="bg-green-500">Visible</Badge>
-                        ) : (
-                          <Badge variant="secondary">Masqué</Badge>
-                        )}
-                      </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -271,25 +258,6 @@ export default function PropertiesManagement() {
                             <DropdownMenuItem>
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            
-                            {/* Visibility toggle */}
-                            <DropdownMenuItem
-                              onClick={() => handleToggleVisibility(property.id)}
-                              className={property.is_visible ? "text-orange-500" : "text-green-500"}
-                            >
-                              {property.is_visible ? (
-                                <>
-                                  <EyeOff className="h-4 w-4 mr-2" />
-                                  Masquer propriété
-                                </>
-                              ) : (
-                                <>
-                                  <Eye className="h-4 w-4 mr-2" />
-                                  Afficher propriété
-                                </>
-                              )}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             
