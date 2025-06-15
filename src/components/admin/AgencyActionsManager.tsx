@@ -20,6 +20,7 @@ export function AgencyActionsManager({
 }: AgencyActionsManagerProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showSuspendConfirm, setShowSuspendConfirm] = useState(false);
 
@@ -28,6 +29,8 @@ export function AgencyActionsManager({
     handleSuspendAgency,
     handleReactivateAgency,
     handleToggleVisibility,
+    handleToggleVerification,
+    handleUpdateRating,
     handleDelete,
     handleEdit
   } = useAgencyActionHandlers({
@@ -51,6 +54,11 @@ export function AgencyActionsManager({
     setShowEditDialog(false);
   };
 
+  const handleRatingWithClose = async (rating: number) => {
+    await handleUpdateRating(rating);
+    setShowRatingDialog(false);
+  };
+
   return (
     <>
       <AgencyActionDropdown
@@ -58,7 +66,8 @@ export function AgencyActionsManager({
         isProcessing={isProcessing}
         onViewDetails={() => setShowDetails(true)}
         onEdit={() => setShowEditDialog(true)}
-        onToggleVerification={() => onToggleVerification(agency.id, agency.verified)}
+        onEditRating={() => setShowRatingDialog(true)}
+        onToggleVerification={handleToggleVerification}
         onToggleVisibility={handleToggleVisibility}
         onSuspend={() => setShowSuspendConfirm(true)}
         onReactivate={handleReactivateAgency}
@@ -69,13 +78,16 @@ export function AgencyActionsManager({
         agency={agency}
         showDetails={showDetails}
         showEditDialog={showEditDialog}
+        showRatingDialog={showRatingDialog}
         showDeleteConfirm={showDeleteConfirm}
         showSuspendConfirm={showSuspendConfirm}
         onCloseDetails={() => setShowDetails(false)}
         onCloseEditDialog={() => setShowEditDialog(false)}
+        onCloseRatingDialog={() => setShowRatingDialog(false)}
         onCloseDeleteConfirm={() => setShowDeleteConfirm(false)}
         onCloseSuspendConfirm={() => setShowSuspendConfirm(false)}
         onEdit={handleEditWithClose}
+        onUpdateRating={handleRatingWithClose}
         onConfirmDelete={handleDeleteWithClose}
         onConfirmSuspend={handleSuspendWithClose}
       />

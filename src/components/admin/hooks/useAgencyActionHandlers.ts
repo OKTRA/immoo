@@ -58,16 +58,17 @@ export function useAgencyActionHandlers({
   const handleToggleVisibility = async () => {
     setIsProcessing(true);
     try {
+      const newVisibility = !agency.is_visible;
       const result = await agencyModerationService.toggleAgencyVisibility(
         agency.id, 
-        !agency.verified
+        newVisibility
       );
       
       if (result.success) {
         toast.success(
-          agency.verified 
-            ? 'Agence masquée avec succès' 
-            : 'Agence affichée avec succès'
+          newVisibility 
+            ? 'Agence affichée avec succès' 
+            : 'Agence masquée avec succès'
         );
         onAgencyUpdate();
       } else {
@@ -76,6 +77,52 @@ export function useAgencyActionHandlers({
     } catch (error) {
       console.error('Error toggling agency visibility:', error);
       toast.error('Erreur lors de la modification de la visibilité');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleToggleVerification = async () => {
+    setIsProcessing(true);
+    try {
+      const newVerified = !agency.verified;
+      const result = await agencyModerationService.toggleAgencyVerification(
+        agency.id, 
+        newVerified
+      );
+      
+      if (result.success) {
+        toast.success(
+          newVerified 
+            ? 'Agence vérifiée avec succès' 
+            : 'Vérification retirée avec succès'
+        );
+        onAgencyUpdate();
+      } else {
+        toast.error(result.error || 'Erreur lors de la modification de la vérification');
+      }
+    } catch (error) {
+      console.error('Error toggling agency verification:', error);
+      toast.error('Erreur lors de la modification de la vérification');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUpdateRating = async (newRating: number) => {
+    setIsProcessing(true);
+    try {
+      const result = await agencyModerationService.updateAgencyRating(agency.id, newRating);
+      
+      if (result.success) {
+        toast.success('Évaluation mise à jour avec succès');
+        onAgencyUpdate();
+      } else {
+        toast.error(result.error || 'Erreur lors de la mise à jour de l\'évaluation');
+      }
+    } catch (error) {
+      console.error('Error updating agency rating:', error);
+      toast.error('Erreur lors de la mise à jour de l\'évaluation');
     } finally {
       setIsProcessing(false);
     }
@@ -105,6 +152,8 @@ export function useAgencyActionHandlers({
     handleSuspendAgency,
     handleReactivateAgency,
     handleToggleVisibility,
+    handleToggleVerification,
+    handleUpdateRating,
     handleDelete,
     handleEdit
   };

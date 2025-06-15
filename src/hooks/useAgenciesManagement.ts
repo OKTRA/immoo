@@ -15,6 +15,8 @@ export interface Agency {
   phone?: string;
   website?: string;
   description?: string;
+  status?: 'active' | 'suspended';
+  is_visible?: boolean;
 }
 
 export function useAgenciesManagement() {
@@ -73,7 +75,9 @@ export function useAgenciesManagement() {
         email: agency.email,
         phone: agency.phone,
         website: agency.website,
-        description: agency.description
+        description: agency.description,
+        status: agency.status || 'active',
+        is_visible: agency.is_visible !== false
       })) || [];
 
       setAgencies(transformedAgencies);
@@ -140,7 +144,8 @@ export function useAgenciesManagement() {
           email: updates.email,
           phone: updates.phone,
           website: updates.website,
-          description: updates.description
+          description: updates.description,
+          rating: updates.rating
         })
         .eq('id', agencyId);
 

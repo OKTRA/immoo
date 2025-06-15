@@ -10,7 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { 
   MoreHorizontal, Eye, Edit, CheckCircle, XCircle, 
-  Building, Ban, RotateCcw, Trash, EyeOff
+  Building, Ban, RotateCcw, Trash, EyeOff, Star, Eye as EyeIcon
 } from 'lucide-react';
 import { Agency } from '@/hooks/useAgenciesManagement';
 
@@ -19,6 +19,7 @@ interface AgencyActionDropdownProps {
   isProcessing: boolean;
   onViewDetails: () => void;
   onEdit: () => void;
+  onEditRating: () => void;
   onToggleVerification: () => void;
   onToggleVisibility: () => void;
   onSuspend: () => void;
@@ -31,13 +32,15 @@ export function AgencyActionDropdown({
   isProcessing,
   onViewDetails,
   onEdit,
+  onEditRating,
   onToggleVerification,
   onToggleVisibility,
   onSuspend,
   onReactivate,
   onDelete
 }: AgencyActionDropdownProps) {
-  const isSuspended = !agency.verified; // Simplified check
+  const isSuspended = agency.status === 'suspended';
+  const isVisible = agency.is_visible !== false;
 
   return (
     <DropdownMenu>
@@ -57,6 +60,11 @@ export function AgencyActionDropdown({
           Modifier
         </DropdownMenuItem>
 
+        <DropdownMenuItem onClick={onEditRating}>
+          <Star className="h-4 w-4 mr-2" />
+          Modifier évaluation
+        </DropdownMenuItem>
+
         <DropdownMenuSeparator />
         
         <DropdownMenuItem onClick={onToggleVerification}>
@@ -74,8 +82,17 @@ export function AgencyActionDropdown({
         </DropdownMenuItem>
 
         <DropdownMenuItem onClick={onToggleVisibility}>
-          <EyeOff className="h-4 w-4 mr-2" />
-          Masquer/Afficher
+          {isVisible ? (
+            <>
+              <EyeOff className="h-4 w-4 mr-2" />
+              Masquer agence
+            </>
+          ) : (
+            <>
+              <EyeIcon className="h-4 w-4 mr-2" />
+              Afficher agence
+            </>
+          )}
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

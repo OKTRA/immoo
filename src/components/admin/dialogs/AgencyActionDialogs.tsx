@@ -21,20 +21,25 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { Agency } from '@/hooks/useAgenciesManagement';
+import { RatingEditDialog } from './RatingEditDialog';
 import { useState, useEffect } from 'react';
 
 interface AgencyActionDialogsProps {
   agency: Agency;
   showDetails: boolean;
   showEditDialog: boolean;
+  showRatingDialog: boolean;
   showDeleteConfirm: boolean;
   showSuspendConfirm: boolean;
   onCloseDetails: () => void;
   onCloseEditDialog: () => void;
+  onCloseRatingDialog: () => void;
   onCloseDeleteConfirm: () => void;
   onCloseSuspendConfirm: () => void;
   onEdit: (updates: Partial<Agency>) => void;
+  onUpdateRating: (rating: number) => void;
   onConfirmDelete: () => void;
   onConfirmSuspend: () => void;
 }
@@ -43,13 +48,16 @@ export function AgencyActionDialogs({
   agency,
   showDetails,
   showEditDialog,
+  showRatingDialog,
   showDeleteConfirm,
   showSuspendConfirm,
   onCloseDetails,
   onCloseEditDialog,
+  onCloseRatingDialog,
   onCloseDeleteConfirm,
   onCloseSuspendConfirm,
   onEdit,
+  onUpdateRating,
   onConfirmDelete,
   onConfirmSuspend
 }: AgencyActionDialogsProps) {
@@ -80,6 +88,17 @@ export function AgencyActionDialogs({
     onEdit(editForm);
   };
 
+  const getStatusBadge = (status?: string) => {
+    switch (status) {
+      case 'suspended':
+        return <Badge variant="destructive">Suspendue</Badge>;
+      case 'active':
+        return <Badge variant="default">Active</Badge>;
+      default:
+        return <Badge variant="secondary">Inconnue</Badge>;
+    }
+  };
+
   return (
     <>
       {/* Details Dialog */}
@@ -99,8 +118,16 @@ export function AgencyActionDialogs({
                 <p>{agency.name}</p>
               </div>
               <div>
+                <Label className="font-semibold">Statut</Label>
+                <div>{getStatusBadge(agency.status)}</div>
+              </div>
+              <div>
                 <Label className="font-semibold">Localisation</Label>
                 <p>{agency.location || 'Non spécifié'}</p>
+              </div>
+              <div>
+                <Label className="font-semibold">Visibilité</Label>
+                <p>{agency.is_visible !== false ? 'Visible' : 'Masquée'}</p>
               </div>
               <div>
                 <Label className="font-semibold">Email</Label>
@@ -123,7 +150,7 @@ export function AgencyActionDialogs({
                 <p>{agency.rating.toFixed(1)}/5</p>
               </div>
               <div>
-                <Label className="font-semibold">Statut</Label>
+                <Label className="font-semibold">Vérification</Label>
                 <p>{agency.verified ? 'Vérifiée' : 'Non vérifiée'}</p>
               </div>
             </div>
@@ -222,6 +249,14 @@ export function AgencyActionDialogs({
         </DialogContent>
       </Dialog>
 
+      {/* Rating Edit Dialog */}
+      <RatingEditDialog
+        agency={agency}
+        isOpen={showRatingDialog}
+        onClose={onCloseRatingDialog}
+        onSave={onUpdateRating}
+      />
+
       {/* Delete Confirmation */}
       <AlertDialog open={showDeleteConfirm} onOpenChange={onCloseDeleteConfirm}>
         <AlertDialogContent>
@@ -251,7 +286,7 @@ export function AgencyActionDialogs({
             <AlertDialogTitle>Suspendre l'agence</AlertDialogTitle>
             <AlertDialogDescription>
               Êtes-vous sûr de vouloir suspendre l'agence "{agency.name}" ?
-              Cela masquera l'agence et rendra ses propriétés indisponibles.
+              Cela rendra l'agence inactive et ses propriétés indisponibles.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
