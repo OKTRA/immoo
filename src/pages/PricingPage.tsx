@@ -1,6 +1,4 @@
-
 import React, { useState, useEffect } from 'react';
-import { getAllSubscriptionPlans } from '@/services/subscription';
 import { useUserSubscription } from '@/hooks/useUserSubscription';
 import { SubscriptionPlan } from '@/assets/types';
 import { toast } from 'sonner';
@@ -13,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 
 export default function PricingPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -40,12 +39,13 @@ export default function PricingPage() {
       setError(null);
       console.log('PricingPage: Loading subscription plans...');
       
-      const { plans: allPlans, error } = await getAllSubscriptionPlans(true);
+      let query = supabase.from('subscription_plans').select('*').eq('is_active', true);
+      const { data: allPlans, error: queryError } = await query;
       
-      if (error) {
-        console.error('PricingPage: Error loading plans:', error);
-        setError(`Erreur: ${error}`);
-        toast.error(`Erreur: ${error}`);
+      if (queryError) {
+        console.error('PricingPage: Error loading plans:', queryError);
+        setError(`Erreur: ${queryError.message}`);
+        toast.error(`Erreur: ${queryError.message}`);
         return;
       }
       
@@ -57,8 +57,11 @@ export default function PricingPage() {
       }
       
       // Trier par prix croissant
-      const sortedPlans = allPlans.sort((a, b) => a.price - b.price);
-      setPlans(sortedPlans);
+      const sortedPlans = allPlans.sort((a, b) => a.price - b.price).map(plan => ({
+        ...plan,
+        features: Array.isArray(plan.features) ? plan.features : [],
+      }));
+      setPlans(sortedPlans as SubscriptionPlan[]);
       console.log('PricingPage: Plans loaded successfully:', sortedPlans.length, 'plans');
       
     } catch (error) {
