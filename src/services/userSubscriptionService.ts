@@ -101,13 +101,21 @@ export const checkUserResourceLimit = async (
   agencyId?: string
 ): Promise<SubscriptionLimit> => {
   try {
-    const { data, error } = await supabase.rpc('check_subscription_limit', {
-      user_id_param: userId,
+    const params = {
+      user_id: userId,
       resource_type: resourceType,
-      agency_id_param: agencyId || null
-    });
+      agency_id: agencyId || null
+    };
+    console.log('Attempting to call check_subscription_limit with params:', params);
 
-    if (error) throw error;
+    const { data, error } = await supabase.rpc('check_subscription_limit', params);
+
+    if (error) {
+      console.error('Error calling check_subscription_limit RPC:', error);
+      throw error;
+    }
+    
+    console.log('RPC check_subscription_limit successful, data:', data);
 
     return {
       allowed: data.allowed,
@@ -123,7 +131,7 @@ export const checkUserResourceLimit = async (
       allowed: false,
       currentCount: 0,
       maxAllowed: 0,
-      error: error.message
+      error: `Failed to check limit: ${error.message}`
     };
   }
 };
