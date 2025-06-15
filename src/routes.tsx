@@ -1,7 +1,8 @@
 
+
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { Loading } from '@/components/ui/spinner';
+import { Spinner } from '@/components/ui/spinner';
 
 // Lazy-loaded components that exist
 const HomePage = lazy(() => import('@/pages/HomePage'));
@@ -21,7 +22,7 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <Suspense fallback={<Loading />}>
+          <Suspense fallback={<Spinner />}>
             <HomePage />
           </Suspense>
         ),
@@ -29,7 +30,7 @@ export const router = createBrowserRouter([
       {
         path: '/profile',
         element: (
-          <Suspense fallback={<Loading />}>
+          <Suspense fallback={<Spinner />}>
             <ProfilePage />
           </Suspense>
         ),
@@ -37,7 +38,7 @@ export const router = createBrowserRouter([
       {
         path: '/agencies',
         element: (
-          <Suspense fallback={<Loading />}>
+          <Suspense fallback={<Spinner />}>
             <BrowseAgenciesPage />
           </Suspense>
         ),
@@ -45,7 +46,7 @@ export const router = createBrowserRouter([
       {
         path: '/create-agency',
         element: (
-          <Suspense fallback={<Loading />}>
+          <Suspense fallback={<Spinner />}>
             <CreateAgencyPage />
           </Suspense>
         ),
@@ -53,7 +54,7 @@ export const router = createBrowserRouter([
       {
         path: '/edit-agency/:id',
         element: (
-          <Suspense fallback={<Loading />}>
+          <Suspense fallback={<Spinner />}>
             <EditAgencyPage />
           </Suspense>
         ),
@@ -61,7 +62,7 @@ export const router = createBrowserRouter([
       {
         path: "/admin",
         element: (
-          <Suspense fallback={<Loading />}>
+          <Suspense fallback={<Spinner />}>
             <AdminDashboardPage />
           </Suspense>
         ),
@@ -73,7 +74,7 @@ export const router = createBrowserRouter([
           {
             path: "subscription-plans",
             element: (
-              <Suspense fallback={<Loading />}>
+              <Suspense fallback={<Spinner />}>
                 <SubscriptionPlansManagement />
               </Suspense>
             ),
@@ -87,7 +88,7 @@ export const router = createBrowserRouter([
       {
         path: '/login',
         element: (
-          <Suspense fallback={<Loading />}>
+          <Suspense fallback={<Spinner />}>
             <LoginPage />
           </Suspense>
         ),
@@ -95,3 +96,4 @@ export const router = createBrowserRouter([
     ],
   },
 ]);
+
