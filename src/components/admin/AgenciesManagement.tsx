@@ -11,10 +11,11 @@ import { Input } from '@/components/ui/input';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { 
   Search, Filter, Building2, CheckCircle, 
   XCircle, ChevronDown, Star, Loader2, RefreshCw,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, Eye, EyeOff
 } from 'lucide-react';
 import { useAgenciesManagement } from '@/hooks/useAgenciesManagement';
 import { AgencyActionsManager } from './AgencyActionsManager';
@@ -137,6 +138,8 @@ export default function AgenciesManagement() {
                     <TableHead>Propriétés</TableHead>
                     <TableHead>Évaluation</TableHead>
                     <TableHead>Vérification</TableHead>
+                    <TableHead>Visibilité</TableHead>
+                    <TableHead>Statut</TableHead>
                     <TableHead>Date de création</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -164,6 +167,26 @@ export default function AgenciesManagement() {
                             <XCircle className="h-4 w-4 mr-1" />
                             <span>Non vérifiée</span>
                           </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {agency.is_visible !== false ? (
+                          <div className="flex items-center text-green-500">
+                            <Eye className="h-4 w-4 mr-1" />
+                            <span>Visible</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center text-orange-500">
+                            <EyeOff className="h-4 w-4 mr-1" />
+                            <span>Masquée</span>
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {agency.status === 'suspended' ? (
+                          <Badge variant="destructive">Suspendue</Badge>
+                        ) : (
+                          <Badge variant="default">Active</Badge>
                         )}
                       </TableCell>
                       <TableCell>{agency.created_at}</TableCell>
