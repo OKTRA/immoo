@@ -30,8 +30,34 @@ export const useUserSubscription = () => {
       const { subscription: userSub, error } = await getCurrentUserSubscription(user.id);
       
       if (error) {
-        console.error('Error loading subscription:', error);
-        toast.error('Erreur lors du chargement de l\'abonnement');
+        console.log('useUserSubscription: No subscription found, setting default free plan');
+        // Set a default free subscription for users without one
+        setSubscription({
+          id: 'default-free',
+          user_id: user.id,
+          agency_id: null,
+          plan_id: 'free-plan',
+          status: 'active',
+          start_date: new Date().toISOString(),
+          end_date: null,
+          auto_renew: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+          plan: {
+            id: 'free-plan',
+            name: 'free',
+            price: 0,
+            max_agencies: 1,
+            max_properties: 1,
+            max_leases: 2,
+            max_users: 1,
+            features: [],
+            billing_cycle: 'monthly',
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          }
+        });
         return;
       }
       
@@ -43,10 +69,10 @@ export const useUserSubscription = () => {
         console.log('useUserSubscription: Plan limits loaded:', {
           planName: userSub.plan.name,
           price: userSub.plan.price,
-          maxAgencies: userSub.plan.maxAgencies,
-          maxProperties: userSub.plan.maxProperties,
-          maxLeases: userSub.plan.maxLeases,
-          maxUsers: userSub.plan.maxUsers,
+          maxAgencies: userSub.plan.max_agencies,
+          maxProperties: userSub.plan.max_properties,
+          maxLeases: userSub.plan.max_leases,
+          maxUsers: userSub.plan.max_users,
           features: userSub.plan.features
         });
       } else {
@@ -54,7 +80,33 @@ export const useUserSubscription = () => {
       }
     } catch (error) {
       console.error('Error loading subscription:', error);
-      toast.error('Erreur lors du chargement de l\'abonnement');
+      // Set default free plan on error
+      setSubscription({
+        id: 'default-free',
+        user_id: user.id,
+        agency_id: null,
+        plan_id: 'free-plan',
+        status: 'active',
+        start_date: new Date().toISOString(),
+        end_date: null,
+        auto_renew: true,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        plan: {
+          id: 'free-plan',
+          name: 'free',
+          price: 0,
+          max_agencies: 1,
+          max_properties: 1,
+          max_leases: 2,
+          max_users: 1,
+          features: [],
+          billing_cycle: 'monthly',
+          is_active: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -83,12 +135,6 @@ export const useUserSubscription = () => {
     
     const result = await checkUserResourceLimit(user.id, resourceType, agencyId);
     console.log('useUserSubscription: Limit check result:', result);
-    
-    // Si on a une erreur dans la vérification des limites, on peut essayer de recharger l'abonnement
-    if (result.error && result.error.includes('No active subscription')) {
-      console.log('useUserSubscription: No active subscription found, attempting to reload...');
-      await loadSubscription(true);
-    }
     
     return result;
   };

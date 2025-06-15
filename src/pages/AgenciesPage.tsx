@@ -49,7 +49,7 @@ export default function AgenciesPage() {
         if (subscription.plan) {
           console.log('AgenciesPage: Plan details from subscription:', {
             planName: subscription.plan.name,
-            maxAgencies: subscription.plan.maxAgencies,
+            maxAgencies: subscription.plan.max_agencies,
             currentAgencies: agencies.length,
             limitResult: limit
           });
@@ -57,8 +57,10 @@ export default function AgenciesPage() {
       }
     };
 
-    checkAgencyLimits();
-  }, [user?.id, subscription, checkLimit, agencies.length]);
+    if (!subscriptionLoading) {
+      checkAgencyLimits();
+    }
+  }, [user?.id, subscription, checkLimit, agencies.length, subscriptionLoading]);
 
   // Log des informations de l'utilisateur et de l'abonnement
   useEffect(() => {
@@ -127,7 +129,7 @@ export default function AgenciesPage() {
     );
   }
 
-  const canCreateAgency = agencyLimit ? agencyLimit.allowed : false;
+  const canCreateAgency = agencyLimit ? agencyLimit.allowed : true; // Default to true if no limit check yet
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -135,7 +137,7 @@ export default function AgenciesPage() {
         <div>
           <h1 className="text-3xl font-bold">Mes Agences</h1>
           <p className="text-muted-foreground">
-            {subscription?.plan ? `Plan ${subscription.plan.name}` : 'Plan non défini'}
+            {subscription?.plan ? `Plan ${subscription.plan.name}` : 'Plan gratuit'}
             {agencyLimit && (
               <span className="ml-2">
                 - {agencyLimit.currentCount}/{agencyLimit.maxAllowed} agences utilisées
@@ -176,20 +178,20 @@ export default function AgenciesPage() {
             <div>
               <span className="text-muted-foreground">Agences:</span>
               <span className="ml-2 font-medium">
-                {agencyLimit ? `${agencyLimit.currentCount}/${agencyLimit.maxAllowed}` : `${agencies.length}/${subscription.plan.maxAgencies || 1}`}
+                {agencyLimit ? `${agencyLimit.currentCount}/${agencyLimit.maxAllowed}` : `${agencies.length}/${subscription.plan.max_agencies || 1}`}
               </span>
             </div>
             <div>
               <span className="text-muted-foreground">Propriétés:</span>
-              <span className="ml-2 font-medium">{subscription.plan.maxProperties || 1}</span>
+              <span className="ml-2 font-medium">{subscription.plan.max_properties || 1}</span>
             </div>
             <div>
               <span className="text-muted-foreground">Baux:</span>
-              <span className="ml-2 font-medium">{subscription.plan.maxLeases || 1}</span>
+              <span className="ml-2 font-medium">{subscription.plan.max_leases || 1}</span>
             </div>
             <div>
               <span className="text-muted-foreground">Utilisateurs:</span>
-              <span className="ml-2 font-medium">{subscription.plan.maxUsers || 1}</span>
+              <span className="ml-2 font-medium">{subscription.plan.max_users || 1}</span>
             </div>
           </div>
           
