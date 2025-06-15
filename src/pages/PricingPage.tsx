@@ -12,6 +12,7 @@ import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 export default function PricingPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
@@ -19,34 +20,49 @@ export default function PricingPage() {
   const [error, setError] = useState<string | null>(null);
   const [upgrading, setUpgrading] = useState<string | null>(null);
   const { subscription, upgradeSubscription } = useUserSubscription();
+  const { user, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadPlans();
-  }, []);
+    console.log('PricingPage: Auth state', { user: user?.id, authLoading, subscription: subscription?.id });
+  }, [user, authLoading, subscription]);
+
+  useEffect(() => {
+    // Attendre que l'auth soit prête avant de charger les plans
+    if (!authLoading) {
+      loadPlans();
+    }
+  }, [authLoading]);
 
   const loadPlans = async () => {
     try {
       setLoading(true);
       setError(null);
-      console.log('Loading subscription plans...');
+      console.log('PricingPage: Loading subscription plans...');
       
       const { plans: allPlans, error } = await getAllSubscriptionPlans(true);
       
       if (error) {
-        console.error('Error loading plans:', error);
+        console.error('PricingPage: Error loading plans:', error);
         setError(`Erreur: ${error}`);
         toast.error(`Erreur: ${error}`);
+        return;
+      }
+      
+      if (!allPlans || allPlans.length === 0) {
+        console.log('PricingPage: No plans returned');
+        setPlans([]);
+        setLoading(false);
         return;
       }
       
       // Trier par prix croissant
       const sortedPlans = allPlans.sort((a, b) => a.price - b.price);
       setPlans(sortedPlans);
-      console.log('Plans loaded successfully:', sortedPlans);
+      console.log('PricingPage: Plans loaded successfully:', sortedPlans.length, 'plans');
       
     } catch (error) {
-      console.error('Error loading plans:', error);
+      console.error('PricingPage: Error loading plans:', error);
       const errorMessage = 'Erreur lors du chargement des plans';
       setError(errorMessage);
       toast.error(errorMessage);
@@ -58,22 +74,27 @@ export default function PricingPage() {
   const handleUpgrade = async (planId: string) => {
     setUpgrading(planId);
     try {
+      console.log('PricingPage: Upgrading to plan:', planId);
       const success = await upgradeSubscription(planId, undefined, 'manual');
       if (success) {
-        // Rediriger ou afficher une confirmation
+        console.log('PricingPage: Upgrade successful');
+        toast.success('Plan mis à jour avec succès');
       }
     } catch (error) {
-      console.error('Error upgrading:', error);
+      console.error('PricingPage: Error upgrading:', error);
+      toast.error('Erreur lors de la mise à niveau');
     } finally {
       setUpgrading(null);
     }
   };
 
   const handleBackToAgencies = () => {
+    console.log('PricingPage: Navigating back to agencies');
     navigate('/agencies');
   };
 
-  if (loading) {
+  // Afficher le loading pendant que l'auth se charge
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <Navbar />
