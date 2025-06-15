@@ -42,6 +42,36 @@ export function AgencyActionDropdown({
   const isSuspended = agency.status === 'suspended';
   const isVisible = agency.is_visible !== false;
 
+  const handleToggleVerification = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleVerification();
+  };
+
+  const handleToggleVisibility = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onToggleVisibility();
+  };
+
+  const handleSuspend = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSuspend();
+  };
+
+  const handleReactivate = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onReactivate();
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onDelete();
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -67,7 +97,7 @@ export function AgencyActionDropdown({
 
         <DropdownMenuSeparator />
         
-        <DropdownMenuItem onClick={onToggleVerification}>
+        <DropdownMenuItem onClick={handleToggleVerification} disabled={isProcessing}>
           {agency.verified ? (
             <>
               <XCircle className="h-4 w-4 mr-2" />
@@ -81,7 +111,7 @@ export function AgencyActionDropdown({
           )}
         </DropdownMenuItem>
 
-        <DropdownMenuItem onClick={onToggleVisibility}>
+        <DropdownMenuItem onClick={handleToggleVisibility} disabled={isProcessing}>
           {isVisible ? (
             <>
               <EyeOff className="h-4 w-4 mr-2" />
@@ -99,16 +129,18 @@ export function AgencyActionDropdown({
 
         {!isSuspended ? (
           <DropdownMenuItem 
-            onClick={onSuspend}
+            onClick={handleSuspend}
             className="text-orange-600"
+            disabled={isProcessing}
           >
             <Ban className="h-4 w-4 mr-2" />
             Suspendre agence
           </DropdownMenuItem>
         ) : (
           <DropdownMenuItem 
-            onClick={onReactivate}
+            onClick={handleReactivate}
             className="text-green-600"
+            disabled={isProcessing}
           >
             <RotateCcw className="h-4 w-4 mr-2" />
             Réactiver agence
@@ -118,7 +150,8 @@ export function AgencyActionDropdown({
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="text-red-600"
-          onClick={onDelete}
+          onClick={handleDelete}
+          disabled={isProcessing}
         >
           <Trash className="h-4 w-4 mr-2" />
           Supprimer
