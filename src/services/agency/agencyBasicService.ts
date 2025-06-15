@@ -1,4 +1,3 @@
-
 import { supabase, handleSupabaseError, getMockData } from '@/lib/supabase';
 import { Agency } from '@/assets/types';
 
@@ -18,6 +17,8 @@ export const getAllAgencies = async (
     const { data, error, count } = await supabase
       .from('agencies')
       .select('*', { count: 'exact' })
+      .eq('status', 'active')
+      .eq('is_visible', true)
       .order(sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + limit - 1);
 
@@ -93,6 +94,8 @@ export const getAgencyById = async (id: string) => {
       .from('agencies')
       .select('*')
       .eq('id', id)
+      .eq('status', 'active')
+      .eq('is_visible', true)
       .single();
 
     if (error) throw error;
@@ -111,34 +114,19 @@ export const getAgencyById = async (id: string) => {
  */
 export const getFeaturedAgencies = async (limit = 6) => {
   try {
-    // First attempt to fetch from Supabase with verified filter
-    try {
-      const { data, error } = await supabase
-        .from('agencies')
-        .select('*')
-        .order('rating', { ascending: false })
-        .limit(limit);
+    const { data, error } = await supabase
+      .from('agencies')
+      .select('*')
+      .eq('status', 'active')
+      .eq('is_visible', true)
+      .order('rating', { ascending: false })
+      .limit(limit);
 
-      if (error) throw error;
-      
-      const agencies = data.map((item) => transformAgencyData(item));
-      
-      return { agencies, error: null };
-    } catch (error) {
-      // If verified column doesn't exist, try without the filter
-      console.warn('Falling back to query without verified filter:', error);
-      const { data, error: fallbackError } = await supabase
-        .from('agencies')
-        .select('*')
-        .order('rating', { ascending: false })
-        .limit(limit);
-
-      if (fallbackError) throw fallbackError;
-      
-      const agencies = data.map((item) => transformAgencyData(item, true));
-      
-      return { agencies, error: null };
-    }
+    if (error) throw error;
+    
+    const agencies = data.map((item) => transformAgencyData(item));
+    
+    return { agencies, error: null };
   } catch (error: any) {
     console.error('Error getting featured agencies:', error);
     const mockData = getMockData('agencies', limit);
