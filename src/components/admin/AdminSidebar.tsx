@@ -9,9 +9,10 @@ import {
   CreditCard, 
   BarChart3, 
   Package,
+  Ticket,
   Settings,
   Crown,
-  Ticket
+  Wallet
 } from 'lucide-react';
 
 interface AdminSidebarProps {
@@ -28,6 +29,7 @@ export default function AdminSidebar({ activeTab, setActiveTab }: AdminSidebarPr
     { id: 'payments', label: 'Paiements', icon: CreditCard },
     { id: 'analytics', label: 'Rapports & Analyses', icon: BarChart3 },
     { id: 'subscriptions', label: 'Plans d\'abonnement', icon: Package },
+    { id: 'subscription-payments', label: 'Paiements Abonnements', icon: Wallet },
     { id: 'promo', label: 'Codes Promo', icon: Crown },
     { id: 'support', label: 'Support', icon: Ticket },
     { id: 'settings', label: 'Paramètres', icon: Settings },
