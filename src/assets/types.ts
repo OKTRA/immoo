@@ -180,6 +180,8 @@ export interface SubscriptionPlan {
   isActive?: boolean;
   maxProperties?: number;
   maxUsers?: number;
+  maxAgencies?: number;
+  maxLeases?: number;
   hasApiAccess?: boolean;
 }
 

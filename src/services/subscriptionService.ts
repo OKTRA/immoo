@@ -1,4 +1,3 @@
-
 import { supabase, handleSupabaseError } from '@/lib/supabase';
 import { SubscriptionPlan } from '@/assets/types';
 
@@ -24,10 +23,12 @@ export const getAllSubscriptionPlans = async (activeOnly = true) => {
       name: plan.name,
       price: plan.price,
       billingCycle: plan.billing_cycle,
-      features: plan.features,
+      features: plan.features || [],
       isActive: plan.is_active,
       maxProperties: plan.max_properties,
       maxUsers: plan.max_users,
+      maxAgencies: plan.max_agencies,
+      maxLeases: plan.max_leases,
       hasApiAccess: plan.has_api_access
     }));
     
@@ -56,10 +57,12 @@ export const getSubscriptionPlanById = async (id: string) => {
       name: data.name,
       price: data.price,
       billingCycle: data.billing_cycle,
-      features: data.features,
+      features: data.features || [],
       isActive: data.is_active,
       maxProperties: data.max_properties,
       maxUsers: data.max_users,
+      maxAgencies: data.max_agencies,
+      maxLeases: data.max_leases,
       hasApiAccess: data.has_api_access
     };
     
@@ -85,6 +88,8 @@ export const createSubscriptionPlan = async (planData: Omit<SubscriptionPlan, 'i
         is_active: planData.isActive,
         max_properties: planData.maxProperties,
         max_users: planData.maxUsers,
+        max_agencies: planData.maxAgencies,
+        max_leases: planData.maxLeases,
         has_api_access: planData.hasApiAccess
       }])
       .select()
@@ -97,10 +102,12 @@ export const createSubscriptionPlan = async (planData: Omit<SubscriptionPlan, 'i
       name: data.name,
       price: data.price,
       billingCycle: data.billing_cycle,
-      features: data.features,
+      features: data.features || [],
       isActive: data.is_active,
       maxProperties: data.max_properties,
       maxUsers: data.max_users,
+      maxAgencies: data.max_agencies,
+      maxLeases: data.max_leases,
       hasApiAccess: data.has_api_access
     };
     
@@ -124,6 +131,8 @@ export const updateSubscriptionPlan = async (id: string, planData: Partial<Subsc
     if (planData.isActive !== undefined) updateData.is_active = planData.isActive;
     if (planData.maxProperties !== undefined) updateData.max_properties = planData.maxProperties;
     if (planData.maxUsers !== undefined) updateData.max_users = planData.maxUsers;
+    if (planData.maxAgencies !== undefined) updateData.max_agencies = planData.maxAgencies;
+    if (planData.maxLeases !== undefined) updateData.max_leases = planData.maxLeases;
     if (planData.hasApiAccess !== undefined) updateData.has_api_access = planData.hasApiAccess;
 
     const { data, error } = await supabase
@@ -140,10 +149,12 @@ export const updateSubscriptionPlan = async (id: string, planData: Partial<Subsc
       name: data.name,
       price: data.price,
       billingCycle: data.billing_cycle,
-      features: data.features,
+      features: data.features || [],
       isActive: data.is_active,
       maxProperties: data.max_properties,
       maxUsers: data.max_users,
+      maxAgencies: data.max_agencies,
+      maxLeases: data.max_leases,
       hasApiAccess: data.has_api_access
     };
     
@@ -193,5 +204,60 @@ export const getUserSubscription = async (userId: string) => {
   } catch (error: any) {
     console.error(`Error getting subscription for user ${userId}:`, error);
     return { subscription: null, error: error.message };
+  }
+};
+
+/**
+ * Check if user has reached limit for a resource
+ */
+export const checkResourceLimit = async (userId: string, resourceType: 'properties' | 'agencies' | 'leases' | 'users') => {
+  try {
+    // Get user's current subscription
+    const { subscription, error: subError } = await getUserSubscription(userId);
+    if (subError || !subscription) {
+      return { hasLimit: true, currentCount: 0, maxAllowed: 1, error: 'No active subscription' };
+    }
+
+    // Get current count based on resource type
+    let currentCount = 0;
+    switch (resourceType) {
+      case 'properties':
+        const { count: propCount } = await supabase
+          .from('properties')
+          .select('*', { count: 'exact', head: true })
+          .eq('owner_id', userId);
+        currentCount = propCount || 0;
+        break;
+      case 'agencies':
+        const { count: agencyCount } = await supabase
+          .from('agencies')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', userId);
+        currentCount = agencyCount || 0;
+        break;
+      case 'leases':
+        const { count: leaseCount } = await supabase
+          .from('leases')
+          .select('*', { count: 'exact', head: true })
+          .eq('tenant_id', userId);
+        currentCount = leaseCount || 0;
+        break;
+    }
+
+    const plan = subscription.subscription_plans;
+    const maxAllowed = resourceType === 'properties' ? plan.max_properties :
+                      resourceType === 'agencies' ? plan.max_agencies :
+                      resourceType === 'leases' ? plan.max_leases :
+                      plan.max_users;
+
+    return {
+      hasLimit: currentCount >= maxAllowed,
+      currentCount,
+      maxAllowed,
+      error: null
+    };
+  } catch (error: any) {
+    console.error(`Error checking resource limit for ${resourceType}:`, error);
+    return { hasLimit: true, currentCount: 0, maxAllowed: 1, error: error.message };
   }
 };

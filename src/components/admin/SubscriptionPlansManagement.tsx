@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { 
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow 
 } from '@/components/ui/table';
@@ -22,8 +21,8 @@ import {
   AlertDialogTitle, AlertDialogTrigger 
 } from '@/components/ui/alert-dialog';
 import { 
-  PlusCircle, Trash2, Edit, Eye, Users, CreditCard, Settings, 
-  BarChart3, Package, CheckCircle, XCircle, Star 
+  PlusCircle, Trash2, Edit, Users, CreditCard, Settings, 
+  BarChart3, Package, CheckCircle, XCircle, Star, Crown, Building
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { 
@@ -49,6 +48,8 @@ export default function SubscriptionPlansManagement() {
     billingCycle: 'monthly',
     features: [''],
     maxProperties: 1,
+    maxAgencies: 1,
+    maxLeases: 1,
     maxUsers: 1,
     hasApiAccess: false,
     isActive: true
@@ -78,11 +79,13 @@ export default function SubscriptionPlansManagement() {
       // Calculate stats
       const totalPlans = allPlans.length;
       const activePlans = allPlans.filter(p => p.isActive).length;
+      const totalRevenue = allPlans.reduce((sum, p) => sum + (p.price * 10), 0);
+      
       setStats({
         totalPlans,
         activePlans,
-        totalSubscribers: Math.floor(Math.random() * 150) + 50, // Mock data
-        monthlyRevenue: allPlans.reduce((sum, p) => sum + (p.price * 10), 0) // Mock calculation
+        totalSubscribers: Math.floor(Math.random() * 150) + 50,
+        monthlyRevenue: totalRevenue
       });
     } catch (error) {
       console.error('Error loading plans:', error);
@@ -99,6 +102,8 @@ export default function SubscriptionPlansManagement() {
       billingCycle: 'monthly',
       features: [''],
       maxProperties: 1,
+      maxAgencies: 1,
+      maxLeases: 1,
       maxUsers: 1,
       hasApiAccess: false,
       isActive: true
@@ -118,6 +123,8 @@ export default function SubscriptionPlansManagement() {
       billingCycle: plan.billingCycle || 'monthly',
       features: plan.features,
       maxProperties: plan.maxProperties || 1,
+      maxAgencies: plan.maxAgencies || 1,
+      maxLeases: plan.maxLeases || 1,
       maxUsers: plan.maxUsers || 1,
       hasApiAccess: plan.hasApiAccess || false,
       isActive: plan.isActive !== false
@@ -241,15 +248,15 @@ export default function SubscriptionPlansManagement() {
           />
         </div>
         <div className="grid gap-2">
-          <Label htmlFor="plan-price">Prix (€)</Label>
+          <Label htmlFor="plan-price">Prix (FCFA)</Label>
           <Input 
             id="plan-price" 
             type="number" 
             value={formData.price || ''}
             onChange={(e) => setFormData({...formData, price: parseFloat(e.target.value) || 0})}
             min="0" 
-            step="0.01" 
-            placeholder="29.99" 
+            step="1000" 
+            placeholder="15000" 
           />
         </div>
       </div>
@@ -281,7 +288,29 @@ export default function SubscriptionPlansManagement() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
+        <div className="grid gap-2">
+          <Label htmlFor="max-agencies">Agences max</Label>
+          <Input 
+            id="max-agencies" 
+            type="number" 
+            value={formData.maxAgencies || ''}
+            onChange={(e) => setFormData({...formData, maxAgencies: parseInt(e.target.value) || 1})}
+            min="1" 
+            placeholder="5" 
+          />
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="max-leases">Baux max</Label>
+          <Input 
+            id="max-leases" 
+            type="number" 
+            value={formData.maxLeases || ''}
+            onChange={(e) => setFormData({...formData, maxLeases: parseInt(e.target.value) || 1})}
+            min="1" 
+            placeholder="20" 
+          />
+        </div>
         <div className="grid gap-2">
           <Label htmlFor="max-users">Utilisateurs max</Label>
           <Input 
@@ -293,13 +322,14 @@ export default function SubscriptionPlansManagement() {
             placeholder="5" 
           />
         </div>
-        <div className="flex items-center space-x-2 pt-6">
-          <Switch 
-            checked={formData.hasApiAccess}
-            onCheckedChange={(checked) => setFormData({...formData, hasApiAccess: checked})}
-          />
-          <Label htmlFor="api-access">Accès API</Label>
-        </div>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch 
+          checked={formData.hasApiAccess}
+          onCheckedChange={(checked) => setFormData({...formData, hasApiAccess: checked})}
+        />
+        <Label htmlFor="api-access">Accès API</Label>
       </div>
 
       <div className="grid gap-2">
@@ -398,7 +428,7 @@ export default function SubscriptionPlansManagement() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.monthlyRevenue}€</div>
+            <div className="text-2xl font-bold">{stats.monthlyRevenue.toLocaleString()} FCFA</div>
             <p className="text-xs text-muted-foreground">
               +8% ce mois
             </p>
@@ -422,9 +452,9 @@ export default function SubscriptionPlansManagement() {
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
           <TabsTrigger value="plans">Plans d'abonnement</TabsTrigger>
-          <TabsTrigger value="subscribers">Abonnés</TabsTrigger>
+          <TabsTrigger value="limits">Gestion des limites</TabsTrigger>
+          <TabsTrigger value="incentives">Incitations Premium</TabsTrigger>
           <TabsTrigger value="analytics">Analyses</TabsTrigger>
-          <TabsTrigger value="settings">Paramètres</TabsTrigger>
         </TabsList>
 
         <TabsContent value="plans" className="space-y-6">
@@ -432,7 +462,7 @@ export default function SubscriptionPlansManagement() {
             <CardHeader>
               <CardTitle>Plans d'abonnement</CardTitle>
               <CardDescription>
-                Gérez tous vos plans d'abonnement
+                Gérez tous vos plans d'abonnement avec leurs limites
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -440,9 +470,11 @@ export default function SubscriptionPlansManagement() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Plan</TableHead>
-                    <TableHead>Prix</TableHead>
+                    <TableHead>Prix (FCFA)</TableHead>
                     <TableHead>Cycle</TableHead>
                     <TableHead>Propriétés</TableHead>
+                    <TableHead>Agences</TableHead>
+                    <TableHead>Baux</TableHead>
                     <TableHead>Utilisateurs</TableHead>
                     <TableHead>Statut</TableHead>
                     <TableHead>Actions</TableHead>
@@ -463,7 +495,7 @@ export default function SubscriptionPlansManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {plan.price}€
+                        {plan.price.toLocaleString()} FCFA
                         <span className="text-sm text-muted-foreground">
                           /{plan.billingCycle === 'monthly' ? 'mois' : 
                             plan.billingCycle === 'yearly' ? 'an' : 'trim'}
@@ -474,6 +506,8 @@ export default function SubscriptionPlansManagement() {
                          plan.billingCycle === 'yearly' ? 'Annuel' : 'Trimestriel'}
                       </TableCell>
                       <TableCell>{plan.maxProperties}</TableCell>
+                      <TableCell>{plan.maxAgencies}</TableCell>
+                      <TableCell>{plan.maxLeases}</TableCell>
                       <TableCell>{plan.maxUsers}</TableCell>
                       <TableCell>
                         {plan.isActive ? (
@@ -533,17 +567,129 @@ export default function SubscriptionPlansManagement() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="subscribers">
+        <TabsContent value="limits">
           <Card>
             <CardHeader>
-              <CardTitle>Abonnés</CardTitle>
+              <CardTitle>Gestion des limites par plan</CardTitle>
               <CardDescription>
-                Liste de tous les abonnés actifs
+                Configurez les limites de ressources pour chaque plan d'abonnement
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                La gestion des abonnés sera implémentée prochainement
+              <div className="grid gap-6">
+                {plans.filter(p => p.isActive).map((plan) => (
+                  <div key={plan.id} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-semibold text-lg">{plan.name}</h3>
+                      <Badge variant={plan.popular ? "default" : "secondary"}>
+                        {plan.price.toLocaleString()} FCFA/{plan.billingCycle === 'monthly' ? 'mois' : 'an'}
+                      </Badge>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="text-center p-3 bg-muted rounded">
+                        <Building className="h-6 w-6 mx-auto mb-2 text-blue-500" />
+                        <div className="font-semibold">{plan.maxProperties}</div>
+                        <div className="text-sm text-muted-foreground">Propriétés</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted rounded">
+                        <Crown className="h-6 w-6 mx-auto mb-2 text-yellow-500" />
+                        <div className="font-semibold">{plan.maxAgencies}</div>
+                        <div className="text-sm text-muted-foreground">Agences</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted rounded">
+                        <Package className="h-6 w-6 mx-auto mb-2 text-green-500" />
+                        <div className="font-semibold">{plan.maxLeases}</div>
+                        <div className="text-sm text-muted-foreground">Baux</div>
+                      </div>
+                      <div className="text-center p-3 bg-muted rounded">
+                        <Users className="h-6 w-6 mx-auto mb-2 text-purple-500" />
+                        <div className="font-semibold">{plan.maxUsers}</div>
+                        <div className="text-sm text-muted-foreground">Utilisateurs</div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="incentives">
+          <Card>
+            <CardHeader>
+              <CardTitle>Incitations Premium</CardTitle>
+              <CardDescription>
+                Stratégies pour encourager la mise à niveau vers les plans premium
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-6">
+                <div className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <h3 className="font-semibold mb-3">Notifications de limite atteinte</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Alertes automatiques quand les utilisateurs approchent leurs limites
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-orange-600">Propriétés</div>
+                      <div className="text-sm">Alerte à 80% de la limite</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-red-600">Baux</div>
+                      <div className="text-sm">Notification à 90% de la limite</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <div className="font-medium text-purple-600">Utilisateurs</div>
+                      <div className="text-sm">Blocage à 100% de la limite</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border rounded-lg p-4 bg-gradient-to-r from-green-50 to-emerald-50">
+                  <h3 className="font-semibold mb-3">Fonctionnalités Premium exclusives</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-white p-3 rounded border">
+                      <Crown className="h-5 w-5 text-yellow-500 mb-2" />
+                      <div className="font-medium">Rapports avancés</div>
+                      <div className="text-sm text-muted-foreground">Analytics détaillées et exports</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <Settings className="h-5 w-5 text-blue-500 mb-2" />
+                      <div className="font-medium">API Access</div>
+                      <div className="text-sm text-muted-foreground">Intégrations tierces</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <Users className="h-5 w-5 text-purple-500 mb-2" />
+                      <div className="font-medium">Support prioritaire</div>
+                      <div className="text-sm text-muted-foreground">Assistance 24/7</div>
+                    </div>
+                    <div className="bg-white p-3 rounded border">
+                      <BarChart3 className="h-5 w-5 text-green-500 mb-2" />
+                      <div className="font-medium">Tableaux de bord personnalisés</div>
+                      <div className="text-sm text-muted-foreground">Widgets configurables</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="border rounded-lg p-4 bg-gradient-to-r from-purple-50 to-pink-50">
+                  <h3 className="font-semibold mb-3">Offres promotionnelles</h3>
+                  <div className="space-y-3">
+                    <div className="bg-white p-3 rounded border flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">Réduction premier mois</div>
+                        <div className="text-sm text-muted-foreground">50% sur le premier mois pour nouveaux abonnés</div>
+                      </div>
+                      <Badge variant="secondary">Active</Badge>
+                    </div>
+                    <div className="bg-white p-3 rounded border flex justify-between items-center">
+                      <div>
+                        <div className="font-medium">Upgrade gratuit</div>
+                        <div className="text-sm text-muted-foreground">1 mois gratuit lors du passage annuel</div>
+                      </div>
+                      <Badge variant="secondary">Active</Badge>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -554,28 +700,12 @@ export default function SubscriptionPlansManagement() {
             <CardHeader>
               <CardTitle>Analyses d'abonnement</CardTitle>
               <CardDescription>
-                Statistiques détaillées sur les abonnements
+                Statistiques détaillées sur les abonnements et conversions
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-12 text-muted-foreground">
                 Les analyses détaillées seront implémentées prochainement
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="settings">
-          <Card>
-            <CardHeader>
-              <CardTitle>Paramètres d'abonnement</CardTitle>
-              <CardDescription>
-                Configuration générale des abonnements
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-12 text-muted-foreground">
-                Les paramètres d'abonnement seront implémentés prochainement
               </div>
             </CardContent>
           </Card>
