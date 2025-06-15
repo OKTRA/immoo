@@ -11,6 +11,7 @@ import FeatureSection from '@/components/FeatureSection';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PropertyList from '@/components/properties/PropertyList';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -21,10 +22,45 @@ export default function HomePage() {
     const fetchProperties = async () => {
       setLoading(true);
       try {
-        const { properties } = await getProperties(undefined, 6);
-        setFeaturedProperties(properties || []);
+        // We fetch more properties than needed (24 instead of 6) to ensure we have enough
+        // to display after filtering out those from inactive or invisible agencies.
+        const { properties } = await getProperties(undefined, 24);
+        
+        if (!properties || properties.length === 0) {
+          setFeaturedProperties([]);
+          setLoading(false);
+          return;
+        }
+
+        const agencyIds = [...new Set(properties.map(p => p.agencyId).filter(Boolean))];
+
+        if (agencyIds.length > 0) {
+          const { data: activeAgencies, error: agenciesError } = await supabase
+            .from('agencies')
+            .select('id')
+            .in('id', agencyIds)
+            .eq('status', 'active')
+            .eq('is_visible', true);
+
+          if (agenciesError) {
+            console.error("Error fetching active agencies:", agenciesError);
+            // On error, we show unfiltered properties to avoid a blank section.
+            setFeaturedProperties(properties.slice(0, 6));
+          } else {
+            const activeAgencyIds = new Set(activeAgencies.map(a => a.id));
+            const filteredProperties = properties
+              .filter(p => p.agencyId && activeAgencyIds.has(p.agencyId))
+              .slice(0, 6);
+            setFeaturedProperties(filteredProperties);
+          }
+        } else {
+          // If no properties have an agency ID, just show the first 6.
+          setFeaturedProperties(properties.slice(0, 6));
+        }
       } catch (error) {
         console.error("Error fetching properties:", error);
+        // We set an empty array on error to avoid showing stale data.
+        setFeaturedProperties([]);
       } finally {
         setLoading(false);
       }
