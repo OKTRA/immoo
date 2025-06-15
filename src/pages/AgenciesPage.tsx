@@ -5,12 +5,15 @@ import AgencyCard from "@/components/AgencyCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
+import UpgradeButton from "@/components/subscription/UpgradeButton";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 export default function AgenciesPage() {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['user-agencies'],
     queryFn: () => getUserAgencies(),
   });
+  const { isFreePlan } = useUserSubscription();
 
   const agencies = data?.agencies || [];
 
@@ -47,12 +50,15 @@ export default function AgenciesPage() {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold">Mes Agences</h1>
-        <Button asChild>
-          <Link to="/agencies/create">
-            <Plus className="w-4 h-4 mr-2" />
-            Créer une agence
-          </Link>
-        </Button>
+        <div className="flex items-center gap-4">
+          {isFreePlan() && <UpgradeButton />}
+          <Button asChild>
+            <Link to="/agencies/create">
+              <Plus className="w-4 h-4 mr-2" />
+              Créer une agence
+            </Link>
+          </Button>
+        </div>
       </div>
 
       {agencies.length === 0 ? (
