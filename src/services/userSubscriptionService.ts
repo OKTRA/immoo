@@ -228,13 +228,13 @@ export const getAgenciesWithSubscriptions = async (): Promise<{
           paymentMethod: '',
           autoRenew: true,
           plan: userSubscription.subscription_plans ? {
-            name: userSubscription.subscription_plans.name,
-            price: userSubscription.subscription_plans.price,
-            maxProperties: userSubscription.subscription_plans.max_properties,
-            maxAgencies: userSubscription.subscription_plans.max_agencies,
-            maxLeases: userSubscription.subscription_plans.max_leases,
-            maxUsers: userSubscription.subscription_plans.max_users,
-            features: userSubscription.subscription_plans.features || []
+            name: userSubscription.subscription_plans[0].name,
+            price: userSubscription.subscription_plans[0].price,
+            maxProperties: userSubscription.subscription_plans[0].max_properties,
+            maxAgencies: userSubscription.subscription_plans[0].max_agencies,
+            maxLeases: userSubscription.subscription_plans[0].max_leases,
+            maxUsers: userSubscription.subscription_plans[0].max_users,
+            features: userSubscription.subscription_plans[0].features || []
           } : undefined
         } : undefined
       };
