@@ -251,3 +251,24 @@ export interface AgencyCommission {
   minimumAmount?: number;
   maximumAmount?: number;
 }
+
+export interface UserSubscription {
+  id: string;
+  userId: string;
+  agencyId?: string;
+  planId: string;
+  status: 'active' | 'inactive' | 'expired';
+  startDate: string;
+  endDate?: string;
+  paymentMethod?: string;
+  autoRenew: boolean;
+  plan?: {
+    name: string;
+    price: number;
+    maxProperties: number;
+    maxAgencies: number;
+    maxLeases: number;
+    maxUsers: number;
+    features: string[];
+  };
+}
