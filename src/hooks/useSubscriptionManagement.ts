@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { 
@@ -66,12 +65,10 @@ export const useSubscriptionManagement = () => {
       }
       setPlans(allPlans);
       
-      // Calculate stats from actual data - fix the reduce function without generic type
+      // Calculate stats from actual data - fix the reduce function with explicit type
       const totalPlans = allPlans.length;
       const activePlans = allPlans.filter(p => p.isActive).length;
-      const totalRevenue = allPlans.reduce((sum: number, plan: SubscriptionPlan) => {
-        return sum + plan.price;
-      }, 0);
+      const totalRevenue = allPlans.reduce((sum, plan) => sum + plan.price, 0);
       
       setStats({
         totalPlans,
