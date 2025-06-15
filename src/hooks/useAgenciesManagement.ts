@@ -76,7 +76,7 @@ export function useAgenciesManagement() {
         phone: agency.phone,
         website: agency.website,
         description: agency.description,
-        status: agency.status || 'active',
+        status: (agency.status === 'suspended' ? 'suspended' : 'active') as 'active' | 'suspended',
         is_visible: agency.is_visible !== false
       })) || [];
 
