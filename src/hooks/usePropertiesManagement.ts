@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -156,22 +157,6 @@ export function usePropertiesManagement() {
       toast.error('Erreur lors du chargement des propriétés');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const fetchLocations = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('location')
-        .not('location', 'is', null);
-
-      if (error) throw error;
-
-      const uniqueLocations = [...new Set(data?.map(p => p.location).filter(Boolean))] as string[];
-      setLocations(uniqueLocations);
-    } catch (error) {
-      console.error('Error fetching locations:', error);
     }
   };
 
