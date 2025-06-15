@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
 } from '@/components/ui/card';
@@ -14,7 +15,7 @@ import {
 import { 
   Search, Filter, MoreHorizontal, Home, MapPin,
   Eye, Edit, Trash, Loader2, RefreshCw, CheckCircle, XCircle,
-  ChevronLeft, ChevronRight
+  ChevronLeft, ChevronRight, EyeOff
 } from 'lucide-react';
 import { 
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, 
@@ -25,6 +26,7 @@ import { formatCurrency } from '@/lib/utils';
 import { usePropertiesManagement } from '@/hooks/usePropertiesManagement';
 
 export default function PropertiesManagement() {
+  const navigate = useNavigate();
   const { 
     properties, 
     isLoading, 
@@ -36,6 +38,8 @@ export default function PropertiesManagement() {
     setTypeFilter,
     locationFilter,
     setLocationFilter,
+    visibilityFilter,
+    setVisibilityFilter,
     locations,
     sortBy,
     setSortBy,
@@ -46,6 +50,7 @@ export default function PropertiesManagement() {
     totalCount,
     totalPages,
     updatePropertyStatus,
+    togglePropertyVisibility,
     deleteProperty,
     moderateProperty,
     refreshProperties 
@@ -53,6 +58,10 @@ export default function PropertiesManagement() {
 
   const handleStatusChange = async (propertyId: string, newStatus: string) => {
     await updatePropertyStatus(propertyId, newStatus);
+  };
+
+  const handleToggleVisibility = async (propertyId: string) => {
+    await togglePropertyVisibility(propertyId);
   };
 
   const handleDelete = async (propertyId: string) => {
@@ -63,6 +72,14 @@ export default function PropertiesManagement() {
 
   const handleModerate = async (propertyId: string, action: 'approve' | 'reject') => {
     await moderateProperty(propertyId, action);
+  };
+
+  const handleViewDetails = (propertyId: string) => {
+    navigate(`/property/${propertyId}`);
+  };
+
+  const handleEditProperty = (propertyId: string) => {
+    navigate(`/admin/properties/${propertyId}/edit`);
   };
 
   if (isLoading) {
@@ -96,7 +113,7 @@ export default function PropertiesManagement() {
 
       <Card className="mb-6">
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div className="relative lg:col-span-2">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
@@ -156,6 +173,19 @@ export default function PropertiesManagement() {
                 ))}
               </SelectContent>
             </Select>
+            <Select
+              value={visibilityFilter}
+              onValueChange={setVisibilityFilter}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Visibilité" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Toutes</SelectItem>
+                <SelectItem value="visible">Visibles</SelectItem>
+                <SelectItem value="hidden">Masquées</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="flex items-center gap-2 mt-4">
@@ -202,6 +232,7 @@ export default function PropertiesManagement() {
                     <TableHead>Localisation</TableHead>
                     <TableHead>Prix</TableHead>
                     <TableHead>Statut</TableHead>
+                    <TableHead>Visibilité</TableHead>
                     <TableHead>Agence</TableHead>
                     <TableHead>Superficie</TableHead>
                     <TableHead>Chambres</TableHead>
@@ -240,6 +271,19 @@ export default function PropertiesManagement() {
                           <Badge variant="outline">{property.status}</Badge>
                         )}
                       </TableCell>
+                      <TableCell>
+                        {property.is_visible ? (
+                          <Badge variant="default" className="bg-green-500">
+                            <Eye className="h-3 w-3 mr-1" />
+                            Visible
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">
+                            <EyeOff className="h-3 w-3 mr-1" />
+                            Masquée
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell>{property.agency_name}</TableCell>
                       <TableCell>{property.area} m²</TableCell>
                       <TableCell>{property.bedrooms}</TableCell>
@@ -251,14 +295,34 @@ export default function PropertiesManagement() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleViewDetails(property.id)}>
                               <Eye className="h-4 w-4 mr-2" />
                               Voir détails
                             </DropdownMenuItem>
-                            <DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleEditProperty(property.id)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Modifier
                             </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            
+                            {/* Visibility toggle */}
+                            <DropdownMenuItem 
+                              onClick={() => handleToggleVisibility(property.id)}
+                              className={property.is_visible ? "text-orange-500" : "text-green-500"}
+                            >
+                              {property.is_visible ? (
+                                <>
+                                  <EyeOff className="h-4 w-4 mr-2" />
+                                  Masquer
+                                </>
+                              ) : (
+                                <>
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  Afficher
+                                </>
+                              )}
+                            </DropdownMenuItem>
+                            
                             <DropdownMenuSeparator />
                             
                             {/* Moderation actions for pending properties */}
@@ -352,7 +416,7 @@ export default function PropertiesManagement() {
             </>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
-              {searchTerm || statusFilter !== 'all' || typeFilter !== 'all' || locationFilter !== 'all'
+              {searchTerm || statusFilter !== 'all' || typeFilter !== 'all' || locationFilter !== 'all' || visibilityFilter !== 'all'
                 ? 'Aucune propriété trouvée pour ces critères' 
                 : 'Aucune propriété enregistrée'
               }

@@ -1392,6 +1392,7 @@ export type Database = {
           furnished: boolean | null
           id: string
           image_url: string | null
+          is_visible: boolean | null
           kitchens: number | null
           latitude: number | null
           living_rooms: number | null
@@ -1425,6 +1426,7 @@ export type Database = {
           furnished?: boolean | null
           id?: string
           image_url?: string | null
+          is_visible?: boolean | null
           kitchens?: number | null
           latitude?: number | null
           living_rooms?: number | null
@@ -1458,6 +1460,7 @@ export type Database = {
           furnished?: boolean | null
           id?: string
           image_url?: string | null
+          is_visible?: boolean | null
           kitchens?: number | null
           latitude?: number | null
           living_rooms?: number | null
