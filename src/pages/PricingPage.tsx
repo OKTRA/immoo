@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getAllSubscriptionPlans } from '@/services/subscriptionService';
 import { useUserSubscription } from '@/hooks/useUserSubscription';
@@ -11,13 +10,14 @@ import PricingLoadingState from '@/components/pricing/PricingLoadingState';
 import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function PricingPage() {
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState(true);
   const [upgrading, setUpgrading] = useState<string | null>(null);
   const { subscription, upgradeSubscription } = useUserSubscription();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadPlans();
@@ -55,6 +55,10 @@ export default function PricingPage() {
     }
   };
 
+  const handleBackToAgencies = () => {
+    navigate('/agencies');
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
@@ -74,11 +78,13 @@ export default function PricingPage() {
         <div className="container mx-auto px-4 pt-24 pb-12">
           {/* Bouton de retour */}
           <div className="mb-8">
-            <Button asChild variant="ghost" className="group hover:bg-white/50 dark:hover:bg-gray-800/50">
-              <Link to="/agencies" className="flex items-center">
-                <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
-                Retour aux agences
-              </Link>
+            <Button 
+              variant="ghost" 
+              className="group hover:bg-white/50 dark:hover:bg-gray-800/50"
+              onClick={handleBackToAgencies}
+            >
+              <ArrowLeft className="w-4 h-4 mr-2 transition-transform group-hover:-translate-x-1" />
+              Retour aux agences
             </Button>
           </div>
 
