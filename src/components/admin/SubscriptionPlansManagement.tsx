@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Card, CardContent, CardDescription, CardHeader, CardTitle 
@@ -9,7 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { PlusCircle } from 'lucide-react';
 import { useSubscriptionManagement } from '@/hooks/useSubscriptionManagement';
-import SubscriptionPlansStatsCards from './subscription/SubscriptionPlansStatsCards';
+import SubscriptionStatsCards from './subscription/SubscriptionStatsCards';
 import SubscriptionPlanForm from './subscription/SubscriptionPlanForm';
 import SubscriptionPlansTable from './subscription/SubscriptionPlansTable';
 import SubscriptionLimitsTab from './subscription/SubscriptionLimitsTab';
@@ -57,7 +58,7 @@ export default function SubscriptionPlansManagement() {
         </Button>
       </div>
 
-      <SubscriptionPlansStatsCards stats={stats} />
+      <SubscriptionStatsCards stats={stats} />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList>
