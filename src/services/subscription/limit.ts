@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import type { SubscriptionLimit } from './types';
 
+export type { SubscriptionLimit };
+
 /**
  * Vérifier les limites d'une ressource pour l'utilisateur
  */
@@ -79,7 +81,7 @@ export const checkUserResourceLimit = async (
 /**
  * Get current count of resources for a user
  */
-const getCurrentResourceCount = async (
+export const getCurrentResourceCount = async (
   userId: string,
   resourceType: 'properties' | 'agencies' | 'leases' | 'users',
   agencyId?: string
