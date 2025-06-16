@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -76,102 +75,82 @@ export default function SubscriptionPaymentsManagement() {
     try {
       setLoading(true);
       
-      // Charger les paiements d'abonnement depuis billing_history avec les bonnes jointures
+      // Charger d'abord les données de billing_history sans jointures
       const { data: billingData, error } = await supabase
         .from('billing_history')
-        .select(`
-          *,
-          agencies!billing_history_agency_id_fkey(name),
-          subscription_plans!billing_history_plan_id_fkey(name),
-          profiles!billing_history_user_id_fkey(email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error loading payments:', error);
-        // Utiliser une requête alternative sans les jointures complexes
-        const { data: alternativeData, error: altError } = await supabase
-          .from('billing_history')
-          .select('*')
-          .order('created_at', { ascending: false });
-        
-        if (altError) throw altError;
-        
-        // Charger les données associées séparément
-        const paymentsData = [];
-        
-        for (const payment of alternativeData || []) {
-          // Charger l'agence
-          const { data: agencyData } = await supabase
-            .from('agencies')
-            .select('name')
-            .eq('id', payment.agency_id)
-            .single();
-          
-          // Charger le plan
-          const { data: planData } = await supabase
-            .from('subscription_plans')
-            .select('name')
-            .eq('id', payment.plan_id)
-            .single();
-          
-          // Charger l'utilisateur
-          const { data: userData } = await supabase
-            .from('profiles')
-            .select('email')
-            .eq('id', payment.user_id)
-            .single();
-          
-          paymentsData.push({
-            id: payment.id,
-            userId: payment.user_id,
-            agencyId: payment.agency_id,
-            planId: payment.plan_id,
-            amount: payment.amount,
-            status: payment.status,
-            paymentMethod: payment.payment_method || 'unknown',
-            transactionId: payment.transaction_id,
-            createdAt: payment.created_at,
-            paidAt: payment.payment_date,
-            agencyName: agencyData?.name || 'N/A',
-            planName: planData?.name || 'N/A',
-            userEmail: userData?.email || 'N/A'
-          });
-        }
-        
-        setPayments(paymentsData);
-      } else {
-        const paymentsData = billingData?.map(payment => ({
-          id: payment.id,
-          userId: payment.user_id,
-          agencyId: payment.agency_id,
-          planId: payment.plan_id,
-          amount: payment.amount,
-          status: payment.status,
-          paymentMethod: payment.payment_method || 'unknown',
-          transactionId: payment.transaction_id,
-          createdAt: payment.created_at,
-          paidAt: payment.payment_date,
-          agencyName: payment.agencies?.name || 'N/A',
-          planName: payment.subscription_plans?.name || 'N/A',
-          userEmail: payment.profiles?.email || 'N/A'
-        })) || [];
-
-        setPayments(paymentsData);
+        toast.error('Erreur lors du chargement des paiements');
+        setPayments([]);
+        setStats({
+          totalPayments: 0,
+          pendingPayments: 0,
+          paidPayments: 0,
+          totalRevenue: 0,
+          monthlyRevenue: 0
+        });
+        return;
       }
-      
+
+      if (!billingData || billingData.length === 0) {
+        setPayments([]);
+        setStats({
+          totalPayments: 0,
+          pendingPayments: 0,
+          paidPayments: 0,
+          totalRevenue: 0,
+          monthlyRevenue: 0
+        });
+        return;
+      }
+
+      // Récupérer les données liées séparément
+      const userIds = [...new Set(billingData.map(p => p.user_id).filter(Boolean))];
+      const planIds = [...new Set(billingData.map(p => p.plan_id).filter(Boolean))];
+      const agencyIds = [...new Set(billingData.map(p => p.agency_id).filter(Boolean))];
+
+      // Requêtes parallèles pour les données liées
+      const [usersResult, plansResult, agenciesResult] = await Promise.all([
+        userIds.length > 0 ? supabase.from('profiles').select('id, email').in('id', userIds) : { data: [] },
+        planIds.length > 0 ? supabase.from('subscription_plans').select('id, name').in('id', planIds) : { data: [] },
+        agencyIds.length > 0 ? supabase.from('agencies').select('id, name').in('id', agencyIds) : { data: [] }
+      ]);
+
+      // Créer des maps pour les lookups rapides
+      const usersMap = new Map((usersResult.data || []).map(u => [u.id, u]));
+      const plansMap = new Map((plansResult.data || []).map(p => [p.id, p]));
+      const agenciesMap = new Map((agenciesResult.data || []).map(a => [a.id, a]));
+
+      // Combiner les données
+      const paymentsWithDetails = billingData.map(payment => ({
+        id: payment.id,
+        amount: payment.amount,
+        status: payment.status,
+        createdAt: payment.created_at,
+        paidAt: payment.payment_date,
+        paymentMethod: payment.payment_method || 'N/A',
+        userEmail: usersMap.get(payment.user_id)?.email || 'N/A',
+        planName: plansMap.get(payment.plan_id)?.name || 'N/A',
+        agencyName: agenciesMap.get(payment.agency_id)?.name || 'N/A',
+        description: payment.description || ''
+      }));
+
+      setPayments(paymentsWithDetails);
+
       // Calculer les statistiques
-      const currentPayments = payments.length > 0 ? payments : [];
-      const totalPayments = currentPayments.length;
-      const pendingPayments = currentPayments.filter(p => p.status === 'pending').length;
-      const paidPayments = currentPayments.filter(p => p.status === 'paid').length;
-      const totalRevenue = currentPayments
+      const totalPayments = paymentsWithDetails.length;
+      const pendingPayments = paymentsWithDetails.filter(p => p.status === 'pending').length;
+      const paidPayments = paymentsWithDetails.filter(p => p.status === 'paid').length;
+      const totalRevenue = paymentsWithDetails
         .filter(p => p.status === 'paid')
         .reduce((sum, p) => sum + p.amount, 0);
-      
+
       const thisMonth = new Date();
       thisMonth.setDate(1);
-      const monthlyRevenue = currentPayments
+      const monthlyRevenue = paymentsWithDetails
         .filter(p => p.status === 'paid' && new Date(p.paidAt || p.createdAt) >= thisMonth)
         .reduce((sum, p) => sum + p.amount, 0);
 

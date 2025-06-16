@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 
 // Get the current user
@@ -117,6 +116,43 @@ export const signUpWithEmail = async (email: string, password: string, userData:
     
     // If we have a user, we need to create or update their profile
     if (data.user) {
+      let agencyId = null;
+      
+      // If the user is registering as an agency, create the agency first
+      if (userData.role === 'agency') {
+        try {
+          const agencyName = userData.firstName && userData.lastName 
+            ? `${userData.firstName} ${userData.lastName} Agency`
+            : `${email.split('@')[0]} Agency`;
+            
+          const { data: agencyData, error: agencyError } = await supabase
+            .from('agencies')
+            .insert([{
+              name: agencyName,
+              email: email,
+              description: 'Agence créée automatiquement lors de l\'inscription',
+              user_id: data.user.id,
+              location: '', // Optionnel
+              properties_count: 0,
+              rating: 0.0,
+              verified: false,
+              status: 'active',
+              is_visible: true
+            }])
+            .select()
+            .single();
+            
+          if (agencyError) {
+            console.error("Error creating agency:", agencyError);
+          } else {
+            agencyId = agencyData.id;
+            console.log("Agency created successfully:", agencyData);
+          }
+        } catch (agencyError) {
+          console.error("Error in agency creation:", agencyError);
+        }
+      }
+      
       try {
         const { error: profileError } = await supabase
           .from('profiles')
@@ -125,11 +161,14 @@ export const signUpWithEmail = async (email: string, password: string, userData:
             email: email,
             first_name: userData.firstName || '',
             last_name: userData.lastName || '',
-            role: userData.role || 'public'
+            role: userData.role || 'public',
+            agency_id: agencyId // Link to the created agency if applicable
           }, { onConflict: 'id' });
         
         if (profileError) {
           console.error("Error creating user profile:", profileError);
+        } else {
+          console.log("Profile created successfully with agency_id:", agencyId);
         }
       } catch (profileError) {
         console.error("Error in profile creation:", profileError);

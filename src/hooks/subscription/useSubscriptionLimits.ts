@@ -1,4 +1,3 @@
-
 import { useAuth } from '@/hooks/useAuth';
 import { checkUserResourceLimit, type SubscriptionLimit } from '@/services/subscription';
 
@@ -10,7 +9,6 @@ export const useSubscriptionLimits = () => {
     agencyId?: string
   ): Promise<SubscriptionLimit> => {
     if (!user?.id) {
-      console.log('useSubscriptionLimits: No user ID for limit check');
       return {
         allowed: false,
         currentCount: 0,
@@ -19,14 +17,7 @@ export const useSubscriptionLimits = () => {
       };
     }
 
-    console.log('useSubscriptionLimits: Checking limit for:', { 
-      resourceType, 
-      userId: user.id, 
-      agencyId
-    });
-    
     const result = await checkUserResourceLimit(user.id, resourceType, agencyId);
-    console.log('useSubscriptionLimits: Limit check result:', result);
     
     return result;
   };

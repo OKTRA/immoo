@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CreditCard, CheckCircle, Clock, DollarSign } from 'lucide-react';
@@ -14,6 +13,15 @@ interface SubscriptionStatsProps {
 }
 
 export default function SubscriptionStatsCards({ stats }: SubscriptionStatsProps) {
+  // Valeurs par défaut pour éviter les erreurs undefined
+  const safeStats = {
+    totalPayments: stats?.totalPayments || 0,
+    pendingPayments: stats?.pendingPayments || 0,
+    paidPayments: stats?.paidPayments || 0,
+    totalRevenue: stats?.totalRevenue || 0,
+    monthlyRevenue: stats?.monthlyRevenue || 0,
+  };
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
       <Card>
@@ -22,7 +30,7 @@ export default function SubscriptionStatsCards({ stats }: SubscriptionStatsProps
           <CreditCard className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.totalPayments}</div>
+          <div className="text-2xl font-bold">{safeStats.totalPayments}</div>
           <p className="text-xs text-muted-foreground">
             Tous les paiements d'abonnements
           </p>
@@ -35,7 +43,7 @@ export default function SubscriptionStatsCards({ stats }: SubscriptionStatsProps
           <Clock className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-orange-600">{stats.pendingPayments}</div>
+          <div className="text-2xl font-bold text-orange-600">{safeStats.pendingPayments}</div>
           <p className="text-xs text-muted-foreground">
             Paiements non confirmés
           </p>
@@ -48,7 +56,7 @@ export default function SubscriptionStatsCards({ stats }: SubscriptionStatsProps
           <CheckCircle className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-green-600">{stats.paidPayments}</div>
+          <div className="text-2xl font-bold text-green-600">{safeStats.paidPayments}</div>
           <p className="text-xs text-muted-foreground">
             Abonnements activés
           </p>
@@ -61,7 +69,7 @@ export default function SubscriptionStatsCards({ stats }: SubscriptionStatsProps
           <DollarSign className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold">{stats.totalRevenue.toLocaleString()} FCFA</div>
+          <div className="text-2xl font-bold">{safeStats.totalRevenue.toLocaleString()} FCFA</div>
           <p className="text-xs text-muted-foreground">
             Total encaissé
           </p>

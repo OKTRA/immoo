@@ -1,4 +1,3 @@
-
 import {
   BrowserRouter as Router,
   Routes,
@@ -13,6 +12,7 @@ import AgencyProfilePage from "@/pages/AgencyProfilePage";
 import PublicAgencyPage from "@/pages/PublicAgencyPage";
 import AgencyDetailPage from "@/pages/AgencyDetailPage";
 import CreateAgencyPage from "@/pages/CreateAgencyPage";
+import EditAgencyPage from "@/pages/EditAgencyPage";
 import PropertyDetailPage from "@/pages/PropertyDetailPage";
 import CreatePropertyPage from "@/pages/property/CreatePropertyPage";
 import CreateLeasePage from "@/pages/CreateLeasePage";
@@ -72,6 +72,7 @@ function App() {
               {/* Routes protégées pour les agences */}
               <Route path="/agencies" element={<AgenciesPage />} />
               <Route path="/agencies/create" element={<CreateAgencyPage />} />
+              <Route path="/agencies/edit/:agencyId" element={<EditAgencyPage />} />
 
               <Route element={<AgencyLayout />}>
                 <Route

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 
 export interface User {
@@ -36,7 +36,6 @@ export function useUsersManagement() {
   const fetchUsers = async () => {
     try {
       setIsLoading(true);
-      console.log('=== DÉBUT DE LA RÉCUPÉRATION DES UTILISATEURS ===');
       
       // Fetch visitor contacts
       const { data: visitors, error: visitorsError } = await supabase
@@ -55,32 +54,27 @@ export function useUsersManagement() {
         `);
 
       if (visitorsError && visitorsError.code !== 'PGRST116') {
-        console.error('Error fetching visitors:', visitorsError);
+        toast.error('Erreur lors du chargement des visiteurs');
       }
-
-      console.log('Visiteurs récupérés:', visitors?.length || 0);
 
       // Fetch ALL profiles (without filtering yet)
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select(`
-          id,
-          email,
-          first_name,
-          last_name,
-          role,
-          created_at,
-          agency_id,
-          agencies(name)
-        `);
+        .select('*');
 
       if (profilesError) {
-        console.error('Error fetching profiles:', profilesError);
+        toast.error('Erreur lors du chargement des profils');
         throw profilesError;
       }
 
-      console.log('Profils récupérés:', profiles?.length || 0);
-      console.log('Détails des profils:', profiles);
+      // Fetch agencies separately to avoid JOIN issues
+      const { data: agencies, error: agenciesError } = await supabase
+        .from('agencies')
+        .select('id, name');
+
+      if (agenciesError && agenciesError.code !== 'PGRST116') {
+        toast.error('Erreur lors du chargement des agences');
+      }
 
       // Fetch admin roles
       const { data: adminRoles, error: adminRolesError } = await supabase
@@ -88,10 +82,8 @@ export function useUsersManagement() {
         .select('user_id, role_level');
 
       if (adminRolesError && adminRolesError.code !== 'PGRST116') {
-        console.error('Error fetching admin roles:', adminRolesError);
+        toast.error('Erreur lors du chargement des rôles administrateurs');
       }
-
-      console.log('Rôles admin récupérés:', adminRoles?.length || 0);
 
       // Transform data
       const allUsers: User[] = [];
@@ -125,6 +117,8 @@ export function useUsersManagement() {
           userType = 'agency';
         }
 
+        const agency = agencies?.find(a => a.id === profile.agency_id);
+
         allUsers.push({
           id: profile.id,
           name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || profile.email?.split('@')[0] || 'Utilisateur',
@@ -136,12 +130,9 @@ export function useUsersManagement() {
           isAdmin,
           adminRole: adminRole?.role_level,
           agency_id: profile.agency_id,
-          agency_name: profile.agencies?.name
+          agency_name: agency?.name
         });
       });
-
-      console.log('Tous les utilisateurs transformés:', allUsers.length);
-      console.log('Détails des utilisateurs:', allUsers);
 
       // Apply filters
       let filteredUsers = allUsers;
@@ -161,20 +152,16 @@ export function useUsersManagement() {
         filteredUsers = filteredUsers.filter(user => user.user_type === userTypeFilter);
       }
 
-      console.log('Utilisateurs après filtrage:', filteredUsers.length);
-
       // Apply pagination
       const startIndex = (currentPage - 1) * itemsPerPage;
       const paginatedUsers = filteredUsers.slice(startIndex, startIndex + itemsPerPage);
-
-      console.log('Utilisateurs paginés:', paginatedUsers.length);
 
       setUsers(paginatedUsers);
       setTotalCount(filteredUsers.length);
 
     } catch (error) {
-      console.error('Error fetching users:', error);
-      toast.error('Erreur lors du chargement des utilisateurs');
+      setUsers([]);
+      setTotalCount(0);
     } finally {
       setIsLoading(false);
     }
@@ -192,7 +179,6 @@ export function useUsersManagement() {
       toast.info('Fonctionnalité en cours d\'implémentation');
       
     } catch (error) {
-      console.error('Error toggling user status:', error);
       toast.error('Erreur lors de la modification du statut');
     }
   };
@@ -219,7 +205,6 @@ export function useUsersManagement() {
       setTotalCount(prev => prev - 1);
       toast.success('Utilisateur supprimé avec succès');
     } catch (error) {
-      console.error('Error deleting user:', error);
       toast.error('Erreur lors de la suppression');
     }
   };

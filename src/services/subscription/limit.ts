@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import type { SubscriptionLimit } from './types';
 
@@ -11,95 +10,57 @@ export const checkUserResourceLimit = async (
   agencyId?: string
 ): Promise<SubscriptionLimit> => {
   try {
-    console.log('Checking resource limit for:', { userId, resourceType, agencyId });
-
     // First, try to get the user's subscription
     const { data: subscription, error: subError } = await supabase
       .from('user_subscriptions')
       .select(`
         *,
-        subscription_plans:plan_id(
-          name,
-          price,
-          max_properties,
-          max_agencies,
-          max_leases,
-          max_users,
-          features
-        )
+        subscription_plans:plan_id(*)
       `)
       .eq('user_id', userId)
       .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .limit(1)
       .single();
 
-    if (subError) {
-      console.log('No active subscription found, treating as free plan');
-      // No subscription found, apply free plan limits
+    if (subError || !subscription) {
+      // No active subscription found, treat as free plan
       const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
-      return {
-        allowed: currentCount < 1, // Free plan allows 1 of everything
-        currentCount,
-        maxAllowed: 1,
-        planName: 'free',
-        percentageUsed: Math.round((currentCount / 1) * 100),
-        error: null
-      };
+      return getFreePlanLimits(currentCount, resourceType);
     }
 
-    const plan = subscription.subscription_plans;
-    if (!plan) {
-      console.log('No plan found in subscription, treating as free plan');
+    if (!subscription.subscription_plans) {
+      // No plan found, treat as free plan
       const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
-      return {
-        allowed: currentCount < 1,
-        currentCount,
-        maxAllowed: 1,
-        planName: 'free',
-        percentageUsed: Math.round((currentCount / 1) * 100),
-        error: null
-      };
+      return getFreePlanLimits(currentCount, resourceType);
     }
 
-    // Get the max allowed for this resource type
-    let maxAllowed = 1;
-    switch (resourceType) {
-      case 'agencies':
-        maxAllowed = plan.max_agencies || 1;
-        break;
-      case 'properties':
-        maxAllowed = plan.max_properties || 1;
-        break;
-      case 'leases':
-        maxAllowed = plan.max_leases || 2;
-        break;
-      case 'users':
-        maxAllowed = plan.max_users || 1;
-        break;
-    }
-
-    // Get current count
+    // Get current count of resources
     const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
     
-    console.log('Resource limit check result:', {
+    // Get the appropriate limit from the plan
+    const plan = subscription.subscription_plans;
+    const limits = {
+      properties: plan.max_properties || 1,
+      agencies: plan.max_agencies || 1,
+      leases: plan.max_leases || 2,
+      users: plan.max_users || 1
+    };
+
+    const maxAllowed = limits[resourceType];
+    const allowed = currentCount < maxAllowed;
+    const percentageUsed = Math.round((currentCount / maxAllowed) * 100);
+
+    const result = {
       resourceType,
       currentCount,
       maxAllowed,
       planName: plan.name,
-      allowed: currentCount < maxAllowed
-    });
-
-    return {
-      allowed: currentCount < maxAllowed,
-      currentCount,
-      maxAllowed,
-      planName: plan.name,
-      percentageUsed: Math.round((currentCount / maxAllowed) * 100),
-      error: null
+      allowed,
+      percentageUsed,
+      planId: plan.id
     };
 
-  } catch (error: any) {
+    return result;
+  } catch (error) {
     console.error('Error checking resource limit:', error);
     
     // Fallback: if any error, allow but with basic limits
@@ -236,4 +197,15 @@ const getCurrentResourceCount = async (
     console.error(`Error getting ${resourceType} count:`, error);
     return 0;
   }
+};
+
+const getFreePlanLimits = (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users') => {
+  return {
+    allowed: currentCount < 1,
+    currentCount,
+    maxAllowed: 1,
+    planName: 'free',
+    percentageUsed: Math.round((currentCount / 1) * 100),
+    error: null
+  };
 };

@@ -1,11 +1,10 @@
-
 import { DefaultUserSubscription } from './types';
 
 export const createDefaultFreeSubscription = (userId: string): DefaultUserSubscription => ({
   id: 'default-free',
   userId: userId,
   agencyId: null,
-  planId: 'free-plan',
+  planId: '00000000-0000-0000-0000-000000000001',
   status: 'active',
   startDate: new Date().toISOString(),
   endDate: null,

@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { getUserAgencies } from "@/services/agency";
 import AgencyCard from "@/components/AgencyCard";
@@ -26,59 +25,29 @@ export default function AgenciesPage() {
 
   const agencies = data?.agencies || [];
 
-  // Forcer le rechargement de l'abonnement au montage du composant
+  // Charger l'abonnement au montage du composant
   useEffect(() => {
-    if (user?.id && !subscriptionLoading) {
-      console.log('AgenciesPage: Reloading subscription data for user:', user.id);
+    if (user?.id && !subscriptionLoading && !subscription) {
       reloadSubscription();
     }
-  }, [user?.id, reloadSubscription]);
+  }, [user?.id, subscriptionLoading, subscription, reloadSubscription]);
 
   // Vérifier les limites dès que l'abonnement est chargé
   useEffect(() => {
     const checkAgencyLimits = async () => {
       if (user?.id && subscription) {
-        console.log('AgenciesPage: Checking agency limits for user:', user.id);
-        console.log('AgenciesPage: Current subscription:', subscription);
-        
         const limit = await checkLimit('agencies');
         setAgencyLimit(limit);
-        console.log('AgenciesPage: Agency limit result:', limit);
-        
-        // Log des informations détaillées pour debug
-        if (subscription.plan) {
-          console.log('AgenciesPage: Plan details from subscription:', {
-            planName: subscription.plan.name,
-            maxAgencies: subscription.plan.maxAgencies,
-            currentAgencies: agencies.length,
-            limitResult: limit
-          });
-        }
       }
     };
 
     if (!subscriptionLoading) {
       checkAgencyLimits();
     }
-  }, [user?.id, subscription, checkLimit, agencies.length, subscriptionLoading]);
-
-  // Log des informations de l'utilisateur et de l'abonnement
-  useEffect(() => {
-    if (user && subscription) {
-      console.log('AgenciesPage: User and subscription info:', {
-        userId: user.id,
-        email: user.email,
-        subscription: subscription,
-        isFreePlan: isFreePlan(),
-        agenciesCount: agencies.length,
-        planLimits: subscription.plan
-      });
-    }
-  }, [user, subscription, agencies.length, isFreePlan]);
+  }, [user?.id, subscription, checkLimit, subscriptionLoading]);
 
   const handleCreateAgency = () => {
     if (agencyLimit && !agencyLimit.allowed) {
-      console.log('AgenciesPage: Cannot create agency - limit reached');
       return;
     }
     navigate('/agencies/create');
