@@ -12,6 +12,7 @@ export interface Agency {
   website?: string;
   specialties?: string[];
   serviceAreas?: string[];
+  agencyYearsActive?: number;
 }
 
 export interface Property {
@@ -179,6 +180,8 @@ export interface SubscriptionPlan {
   isActive?: boolean;
   maxProperties?: number;
   maxUsers?: number;
+  maxAgencies?: number;
+  maxLeases?: number;
   hasApiAccess?: boolean;
 }
 
@@ -247,4 +250,25 @@ export interface AgencyCommission {
   calculationType: 'percentage' | 'fixed';
   minimumAmount?: number;
   maximumAmount?: number;
+}
+
+export interface UserSubscription {
+  id: string;
+  userId: string;
+  agencyId?: string;
+  planId: string;
+  status: 'active' | 'inactive' | 'expired';
+  startDate: string;
+  endDate?: string;
+  paymentMethod?: string;
+  autoRenew: boolean;
+  plan?: {
+    name: string;
+    price: number;
+    maxProperties: number;
+    maxAgencies: number;
+    maxLeases: number;
+    maxUsers: number;
+    features: string[];
+  };
 }

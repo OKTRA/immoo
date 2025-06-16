@@ -1,82 +1,99 @@
-import { createBrowserRouter } from "react-router-dom";
-import NotFound from "./pages/NotFound";
-import HomePage from "./pages/HomePage";
-import Auth from "./pages/Auth";
-import Profile from "./pages/Profile";
-import AgenciesPage from "./pages/AgenciesPage";
-import CreateAgencyPage from "./pages/CreateAgencyPage";
-import AgencyDetailPage from "./pages/AgencyDetailPage";
-import EditAgencyPage from "./pages/EditAgencyPage";
-import AgencyPaymentsPage from "./pages/AgencyPaymentsPage";
-import PropertyDetailPage from "./pages/PropertyDetailPage";
-import CreatePropertyPage from "./pages/property/CreatePropertyPage";
-import PropertyLeasePaymentsPage from "./pages/PropertyLeasePaymentsPage";
-import AgencySettingsPage from "./pages/AgencySettingsPage";
-import PaymentSuccessPage from "./pages/PaymentSuccessPage";
-import PaymentCancelPage from "./pages/PaymentCancelPage";
 
-const router = createBrowserRouter([
+
+import { lazy, Suspense } from 'react';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { Spinner } from '@/components/ui/spinner';
+
+// Lazy-loaded components that exist
+const HomePage = lazy(() => import('@/pages/HomePage'));
+const LoginPage = lazy(() => import('@/pages/LoginPage'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
+const BrowseAgenciesPage = lazy(() => import('@/pages/BrowseAgenciesPage'));
+const CreateAgencyPage = lazy(() => import('@/pages/CreateAgencyPage'));
+const EditAgencyPage = lazy(() => import('@/pages/EditAgencyPage'));
+const AdminDashboardPage = lazy(() => import('@/pages/AdminPage'));
+const SubscriptionPlansManagement = lazy(() => import('@/components/admin/SubscriptionPlansManagement'));
+import PricingPage from '@/pages/PricingPage';
+
+export const router = createBrowserRouter([
   {
-    path: "/",
-    element: <HomePage />,
-    errorElement: <NotFound />,
-  },
-  {
-    path: "/auth",
-    element: <Auth />,
-  },
-  {
-    path: "/register",
-    element: <Auth isRegister={true} />,
-  },
-  {
-    path: "/profile",
-    element: <Profile />,
-  },
-  {
-    path: "/agencies",
-    element: <AgenciesPage />,
-  },
-  {
-    path: "/agencies/create",
-    element: <CreateAgencyPage />,
-  },
-  {
-    path: "/agencies/:id",
-    element: <AgencyDetailPage />,
-  },
-  {
-    path: "/agencies/:id/edit",
-    element: <EditAgencyPage />,
-  },
-  {
-    path: "/agencies/:id/payments",
-    element: <AgencyPaymentsPage />,
-  },
-  {
-    path: "/properties/:id",
-    element: <PropertyDetailPage />,
-  },
-  {
-    path: "/properties/create",
-    element: <CreatePropertyPage />,
-  },
-  {
-    path: "/properties/:id/payments",
-    element: <PropertyLeasePaymentsPage />,
-  },
-  {
-    path: "/agency/settings",
-    element: <AgencySettingsPage />,
-  },
-  {
-    path: "/payment/success",
-    element: <PaymentSuccessPage />,
-  },
-  {
-    path: "/payment/cancel",
-    element: <PaymentCancelPage />,
+    path: '/',
+    children: [
+      {
+        index: true,
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <HomePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/profile',
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <ProfilePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/agencies',
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <BrowseAgenciesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/create-agency',
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <CreateAgencyPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/edit-agency/:id',
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <EditAgencyPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/admin",
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <AdminDashboardPage />
+          </Suspense>
+        ),
+        children: [
+          {
+            index: true,
+            element: <Navigate to="subscription-plans" replace />,
+          },
+          {
+            path: "subscription-plans",
+            element: (
+              <Suspense fallback={<Spinner />}>
+                <SubscriptionPlansManagement />
+              </Suspense>
+            ),
+          },
+        ],
+      },
+      {
+        path: "/pricing",
+        element: <PricingPage />
+      },
+      {
+        path: '/login',
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <LoginPage />
+          </Suspense>
+        ),
+      },
+    ],
   },
 ]);
 
-export default router;

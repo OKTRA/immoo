@@ -1,4 +1,3 @@
-
 import { supabase, handleSupabaseError, getMockData } from '@/lib/supabase';
 import { Agency } from '@/assets/types';
 
@@ -16,9 +15,11 @@ export const getAllAgencies = async (
 
     // For public browsing, we don't filter by user_id - we want to show all agencies
     const { data, error, count } = await supabase
-      .from('agencies')
+      .from('agencies_with_property_count')
       .select('*', { count: 'exact' })
-      .order(sortBy, { ascending: sortOrder === 'asc' })
+      .eq('status', 'active')
+      .eq('is_visible', true)
+      .order(sortBy === 'properties_count' ? 'computed_properties_count' : sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + limit - 1);
 
     if (error) {
@@ -60,10 +61,10 @@ export const getUserAgencies = async (
 
     // Récupérer uniquement les agences de l'utilisateur connecté
     const { data, error, count } = await supabase
-      .from('agencies')
+      .from('agencies_with_property_count')
       .select('*', { count: 'exact' })
       .eq('user_id', userId) // Filtrer explicitement par l'ID utilisateur actuel
-      .order(sortBy, { ascending: sortOrder === 'asc' })
+      .order(sortBy === 'properties_count' ? 'computed_properties_count' : sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + limit - 1);
 
     if (error) {
@@ -90,9 +91,11 @@ export const getUserAgencies = async (
 export const getAgencyById = async (id: string) => {
   try {
     const { data, error } = await supabase
-      .from('agencies')
+      .from('agencies_with_property_count')
       .select('*')
       .eq('id', id)
+      .eq('status', 'active')
+      .eq('is_visible', true)
       .single();
 
     if (error) throw error;
@@ -111,34 +114,19 @@ export const getAgencyById = async (id: string) => {
  */
 export const getFeaturedAgencies = async (limit = 6) => {
   try {
-    // First attempt to fetch from Supabase with verified filter
-    try {
-      const { data, error } = await supabase
-        .from('agencies')
-        .select('*')
-        .order('rating', { ascending: false })
-        .limit(limit);
+    const { data, error } = await supabase
+      .from('agencies_with_property_count')
+      .select('*')
+      .eq('status', 'active')
+      .eq('is_visible', true)
+      .order('rating', { ascending: false })
+      .limit(limit);
 
-      if (error) throw error;
-      
-      const agencies = data.map((item) => transformAgencyData(item));
-      
-      return { agencies, error: null };
-    } catch (error) {
-      // If verified column doesn't exist, try without the filter
-      console.warn('Falling back to query without verified filter:', error);
-      const { data, error: fallbackError } = await supabase
-        .from('agencies')
-        .select('*')
-        .order('rating', { ascending: false })
-        .limit(limit);
-
-      if (fallbackError) throw fallbackError;
-      
-      const agencies = data.map((item) => transformAgencyData(item, true));
-      
-      return { agencies, error: null };
-    }
+    if (error) throw error;
+    
+    const agencies = data.map((item) => transformAgencyData(item));
+    
+    return { agencies, error: null };
   } catch (error: any) {
     console.error('Error getting featured agencies:', error);
     const mockData = getMockData('agencies', limit);
@@ -159,7 +147,7 @@ export const transformAgencyData = (data: any, useFallbackValues = false): Agenc
     name: data.name,
     logoUrl: data.logo_url || (useFallbackValues ? '' : data.logo_url),
     location: data.location || (useFallbackValues ? '' : data.location),
-    properties: data.properties_count || (useFallbackValues ? 0 : data.properties_count),
+    properties: data.computed_properties_count ?? data.properties_count ?? (useFallbackValues ? 0 : data.properties_count),
     rating: rating,
     verified: data.verified || false,
     description: data.description || (useFallbackValues ? '' : data.description),
