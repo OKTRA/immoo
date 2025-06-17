@@ -80,59 +80,59 @@ export default function HomePage() {
         
         {/* Only show properties section if there are properties or while loading */}
         {(hasProperties || loading) && (
-          <section className="py-20 bg-gradient-to-b from-immoo-pearl to-card dark:from-immoo-navy-light dark:to-immoo-navy">
+          <section className="py-12 bg-gradient-to-b from-immoo-pearl/20 to-white dark:from-immoo-navy-light/20 dark:to-immoo-navy">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               {/* Section Header */}
-              <div className="text-center mb-16">
-                <div className="inline-flex items-center px-6 py-3 bg-immoo-gold/10 text-immoo-gold rounded-full text-sm font-semibold mb-6 border border-immoo-gold/20">
-                  <Building2 className="w-4 h-4 mr-2" />
+              <div className="text-center mb-12">
+                <div className="inline-flex items-center px-4 py-2 bg-immoo-gold/10 text-immoo-gold rounded-full text-xs font-medium mb-4 border border-immoo-gold/20">
+                  <Building2 className="w-3 h-3 mr-2" />
                   Sélection immobilière
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-gradient-to-r from-immoo-navy to-immoo-gold dark:from-immoo-pearl dark:to-immoo-gold bg-clip-text text-transparent">
+                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-immoo-navy dark:text-immoo-pearl">
                   Propriétés en vedette
                 </h2>
-                <p className="text-xl text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-3xl mx-auto leading-relaxed">
-                  Découvrez notre sélection de biens d'exception, soigneusement choisis pour leur qualité, leur emplacement privilégié et leur potentiel d'investissement.
+                <p className="text-sm md:text-base text-immoo-navy/60 dark:text-immoo-pearl/60 max-w-2xl mx-auto">
+                  Découvrez notre sélection de biens d'exception
                 </p>
               </div>
 
               {/* Properties Grid */}
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                   {[...Array(6)].map((_, index) => (
-                    <Card key={index} className="overflow-hidden animate-pulse border-immoo-gray/20 shadow-lg">
-                      <div className="h-64 bg-immoo-gray/30"></div>
-                      <CardContent className="p-6">
-                        <div className="h-6 bg-immoo-gray/30 rounded mb-3"></div>
-                        <div className="h-4 bg-immoo-gray/30 rounded mb-4 w-2/3"></div>
-                        <div className="flex justify-between items-center mb-4">
-                          <div className="h-6 bg-immoo-gray/30 rounded w-1/3"></div>
-                          <div className="h-4 bg-immoo-gray/30 rounded w-1/4"></div>
+                    <Card key={index} className="overflow-hidden animate-pulse border-immoo-gray/20 shadow-sm">
+                      <div className="h-48 bg-immoo-gray/30"></div>
+                      <CardContent className="p-4">
+                        <div className="h-4 bg-immoo-gray/30 rounded mb-2"></div>
+                        <div className="h-3 bg-immoo-gray/30 rounded mb-3 w-2/3"></div>
+                        <div className="flex justify-between items-center mb-3">
+                          <div className="h-4 bg-immoo-gray/30 rounded w-1/3"></div>
+                          <div className="h-3 bg-immoo-gray/30 rounded w-1/4"></div>
                         </div>
-                        <div className="flex space-x-4">
-                          <div className="h-4 bg-immoo-gray/30 rounded w-16"></div>
-                          <div className="h-4 bg-immoo-gray/30 rounded w-12"></div>
+                        <div className="flex space-x-3">
+                          <div className="h-3 bg-immoo-gray/30 rounded w-12"></div>
+                          <div className="h-3 bg-immoo-gray/30 rounded w-10"></div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : (
-                <div className="space-y-8">
+                <div className="space-y-6">
                   <PropertyList properties={featuredProperties} />
                   
-                  {/* Call to Action */}
-                  <div className="text-center pt-8">
-                    <div className="inline-flex flex-col sm:flex-row gap-4">
-                      <Button asChild size="lg" className="immoo-cta-button h-14 px-8 text-lg font-medium">
+                  {/* Compact Call to Action */}
+                  <div className="text-center pt-6">
+                    <div className="inline-flex flex-col sm:flex-row gap-3">
+                      <Button asChild size="default" className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy px-6 py-2.5 font-medium shadow-md hover:shadow-lg transition-all duration-200">
                         <Link to="/properties" className="flex items-center">
                           Voir toutes les propriétés
-                          <ArrowRight className="ml-2 h-5 w-5" />
+                          <ArrowRight className="ml-2 h-4 w-4" />
                         </Link>
                       </Button>
-                      <Button asChild variant="outline" size="lg" className="h-14 px-8 text-lg font-medium border-2 border-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy transition-all duration-300">
+                      <Button asChild variant="outline" size="default" className="border border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy px-6 py-2.5 font-medium transition-all duration-200">
                         <Link to="/agencies" className="flex items-center">
-                          <Building2 className="mr-2 h-5 w-5" />
+                          <Building2 className="mr-2 h-4 w-4" />
                           Parcourir les agences
                         </Link>
                       </Button>
@@ -146,33 +146,33 @@ export default function HomePage() {
         
         <FeatureSection />
         
-        <section className="py-20 bg-gradient-to-r from-immoo-navy via-immoo-navy-light to-immoo-navy relative overflow-hidden">
-          {/* Decorative elements */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-10 left-10 w-32 h-32 bg-immoo-gold rounded-full animate-immoo-float"></div>
-            <div className="absolute bottom-10 right-10 w-20 h-20 bg-immoo-gold/50 rounded-full animate-immoo-float" style={{ animationDelay: '2s' }}></div>
+        <section className="py-12 bg-gradient-to-r from-immoo-navy/95 via-immoo-navy-light/95 to-immoo-navy/95 relative overflow-hidden">
+          {/* Subtle decorative elements */}
+          <div className="absolute inset-0 opacity-5">
+            <div className="absolute top-5 left-5 w-16 h-16 bg-immoo-gold rounded-full animate-immoo-float"></div>
+            <div className="absolute bottom-5 right-5 w-12 h-12 bg-immoo-gold/50 rounded-full animate-immoo-float" style={{ animationDelay: '2s' }}></div>
           </div>
           
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-4xl md:text-5xl font-bold mb-8 bg-gradient-to-r from-immoo-pearl to-immoo-gold bg-clip-text text-transparent">
+            <div className="max-w-3xl mx-auto">
+              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-immoo-pearl">
                 Accédez à votre espace IMMOO
               </h2>
-              <p className="text-xl text-immoo-pearl/80 mb-12 leading-relaxed">
-                Connectez-vous à votre espace personnalisé pour gérer vos propriétés, suivre vos locataires et administrer vos baux en toute simplicité.
+              <p className="text-base text-immoo-pearl/80 mb-8">
+                Connectez-vous à votre espace personnalisé pour gérer facilement vos propriétés et locataires.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                <Button className="immoo-cta-button h-16 px-10 text-lg font-medium animate-immoo-glow" asChild size="lg">
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy px-6 py-2.5 font-medium shadow-md hover:shadow-lg transition-all duration-200" asChild size="default">
                   <Link to="/agencies" className="flex items-center">
-                    <Building2 className="w-6 h-6 mr-3" />
+                    <Building2 className="w-4 h-4 mr-2" />
                     Espace Agence
                   </Link>
                 </Button>
                 
-                <Button variant="outline" className="h-16 px-10 text-lg font-medium border-2 border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy transition-all duration-300" asChild size="lg">
+                <Button variant="outline" className="border border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy px-6 py-2.5 font-medium transition-all duration-200" asChild size="default">
                   <Link to="/auth" className="flex items-center">
-                    <LogIn className="w-6 h-6 mr-3" />
+                    <LogIn className="w-4 h-4 mr-2" />
                     Se connecter
                   </Link>
                 </Button>

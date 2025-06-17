@@ -62,22 +62,90 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-				// IMMOO Premium Branding Colors (Utility Classes)
-				immoo: {
-					'navy': '#111827', // Bleu nuit
-					'gold': '#D97706', // Or doux
-					'pearl': '#F9FAFB', // Blanc cassé
-					'gray': '#E5E7EB', // Gris perle
-					'navy-light': '#1F2937', // Bleu nuit plus clair
-					'navy-dark': '#0F172A', // Bleu nuit plus foncé
-					'gold-light': '#F59E0B', // Or plus clair
-					'gold-dark': '#B45309' // Or plus foncé
+				// IMMOO Premium Branding Colors - Enhanced with CSS Variables
+				'immoo-navy': {
+					DEFAULT: 'hsl(var(--immoo-navy))',
+					light: 'hsl(var(--immoo-navy-light))',
+					dark: '#0F172A',
+					50: '#F8FAFC',
+					100: '#F1F5F9',
+					200: '#E2E8F0',
+					300: '#CBD5E1',
+					400: '#94A3B8',
+					500: '#64748B',
+					600: '#475569',
+					700: '#334155',
+					800: '#1E293B',
+					900: 'hsl(var(--immoo-navy))',
+					950: '#020617'
+				},
+				'immoo-gold': {
+					DEFAULT: 'hsl(var(--immoo-gold))',
+					light: 'hsl(var(--immoo-gold-light))',
+					dark: '#B45309',
+					50: '#FFFBEB',
+					100: '#FEF3C7',
+					200: '#FDE68A',
+					300: '#FCD34D',
+					400: '#FBBF24',
+					500: 'hsl(var(--immoo-gold-light))',
+					600: 'hsl(var(--immoo-gold))',
+					700: '#B45309',
+					800: '#92400E',
+					900: '#78350F',
+					950: '#451A03'
+				},
+				'immoo-pearl': {
+					DEFAULT: 'hsl(var(--immoo-pearl))',
+					dark: '#F3F4F6',
+					50: 'hsl(var(--immoo-pearl))',
+					100: '#F3F4F6',
+					200: '#E5E7EB',
+					300: '#D1D5DB',
+					400: '#9CA3AF',
+					500: '#6B7280',
+					600: '#4B5563',
+					700: '#374151',
+					800: '#1F2937',
+					900: '#111827'
+				},
+				'immoo-gray': {
+					DEFAULT: 'hsl(var(--immoo-gray))',
+					light: '#F9FAFB',
+					dark: '#D1D5DB'
 				}
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
-				sm: 'calc(var(--radius) - 4px)'
+				sm: 'calc(var(--radius) - 4px)',
+				'xl': '1rem',
+				'2xl': '1.5rem',
+				'3xl': '2rem'
+			},
+			fontFamily: {
+				'immoo': ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+			},
+			boxShadow: {
+				'immoo-sm': '0 2px 8px -2px rgba(17, 24, 39, 0.1)',
+				'immoo-md': '0 8px 25px -5px rgba(17, 24, 39, 0.1), 0 4px 10px -3px rgba(17, 24, 39, 0.05)',
+				'immoo-lg': '0 20px 40px -12px rgba(17, 24, 39, 0.15)',
+				'immoo-xl': '0 25px 50px -12px rgba(17, 24, 39, 0.25)',
+				'immoo-2xl': '0 35px 60px -12px rgba(17, 24, 39, 0.3)',
+				'immoo-gold': '0 25px 50px -12px rgba(217, 119, 6, 0.25)',
+				'immoo-gold-lg': '0 35px 60px -12px rgba(217, 119, 6, 0.4)',
+				'immoo-glow': '0 0 30px rgba(217, 119, 6, 0.5)',
+				'immoo-glow-lg': '0 0 50px rgba(217, 119, 6, 0.6)',
+			},
+			backdropBlur: {
+				'immoo': '16px',
+				'immoo-lg': '24px',
+			},
+			backgroundImage: {
+				'immoo-gradient': 'linear-gradient(135deg, hsl(var(--immoo-navy)), hsl(var(--immoo-navy-light)))',
+				'immoo-gold-gradient': 'linear-gradient(135deg, hsl(var(--immoo-gold)), hsl(var(--immoo-gold-light)))',
+				'immoo-hero': 'linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--card)) 50%, hsl(var(--muted))/30 100%)',
+				'immoo-premium': 'linear-gradient(135deg, hsl(var(--immoo-pearl)) 0%, rgba(255,255,255,0.8) 50%, hsl(var(--immoo-pearl))/30 100%)',
 			},
 			keyframes: {
 				'accordion-down': {
@@ -128,14 +196,67 @@ export default {
 					'0%': { backgroundPosition: '-200% 0' },
 					'100%': { backgroundPosition: '200% 0' }
 				},
-				// IMMOO Premium Animations
+				// IMMOO Premium Animations - Enhanced
 				'immoo-glow': {
-					'0%, 100%': { boxShadow: '0 0 20px rgba(217, 119, 6, 0.3)' },
-					'50%': { boxShadow: '0 0 30px rgba(217, 119, 6, 0.5)' }
+					'0%, 100%': { 
+						boxShadow: '0 0 20px rgba(217, 119, 6, 0.5)',
+						filter: 'brightness(1)'
+					},
+					'50%': { 
+						boxShadow: '0 0 40px rgba(217, 119, 6, 0.8), 0 0 60px rgba(217, 119, 6, 0.3)',
+						filter: 'brightness(1.1)'
+					}
 				},
 				'immoo-float': {
-					'0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
-					'50%': { transform: 'translateY(-10px) rotate(2deg)' }
+					'0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+					'33%': { transform: 'translateY(-20px) rotate(1deg)' },
+					'66%': { transform: 'translateY(-10px) rotate(-1deg)' }
+				},
+				'immoo-pulse': {
+					'0%, 100%': { 
+						opacity: '1',
+						transform: 'scale(1)'
+					},
+					'50%': { 
+						opacity: '0.8',
+						transform: 'scale(1.05)'
+					}
+				},
+				'immoo-bounce-in': {
+					'0%': {
+						opacity: '0',
+						transform: 'scale(0.3) rotate(-10deg)'
+					},
+					'50%': {
+						opacity: '1',
+						transform: 'scale(1.1) rotate(5deg)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'scale(1) rotate(0deg)'
+					}
+				},
+				'immoo-slide-up': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(60px)'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)'
+					}
+				},
+				'immoo-shimmer': {
+					'0%': { transform: 'translateX(-100%)' },
+					'100%': { transform: 'translateX(100%)' }
+				},
+				'immoo-rotate': {
+					'0%': { transform: 'rotate(0deg)' },
+					'100%': { transform: 'rotate(360deg)' }
+				},
+				'immoo-breathe': {
+					'0%, 100%': { transform: 'scale(1)' },
+					'50%': { transform: 'scale(1.05)' }
 				}
 			},
 			animation: {
@@ -151,10 +272,25 @@ export default {
 				'float': 'float 3s ease-in-out infinite',
 				'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
 				'shimmer': 'shimmer 2s linear infinite',
-				// IMMOO Premium Animations
-				'immoo-glow': 'immoo-glow 2s ease-in-out infinite',
-				'immoo-float': 'immoo-float 6s ease-in-out infinite'
+				// IMMOO Premium Animations - Enhanced
+				'immoo-glow': 'immoo-glow 3s ease-in-out infinite',
+				'immoo-float': 'immoo-float 6s ease-in-out infinite',
+				'immoo-pulse': 'immoo-pulse 2s ease-in-out infinite',
+				'immoo-bounce-in': 'immoo-bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+				'immoo-slide-up': 'immoo-slide-up 0.8s ease-out',
+				'immoo-shimmer': 'immoo-shimmer 2s ease-in-out infinite',
+				'immoo-rotate': 'immoo-rotate 20s linear infinite',
+				'immoo-breathe': 'immoo-breathe 4s ease-in-out infinite'
 			},
+			transitionTimingFunction: {
+				'immoo-bounce': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+				'immoo-ease': 'cubic-bezier(0.25, 0.1, 0.25, 1)',
+			},
+			scale: {
+				'102': '1.02',
+				'103': '1.03',
+				'108': '1.08',
+			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],

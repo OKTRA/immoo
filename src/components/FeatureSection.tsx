@@ -1,40 +1,38 @@
-
 import { useRef } from "react";
-import { useInView } from "framer-motion";
-import { AnimatedCard } from "./ui/AnimatedCard";
-import { BarChart3, Building2, Briefcase, Shield, Users2, FileText } from "lucide-react";
+import { useInView, motion } from "framer-motion";
+import { BarChart3, Building2, Briefcase, Shield, Users2, FileText, ArrowRight } from "lucide-react";
 import { Feature, UserTypeOption } from "@/assets/types";
 
 export default function FeatureSection() {
   const features: Feature[] = [
     {
       title: "Gestion des Biens",
-      description: "Gérez facilement votre portefeuille immobilier, du studio à l'immeuble entier.",
+      description: "Portefeuille immobilier centralisé et outils de gestion intelligents.",
       icon: "Building2"
     },
     {
       title: "Gestion Locative",
-      description: "Simplifiez vos relations avec les locataires et automatisez les tâches répétitives.",
+      description: "Relations locataires simplifiées et processus automatisés.",
       icon: "Users2"
     },
     {
       title: "Finances & Comptabilité",
-      description: "Suivez vos revenus, dépenses et générez des rapports financiers détaillés.",
+      description: "Suivi financier en temps réel et rapports détaillés.",
       icon: "Briefcase"
     },
     {
-      title: "Reporting & Analytics",
-      description: "Analysez les performances de votre patrimoine avec des tableaux de bord personnalisés.",
+      title: "Analytics",
+      description: "Tableaux de bord et analyses de performances avancées.",
       icon: "BarChart3"
     },
     {
-      title: "Documents & Contrats",
-      description: "Créez, signez et archivez tous vos documents juridiques en quelques clics.",
+      title: "Documents",
+      description: "Gestion documentaire et signature électronique intégrée.",
       icon: "FileText"
     },
     {
-      title: "Sécurité & Conformité",
-      description: "Protection de vos données et mise en conformité avec les réglementations en vigueur.",
+      title: "Sécurité",
+      description: "Protection des données et conformité RGPD garantie.",
       icon: "Shield"
     }
   ];
@@ -44,26 +42,26 @@ export default function FeatureSection() {
       type: "agency",
       label: "Espace Agence",
       path: "/agence",
-      description: "Optimisez votre gestion locative, suivez vos biens et locataires, et automatisez vos processus."
+      description: "Suite complète d'outils pour optimiser votre gestion locative et développer votre activité."
     },
     {
       type: "owner",
       label: "Espace Propriétaire",
       path: "/owner",
-      description: "Visualisez vos revenus, suivez l'occupation de vos biens et communiquez avec votre agence."
+      description: "Interface simplifiée pour suivre vos biens, revenus et communiquer avec votre agence."
     },
     {
       type: "admin",
       label: "Super Admin",
       path: "/admin",
-      description: "Gérez vos agences partenaires, configurez le système et accédez aux statistiques globales."
+      description: "Contrôle total du système, gestion des agences et accès aux statistiques globales."
     }
   ];
 
   const featureRef = useRef(null);
   const userTypeRef = useRef(null);
-  const isFeatureInView = useInView(featureRef, { once: true, amount: 0.3 });
-  const isUserTypeInView = useInView(userTypeRef, { once: true, amount: 0.3 });
+  const isFeatureInView = useInView(featureRef, { once: true, amount: 0.2 });
+  const isUserTypeInView = useInView(userTypeRef, { once: true, amount: 0.2 });
 
   // Map icon string to icon component
   const getIconComponent = (iconName: string) => {
@@ -79,101 +77,133 @@ export default function FeatureSection() {
     return iconMap[iconName] || null;
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        delayChildren: 0.1,
+        staggerChildren: 0.08
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 30, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15
+      }
+    }
+  };
+
   return (
-    <section className="py-24 bg-muted/50" id="features">
-      <div className="container mx-auto px-4">
-        {/* Features */}
-        <div 
+    <section className="py-16 bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 relative overflow-hidden" id="features">
+      {/* Subtle Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute top-20 right-20 w-32 h-32 bg-gradient-to-r from-immoo-gold/5 to-immoo-gold-light/3 rounded-full filter blur-3xl" />
+        <div className="absolute bottom-20 left-20 w-24 h-24 bg-gradient-to-r from-immoo-navy/5 to-immoo-navy-light/3 rounded-full filter blur-3xl" />
+      </div>
+
+      <div className="container mx-auto px-4 relative z-10">
+        {/* Features Section */}
+        <motion.div 
           ref={featureRef}
-          className="max-w-4xl mx-auto text-center mb-16"
-          style={{
-            opacity: isFeatureInView ? 1 : 0,
-            transform: isFeatureInView ? "translateY(0)" : "translateY(20px)",
-            transition: "opacity 0.6s ease-out, transform 0.6s ease-out"
-          }}
+          className="max-w-5xl mx-auto text-center mb-16"
+          initial="hidden"
+          animate={isFeatureInView ? "visible" : "hidden"}
+          variants={containerVariants}
         >
-          <p className="text-sm font-medium text-primary mb-3">Modules intégrés</p>
-          <h2 className="text-3xl font-bold mb-6">Toutes les fonctionnalités dont vous avez besoin</h2>
-          <p className="text-muted-foreground mb-12">
-            Une solution complète pour simplifier et optimiser la gestion de votre patrimoine immobilier
-          </p>
+          <motion.div variants={itemVariants} className="mb-3">
+            <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-immoo-gold/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/20">
+              Fonctionnalités
+            </span>
+          </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <motion.h2 variants={itemVariants} className="text-2xl md:text-3xl font-bold mb-4 text-immoo-navy dark:text-immoo-pearl">
+            Tout ce dont vous avez besoin
+          </motion.h2>
+          
+          <motion.p variants={itemVariants} className="text-sm md:text-base text-immoo-navy/60 dark:text-immoo-pearl/60 mb-12 max-w-2xl mx-auto">
+            Une solution complète pour simplifier la gestion immobilière
+          </motion.p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((feature, index) => (
-              <AnimatedCard
+              <motion.div
                 key={index}
-                highlightOnHover={true}
-                className="p-6 h-full"
-                style={{
-                  transitionDelay: `${index * 100}ms`,
-                  opacity: isFeatureInView ? 1 : 0,
-                  transform: isFeatureInView ? "translateY(0)" : "translateY(20px)"
-                }}
+                variants={itemVariants}
+                className="group p-4 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300"
               >
                 <div className="flex flex-col h-full text-left">
-                  <div className="w-12 h-12 mb-4 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                  <div className="w-8 h-8 mb-3 rounded-lg bg-gradient-to-r from-immoo-gold/10 to-immoo-gold-light/5 flex items-center justify-center text-immoo-gold group-hover:scale-105 transition-transform duration-200">
                     {getIconComponent(feature.icon)}
                   </div>
-                  <h3 className="text-lg font-medium mb-2">{feature.title}</h3>
-                  <p className="text-muted-foreground text-sm">{feature.description}</p>
+                  <h3 className="text-sm font-semibold mb-2 text-immoo-navy dark:text-immoo-pearl">{feature.title}</h3>
+                  <p className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 leading-relaxed flex-grow">{feature.description}</p>
                 </div>
-              </AnimatedCard>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
 
-        {/* User Types */}
-        <div 
+        {/* User Types Section */}
+        <motion.div 
           ref={userTypeRef}
-          className="max-w-6xl mx-auto mt-24"
-          style={{
-            opacity: isUserTypeInView ? 1 : 0,
-            transform: isUserTypeInView ? "translateY(0)" : "translateY(20px)",
-            transition: "opacity 0.6s ease-out, transform 0.6s ease-out",
-            transitionDelay: "0.2s"
-          }}
+          className="max-w-5xl mx-auto mt-16"
+          initial="hidden"
+          animate={isUserTypeInView ? "visible" : "hidden"}
+          variants={containerVariants}
         >
-          <div className="text-center mb-12">
-            <p className="text-sm font-medium text-primary mb-3">Pour chaque besoin</p>
-            <h2 className="text-3xl font-bold mb-6">Un espace dédié pour chaque utilisateur</h2>
-          </div>
+          <motion.div variants={itemVariants} className="text-center mb-8">
+            <div className="mb-3">
+              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-immoo-navy/10 dark:bg-immoo-pearl/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-navy/20 dark:border-immoo-pearl/20">
+                Espaces dédiés
+              </span>
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-immoo-navy dark:text-immoo-pearl">
+              Pour chaque utilisateur
+            </h2>
+            <p className="text-sm md:text-base text-immoo-navy/60 dark:text-immoo-pearl/60 max-w-2xl mx-auto">
+              IMMOO s'adapte à vos besoins spécifiques
+            </p>
+          </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {userTypes.map((userType, index) => (
-              <a 
+              <motion.a 
                 key={index} 
                 href={userType.path}
-                className="block h-full"
+                className="block h-full group"
+                variants={itemVariants}
               >
-                <AnimatedCard
-                  highlightOnHover={true}
-                  depthEffect={true}
-                  className="p-8 h-full border border-border/50 hover:border-primary/20 transition-all"
-                  style={{
-                    transitionDelay: `${index * 100 + 300}ms`,
-                    opacity: isUserTypeInView ? 1 : 0,
-                    transform: isUserTypeInView ? "translateY(0)" : "translateY(20px)"
-                  }}
-                >
+                <div className="relative p-6 h-full bg-white/90 dark:bg-immoo-navy-light/90 backdrop-blur-sm rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300">
+                  {/* Number Badge */}
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-immoo-gold to-immoo-gold-light rounded-full flex items-center justify-center text-immoo-navy font-bold text-xs shadow-sm">
+                    {index + 1}
+                  </div>
+                  
                   <div className="flex flex-col h-full">
-                    <h3 className="text-xl font-semibold mb-3">{userType.label}</h3>
-                    <p className="text-muted-foreground mb-6 flex-grow">
+                    <h3 className="text-lg font-bold mb-3 text-immoo-navy dark:text-immoo-pearl group-hover:text-immoo-gold transition-colors duration-300">{userType.label}</h3>
+                    <p className="text-sm text-immoo-navy/60 dark:text-immoo-pearl/60 mb-4 flex-grow leading-relaxed">
                       {userType.description}
                     </p>
                     <div className="mt-auto">
-                      <span className="text-sm font-medium text-primary flex items-center">
+                      <div className="inline-flex items-center text-immoo-gold font-medium text-sm group-hover:text-immoo-gold-light transition-all duration-300">
                         Découvrir
-                        <svg className="w-4 h-4 ml-1" viewBox="0 0 16 16" fill="none">
-                          <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </span>
+                        <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </div>
                   </div>
-                </AnimatedCard>
-              </a>
+                </div>
+              </motion.a>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

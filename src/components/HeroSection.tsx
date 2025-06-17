@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import { ButtonEffects } from "./ui/ButtonEffects";
-import { Search, MapPin, Home, Building, ArrowRight, BadgeCheck, Users, Star, TrendingUp } from "lucide-react";
+import { Search, MapPin, Home, Building, ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function HeroSection() {
@@ -9,6 +9,11 @@ export default function HeroSection() {
   const [searchType, setSearchType] = useState<"properties" | "agencies">("properties");
   const [isLoaded, setIsLoaded] = useState(false);
   const navigate = useNavigate();
+  
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 300], [0, -50]);
+  const y2 = useTransform(scrollY, [0, 300], [0, -80]);
+  const opacity = useTransform(scrollY, [0, 200], [1, 0.9]);
   
   useEffect(() => {
     setIsLoaded(true);
@@ -30,7 +35,7 @@ export default function HeroSection() {
       opacity: 1,
       transition: {
         delayChildren: 0.1,
-        staggerChildren: 0.1
+        staggerChildren: 0.08
       }
     }
   };
@@ -43,56 +48,88 @@ export default function HeroSection() {
       transition: { 
         type: "spring",
         stiffness: 100,
-        damping: 15
+        damping: 15,
+        duration: 0.4
       }
     }
   };
 
   return (
-    <section className="relative pt-20 overflow-hidden immoo-hero-bg">
-      {/* IMMOO Premium animated background */}
+    <section className="relative pt-16 overflow-hidden bg-gradient-to-br from-white via-immoo-pearl/30 to-white dark:from-immoo-navy dark:via-immoo-navy-light/50 dark:to-immoo-navy min-h-[75vh] flex items-center">
+      {/* Subtle Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-r from-immoo-gold to-immoo-gold-light rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-immoo-float"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-r from-immoo-navy to-immoo-navy-light rounded-full mix-blend-multiply filter blur-xl opacity-15 animate-immoo-float animation-delay-2000"></div>
-        <div className="absolute top-40 left-40 w-80 h-80 bg-gradient-to-r from-immoo-gold/50 to-immoo-gold rounded-full mix-blend-multiply filter blur-xl opacity-25 animate-immoo-float animation-delay-4000"></div>
+        <motion.div 
+          style={{ y: y1 }}
+          className="absolute -top-32 -right-32 w-64 h-64 bg-gradient-to-r from-immoo-gold/5 to-immoo-gold-light/3 rounded-full filter blur-3xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            opacity: [0.3, 0.1, 0.3],
+          }}
+          transition={{
+            duration: 8,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }}
+        />
+        <motion.div 
+          style={{ y: y2 }}
+          className="absolute -bottom-32 -left-32 w-48 h-48 bg-gradient-to-r from-immoo-navy/5 to-immoo-navy-light/3 rounded-full filter blur-3xl"
+          animate={{
+            scale: [1.1, 1, 1.1],
+            opacity: [0.2, 0.1, 0.2],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "easeInOut",
+            delay: 3
+          }}
+        />
       </div>
       
-      <div className="container mx-auto px-4 py-16 md:py-24 relative z-10">
+      <motion.div 
+        style={{ opacity }}
+        className="container mx-auto px-4 py-12 relative z-10"
+      >
         <motion.div 
-          className="max-w-5xl mx-auto text-center"
+          className="max-w-4xl mx-auto text-center"
           initial="hidden"
           animate={isLoaded ? "visible" : "hidden"}
           variants={containerVariants}
         >
-          <motion.div variants={itemVariants} className="inline-block mb-6">
-            <span className="inline-flex items-center px-6 py-3 text-sm font-bold rounded-full bg-gradient-to-r from-immoo-gold to-immoo-gold-light text-immoo-navy shadow-xl border border-immoo-gold/30">
-              <TrendingUp className="mr-2 h-4 w-4" />
-              #1 Plateforme immobilière nouvelle génération
+          <motion.div variants={itemVariants} className="inline-block mb-4">
+            <span className="inline-flex items-center px-4 py-2 text-xs font-medium rounded-full bg-immoo-gold/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/20">
+              <Sparkles className="mr-2 h-3 w-3 text-immoo-gold" />
+              Plateforme immobilière moderne
             </span>
           </motion.div>
           
-          <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight mb-8 bg-gradient-to-r from-immoo-navy via-immoo-navy-light to-immoo-gold bg-clip-text text-transparent dark:from-immoo-pearl dark:via-immoo-gold-light dark:to-immoo-gold">
-            Trouvez votre 
-            <span className="block text-gradient bg-gradient-to-r from-immoo-gold to-immoo-gold-light bg-clip-text text-transparent">
+          <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
+            <span className="text-immoo-navy dark:text-immoo-pearl">
+              Trouvez votre{" "}
+            </span>
+            <span className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light bg-clip-text text-transparent">
               futur chez vous
             </span>
           </motion.h1>
           
-          <motion.p variants={itemVariants} className="text-xl md:text-2xl text-immoo-navy/80 dark:text-immoo-pearl/80 max-w-3xl mx-auto mb-12 leading-relaxed">
-            Découvrez des propriétés exceptionnelles et connectez-vous avec les meilleures agences. 
-            <span className="font-semibold text-immoo-gold"> Simple, rapide, moderne.</span>
+          <motion.p variants={itemVariants} className="text-base md:text-lg text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-2xl mx-auto mb-8 leading-relaxed font-normal">
+            Découvrez des propriétés exceptionnelles et connectez-vous avec les meilleures agences.{" "}
+            <span className="font-medium text-immoo-gold">
+              Simple et moderne.
+            </span>
           </motion.p>
           
-          <motion.div variants={itemVariants} className="mb-12">
+          <motion.div variants={itemVariants} className="mb-8">
             <div className="max-w-2xl mx-auto">
-              {/* Search Type Toggle */}
-              <div className="flex justify-center mb-6">
-                <div className="inline-flex rounded-full p-1 bg-immoo-pearl/90 dark:bg-immoo-navy-light shadow-xl border border-immoo-gold/20">
+              {/* Compact Search Type Toggle */}
+              <div className="flex justify-center mb-4">
+                <div className="inline-flex rounded-xl p-1 bg-white/90 dark:bg-immoo-navy-light/90 backdrop-blur-sm shadow-lg border border-immoo-gold/10">
                   <button
                     onClick={() => setSearchType("properties")}
-                    className={`px-6 py-3 rounded-full text-sm font-semibold transition-all duration-200 ${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       searchType === "properties"
-                        ? "bg-immoo-navy text-immoo-pearl shadow-lg"
+                        ? "bg-immoo-navy text-immoo-pearl shadow-sm"
                         : "text-immoo-navy/70 dark:text-immoo-pearl/70 hover:text-immoo-gold"
                     }`}
                   >
@@ -101,9 +138,9 @@ export default function HeroSection() {
                   </button>
                   <button
                     onClick={() => setSearchType("agencies")}
-                    className={`px-6 py-3 rounded-full text-sm font-semibold transition-all duration-200 ${
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                       searchType === "agencies"
-                        ? "bg-immoo-gold text-immoo-navy shadow-lg"
+                        ? "bg-immoo-gold text-immoo-navy shadow-sm"
                         : "text-immoo-navy/70 dark:text-immoo-pearl/70 hover:text-immoo-gold"
                     }`}
                   >
@@ -113,61 +150,54 @@ export default function HeroSection() {
                 </div>
               </div>
 
-              {/* Search Bar */}
-              <div className="relative glass-panel rounded-2xl p-2 flex items-center shadow-2xl border border-immoo-gold/30 backdrop-blur-sm bg-immoo-pearl/90 dark:bg-immoo-navy-light/90">
-                <div className="flex items-center pl-4 text-immoo-gold">
-                  <Search className="h-6 w-6" />
+              {/* Compact Search Bar */}
+              <div className="relative flex items-center bg-white/95 dark:bg-immoo-navy-light/95 backdrop-blur-sm rounded-xl border border-immoo-gold/20 shadow-lg hover:shadow-xl transition-all duration-300 p-2">
+                <div className="flex items-center pl-3 text-immoo-gold">
+                  <Search className="h-5 w-5" />
                 </div>
                 <input
                   type="text"
-                  placeholder={searchType === "properties" ? "Rechercher une propriété, adresse, ville..." : "Rechercher une agence, nom, localisation..."}
-                  className="w-full py-4 px-4 bg-transparent border-none focus:outline-none text-immoo-navy dark:text-immoo-pearl placeholder-immoo-navy/60 dark:placeholder-immoo-pearl/60 text-lg"
+                  placeholder={searchType === "properties" ? "Rechercher une propriété..." : "Rechercher une agence..."}
+                  className="w-full py-3 px-3 bg-transparent border-none focus:outline-none text-immoo-navy dark:text-immoo-pearl placeholder-immoo-navy/50 dark:placeholder-immoo-pearl/50 text-base"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                 />
-                <div className="pr-2">
+                <div className="pr-1">
                   <ButtonEffects 
                     variant="primary" 
-                    className="immoo-cta-button rounded-xl px-8 py-3 text-lg font-semibold animate-immoo-glow"
+                    className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy rounded-lg px-6 py-2.5 text-sm font-medium shadow-md hover:shadow-lg transition-all duration-200"
                     onClick={handleSearch}
                   >
-                    <Search className="h-5 w-5 mr-2" />
                     Rechercher
                   </ButtonEffects>
                 </div>
               </div>
               
-              {/* Quick Filters */}
-              <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {/* Compact Quick Filters */}
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {searchType === "properties" ? (
                   <>
-                    <span className="flex items-center px-4 py-2 bg-immoo-pearl/70 dark:bg-immoo-navy-light/70 backdrop-blur-sm rounded-full text-sm font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/30">
-                      <MapPin className="h-4 w-4 mr-2 text-immoo-gold" />
+                    <span className="flex items-center px-3 py-1.5 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg text-xs font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/10 cursor-pointer hover:border-immoo-gold/30 transition-colors">
+                      <MapPin className="h-3 w-3 mr-1.5 text-immoo-gold" />
                       Paris 15ème
                     </span>
-                    <span className="flex items-center px-4 py-2 bg-immoo-pearl/70 dark:bg-immoo-navy-light/70 backdrop-blur-sm rounded-full text-sm font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/30">
-                      <Home className="h-4 w-4 mr-2 text-immoo-gold" />
+                    <span className="flex items-center px-3 py-1.5 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg text-xs font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/10 cursor-pointer hover:border-immoo-gold/30 transition-colors">
+                      <Home className="h-3 w-3 mr-1.5 text-immoo-gold" />
                       2-3 pièces
                     </span>
-                    <span className="flex items-center px-4 py-2 bg-immoo-pearl/70 dark:bg-immoo-navy-light/70 backdrop-blur-sm rounded-full text-sm font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/30">
-                      <Building className="h-4 w-4 mr-2 text-immoo-gold" />
+                    <span className="flex items-center px-3 py-1.5 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg text-xs font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/10 cursor-pointer hover:border-immoo-gold/30 transition-colors">
+                      <Building className="h-3 w-3 mr-1.5 text-immoo-gold" />
                       {"< 1500€"}
                     </span>
                   </>
                 ) : (
                   <>
-                    <span className="flex items-center px-4 py-2 bg-immoo-pearl/70 dark:bg-immoo-navy-light/70 backdrop-blur-sm rounded-full text-sm font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/30">
-                      <Star className="h-4 w-4 mr-2 text-immoo-gold" />
+                    <span className="flex items-center px-3 py-1.5 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg text-xs font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/10 cursor-pointer hover:border-immoo-gold/30 transition-colors">
                       Agences certifiées
                     </span>
-                    <span className="flex items-center px-4 py-2 bg-immoo-pearl/70 dark:bg-immoo-navy-light/70 backdrop-blur-sm rounded-full text-sm font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/30">
-                      <Users className="h-4 w-4 mr-2 text-immoo-gold" />
+                    <span className="flex items-center px-3 py-1.5 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg text-xs font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/10 cursor-pointer hover:border-immoo-gold/30 transition-colors">
                       Spécialiste location
-                    </span>
-                    <span className="flex items-center px-4 py-2 bg-immoo-pearl/70 dark:bg-immoo-navy-light/70 backdrop-blur-sm rounded-full text-sm font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/30">
-                      <BadgeCheck className="h-4 w-4 mr-2 text-immoo-gold" />
-                      Réponse rapide
                     </span>
                   </>
                 )}
@@ -175,46 +205,46 @@ export default function HeroSection() {
             </div>
           </motion.div>
           
-          {/* Action Cards */}
-          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 max-w-4xl mx-auto">
-            <div className="group p-6 bg-immoo-pearl/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-2xl border border-immoo-gold/20 hover:shadow-2xl hover:border-immoo-gold/50 transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-gradient-to-r from-immoo-gold to-immoo-gold-light rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200 shadow-lg">
-                <Home className="h-6 w-6 text-immoo-navy" />
+          {/* Compact Action Cards */}
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 max-w-3xl mx-auto">
+            <div className="group p-4 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="w-8 h-8 bg-gradient-to-r from-immoo-gold to-immoo-gold-light rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-200">
+                <Home className="h-4 w-4 text-immoo-navy" />
               </div>
-              <h3 className="text-lg font-semibold text-immoo-navy dark:text-immoo-pearl mb-2">Propriétés exclusives</h3>
-              <p className="text-immoo-navy/70 dark:text-immoo-pearl/70 text-sm mb-4">Découvrez des biens uniques sélectionnés par nos experts</p>
-              <button className="text-immoo-gold font-semibold text-sm group-hover:text-immoo-gold-light transition-colors flex items-center">
-                Explorer <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <h3 className="text-sm font-semibold text-immoo-navy dark:text-immoo-pearl mb-1">Propriétés exclusives</h3>
+              <p className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 mb-2">Biens sélectionnés par nos experts</p>
+              <button className="text-immoo-gold text-xs font-medium hover:text-immoo-gold-light transition-colors flex items-center">
+                Explorer <ArrowRight className="ml-1 h-3 w-3" />
               </button>
             </div>
 
-            <div className="group p-6 bg-immoo-pearl/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-2xl border border-immoo-gold/20 hover:shadow-2xl hover:border-immoo-gold/50 transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-gradient-to-r from-immoo-navy to-immoo-navy-light rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200 shadow-lg">
-                <Building className="h-6 w-6 text-immoo-pearl" />
+            <div className="group p-4 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="w-8 h-8 bg-gradient-to-r from-immoo-navy to-immoo-navy-light rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-200">
+                <Building className="h-4 w-4 text-immoo-pearl" />
               </div>
-              <h3 className="text-lg font-semibold text-immoo-navy dark:text-immoo-pearl mb-2">Agences de confiance</h3>
-              <p className="text-immoo-navy/70 dark:text-immoo-pearl/70 text-sm mb-4">Connectez-vous avec les meilleures agences locales</p>
+              <h3 className="text-sm font-semibold text-immoo-navy dark:text-immoo-pearl mb-1">Agences de confiance</h3>
+              <p className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 mb-2">Meilleures agences locales</p>
               <button 
                 onClick={() => navigate("/browse-agencies")}
-                className="text-immoo-gold font-semibold text-sm group-hover:text-immoo-gold-light transition-colors flex items-center"
+                className="text-immoo-gold text-xs font-medium hover:text-immoo-gold-light transition-colors flex items-center"
               >
-                Voir les agences <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                Voir les agences <ArrowRight className="ml-1 h-3 w-3" />
               </button>
             </div>
 
-            <div className="group p-6 bg-immoo-pearl/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-2xl border border-immoo-gold/20 hover:shadow-2xl hover:border-immoo-gold/50 transition-all duration-300 hover:-translate-y-2">
-              <div className="w-12 h-12 bg-gradient-to-r from-immoo-gold to-immoo-gold-dark rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200 shadow-lg">
-                <Users className="h-6 w-6 text-immoo-navy" />
+            <div className="group p-4 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300">
+              <div className="w-8 h-8 bg-gradient-to-r from-immoo-gold to-immoo-gold-light rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-200">
+                <Search className="h-4 w-4 text-immoo-navy" />
               </div>
-              <h3 className="text-lg font-semibold text-immoo-navy dark:text-immoo-pearl mb-2">Gestion simplifiée</h3>
-              <p className="text-immoo-navy/70 dark:text-immoo-pearl/70 text-sm mb-4">Outils modernes pour propriétaires et locataires</p>
-              <button className="text-immoo-gold font-semibold text-sm group-hover:text-immoo-gold-light transition-colors flex items-center">
-                Commencer <ArrowRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <h3 className="text-sm font-semibold text-immoo-navy dark:text-immoo-pearl mb-1">Gestion simplifiée</h3>
+              <p className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 mb-2">Outils modernes et intuitifs</p>
+              <button className="text-immoo-gold text-xs font-medium hover:text-immoo-gold-light transition-colors flex items-center">
+                Commencer <ArrowRight className="ml-1 h-3 w-3" />
               </button>
             </div>
           </motion.div>
         </motion.div>
-      </div>
+      </motion.div>
     </section>
   );
 }

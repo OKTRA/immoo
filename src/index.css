@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    /* IMMOO Premium Branding Colors */
+    /* IMMOO Premium Branding Colors - Enhanced */
     --background: 210 20% 98%; /* Blanc cassé #F9FAFB */
     --foreground: 217 50% 14%; /* Bleu nuit #111827 */
 
@@ -34,6 +34,14 @@
     --ring: 32 95% 44%; /* Or doux pour focus */
 
     --radius: 0.6rem;
+
+    /* IMMOO Custom Color Variables */
+    --immoo-navy: 217 50% 14%; /* #111827 */
+    --immoo-navy-light: 217 40% 20%; /* #1E293B */
+    --immoo-gold: 32 95% 44%; /* #D97706 */
+    --immoo-gold-light: 38 92% 50%; /* #EAB308 */
+    --immoo-pearl: 210 20% 98%; /* #F9FAFB */
+    --immoo-gray: 220 13% 91%; /* #E5E7EB */
 
     /* Sidebar avec le thème IMMOO */
     --sidebar-background: 217 50% 14%; /* Bleu nuit #111827 */
@@ -95,18 +103,22 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-medium tracking-tight text-foreground;
+    @apply font-bold tracking-tight text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
   h1 {
     @apply text-4xl sm:text-5xl md:text-6xl;
+    line-height: 1.1;
   }
 
   h2 {
     @apply text-3xl sm:text-4xl;
+    line-height: 1.2;
   }
 
   p {
@@ -121,6 +133,7 @@
 
   .glass-panel {
     @apply bg-card/70 dark:bg-card/60 backdrop-blur-lg border border-border/20;
+    backdrop-filter: blur(16px) saturate(180%);
   }
   
   .glass-card {
@@ -139,29 +152,63 @@
     @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-accent/20 before:to-transparent;
   }
 
-  /* IMMOO Premium Branding Components */
+  /* IMMOO Premium Branding Components - Enhanced */
   .immoo-gradient {
-    @apply bg-gradient-to-r from-primary to-primary/80;
+    background: linear-gradient(135deg, hsl(var(--immoo-navy)), hsl(var(--immoo-navy-light)));
   }
 
   .immoo-accent-gradient {
-    @apply bg-gradient-to-r from-accent to-accent/80;
+    background: linear-gradient(135deg, hsl(var(--immoo-gold)), hsl(var(--immoo-gold-light)));
   }
 
   .immoo-hero-bg {
-    @apply bg-gradient-to-br from-background via-card to-muted/30;
+    background: linear-gradient(135deg, 
+      hsl(var(--background)) 0%, 
+      hsl(var(--card)) 50%, 
+      hsl(var(--muted))/30 100%);
   }
 
   .immoo-cta-button {
-    @apply bg-accent hover:bg-accent/90 text-accent-foreground font-medium transition-all duration-200 shadow-lg hover:shadow-xl;
+    @apply bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy font-bold transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105;
+    box-shadow: 0 10px 30px -5px hsl(var(--immoo-gold) / 0.3);
+  }
+
+  .immoo-cta-button:hover {
+    box-shadow: 0 20px 40px -5px hsl(var(--immoo-gold) / 0.4);
   }
 
   .immoo-primary-button {
-    @apply bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-200;
+    @apply bg-gradient-to-r from-immoo-navy to-immoo-navy-light hover:from-immoo-navy-light hover:to-immoo-navy text-immoo-pearl font-bold transition-all duration-300;
+  }
+
+  .immoo-card-premium {
+    @apply bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-xl border border-immoo-gold/20 hover:border-immoo-gold/50 shadow-xl hover:shadow-3xl transition-all duration-500 rounded-3xl;
+    backdrop-filter: blur(20px) saturate(180%);
+  }
+
+  .immoo-text-gradient {
+    @apply bg-gradient-to-r from-immoo-navy via-immoo-navy-light to-immoo-gold dark:from-immoo-pearl dark:via-immoo-gold-light dark:to-immoo-gold bg-clip-text text-transparent;
+  }
+
+  .immoo-text-gold {
+    @apply bg-gradient-to-r from-immoo-gold to-immoo-gold-light bg-clip-text text-transparent;
+  }
+
+  /* Premium Shadow Effects */
+  .shadow-3xl {
+    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+  }
+
+  .shadow-immoo-gold {
+    box-shadow: 0 25px 50px -12px hsl(var(--immoo-gold) / 0.25);
+  }
+
+  .shadow-immoo-navy {
+    box-shadow: 0 25px 50px -12px hsl(var(--immoo-navy) / 0.25);
   }
 }
 
-/* Custom scrollbar avec les couleurs IMMOO */
+/* Enhanced Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -172,23 +219,23 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-muted rounded-full;
+  @apply bg-gradient-to-b from-immoo-gold to-immoo-gold-light rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-accent/30;
+  @apply bg-gradient-to-b from-immoo-gold-light to-immoo-gold;
 }
 
-/* Smooth scroll and selection avec les couleurs IMMOO */
+/* Smooth scroll and selection */
 html {
   scroll-behavior: smooth;
 }
 
 ::selection {
-  @apply bg-accent/10 text-accent;
+  @apply bg-immoo-gold/20 text-immoo-navy;
 }
 
-/* Custom animations */
+/* Enhanced Custom Animations */
 .animate-image-load {
   animation: image-load 0.6s ease-out forwards;
 }
@@ -204,4 +251,188 @@ html {
     opacity: 1;
     transform: scale(1);
   }
+}
+
+/* IMMOO Premium Animations */
+@keyframes immoo-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-20px) rotate(1deg);
+  }
+  66% {
+    transform: translateY(-10px) rotate(-1deg);
+  }
+}
+
+@keyframes immoo-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(var(--immoo-gold) / 0.5);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(var(--immoo-gold) / 0.8), 0 0 60px hsl(var(--immoo-gold) / 0.3);
+  }
+}
+
+@keyframes immoo-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes immoo-shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes immoo-bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3) rotate(-10deg);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes immoo-slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(60px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Animation Classes */
+.animate-immoo-float {
+  animation: immoo-float 6s ease-in-out infinite;
+}
+
+.animate-immoo-glow {
+  animation: immoo-glow 3s ease-in-out infinite;
+}
+
+.animate-immoo-pulse {
+  animation: immoo-pulse 2s ease-in-out infinite;
+}
+
+.animate-immoo-shimmer {
+  animation: immoo-shimmer 2s ease-in-out infinite;
+}
+
+.animate-immoo-bounce-in {
+  animation: immoo-bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.animate-immoo-slide-up {
+  animation: immoo-slide-up 0.8s ease-out;
+}
+
+/* Utility Classes for IMMOO Colors */
+.text-immoo-navy {
+  color: hsl(var(--immoo-navy));
+}
+
+.text-immoo-navy-light {
+  color: hsl(var(--immoo-navy-light));
+}
+
+.text-immoo-gold {
+  color: hsl(var(--immoo-gold));
+}
+
+.text-immoo-gold-light {
+  color: hsl(var(--immoo-gold-light));
+}
+
+.text-immoo-pearl {
+  color: hsl(var(--immoo-pearl));
+}
+
+.text-immoo-gray {
+  color: hsl(var(--immoo-gray));
+}
+
+.bg-immoo-navy {
+  background-color: hsl(var(--immoo-navy));
+}
+
+.bg-immoo-navy-light {
+  background-color: hsl(var(--immoo-navy-light));
+}
+
+.bg-immoo-gold {
+  background-color: hsl(var(--immoo-gold));
+}
+
+.bg-immoo-gold-light {
+  background-color: hsl(var(--immoo-gold-light));
+}
+
+.bg-immoo-pearl {
+  background-color: hsl(var(--immoo-pearl));
+}
+
+.bg-immoo-gray {
+  background-color: hsl(var(--immoo-gray));
+}
+
+.border-immoo-navy {
+  border-color: hsl(var(--immoo-navy));
+}
+
+.border-immoo-gold {
+  border-color: hsl(var(--immoo-gold));
+}
+
+.border-immoo-pearl {
+  border-color: hsl(var(--immoo-pearl));
+}
+
+/* Responsive Typography Improvements */
+@media (max-width: 640px) {
+  h1 {
+    @apply text-3xl sm:text-4xl;
+  }
+  
+  h2 {
+    @apply text-2xl sm:text-3xl;
+  }
+}
+
+/* Focus States with IMMOO Branding */
+.focus-immoo {
+  @apply focus:outline-none focus:ring-4 focus:ring-immoo-gold/20 focus:border-immoo-gold transition-all duration-200;
+}
+
+/* Premium Button Hover Effects */
+.btn-immoo-premium {
+  @apply relative overflow-hidden transition-all duration-300 transform hover:scale-105;
+}
+
+.btn-immoo-premium::before {
+  content: '';
+  @apply absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] transition-transform duration-700;
+}
+
+.btn-immoo-premium:hover::before {
+  @apply translate-x-[200%];
 }
