@@ -1,87 +1,89 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 220 14% 15%;
+    /* IMMOO Premium Branding Colors */
+    --background: 210 20% 98%; /* Blanc cassé #F9FAFB */
+    --foreground: 217 50% 14%; /* Bleu nuit #111827 */
 
-    --card: 0 0% 100%;
-    --card-foreground: 220 14% 15%;
+    --card: 210 20% 98%; /* Blanc cassé #F9FAFB */
+    --card-foreground: 217 50% 14%; /* Bleu nuit #111827 */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 220 14% 15%;
+    --popover: 210 20% 98%; /* Blanc cassé #F9FAFB */
+    --popover-foreground: 217 50% 14%; /* Bleu nuit #111827 */
 
-    --primary: 216 98% 52%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 217 50% 14%; /* Bleu nuit #111827 - Couleur principale */
+    --primary-foreground: 210 20% 98%; /* Blanc cassé pour contraste */
 
-    --secondary: 210 20% 96%;
-    --secondary-foreground: 220 14% 15%;
+    --secondary: 220 13% 91%; /* Gris perle #E5E7EB */
+    --secondary-foreground: 217 50% 14%; /* Bleu nuit #111827 */
 
-    --muted: 210 20% 96%;
-    --muted-foreground: 220 8% 46%;
+    --muted: 220 13% 91%; /* Gris perle #E5E7EB */
+    --muted-foreground: 217 33% 35%; /* Bleu nuit plus clair */
 
-    --accent: 215 98% 50%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 32 95% 44%; /* Or doux #D97706 - Accent/CTA */
+    --accent-foreground: 210 20% 98%; /* Blanc cassé pour contraste */
 
     --destructive: 0 84% 60%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 210 20% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 216 98% 52%;
+    --border: 220 13% 91%; /* Gris perle #E5E7EB */
+    --input: 220 13% 91%; /* Gris perle #E5E7EB */
+    --ring: 32 95% 44%; /* Or doux pour focus */
 
     --radius: 0.6rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5% 26%;
-    --sidebar-primary: 240 6% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 5% 96%;
-    --sidebar-accent-foreground: 240 6% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 216 98% 60%;
+    /* Sidebar avec le thème IMMOO */
+    --sidebar-background: 217 50% 14%; /* Bleu nuit #111827 */
+    --sidebar-foreground: 210 20% 98%; /* Blanc cassé */
+    --sidebar-primary: 32 95% 44%; /* Or doux #D97706 */
+    --sidebar-primary-foreground: 217 50% 14%; /* Bleu nuit */
+    --sidebar-accent: 217 40% 20%; /* Bleu nuit plus clair */
+    --sidebar-accent-foreground: 210 20% 98%; /* Blanc cassé */
+    --sidebar-border: 217 40% 20%; /* Bleu nuit plus clair */
+    --sidebar-ring: 32 95% 44%; /* Or doux */
   }
 
   .dark {
-    --background: 220 14% 15%;
-    --foreground: 210 40% 98%;
+    /* Mode sombre avec ajustements */
+    --background: 217 50% 14%; /* Bleu nuit #111827 */
+    --foreground: 210 20% 98%; /* Blanc cassé #F9FAFB */
 
-    --card: 220 14% 15%;
-    --card-foreground: 210 40% 98%;
+    --card: 217 45% 16%; /* Bleu nuit légèrement plus clair */
+    --card-foreground: 210 20% 98%; /* Blanc cassé */
 
-    --popover: 220 14% 15%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 217 50% 14%; /* Bleu nuit */
+    --popover-foreground: 210 20% 98%; /* Blanc cassé */
 
-    --primary: 216 98% 52%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 32 95% 44%; /* Or doux #D97706 */
+    --primary-foreground: 217 50% 14%; /* Bleu nuit */
 
-    --secondary: 215 14% 20%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 217 40% 20%; /* Bleu nuit plus clair */
+    --secondary-foreground: 210 20% 98%; /* Blanc cassé */
 
-    --muted: 215 14% 20%;
-    --muted-foreground: 215 20% 65%;
+    --muted: 217 40% 20%; /* Bleu nuit plus clair */
+    --muted-foreground: 220 13% 91%; /* Gris perle */
 
-    --accent: 216 98% 52%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 32 95% 44%; /* Or doux #D97706 */
+    --accent-foreground: 217 50% 14%; /* Bleu nuit */
 
     --destructive: 0 62% 30%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 210 20% 98%;
 
-    --border: 215 14% 25%;
-    --input: 215 14% 25%;
-    --ring: 216 98% 60%;
+    --border: 217 40% 20%; /* Bleu nuit plus clair */
+    --input: 217 40% 20%; /* Bleu nuit plus clair */
+    --ring: 32 95% 44%; /* Or doux */
 
-    --sidebar-background: 240 6% 10%;
-    --sidebar-foreground: 240 5% 96%;
-    --sidebar-primary: 216 98% 52%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 4% 16%;
-    --sidebar-accent-foreground: 240 5% 96%;
-    --sidebar-border: 240 4% 16%;
-    --sidebar-ring: 216 98% 60%;
+    --sidebar-background: 217 55% 12%; /* Bleu nuit encore plus foncé */
+    --sidebar-foreground: 210 20% 98%; /* Blanc cassé */
+    --sidebar-primary: 32 95% 44%; /* Or doux */
+    --sidebar-primary-foreground: 217 50% 14%; /* Bleu nuit */
+    --sidebar-accent: 217 40% 18%; /* Bleu nuit accent */
+    --sidebar-accent-foreground: 210 20% 98%; /* Blanc cassé */
+    --sidebar-border: 217 40% 18%; /* Bleu nuit accent */
+    --sidebar-ring: 32 95% 44%; /* Or doux */
   }
 }
 
@@ -96,7 +98,7 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-medium tracking-tight;
+    @apply font-medium tracking-tight text-foreground;
   }
 
   h1 {
@@ -118,7 +120,7 @@
   }
 
   .glass-panel {
-    @apply bg-white/70 dark:bg-gray-900/60 backdrop-blur-lg border border-white/20 dark:border-gray-800/30;
+    @apply bg-card/70 dark:bg-card/60 backdrop-blur-lg border border-border/20;
   }
   
   .glass-card {
@@ -126,7 +128,7 @@
   }
 
   .subtle-shadow {
-    @apply shadow-[0_5px_20px_-5px_rgba(0,0,0,0.08)];
+    @apply shadow-[0_5px_20px_-5px_rgba(17,24,39,0.08)];
   }
 
   .link-underline {
@@ -134,11 +136,32 @@
   }
 
   .shimmer-effect {
-    @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent;
+    @apply relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer before:bg-gradient-to-r before:from-transparent before:via-accent/20 before:to-transparent;
+  }
+
+  /* IMMOO Premium Branding Components */
+  .immoo-gradient {
+    @apply bg-gradient-to-r from-primary to-primary/80;
+  }
+
+  .immoo-accent-gradient {
+    @apply bg-gradient-to-r from-accent to-accent/80;
+  }
+
+  .immoo-hero-bg {
+    @apply bg-gradient-to-br from-background via-card to-muted/30;
+  }
+
+  .immoo-cta-button {
+    @apply bg-accent hover:bg-accent/90 text-accent-foreground font-medium transition-all duration-200 shadow-lg hover:shadow-xl;
+  }
+
+  .immoo-primary-button {
+    @apply bg-primary hover:bg-primary/90 text-primary-foreground font-medium transition-all duration-200;
   }
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar avec les couleurs IMMOO */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -153,16 +176,16 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-muted-foreground/30;
+  @apply bg-accent/30;
 }
 
-/* Smooth scroll and selection */
+/* Smooth scroll and selection avec les couleurs IMMOO */
 html {
   scroll-behavior: smooth;
 }
 
 ::selection {
-  @apply bg-primary/10 text-primary;
+  @apply bg-accent/10 text-accent;
 }
 
 /* Custom animations */

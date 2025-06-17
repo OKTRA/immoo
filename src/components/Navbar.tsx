@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -9,6 +8,7 @@ import { NavbarDesktopMenu } from "./navbar/NavbarDesktopMenu";
 import { NavbarMobileMenu } from "./navbar/NavbarMobileMenu";
 import { UserType } from "./navbar/types";
 import { supabase } from "@/lib/supabase";
+import ImmooLogo from "./ui/ImmooLogo";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -120,19 +120,15 @@ export default function Navbar() {
       localStorage.removeItem('supabase.auth.token');
       localStorage.removeItem('sb-hzbogwleoszwtneveuvx-auth-token');
       
-      // Try to sign out, but don't fail if the session is already invalid
-      try {
-        const { error } = await supabase.auth.signOut();
-        if (error && error.message !== 'Auth session missing!') {
-          console.warn('Logout warning:', error);
-        }
-      } catch (authError: any) {
-        console.log('Auth session already invalid, continuing logout...');
-      }
+      // Sign out from Supabase - this will trigger onAuthStateChange
+      const { error } = await supabase.auth.signOut();
       
-      // Clear local state
-      setUser(null);
-      setUserRole(null);
+      if (error && error.message !== 'Auth session missing!') {
+        console.warn('Logout warning:', error);
+        // Force clear state if signOut fails
+        setUser(null);
+        setUserRole(null);
+      }
       
       console.log('Logout successful');
       toast.success("Vous avez été déconnecté avec succès");
@@ -141,7 +137,7 @@ export default function Navbar() {
       navigate("/");
     } catch (error: any) {
       console.error('Logout error:', error);
-      // Even if there's an error, still clear state and navigate
+      // Force clear state and navigate if there's an error
       setUser(null);
       setUserRole(null);
       toast.success("Vous avez été déconnecté avec succès");
@@ -154,33 +150,39 @@ export default function Navbar() {
       className={cn(
         "fixed top-0 left-0 w-full z-50 transition-all duration-200 ease-in-out",
         isScrolled 
-          ? "bg-white/80 dark:bg-gray-900/80 backdrop-blur-md shadow-sm py-3" 
+          ? "bg-immoo-pearl/90 dark:bg-immoo-navy/90 backdrop-blur-md shadow-lg border-b border-immoo-gray/20 py-3" 
           : "bg-transparent py-5"
       )}
     >
       <div className="container mx-auto px-4 md:px-6">
         <nav className="flex items-center justify-between">
-          <div className="flex items-center">
-            <div 
-              className="text-2xl font-semibold tracking-tight text-foreground mr-8 flex items-center cursor-pointer"
+          {/* Espace gauche pour équilibrer */}
+          <div className="flex-1 md:flex hidden"></div>
+
+          {/* Logo centré */}
+          <div className="flex justify-center">
+            <ImmooLogo 
               onClick={() => navigate("/")}
-            >
-              <span className="text-primary">immo</span>
-              <span>connect</span>
-            </div>
+              size="medium"
+              className="transition-all duration-200 hover:scale-105"
+            />
           </div>
 
-          <NavbarDesktopMenu 
-            navLinks={[]}
-            userTypes={userTypes}
-            user={user}
-            userRole={userRole}
-            location={location}
-            handleLogout={handleLogout}
-          />
+          {/* Menu desktop à droite */}
+          <div className="flex-1 flex justify-end">
+            <NavbarDesktopMenu 
+              navLinks={[]}
+              userTypes={userTypes}
+              user={user}
+              userRole={userRole}
+              location={location}
+              handleLogout={handleLogout}
+            />
+          </div>
 
+          {/* Bouton mobile */}
           <button
-            className="md:hidden text-foreground p-1"
+            className="md:hidden text-immoo-navy dark:text-immoo-pearl p-2 rounded-md hover:bg-immoo-gray/20 transition-colors duration-200"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? (

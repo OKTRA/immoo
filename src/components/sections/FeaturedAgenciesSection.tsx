@@ -142,7 +142,7 @@ export default function FeaturedAgenciesSection() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {agencies.map((agency) => (
-                <AgencyCard key={agency.id} agency={agency} />
+                <AgencyCard key={agency.id} agency={agency} isPublicView={true} />
               ))}
             </div>
             

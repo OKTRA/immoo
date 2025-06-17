@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -62,6 +61,17 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// IMMOO Premium Branding Colors (Utility Classes)
+				immoo: {
+					'navy': '#111827', // Bleu nuit
+					'gold': '#D97706', // Or doux
+					'pearl': '#F9FAFB', // Blanc cassé
+					'gray': '#E5E7EB', // Gris perle
+					'navy-light': '#1F2937', // Bleu nuit plus clair
+					'navy-dark': '#0F172A', // Bleu nuit plus foncé
+					'gold-light': '#F59E0B', // Or plus clair
+					'gold-dark': '#B45309' // Or plus foncé
 				}
 			},
 			borderRadius: {
@@ -117,6 +127,15 @@ export default {
 				'shimmer': {
 					'0%': { backgroundPosition: '-200% 0' },
 					'100%': { backgroundPosition: '200% 0' }
+				},
+				// IMMOO Premium Animations
+				'immoo-glow': {
+					'0%, 100%': { boxShadow: '0 0 20px rgba(217, 119, 6, 0.3)' },
+					'50%': { boxShadow: '0 0 30px rgba(217, 119, 6, 0.5)' }
+				},
+				'immoo-float': {
+					'0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+					'50%': { transform: 'translateY(-10px) rotate(2deg)' }
 				}
 			},
 			animation: {
@@ -131,7 +150,10 @@ export default {
 				'slide-down': 'slide-down 0.2s cubic-bezier(0.22, 1, 0.36, 1)',
 				'float': 'float 3s ease-in-out infinite',
 				'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
-				'shimmer': 'shimmer 2s linear infinite'
+				'shimmer': 'shimmer 2s linear infinite',
+				// IMMOO Premium Animations
+				'immoo-glow': 'immoo-glow 2s ease-in-out infinite',
+				'immoo-float': 'immoo-float 6s ease-in-out infinite'
 			},
 		}
 	},

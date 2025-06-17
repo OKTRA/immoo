@@ -1,6 +1,5 @@
-
 import { useParams } from "react-router-dom";
-import { LogOut, User, Home } from "lucide-react";
+import { LogOut, User, Home, DoorOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { getAgencyById } from "@/services/agency";
@@ -28,21 +27,17 @@ export default function AgencyHeader() {
       localStorage.removeItem('supabase.auth.token');
       localStorage.removeItem('sb-hzbogwleoszwtneveuvx-auth-token');
       
-      // Try to sign out, but don't fail if the session is already invalid
-      try {
-        const { error } = await supabase.auth.signOut();
-        if (error && error.message !== 'Auth session missing!') {
-          console.warn('Logout warning:', error);
-        }
-      } catch (authError: any) {
-        console.log('Auth session already invalid, continuing logout...');
+      // Sign out from Supabase - this will trigger onAuthStateChange
+      const { error } = await supabase.auth.signOut();
+      
+      if (error && error.message !== 'Auth session missing!') {
+        console.warn('Logout warning:', error);
       }
       
       toast.success("Déconnexion réussie");
       navigate("/");
     } catch (error: any) {
       console.error("Error signing out:", error);
-      // Even if there's an error, still navigate away and show success
       toast.success("Déconnexion réussie");
       navigate("/");
     }
@@ -54,32 +49,55 @@ export default function AgencyHeader() {
   };
 
   return (
-    <header className="w-full h-16 border-b bg-background flex items-center justify-between px-4 lg:px-6">
+    <header className="w-full h-20 border-b border-immoo-gray/20 bg-white/80 backdrop-blur-sm shadow-lg flex items-center justify-between px-6 lg:px-8">
       <div className="flex items-center">
         {agency?.logoUrl ? (
           <img 
-            src={agency.logoUrl} 
+            src={`${agency.logoUrl}?t=${Date.now()}`} 
             alt={agency.name || "Agency logo"} 
-            className="h-9 w-9 rounded object-cover mr-3"
+            className="h-12 w-12 rounded-xl object-cover mr-4 border-2 border-immoo-gold/30 shadow-md"
+            onError={(e) => {
+              console.error('Error loading agency logo in header:', e);
+              // Fallback to default icon if logo fails to load
+              e.currentTarget.style.display = 'none';
+            }}
           />
         ) : (
-          <div className="h-9 w-9 rounded bg-muted flex items-center justify-center mr-3">
-            <User className="h-5 w-5 text-muted-foreground" />
+          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-immoo-gold to-immoo-navy flex items-center justify-center mr-4 shadow-md">
+            <User className="h-6 w-6 text-white" />
           </div>
         )}
-        <h1 className="text-xl font-semibold">
-          {agency?.name || "Administration de l'agence"}
-        </h1>
+        <div>
+          <h1 className="text-xl font-bold text-immoo-navy">
+            {agency?.name || "Administration de l'agence"}
+          </h1>
+          <p className="text-sm text-immoo-gray">
+            Tableau de bord
+          </p>
+        </div>
       </div>
       
       <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" onClick={handleExitAgencySpace}>
-          <Home className="h-4 w-4 mr-2" />
-          Quitter l'espace agence
+        {/* Bouton Quitter l'espace agence */}
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={handleExitAgencySpace}
+          className="border-immoo-gray/30 text-immoo-navy hover:bg-immoo-pearl hover:border-immoo-gold transition-all duration-300 w-11 h-11"
+          title="Quitter l'espace agence"
+        >
+          <DoorOpen className="h-5 w-5" />
         </Button>
-        <Button variant="outline" size="sm" onClick={handleSignOut}>
-          <LogOut className="h-4 w-4 mr-2" />
-          Se déconnecter
+        
+        {/* Bouton Se déconnecter */}
+        <Button 
+          variant="outline" 
+          size="icon" 
+          onClick={handleSignOut}
+          className="border-immoo-gray/30 text-immoo-navy hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-300 w-11 h-11"
+          title="Se déconnecter"
+        >
+          <LogOut className="h-5 w-5" />
         </Button>
       </div>
     </header>

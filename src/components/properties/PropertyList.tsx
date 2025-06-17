@@ -6,9 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Eye, Home, MapPin, Ruler, Hotel, Bath, Tag, Edit, Heart } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import PropertyDetailsDialog from "./PropertyDetailsDialog";
-import VisitorContactForm from "@/components/visitor/VisitorContactForm";
-import { useVisitorContact } from "@/hooks/useVisitorContact";
+import QuickVisitorLogin from "@/components/visitor/QuickVisitorLogin";
+import { useQuickVisitorAccess } from "@/hooks/useQuickVisitorAccess";
 import { Link } from "react-router-dom";
+import { PropertyImageService } from "@/services/property/propertyImageService";
 
 interface PropertyListProps {
   properties: Property[];
@@ -18,43 +19,43 @@ interface PropertyListProps {
 export default function PropertyList({ properties, agencyId }: PropertyListProps) {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [showContactForm, setShowContactForm] = useState(false);
+  const [showMiniLogin, setShowMiniLogin] = useState(false);
   
-  // Use the visitor contact hook only for public view (when no agencyId)
-  const { isAuthorized, isLoading, submitContactForm } = useVisitorContact(
-    !agencyId && selectedProperty?.agencyId ? selectedProperty.agencyId : ""
-  );
+  // Use the visitor access hook for public view
+  const { isLoggedIn, isLoading } = useQuickVisitorAccess();
   
   const openPropertyDetails = (property: Property) => {
+    console.log('🏠 openPropertyDetails called:', { 
+      propertyTitle: property.title,
+      agencyId, 
+      isLoggedIn, 
+      isLoading 
+    });
+    
     setSelectedProperty(property);
     
-    // If this is public view and user doesn't have access, show contact form
-    if (!agencyId && property.agencyId && !isAuthorized) {
-      setShowContactForm(true);
+    // If this is public view and user is not logged in, show mini login
+    if (!agencyId && !isLoggedIn) {
+      console.log('🏠 Opening mini login');
+      setShowMiniLogin(true);
     } else {
-      // Direct access to details (agency view or already authorized)
+      console.log('🏠 Opening property details directly');
+      // Direct access to details (agency view or visitor logged in)
       setIsDialogOpen(true);
     }
   };
   
   const closePropertyDetails = () => {
     setIsDialogOpen(false);
-    setShowContactForm(false);
+    setShowMiniLogin(false);
     setSelectedProperty(null);
   };
 
-  const handleContactFormSubmit = async (formData: any) => {
-    if (!selectedProperty?.agencyId) return { success: false };
-    
-    const result = await submitContactForm(formData);
-    
-    if (result.success) {
-      // Close contact form and open property details
-      setShowContactForm(false);
-      setIsDialogOpen(true);
-    }
-    
-    return result;
+  const handleMiniLoginSuccess = (visitorData: any) => {
+    // After successful login, open property details
+    console.log('✅ Quick login successful:', visitorData);
+    setShowMiniLogin(false);
+    setIsDialogOpen(true);
   };
   
   if (properties.length === 0) {
@@ -79,26 +80,22 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
         {properties.map((property, index) => (
           <Card 
             key={property.id} 
-            className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white dark:bg-gray-900 rounded-2xl"
+            className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white dark:bg-gray-900 rounded-2xl flex flex-col"
             style={{
               animationDelay: `${index * 100}ms`
             }}
           >
             {/* Property Image */}
             <div className="relative h-64 overflow-hidden">
-              {property.imageUrl ? (
-                <img 
-                  src={property.imageUrl} 
-                  alt={property.title} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer"
-                  onClick={() => agencyId ? null : openPropertyDetails(property)}
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center cursor-pointer"
-                     onClick={() => agencyId ? null : openPropertyDetails(property)}>
-                  <Home className="h-16 w-16 text-gray-400" />
-                </div>
-              )}
+              <img 
+                src={PropertyImageService.getImageUrl(property.imageUrl)} 
+                alt={property.title} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer"
+                onClick={() => agencyId ? null : openPropertyDetails(property)}
+                onError={(e) => {
+                  e.currentTarget.src = PropertyImageService.getImageUrl(null);
+                }}
+              />
               
               {/* Status Badge */}
               <Badge 
@@ -122,7 +119,7 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
             
-            <CardContent className="p-6 space-y-4">
+            <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
               {/* Header */}
               <div className="space-y-2">
                 <div className="flex justify-between items-start">
@@ -141,7 +138,7 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
               </div>
               
               {/* Property Details */}
-              <div className="flex flex-wrap gap-4 py-2">
+              <div className="flex flex-wrap gap-4 py-2 flex-1">
                 <div className="flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
                   <Ruler className="h-4 w-4 mr-2 text-primary" />
                   <span className="text-sm font-medium">{property.area} m²</span>
@@ -169,8 +166,8 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
                 )}
               </div>
               
-              {/* Action Buttons */}
-              <div className="pt-2">
+              {/* Action Buttons - Always at bottom */}
+              <div className="mt-auto pt-4">
                 {agencyId ? (
                   // Agency management context
                   <div className="flex gap-3">
@@ -213,18 +210,19 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
         ))}
       </div>
       
-      {/* Visitor Contact Form */}
-      {!agencyId && showContactForm && selectedProperty && (
-        <VisitorContactForm
-          agencyName={selectedProperty.agencyName || "cette agence"}
-          onSubmit={handleContactFormSubmit}
-          isLoading={isLoading}
+
+
+      {/* Quick Visitor Login */}
+      {!agencyId && showMiniLogin && selectedProperty && (
+        <QuickVisitorLogin
+          isOpen={showMiniLogin}
           onClose={closePropertyDetails}
+          onSuccess={handleMiniLoginSuccess}
         />
       )}
       
-      {/* Property Details Dialog - Only show when authorized or in agency context */}
-      {isDialogOpen && selectedProperty && (agencyId || isAuthorized) && (
+      {/* Property Details Dialog - Only show when logged in or in agency context */}
+      {isDialogOpen && selectedProperty && (agencyId || isLoggedIn) && (
         <PropertyDetailsDialog 
           property={selectedProperty} 
           isOpen={isDialogOpen} 

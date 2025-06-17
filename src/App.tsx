@@ -22,6 +22,7 @@ import PropertyLeasePaymentsPage from "@/pages/PropertyLeasePaymentsPage";
 import AgencyPaymentsPage from "@/pages/AgencyPaymentsPage";
 import AgencySettingsPage from "@/pages/AgencySettingsPage";
 import PricingPage from "@/pages/PricingPage";
+import LogoShowcasePage from "@/pages/LogoShowcasePage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AgencyLayout from "@/components/agency/AgencyLayout";
 import Auth from "@/pages/Auth";
@@ -32,11 +33,15 @@ import OwnerPage from "@/pages/OwnerPage";
 import AdminPage from "@/pages/AdminPage";
 import NotFoundPage from "@/pages/NotFoundPage";
 import { VisitorTracker } from "./components/analytics/VisitorTracker";
+import { useAutoVisitorSession } from "./hooks/useAutoVisitorSession";
 import routes from "tempo-routes";
 
 const queryClient = new QueryClient();
 
 function App() {
+  // Initialize visitor session system
+  useAutoVisitorSession();
+
   // Removed bucket creation logic that was causing RLS policy violations
   // This prevents the storage errors on app initialization
 
@@ -58,6 +63,7 @@ function App() {
               <Route path="/public-agency/:agencyId" element={<PublicAgencyPage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/logo-showcase" element={<LogoShowcasePage />} />
               
               {/* Routes d'authentification */}
               <Route path="/auth" element={<Auth />} />

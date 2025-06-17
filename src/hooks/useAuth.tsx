@@ -67,26 +67,26 @@ export function useAuth() {
         
         if (session?.user) {
           setUser(session.user);
+          setIsLoading(false); // Set loading false immediately for login
           
-          // Fetch user profile to get role avec un délai pour éviter les conflits
-          setTimeout(async () => {
-            if (!mounted) return;
-            try {
-              const { profile } = await getUserProfile(session.user.id);
-              if (mounted) {
-                setUserRole(profile?.role || null);
-                console.log('useAuth: Role updated after auth change:', profile?.role);
-              }
-            } catch (error) {
-              console.error('Error fetching user profile after auth change:', error);
-              if (mounted) setUserRole(null);
+          // Fetch user profile to get role
+          try {
+            const { profile } = await getUserProfile(session.user.id);
+            if (mounted) {
+              setUserRole(profile?.role || null);
+              console.log('useAuth: Role updated after auth change:', profile?.role);
             }
-          }, 100);
+          } catch (error) {
+            console.error('Error fetching user profile after auth change:', error);
+            if (mounted) setUserRole(null);
+          }
         } else {
+          // Clear state immediately for logout
           setUser(null);
           setUserRole(null);
+          setIsLoading(false);
+          console.log('useAuth: User logged out, state cleared');
         }
-        setIsLoading(false);
       }
     );
 

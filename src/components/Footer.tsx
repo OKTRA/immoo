@@ -1,6 +1,6 @@
-
 import { useNavigate } from "react-router-dom";
 import { ButtonEffects } from "./ui/ButtonEffects";
+import ImmooLogo from "./ui/ImmooLogo";
 import {
   Facebook,
   Twitter,
@@ -57,6 +57,7 @@ export default function Footer() {
         { name: "Centre d'aide", href: "/#help" },
         { name: "Blog", href: "/#blog" },
         { name: "Documentation API", href: "/#api" },
+        { name: "Logo Showcase", href: "/logo-showcase" },
         { name: "Partenaires", href: "/#partners" }
       ]
     },
@@ -78,31 +79,31 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-muted/30 border-t border-border/60">
-      <div className="container mx-auto px-4 py-12">
+    <footer className="bg-immoo-navy text-immoo-pearl border-t border-immoo-navy-light">
+      <div className="container mx-auto px-4 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-8 mb-12">
           <div className="lg:col-span-2">
             <div 
-              className="text-2xl font-semibold tracking-tight text-foreground inline-flex items-center mb-4 cursor-pointer"
+              className="text-3xl font-bold tracking-tight text-immoo-pearl inline-flex items-center mb-6 cursor-pointer hover:scale-105 transition-transform duration-200"
               onClick={() => navigate("/")}
             >
-              <span className="text-primary">immo</span>
-              <span>connect</span>
+              <span className="text-immoo-pearl font-extrabold">IMMOO</span>
+              <span className="text-immoo-gold ml-1">•</span>
             </div>
-            <p className="text-muted-foreground text-sm mb-6 max-w-xs">
-              La première plateforme immobilière intégrée pour les agences, 
-              propriétaires et locataires.
+            <p className="text-immoo-pearl/70 text-base mb-8 max-w-md leading-relaxed">
+              La première plateforme immobilière premium intégrée pour les agences, 
+              propriétaires et locataires. Excellence et innovation au service de l'immobilier.
             </p>
             
-            <div className="flex space-x-3">
+            <div className="flex space-x-4">
               {socialLinks.map((social) => (
                 <div
                   key={social.name}
-                  className="w-9 h-9 rounded-full bg-background flex items-center justify-center text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+                  className="w-12 h-12 rounded-full bg-immoo-navy-light border border-immoo-gold/20 flex items-center justify-center text-immoo-pearl hover:text-immoo-gold hover:bg-immoo-gold/10 transition-all duration-300 cursor-pointer group"
                   aria-label={social.name}
                   onClick={() => handleNavigation(social.href)}
                 >
-                  <social.icon className="w-4 h-4" />
+                  <social.icon className="w-5 h-5 group-hover:scale-110 transition-transform duration-200" />
                 </div>
               ))}
             </div>
@@ -110,15 +111,17 @@ export default function Footer() {
           
           {footerLinks.map((column) => (
             <div key={column.title}>
-              <h4 className="font-medium text-base mb-4">{column.title}</h4>
-              <ul className="space-y-3">
+              <h4 className="font-semibold text-lg mb-6 text-immoo-gold">{column.title}</h4>
+              <ul className="space-y-4">
                 {column.links.map((link) => (
                   <li key={link.name}>
                     <div
-                      className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                      className="text-sm text-immoo-pearl/70 hover:text-immoo-gold transition-colors duration-200 cursor-pointer group flex items-center"
                       onClick={() => handleNavigation(link.href)}
                     >
-                      {link.name}
+                      <span className="group-hover:translate-x-1 transition-transform duration-200">
+                        {link.name}
+                      </span>
                     </div>
                   </li>
                 ))}
@@ -127,30 +130,30 @@ export default function Footer() {
           ))}
         </div>
         
-        <div className="pt-8 border-t border-border/60">
+        <div className="pt-8 border-t border-immoo-navy-light/50">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
-              <p className="text-sm text-muted-foreground">
-                © {currentYear} ImmoConnect. Tous droits réservés.
+              <p className="text-sm text-immoo-pearl/60">
+                © {currentYear} IMMOO. Tous droits réservés. Made with ❤️ in Mali.
               </p>
             </div>
             
-            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 items-center">
-              <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-6 items-center">
+              <div className="flex items-center space-x-6">
                 <div 
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  className="text-sm text-immoo-pearl/70 hover:text-immoo-gold transition-colors duration-200 cursor-pointer"
                   onClick={() => handleNavigation("/#terms")}
                 >
                   Conditions
                 </div>
                 <div 
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  className="text-sm text-immoo-pearl/70 hover:text-immoo-gold transition-colors duration-200 cursor-pointer"
                   onClick={() => handleNavigation("/#privacy")}
                 >
                   Confidentialité
                 </div>
                 <div 
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+                  className="text-sm text-immoo-pearl/70 hover:text-immoo-gold transition-colors duration-200 cursor-pointer"
                   onClick={() => handleNavigation("/#cookies")}
                 >
                   Cookies
@@ -158,12 +161,12 @@ export default function Footer() {
               </div>
               
               <div 
-                className="group flex items-center text-sm text-primary cursor-pointer"
+                className="group flex items-center text-sm text-immoo-gold hover:text-immoo-gold-light cursor-pointer px-4 py-2 rounded-full border border-immoo-gold/30 hover:border-immoo-gold hover:bg-immoo-gold/10 transition-all duration-300"
                 onClick={() => handleNavigation("/#contact")}
               >
-                <Mail className="w-4 h-4 mr-1" />
-                Contact 
-                <ArrowRight className="ml-1 w-3 h-3 transition-transform group-hover:translate-x-0.5" />
+                <Mail className="w-4 h-4 mr-2" />
+                Contact IMMOO
+                <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
               </div>
             </div>
           </div>

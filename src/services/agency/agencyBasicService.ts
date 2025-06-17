@@ -11,7 +11,7 @@ export const getAllAgencies = async (
   sortOrder: 'asc' | 'desc' = 'desc'
 ) => {
   try {
-    console.log("Fetching public agencies for browsing...");
+    console.log("🏢 Fetching public agencies for browsing...", { limit, offset, sortBy, sortOrder });
 
     // For public browsing, we don't filter by user_id - we want to show all agencies
     const { data, error, count } = await supabase
@@ -23,19 +23,32 @@ export const getAllAgencies = async (
       .range(offset, offset + limit - 1);
 
     if (error) {
-      console.error('Erreur Supabase:', error);
+      console.error('❌ Erreur Supabase:', error);
       throw error;
     }
     
-    console.log(`Agences publiques récupérées: ${data?.length || 0}`);
+    console.log(`✅ Raw data from Supabase:`, { count, dataLength: data?.length, data });
     
-    const transformedData = data?.map((item) => transformAgencyData(item));
+    if (!data || data.length === 0) {
+      console.warn('⚠️ No agencies found in database with current filters');
+      return { agencies: [], count: 0, error: null };
+    }
     
-    return { agencies: transformedData, count, error: null };
+    const transformedData = data?.map((item) => {
+      console.log('🔄 Transforming agency:', item);
+      const transformed = transformAgencyData(item);
+      console.log('✅ Transformed result:', transformed);
+      return transformed;
+    });
+    
+    console.log(`✅ Final transformed agencies:`, transformedData);
+    
+    return { agencies: transformedData || [], count, error: null };
   } catch (error: any) {
-    console.error('Error getting public agencies:', error);
+    console.error('❌ Error getting public agencies:', error);
     // Utiliser les données mockées si la requête échoue
     const mockData = getMockData('agencies', limit);
+    console.log('🔄 Using mock data:', mockData);
     return { agencies: mockData, count: mockData.length, error: error.message };
   }
 };

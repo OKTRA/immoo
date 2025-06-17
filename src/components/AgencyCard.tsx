@@ -1,4 +1,3 @@
-
 import { AnimatedCard } from "./ui/AnimatedCard";
 import { Badge } from "./ui/badge";
 import { Agency } from "@/assets/types";
@@ -10,15 +9,20 @@ import { getPropertiesByAgencyId, deleteAgency } from "@/services/agency";
 import { useState } from "react";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { toast } from "sonner";
+import QuickVisitorLogin from "@/components/visitor/QuickVisitorLogin";
+import { useQuickVisitorAccess } from "@/hooks/useQuickVisitorAccess";
 
 interface AgencyCardProps {
   agency: Agency;
   onDelete?: () => void;
+  isPublicView?: boolean; // New prop to control quicklogin behavior
 }
 
-export default function AgencyCard({ agency, onDelete }: AgencyCardProps) {
+export default function AgencyCard({ agency, onDelete, isPublicView = false }: AgencyCardProps) {
   const navigate = useNavigate();
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showMiniLogin, setShowMiniLogin] = useState(false);
+  const { isLoggedIn, isLoading } = useQuickVisitorAccess();
   
   // Fetch actual property count for this agency
   const { data: propertiesData } = useQuery({
@@ -45,6 +49,41 @@ export default function AgencyCard({ agency, onDelete }: AgencyCardProps) {
     } finally {
       setShowDeleteConfirm(false);
     }
+  };
+
+  const handleViewAgency = (e: React.MouseEvent) => {
+    // Only apply quicklogin logic in public view
+    if (isPublicView) {
+      e.preventDefault();
+      
+      console.log('🏢 handleViewAgency called (public):', { 
+        agencyName: agency.name,
+        isLoggedIn, 
+        isLoading 
+      });
+      
+      // If visitor is not logged in, show mini login
+      if (!isLoggedIn) {
+        console.log('🏢 Opening mini login for agency access');
+        setShowMiniLogin(true);
+      } else {
+        console.log('🏢 Navigating to public agency page directly');
+        // Navigate to public agency page, not the private management page
+        navigate(`/public-agency/${agency.id}`);
+      }
+    }
+    // In authenticated context, let the Link handle navigation normally to private management
+  };
+
+  const handleMiniLoginSuccess = (visitorData: any) => {
+    // After successful login, navigate to public agency page
+    console.log('✅ Quick login successful, navigating to public agency page:', visitorData);
+    setShowMiniLogin(false);
+    navigate(`/public-agency/${agency.id}`);
+  };
+
+  const handleCloseLogin = () => {
+    setShowMiniLogin(false);
   };
 
   // Ensure rating is a number and handle potential undefined/null values
@@ -76,11 +115,23 @@ export default function AgencyCard({ agency, onDelete }: AgencyCardProps) {
           </div>
           
           <div className="flex-1 min-w-0">
-            <Link to={`/agencies/${agency.id}`}>
-              <h3 className="text-lg font-medium truncate group-hover:text-primary transition-colors">
-                {agency.name}
-              </h3>
-            </Link>
+            {isPublicView ? (
+              <button 
+                onClick={handleViewAgency}
+                className="text-left w-full"
+                disabled={isLoading}
+              >
+                <h3 className="text-lg font-medium truncate group-hover:text-primary transition-colors">
+                  {agency.name}
+                </h3>
+              </button>
+            ) : (
+              <Link to={`/agencies/${agency.id}`}>
+                <h3 className="text-lg font-medium truncate group-hover:text-primary transition-colors">
+                  {agency.name}
+                </h3>
+              </Link>
+            )}
             <div className="flex items-center text-muted-foreground text-sm">
               <MapPin className="h-3 w-3 mr-1 inline-block" />
               <span className="truncate">{agency.location}</span>
@@ -122,35 +173,63 @@ export default function AgencyCard({ agency, onDelete }: AgencyCardProps) {
             </div>
           )}
           
-          <div className="grid grid-cols-3 gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link to={`/agencies/${agency.id}`}>
-                <Eye className="w-4 h-4 mr-2" />
-                Voir
-              </Link>
+          {/* Only show management buttons in authenticated context */}
+          {!isPublicView && (
+            <div className="grid grid-cols-3 gap-2">
+              <Button variant="outline" size="sm" asChild>
+                <Link to={`/agencies/${agency.id}`}>
+                  <Eye className="w-4 h-4 mr-2" />
+                  Voir
+                </Link>
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate(`/agencies/edit/${agency.id}`)}>
+                <Edit className="w-4 h-4 mr-2" />
+                Modifier
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setShowDeleteConfirm(true)}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Supprimer
+              </Button>
+            </div>
+          )}
+
+          {/* Show view button in public context */}
+          {isPublicView && (
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleViewAgency}
+              disabled={isLoading}
+            >
+              <Eye className="w-4 h-4 mr-2" />
+              {isLoading ? "Chargement..." : "Voir l'agence"}
             </Button>
-            <Button variant="outline" size="sm" onClick={() => navigate(`/agencies/edit/${agency.id}`)}>
-              <Edit className="w-4 h-4 mr-2" />
-              Modifier
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setShowDeleteConfirm(true)}>
-              <Trash2 className="w-4 h-4 mr-2" />
-              Supprimer
-            </Button>
-          </div>
+          )}
         </div>
-      </AnimatedCard>
-      
-      <ConfirmDialog 
-        isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={handleDelete}
-        title="Supprimer l'agence"
-        description={`Êtes-vous sûr de vouloir supprimer l'agence "${agency.name}"? Cette action est irréversible.`}
-        confirmLabel="Supprimer"
-        cancelLabel="Annuler"
-        variant="destructive"
-      />
-    </>
-  );
-}
+              </AnimatedCard>
+        
+        {/* Quick Visitor Login - only in public view */}
+        {isPublicView && showMiniLogin && (
+          <QuickVisitorLogin
+            isOpen={showMiniLogin}
+            onClose={handleCloseLogin}
+            onSuccess={handleMiniLoginSuccess}
+          />
+        )}
+        
+        {/* Delete confirmation - only in authenticated context */}
+        {!isPublicView && (
+          <ConfirmDialog 
+            isOpen={showDeleteConfirm}
+            onClose={() => setShowDeleteConfirm(false)}
+            onConfirm={handleDelete}
+            title="Supprimer l'agence"
+            description={`Êtes-vous sûr de vouloir supprimer l'agence "${agency.name}"? Cette action est irréversible.`}
+            confirmLabel="Supprimer"
+            cancelLabel="Annuler"
+            variant="destructive"
+          />
+        )}
+      </>
+    );
+  }

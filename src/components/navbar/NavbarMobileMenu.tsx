@@ -40,7 +40,6 @@ export function NavbarMobileMenu({
     setMobileMenuOpen(false);
     try {
       await handleLogout();
-      navigate('/');
     } catch (error) {
       console.error('Logout error:', error);
     }

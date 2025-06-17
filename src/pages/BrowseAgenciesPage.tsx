@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserSubscription } from '@/hooks/useUserSubscription';
-import { getAgenciesWithSubscriptions } from '@/services/subscription';
+import { getAllAgencies } from '@/services/agency/agencyBasicService';
 import { toast } from 'sonner';
 
 import { BrowseAgenciesHeader } from '@/components/browse-agencies/BrowseAgenciesHeader';
@@ -42,14 +41,32 @@ export default function BrowseAgenciesPage() {
   const loadAgencies = async () => {
     setLoading(true);
     try {
-      const { agencies: agenciesData, error } = await getAgenciesWithSubscriptions();
+      console.log('🏢 Loading public agencies...');
+      
+      // Use getAllAgencies instead of getAgenciesWithSubscriptions
+      // to show all public visible agencies, not just those with subscriptions
+      const { agencies: agenciesData, error } = await getAllAgencies(50, 0, 'name', 'asc');
+      
       if (error) {
+        console.error('❌ Error loading agencies:', error);
         toast.error(`Erreur: ${error}`);
         return;
       }
-      setAgencies(agenciesData);
+      
+      console.log('✅ Public agencies loaded:', agenciesData.length);
+      
+      // Transform agencies to match the expected interface
+      const transformedAgencies: AgencyWithSubscription[] = agenciesData.map(agency => ({
+        id: agency.id,
+        name: agency.name,
+        logoUrl: agency.logoUrl,
+        // We don't have subscription info from getAllAgencies, but that's fine for public browsing
+        subscription: undefined
+      }));
+      
+      setAgencies(transformedAgencies);
     } catch (error) {
-      console.error('Error loading agencies:', error);
+      console.error('❌ Error loading agencies:', error);
       toast.error('Erreur lors du chargement des agences');
     } finally {
       setLoading(false);

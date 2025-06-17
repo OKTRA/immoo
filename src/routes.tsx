@@ -1,5 +1,3 @@
-
-
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Spinner } from '@/components/ui/spinner';
@@ -13,6 +11,8 @@ const CreateAgencyPage = lazy(() => import('@/pages/CreateAgencyPage'));
 const EditAgencyPage = lazy(() => import('@/pages/EditAgencyPage'));
 const AdminDashboardPage = lazy(() => import('@/pages/AdminPage'));
 const SubscriptionPlansManagement = lazy(() => import('@/components/admin/SubscriptionPlansManagement'));
+const PublicAgencyPage = lazy(() => import('@/pages/PublicAgencyPage'));
+const LogoShowcasePage = lazy(() => import('@/pages/LogoShowcasePage'));
 import PricingPage from '@/pages/PricingPage';
 
 export const router = createBrowserRouter([
@@ -40,6 +40,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Spinner />}>
             <BrowseAgenciesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/public-agency/:agencyId',
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <PublicAgencyPage />
           </Suspense>
         ),
       },
@@ -84,6 +92,14 @@ export const router = createBrowserRouter([
       {
         path: "/pricing",
         element: <PricingPage />
+      },
+      {
+        path: "/logo-showcase",
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <LogoShowcasePage />
+          </Suspense>
+        ),
       },
       {
         path: '/login',

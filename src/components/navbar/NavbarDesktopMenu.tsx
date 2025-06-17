@@ -6,6 +6,7 @@ import { LogOut } from "lucide-react";
 import { UserType } from "./types";
 import { cn } from "@/lib/utils";
 import LoginDialog from "@/components/auth/LoginDialog";
+import QuickVisitorIndicator from "@/components/visitor/QuickVisitorIndicator";
 import { toast } from "sonner";
 
 interface NavbarDesktopMenuProps {
@@ -48,10 +49,6 @@ export function NavbarDesktopMenu({
       await handleLogout();
       console.log('Logout completed successfully');
       
-      // Force navigation to home page
-      navigate('/', { replace: true });
-      
-      toast.success("Vous avez été déconnecté avec succès");
     } catch (error) {
       console.error('Logout error:', error);
       toast.error("Erreur lors de la déconnexion");
@@ -63,7 +60,7 @@ export function NavbarDesktopMenu({
   return (
     <>
       <div className="hidden md:flex items-center space-x-4">
-        <div className="hidden md:flex">
+        <div className="hidden md:flex items-center">
           {userTypes.map((type) => (
             <ButtonEffects 
               key={type.name}
@@ -80,6 +77,13 @@ export function NavbarDesktopMenu({
               {type.name}
             </ButtonEffects>
           ))}
+
+          {/* Quick Visitor Indicator - only show if no user logged in */}
+          {!user && (
+            <div className="mx-2">
+              <QuickVisitorIndicator />
+            </div>
+          )}
 
           {user && (
             <ButtonEffects
