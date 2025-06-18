@@ -13,6 +13,8 @@ const AdminDashboardPage = lazy(() => import('@/pages/AdminPage'));
 const SubscriptionPlansManagement = lazy(() => import('@/components/admin/SubscriptionPlansManagement'));
 const PublicAgencyPage = lazy(() => import('@/pages/PublicAgencyPage'));
 const LogoShowcasePage = lazy(() => import('@/pages/LogoShowcasePage'));
+const TestLogoAdaptive = lazy(() => import('@/pages/TestLogoAdaptive'));
+const TestMobileNavigation = lazy(() => import('@/pages/TestMobileNavigation'));
 import PricingPage from '@/pages/PricingPage';
 
 export const router = createBrowserRouter([
@@ -98,6 +100,22 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Spinner />}>
             <LogoShowcasePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/test-logo-adaptive",
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <TestLogoAdaptive />
+          </Suspense>
+        ),
+      },
+      {
+        path: "/test-mobile-navigation",
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <TestMobileNavigation />
           </Suspense>
         ),
       },

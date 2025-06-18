@@ -192,7 +192,7 @@
 
   .immoo-text-gold {
     @apply bg-gradient-to-r from-immoo-gold to-immoo-gold-light bg-clip-text text-transparent;
-  }
+}
 
   /* Premium Shadow Effects */
   .shadow-3xl {

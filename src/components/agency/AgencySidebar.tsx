@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
 import { getAgencyById } from "@/services/agency";
-import ImmooLogo from "@/components/ui/ImmooLogo";
+import ImmooLogoAdaptive from "@/components/ui/ImmooLogoAdaptive";
 import ImmooFavicon from "@/components/ui/ImmooFavicon";
 
 export default function AgencySidebar() {
@@ -95,7 +95,7 @@ export default function AgencySidebar() {
       <div className="flex items-center justify-between p-6 border-b border-immoo-gray/20 bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5">
         {!collapsed ? (
           <div className="flex items-center">
-            <ImmooLogo size="medium" />
+            <ImmooLogoAdaptive size="medium" />
           </div>
         ) : (
           <button 

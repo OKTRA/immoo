@@ -8,7 +8,7 @@ import { NavbarDesktopMenu } from "./navbar/NavbarDesktopMenu";
 import { NavbarMobileMenu } from "./navbar/NavbarMobileMenu";
 import { UserType } from "./navbar/types";
 import { supabase } from "@/lib/supabase";
-import ImmooLogo from "./ui/ImmooLogo";
+import ImmooLogoAdaptive from "./ui/ImmooLogoAdaptive";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -155,21 +155,18 @@ export default function Navbar() {
       )}
     >
       <div className="container mx-auto px-4 md:px-6">
-        <nav className="flex items-center justify-between">
-          {/* Espace gauche pour équilibrer */}
-          <div className="flex-1 md:flex hidden"></div>
-
-          {/* Logo centré */}
-          <div className="flex justify-center">
-            <ImmooLogo 
+        <nav className="flex items-center justify-between md:justify-center relative">
+          {/* Logo - centré sur toutes les tailles d'écran */}
+          <div className="absolute left-1/2 transform -translate-x-1/2 md:static md:transform-none">
+            <ImmooLogoAdaptive 
               onClick={() => navigate("/")}
               size="medium"
               className="transition-all duration-200 hover:scale-105"
             />
           </div>
 
-          {/* Menu desktop à droite */}
-          <div className="flex-1 flex justify-end">
+          {/* Menu desktop à droite - caché sur mobile */}
+          <div className="hidden md:flex md:absolute md:right-0">
             <NavbarDesktopMenu 
               navLinks={[]}
               userTypes={userTypes}
@@ -180,17 +177,35 @@ export default function Navbar() {
             />
           </div>
 
-          {/* Bouton mobile */}
-          <button
-            className="md:hidden text-immoo-navy dark:text-immoo-pearl p-2 rounded-md hover:bg-immoo-gray/20 transition-colors duration-200"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-6 w-6" />
-            ) : (
-              <Menu className="h-6 w-6" />
-            )}
-          </button>
+          {/* Bouton mobile - positionné à droite */}
+          <div className="md:hidden ml-auto">
+            <button
+              className="relative w-10 h-10 flex items-center justify-center rounded-lg bg-white/80 backdrop-blur-sm border border-immoo-gray/20 shadow-sm hover:bg-white hover:shadow-md transition-all duration-200 group"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Menu"
+            >
+              <div className="flex flex-col items-center justify-center w-5 h-5">
+                <span
+                  className={cn(
+                    "block h-0.5 w-5 bg-immoo-navy rounded-full transition-all duration-300 transform",
+                    mobileMenuOpen ? "rotate-45 translate-y-1" : "-translate-y-1"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "block h-0.5 w-5 bg-immoo-navy rounded-full transition-all duration-300",
+                    mobileMenuOpen ? "opacity-0" : "opacity-100"
+                  )}
+                />
+                <span
+                  className={cn(
+                    "block h-0.5 w-5 bg-immoo-navy rounded-full transition-all duration-300 transform",
+                    mobileMenuOpen ? "-rotate-45 -translate-y-1" : "translate-y-1"
+                  )}
+                />
+              </div>
+            </button>
+          </div>
         </nav>
       </div>
 

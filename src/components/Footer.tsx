@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { ButtonEffects } from "./ui/ButtonEffects";
-import ImmooLogo from "./ui/ImmooLogo";
+
 import {
   Facebook,
   Twitter,
