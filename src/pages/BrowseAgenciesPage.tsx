@@ -9,6 +9,7 @@ import { SubscriptionStatus } from '@/components/browse-agencies/SubscriptionSta
 import { AgencySearch } from '@/components/browse-agencies/AgencySearch';
 import { AgencyList } from '@/components/browse-agencies/AgencyList';
 import { NoAgenciesFound } from '@/components/browse-agencies/NoAgenciesFound';
+import { Building2, Loader2 } from 'lucide-react';
 
 interface AgencyWithSubscription {
   id: string;
@@ -88,41 +89,93 @@ export default function BrowseAgenciesPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex justify-center items-center py-12">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl via-white to-immoo-gold/10">
+        <div className="container mx-auto px-4 py-8">
+          {/* Loading Header Skeleton */}
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-2xl animate-pulse" />
+            <div className="relative px-8 py-12">
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-12 bg-gray-300 rounded-full animate-pulse" />
+                    <div>
+                      <div className="h-10 w-64 bg-gray-300 rounded animate-pulse mb-2" />
+                      <div className="h-6 w-80 bg-gray-200 rounded animate-pulse" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Loading Content */}
+          <div className="flex justify-center items-center py-20">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-br from-immoo-gold/20 to-immoo-navy/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Loader2 className="h-8 w-8 text-immoo-gold animate-spin" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                Chargement des agences...
+              </h3>
+              <p className="text-gray-600">
+                Nous récupérons les meilleures agences pour vous
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <BrowseAgenciesHeader 
-        user={user}
-        canCreateAgency={canCreateAgency}
-      />
-      
-      <SubscriptionStatus 
-        user={user}
-        subscription={subscription}
-        agencyLimit={agencyLimit}
-      />
-
-      <AgencySearch 
-        searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
-      />
-
-      {filteredAgencies.length > 0 ? (
-        <AgencyList agencies={filteredAgencies} />
-      ) : (
-        <NoAgenciesFound
-          searchTerm={searchTerm}
+    <div className="min-h-screen bg-gradient-to-br from-immoo-pearl via-white to-immoo-gold/10">
+      <div className="container mx-auto px-4 py-8">
+        <BrowseAgenciesHeader 
           user={user}
           canCreateAgency={canCreateAgency}
         />
-      )}
+        
+        <SubscriptionStatus 
+          user={user}
+          subscription={subscription}
+          agencyLimit={agencyLimit}
+        />
+
+        <AgencySearch 
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+        />
+
+        {/* Results Section */}
+        <div className="mb-6">
+          {filteredAgencies.length > 0 && (
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-5 w-5 text-immoo-gold" />
+                <span className="text-lg font-semibold text-gray-900">
+                  {filteredAgencies.length} agence{filteredAgencies.length > 1 ? 's' : ''} trouvée{filteredAgencies.length > 1 ? 's' : ''}
+                </span>
+                {searchTerm && (
+                  <span className="text-sm text-gray-600">
+                    pour "{searchTerm}"
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {filteredAgencies.length > 0 ? (
+          <AgencyList agencies={filteredAgencies} />
+        ) : (
+          <NoAgenciesFound
+            searchTerm={searchTerm}
+            user={user}
+            canCreateAgency={canCreateAgency}
+          />
+        )}
+      </div>
     </div>
   );
 }

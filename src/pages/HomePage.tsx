@@ -145,41 +145,6 @@ export default function HomePage() {
         )}
         
         <FeatureSection />
-        
-        <section className="py-12 bg-gradient-to-r from-immoo-navy/95 via-immoo-navy-light/95 to-immoo-navy/95 relative overflow-hidden">
-          {/* Subtle decorative elements */}
-          <div className="absolute inset-0 opacity-5">
-            <div className="absolute top-5 left-5 w-16 h-16 bg-immoo-gold rounded-full animate-immoo-float"></div>
-            <div className="absolute bottom-5 right-5 w-12 h-12 bg-immoo-gold/50 rounded-full animate-immoo-float" style={{ animationDelay: '2s' }}></div>
-          </div>
-          
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <div className="max-w-3xl mx-auto">
-              <h2 className="text-2xl md:text-3xl font-bold mb-4 text-immoo-pearl">
-                Accédez à votre espace IMMOO
-              </h2>
-              <p className="text-base text-immoo-pearl/80 mb-8">
-                Connectez-vous à votre espace personnalisé pour gérer facilement vos propriétés et locataires.
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy px-6 py-2.5 font-medium shadow-md hover:shadow-lg transition-all duration-200" asChild size="default">
-                  <Link to="/agencies" className="flex items-center">
-                    <Building2 className="w-4 h-4 mr-2" />
-                    Espace Agence
-                  </Link>
-                </Button>
-                
-                <Button variant="outline" className="border border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy px-6 py-2.5 font-medium transition-all duration-200" asChild size="default">
-                  <Link to="/auth" className="flex items-center">
-                    <LogIn className="w-4 h-4 mr-2" />
-                    Se connecter
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
       
       <Footer />

@@ -50,12 +50,7 @@ export default function FeatureSection() {
       path: "/owner",
       description: "Interface simplifiée pour suivre vos biens, revenus et communiquer avec votre agence."
     },
-    {
-      type: "admin",
-      label: "Super Admin",
-      path: "/admin",
-      description: "Contrôle total du système, gestion des agences et accès aux statistiques globales."
-    }
+
   ];
 
   const featureRef = useRef(null);
@@ -173,7 +168,7 @@ export default function FeatureSection() {
             </p>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {userTypes.map((userType, index) => (
               <motion.a 
                 key={index} 
