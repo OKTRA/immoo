@@ -21,6 +21,8 @@ export const checkUserResourceLimit = async (
   agencyId?: string
 ): Promise<SubscriptionLimit> => {
   try {
+    console.log(`🔍 Checking resource limit for user ${userId}, resource: ${resourceType}, agency: ${agencyId}`);
+    
     // First, try to get the user's subscription
     const { data: subscription, error: subError } = await supabase
       .from('user_subscriptions')
@@ -32,23 +34,34 @@ export const checkUserResourceLimit = async (
       .eq('status', 'active')
       .single();
 
+    console.log(`📊 Subscription query result:`, { subscription, error: subError });
+
     if (subError || !subscription) {
+      console.log(`⚠️ No active subscription found, using free plan limits`);
       // No active subscription found, treat as free plan
       const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
-      return getFreePlanLimits(currentCount, resourceType);
+      const freePlanResult = getFreePlanLimits(currentCount, resourceType);
+      console.log(`🆓 Free plan result:`, freePlanResult);
+      return freePlanResult;
     }
 
     if (!subscription.subscription_plans) {
+      console.log(`⚠️ No plan found in subscription, using free plan limits`);
       // No plan found, treat as free plan
       const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
-      return getFreePlanLimits(currentCount, resourceType);
+      const freePlanResult = getFreePlanLimits(currentCount, resourceType);
+      console.log(`🆓 Free plan result (no plan):`, freePlanResult);
+      return freePlanResult;
     }
 
     // Get current count of resources
     const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
+    console.log(`📈 Current count for ${resourceType}:`, currentCount);
     
     // Get the appropriate limit from the plan
     const plan = subscription.subscription_plans;
+    console.log(`📋 Plan details:`, plan);
+    
     const limits = {
       properties: plan.max_properties || 1,
       agencies: plan.max_agencies || 1,
@@ -57,6 +70,7 @@ export const checkUserResourceLimit = async (
     };
 
     const maxAllowed = limits[resourceType];
+    console.log(`🎯 Limits for ${resourceType}:`, { maxAllowed, currentCount });
     
     // Si la limite est -1, c'est illimité
     const isUnlimited = maxAllowed === -1;
@@ -74,9 +88,10 @@ export const checkUserResourceLimit = async (
       isUnlimited
     };
 
+    console.log(`✅ Final result:`, result);
     return result;
   } catch (error: any) {
-    console.error('Error checking user resource limit:', error);
+    console.error('❌ Error checking user resource limit:', error);
     return {
       allowed: false,
       currentCount: 0,
@@ -98,6 +113,8 @@ export const getCurrentResourceCount = async (
   try {
     let count = 0;
     
+    console.log(`📊 Getting count for ${resourceType}, user: ${userId}, agency: ${agencyId}`);
+    
     switch (resourceType) {
       case 'agencies':
         const { count: agencyCount } = await supabase
@@ -105,6 +122,7 @@ export const getCurrentResourceCount = async (
           .select('id', { count: 'exact', head: true })
           .eq('user_id', userId);
         count = agencyCount || 0;
+        console.log(`🏢 Agency count: ${count}`);
         break;
         
       case 'properties':
@@ -115,68 +133,105 @@ export const getCurrentResourceCount = async (
             .select('id', { count: 'exact', head: true })
             .eq('agency_id', agencyId);
           count = propCount || 0;
+          console.log(`🏠 Property count for agency ${agencyId}: ${count}`);
         } else {
-          // Count properties from all user's agencies - FIXED LOGIC
-          const { count: propCount } = await supabase
-            .from('properties')
-            .select('id', { count: 'exact', head: true })
-            .in('agency_id', 
-              supabase
-                .from('agencies')
-                .select('id')
-                .eq('user_id', userId)
-            );
-          count = propCount || 0;
+          // First get all user's agency IDs
+          const { data: userAgencies } = await supabase
+            .from('agencies')
+            .select('id')
+            .eq('user_id', userId);
+          
+          if (userAgencies && userAgencies.length > 0) {
+            const agencyIds = userAgencies.map(a => a.id);
+            console.log(`🏢 User's agency IDs:`, agencyIds);
+            
+            // Count properties from all user's agencies
+            const { count: propCount } = await supabase
+              .from('properties')
+              .select('id', { count: 'exact', head: true })
+              .in('agency_id', agencyIds);
+            count = propCount || 0;
+          } else {
+            count = 0;
+          }
+          console.log(`🏠 Total property count: ${count}`);
         }
         break;
         
       case 'leases':
         if (agencyId) {
-          // Count leases for properties in specific agency
-          const { count: leaseCount } = await supabase
-            .from('leases')
-            .select('id', { count: 'exact', head: true })
-            .eq('is_active', true)
-            .in('property_id',
-              supabase
-                .from('properties')
-                .select('id')
-                .eq('agency_id', agencyId)
-            );
-          count = leaseCount || 0;
+          // First get properties for this agency
+          const { data: agencyProperties } = await supabase
+            .from('properties')
+            .select('id')
+            .eq('agency_id', agencyId);
+          
+          if (agencyProperties && agencyProperties.length > 0) {
+            const propertyIds = agencyProperties.map(p => p.id);
+            console.log(`🏠 Properties in agency ${agencyId}:`, propertyIds);
+            
+            // Count leases for these properties
+            const { count: leaseCount } = await supabase
+              .from('leases')
+              .select('id', { count: 'exact', head: true })
+              .eq('is_active', true)
+              .in('property_id', propertyIds);
+            count = leaseCount || 0;
+          } else {
+            count = 0;
+          }
+          console.log(`📝 Lease count for agency ${agencyId}: ${count}`);
         } else {
-          // Count leases for all user's properties - FIXED LOGIC
-          const { count: leaseCount } = await supabase
-            .from('leases')
-            .select('id', { count: 'exact', head: true })
-            .eq('is_active', true)
-            .in('property_id',
-              supabase
-                .from('properties')
-                .select('id')
-                .in('agency_id',
-                  supabase
-                    .from('agencies')
-                    .select('id')
-                    .eq('user_id', userId)
-                )
-            );
-          count = leaseCount || 0;
+          // First get all user's agency IDs
+          const { data: userAgencies } = await supabase
+            .from('agencies')
+            .select('id')
+            .eq('user_id', userId);
+          
+          if (userAgencies && userAgencies.length > 0) {
+            const agencyIds = userAgencies.map(a => a.id);
+            
+            // Then get all properties from these agencies
+            const { data: userProperties } = await supabase
+              .from('properties')
+              .select('id')
+              .in('agency_id', agencyIds);
+            
+            if (userProperties && userProperties.length > 0) {
+              const propertyIds = userProperties.map(p => p.id);
+              console.log(`🏠 User's property IDs:`, propertyIds);
+              
+              // Count leases for all user's properties
+              const { count: leaseCount } = await supabase
+                .from('leases')
+                .select('id', { count: 'exact', head: true })
+                .eq('is_active', true)
+                .in('property_id', propertyIds);
+              count = leaseCount || 0;
+            } else {
+              count = 0;
+            }
+          } else {
+            count = 0;
+          }
+          console.log(`📝 Total lease count: ${count}`);
         }
         break;
         
       case 'users':
         // For now, just count the user themselves
         count = 1;
+        console.log(`👤 User count: ${count}`);
         break;
         
       default:
         count = 0;
     }
     
+    console.log(`📊 Final count for ${resourceType}: ${count}`);
     return count;
   } catch (error: any) {
-    console.error(`Error getting ${resourceType} count for user ${userId}:`, error);
+    console.error(`❌ Error getting ${resourceType} count for user ${userId}:`, error);
     return 0;
   }
 };

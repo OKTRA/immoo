@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -42,7 +41,7 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
       imageUrl: formData.imageUrl,
       virtualTourUrl: formData.virtualTourUrl,
     });
-  }, [formData.imageUrl, formData.virtualTourUrl, onChange]);
+  }, [formData.imageUrl, formData.virtualTourUrl]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

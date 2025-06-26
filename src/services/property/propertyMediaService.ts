@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -22,7 +21,8 @@ export const uploadPropertyImage = async (propertyId: string, file: File, isPrim
       .getPublicUrl(filePath);
     
     // Enregistrement des métadonnées dans la base de données
-    if (propertyId !== 'temp') {
+    // Seulement si l'ID n'est pas temporaire (ne commence pas par 'temp-')
+    if (!propertyId.startsWith('temp-') && propertyId !== 'temp') {
       const { error: dbError } = await supabase
         .from('property_images')
         .insert({
@@ -32,7 +32,10 @@ export const uploadPropertyImage = async (propertyId: string, file: File, isPrim
           is_primary: isPrimary
         });
       
-      if (dbError) throw dbError;
+      if (dbError) {
+        console.warn('Could not save image metadata to database (property not created yet):', dbError);
+        // Ne pas jeter d'erreur car l'upload du fichier a réussi
+      }
     }
     
     return { imageUrl: publicUrl, error: null, filePath };
