@@ -131,8 +131,9 @@ export const signUpWithEmail = async (email: string, password: string, userData:
               name: agencyName,
               email: email,
               description: 'Agence créée automatiquement lors de l\'inscription',
-              user_id: data.user.id,
-              location: '', // Optionnel
+              user_id: data.user.id, // Important: lier immédiatement à l'utilisateur
+              location: userData.location || '',
+              phone: userData.phone || '',
               properties_count: 0,
               rating: 0.0,
               verified: false,
@@ -153,32 +154,60 @@ export const signUpWithEmail = async (email: string, password: string, userData:
         }
       }
       
-      try {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: data.user.id,
-            email: email,
-            first_name: userData.firstName || '',
-            last_name: userData.lastName || '',
-            role: userData.role || 'public',
-            agency_id: agencyId // Link to the created agency if applicable
-          }, { onConflict: 'id' });
-        
-        if (profileError) {
-          console.error("Error creating user profile:", profileError);
-        } else {
-          console.log("Profile created successfully with agency_id:", agencyId);
-        }
-      } catch (profileError) {
-        console.error("Error in profile creation:", profileError);
+      // Create or update the user profile with the agency link
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: data.user.id,
+          email: email,
+          first_name: userData.firstName || '',
+          last_name: userData.lastName || '',
+          role: userData.role || 'visiteur',
+          agency_id: agencyId, // Lier le profil à l'agence créée
+          phone: userData.phone || '',
+          avatar_url: userData.avatar_url || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+
+      if (profileError) {
+        console.error("Error creating/updating profile:", profileError);
+        throw profileError;
       }
+
+      // Create a default subscription for ALL users (agency or not)
+      try {
+        // Use the standardized free plan ID
+        const FREE_PLAN_ID = '00000000-0000-0000-0000-000000000001';
+        
+        // Create subscription with the standardized free plan
+        await supabase
+          .from('user_subscriptions')
+          .insert({
+            user_id: data.user.id,
+            agency_id: agencyId, // Will be null for non-agency users
+            plan_id: FREE_PLAN_ID,
+            status: 'active',
+            start_date: new Date().toISOString().split('T')[0],
+            end_date: null, // Free plan doesn't expire
+            payment_method: 'free',
+            auto_renew: false
+          });
+
+        console.log(`Free subscription created for new user with plan ${FREE_PLAN_ID}`);
+      } catch (subscriptionError) {
+        console.error("Error creating subscription:", subscriptionError);
+        // Don't fail the registration for subscription issues
+      }
+
+      console.log("User profile created/updated successfully");
+      return { user: data.user, session: data.session };
     }
     
-    return { user: data.user, error: null };
-  } catch (error: any) {
-    console.error("Error signing up:", error.message);
-    return { user: null, error: error.message };
+    return { user: data.user, session: data.session };
+  } catch (error) {
+    console.error("Error in signUpWithEmail:", error);
+    throw error;
   }
 };
 

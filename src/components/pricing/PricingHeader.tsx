@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { UserSubscription } from '@/services/subscription';
 import { Sparkles, Crown } from 'lucide-react';
+import { getBillingCycleSuffix } from '@/utils/billingCycleUtils';
 
 interface PricingHeaderProps {
   subscription: UserSubscription | null;
@@ -46,7 +46,7 @@ export default function PricingHeader({ subscription }: PricingHeaderProps) {
                   <span className="ml-2 text-green-600 dark:text-green-400">Gratuit</span>
                 ) : (
                   <span className="ml-2 text-blue-600 dark:text-blue-400">
-                    {subscription.plan?.price.toLocaleString()} FCFA/mois
+                    {subscription.plan?.price.toLocaleString()} FCFA{getBillingCycleSuffix(subscription.plan?.billing_cycle || 'monthly')}
                   </span>
                 )}
               </p>

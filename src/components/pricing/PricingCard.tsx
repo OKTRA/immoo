@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Check, Crown, Zap, Loader2 } from 'lucide-react';
 import { SubscriptionPlan, UserSubscription } from '@/assets/types';
 import SubscriptionPaymentDialog from '@/components/subscription/SubscriptionPaymentDialog';
+import { getBillingCycleSuffix } from '@/utils/billingCycleUtils';
 
 interface PricingCardProps {
   plan: SubscriptionPlan;
@@ -73,7 +73,7 @@ export default function PricingCard({ plan, subscription, upgrading, onUpgrade }
             </span>
             {plan.price > 0 && (
               <span className="text-muted-foreground ml-1">
-                /{plan.billingCycle === 'monthly' ? 'mois' : 'an'}
+                {getBillingCycleSuffix(plan.billingCycle || 'monthly')}
               </span>
             )}
           </div>

@@ -2,6 +2,7 @@ export * from './mutations';
 export * from './queries';
 export * from './types';
 export * from './manualSubscriptionService';
+import { supabase } from '@/lib/supabase';
 
 /**
  * Utilitaires pour la gestion des abonnements
@@ -12,7 +13,7 @@ export * from './manualSubscriptionService';
  */
 export const calculateSubscriptionEndDate = (
   startDate: Date | string,
-  billingCycle: 'monthly' | 'yearly' | 'weekly'
+  billingCycle: 'monthly' | 'quarterly' | 'semestriel' | 'yearly' | 'lifetime' | 'weekly'
 ): Date => {
   const start = new Date(startDate);
   const endDate = new Date(start);
@@ -24,8 +25,18 @@ export const calculateSubscriptionEndDate = (
     case 'monthly':
       endDate.setMonth(start.getMonth() + 1);
       break;
+    case 'quarterly':
+      endDate.setMonth(start.getMonth() + 3);
+      break;
+    case 'semestriel':
+      endDate.setMonth(start.getMonth() + 6);
+      break;
     case 'yearly':
       endDate.setFullYear(start.getFullYear() + 1);
+      break;
+    case 'lifetime':
+      // Pour un plan lifetime, on met la date à 100 ans dans le futur (pratiquement illimité)
+      endDate.setFullYear(start.getFullYear() + 100);
       break;
     default:
       // Par défaut mensuel
@@ -38,9 +49,11 @@ export const calculateSubscriptionEndDate = (
 /**
  * Vérifie si un abonnement est expiré
  */
-export const isSubscriptionExpired = (endDate: Date | string | null): boolean => {
-  if (!endDate) return false; // Pas de date de fin = pas d'expiration (plan gratuit)
-  return new Date(endDate) <= new Date();
+export const isSubscriptionExpired = (endDate: string | Date | null): boolean => {
+  if (!endDate) return false;
+  const today = new Date();
+  const expiration = new Date(endDate);
+  return today > expiration;
 };
 
 /**
@@ -91,4 +104,50 @@ export const getSubscriptionMessages = {
     success: `Renouvellement vers ${planName} effectué avec succès jusqu'au ${endDate.toLocaleDateString()}.`,
     description: `Renouvellement vers le plan ${planName}`
   })
+};
+
+/**
+ * Obtient le libellé français du cycle de facturation
+ */
+export const getBillingCycleLabel = (billingCycle: string): string => {
+  switch (billingCycle) {
+    case 'weekly':
+      return 'Hebdomadaire';
+    case 'monthly':
+      return 'Mensuel';
+    case 'quarterly':
+      return 'Trimestriel';
+    case 'semestriel':
+      return 'Semestriel';
+    case 'yearly':
+    case 'annual':
+      return 'Annuel';
+    case 'lifetime':
+      return 'À vie';
+    default:
+      return billingCycle;
+  }
+};
+
+/**
+ * Obtient le suffixe d'affichage pour le prix selon le cycle
+ */
+export const getBillingCycleSuffix = (billingCycle: string): string => {
+  switch (billingCycle) {
+    case 'weekly':
+      return '/semaine';
+    case 'monthly':
+      return '/mois';
+    case 'quarterly':
+      return '/trimestre';
+    case 'semestriel':
+      return '/6 mois';
+    case 'yearly':
+    case 'annual':
+      return '/an';
+    case 'lifetime':
+      return ' (à vie)';
+    default:
+      return '';
+  }
 };

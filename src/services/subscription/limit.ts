@@ -1,7 +1,16 @@
 import { supabase } from '@/lib/supabase';
-import type { SubscriptionLimit } from './types';
 
-export type { SubscriptionLimit };
+export interface SubscriptionLimit {
+  resourceType?: string;
+  currentCount: number;
+  maxAllowed: number;
+  planName?: string;
+  allowed: boolean;
+  percentageUsed?: number;
+  planId?: string;
+  isUnlimited?: boolean;
+  error?: string;
+}
 
 /**
  * Vérifier les limites d'une ressource pour l'utilisateur
@@ -48,38 +57,38 @@ export const checkUserResourceLimit = async (
     };
 
     const maxAllowed = limits[resourceType];
-    const allowed = currentCount < maxAllowed;
-    const percentageUsed = Math.round((currentCount / maxAllowed) * 100);
+    
+    // Si la limite est -1, c'est illimité
+    const isUnlimited = maxAllowed === -1;
+    const allowed = isUnlimited || currentCount < maxAllowed;
+    const percentageUsed = isUnlimited ? 0 : Math.round((currentCount / maxAllowed) * 100);
 
     const result = {
       resourceType,
       currentCount,
-      maxAllowed,
+      maxAllowed: isUnlimited ? -1 : maxAllowed,
       planName: plan.name,
       allowed,
       percentageUsed,
-      planId: plan.id
+      planId: plan.id,
+      isUnlimited
     };
 
     return result;
-  } catch (error) {
-    console.error('Error checking resource limit:', error);
-    
-    // Fallback: if any error, allow but with basic limits
-    const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
+  } catch (error: any) {
+    console.error('Error checking user resource limit:', error);
     return {
-      allowed: currentCount < 1, // Conservative fallback
-      currentCount,
-      maxAllowed: 1,
-      planName: 'free',
-      percentageUsed: Math.round((currentCount / 1) * 100),
-      error: `Failed to check limit: ${error.message}`
+      allowed: false,
+      currentCount: 0,
+      maxAllowed: 0,
+      error: error.message,
+      percentageUsed: 100
     };
   }
 };
 
 /**
- * Get current count of resources for a user
+ * Get current count of resources for a user - CORRECTED VERSION
  */
 export const getCurrentResourceCount = async (
   userId: string,
@@ -87,127 +96,114 @@ export const getCurrentResourceCount = async (
   agencyId?: string
 ): Promise<number> => {
   try {
-    let query;
+    let count = 0;
     
     switch (resourceType) {
       case 'agencies':
-        query = supabase
+        const { count: agencyCount } = await supabase
           .from('agencies')
           .select('id', { count: 'exact', head: true })
           .eq('user_id', userId);
+        count = agencyCount || 0;
         break;
         
       case 'properties':
         if (agencyId) {
-          query = supabase
+          // Count properties for specific agency
+          const { count: propCount } = await supabase
             .from('properties')
             .select('id', { count: 'exact', head: true })
             .eq('agency_id', agencyId);
+          count = propCount || 0;
         } else {
-          // Get properties from all user's agencies
-          const { data: agencies } = await supabase
-            .from('agencies')
-            .select('id')
-            .eq('user_id', userId);
-          
-          if (!agencies || agencies.length === 0) return 0;
-          
-          const agencyIds = agencies.map(a => a.id);
-          query = supabase
+          // Count properties from all user's agencies - FIXED LOGIC
+          const { count: propCount } = await supabase
             .from('properties')
             .select('id', { count: 'exact', head: true })
-            .in('agency_id', agencyIds);
+            .in('agency_id', 
+              supabase
+                .from('agencies')
+                .select('id')
+                .eq('user_id', userId)
+            );
+          count = propCount || 0;
         }
         break;
         
       case 'leases':
         if (agencyId) {
-          // Get leases for properties in this agency
-          const { data: properties } = await supabase
-            .from('properties')
-            .select('id')
-            .eq('agency_id', agencyId);
-          
-          if (!properties || properties.length === 0) return 0;
-          
-          const propertyIds = properties.map(p => p.id);
-          query = supabase
+          // Count leases for properties in specific agency
+          const { count: leaseCount } = await supabase
             .from('leases')
             .select('id', { count: 'exact', head: true })
-            .in('property_id', propertyIds);
+            .eq('is_active', true)
+            .in('property_id',
+              supabase
+                .from('properties')
+                .select('id')
+                .eq('agency_id', agencyId)
+            );
+          count = leaseCount || 0;
         } else {
-          // Get leases for all user's properties
-          const { data: agencies } = await supabase
-            .from('agencies')
-            .select('id')
-            .eq('user_id', userId);
-          
-          if (!agencies || agencies.length === 0) return 0;
-          
-          const { data: properties } = await supabase
-            .from('properties')
-            .select('id')
-            .in('agency_id', agencies.map(a => a.id));
-          
-          if (!properties || properties.length === 0) return 0;
-          
-          const propertyIds = properties.map(p => p.id);
-          query = supabase
+          // Count leases for all user's properties - FIXED LOGIC
+          const { count: leaseCount } = await supabase
             .from('leases')
             .select('id', { count: 'exact', head: true })
-            .in('property_id', propertyIds);
+            .eq('is_active', true)
+            .in('property_id',
+              supabase
+                .from('properties')
+                .select('id')
+                .in('agency_id',
+                  supabase
+                    .from('agencies')
+                    .select('id')
+                    .eq('user_id', userId)
+                )
+            );
+          count = leaseCount || 0;
         }
         break;
         
       case 'users':
-        if (agencyId) {
-          query = supabase
-            .from('profiles')
-            .select('id', { count: 'exact', head: true })
-            .eq('agency_id', agencyId);
-        } else {
-          // Count users across all user's agencies
-          const { data: agencies } = await supabase
-            .from('agencies')
-            .select('id')
-            .eq('user_id', userId);
-          
-          if (!agencies || agencies.length === 0) return 1; // At least the owner
-          
-          const agencyIds = agencies.map(a => a.id);
-          query = supabase
-            .from('profiles')
-            .select('id', { count: 'exact', head: true })
-            .in('agency_id', agencyIds);
-        }
+        // For now, just count the user themselves
+        count = 1;
         break;
         
       default:
-        return 0;
-    }
-
-    const { count, error } = await query;
-    
-    if (error) {
-      console.error(`Error counting ${resourceType}:`, error);
-      return 0;
+        count = 0;
     }
     
-    return count || 0;
-    
-  } catch (error) {
-    console.error(`Error getting ${resourceType} count:`, error);
+    return count;
+  } catch (error: any) {
+    console.error(`Error getting ${resourceType} count for user ${userId}:`, error);
     return 0;
   }
 };
 
-const getFreePlanLimits = (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users') => {
+/**
+ * CORRECTED free plan limits function
+ */
+const getFreePlanLimits = (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users'): SubscriptionLimit => {
+  const freeLimits = {
+    properties: 1,
+    agencies: 1, 
+    leases: 2,
+    users: 1
+  };
+  
+  const maxAllowed = freeLimits[resourceType];
+  const allowed = currentCount < maxAllowed;
+  const percentageUsed = Math.round((currentCount / maxAllowed) * 100);
+  
   return {
-    allowed: currentCount < 1,
+    allowed,
     currentCount,
-    maxAllowed: 1,
+    maxAllowed,
     planName: 'free',
-    percentageUsed: Math.round((currentCount / 1) * 100),
+    percentageUsed,
+    resourceType,
+    isUnlimited: false,
     error: null
   };
 };

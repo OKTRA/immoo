@@ -55,7 +55,7 @@ export const upgradeUserSubscription = async (
         .eq('user_id', userId)
         .neq('status', 'cancelled');
 
-      if (deactivateError) throw deactivateError;
+    if (deactivateError) throw deactivateError;
 
       // Récupérer les infos du plan pour calculer la date de fin
       const { data: planInfo, error: planError } = await supabase
@@ -70,19 +70,19 @@ export const upgradeUserSubscription = async (
       const endDate = calculateSubscriptionEndDate(now, planInfo.billing_cycle);
 
       // Créer un nouvel abonnement avec dates fraîches
-      const { error: createError } = await supabase
-        .from('user_subscriptions')
-        .insert({
-          user_id: userId,
-          agency_id: agencyId,
-          plan_id: newPlanId,
-          status: 'active',
-          payment_method: paymentMethod,
+    const { error: createError } = await supabase
+      .from('user_subscriptions')
+      .insert({
+        user_id: userId,
+        agency_id: agencyId,
+        plan_id: newPlanId,
+        status: 'active',
+        payment_method: paymentMethod,
           start_date: now.toISOString(),
           end_date: endDate.toISOString()
-        });
+      });
 
-      if (createError) throw createError;
+    if (createError) throw createError;
     }
 
     return { success: true, error: null };

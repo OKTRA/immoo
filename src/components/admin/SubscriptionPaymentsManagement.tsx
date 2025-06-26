@@ -40,7 +40,7 @@ interface SubscriptionPayment {
   agencyId: string;
   planId: string;
   amount: number;
-  status: 'pending' | 'paid' | 'failed' | 'cancelled';
+  status: 'pending' | 'paid' | 'failed' | 'cancelled' | 'active';
   paymentMethod: string;
   transactionId?: string;
   createdAt: string;
@@ -390,7 +390,7 @@ export default function SubscriptionPaymentsManagement() {
         promoCode: promoCode || undefined,
         adminNote: adminNote || `Activation manuelle du plan ${selectedPlanData?.name} pour ${selectedUserData?.first_name} ${selectedUserData?.last_name}`
       });
-      
+
       // Message de succès avec plus de détails
       const successMessage = `Abonnement ${selectedPlanData?.name} activé avec succès pour ${selectedUserData?.first_name} ${selectedUserData?.last_name}`;
       
@@ -427,15 +427,96 @@ export default function SubscriptionPaymentsManagement() {
     try {
       setLoading(true);
       
-      // Charger d'abord les données de billing_history sans jointures
-      const { data: billingData, error } = await supabase
+      // 1. Charger d'abord les paiements de billing_history
+      const { data: billingData, error: billingError } = await supabase
         .from('billing_history')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error('Error loading payments:', error);
-        toast.error('Erreur lors du chargement des paiements');
+      // 2. Charger tous les abonnements actifs (incluant les gratuits)
+      const { data: subscriptionsData, error: subscriptionsError } = await supabase
+        .from('user_subscriptions')
+        .select(`
+          id,
+          user_id,
+          agency_id,
+          plan_id,
+          status,
+          start_date,
+          end_date,
+          created_at,
+          updated_at
+        `)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false });
+
+      if (billingError && subscriptionsError) {
+        console.error('Error loading payments and subscriptions:', { billingError, subscriptionsError });
+        toast.error('Erreur lors du chargement des données');
+        return;
+      }
+
+      const allPayments = [];
+      const allUsers = new Set();
+      const allPlans = new Set();
+      const allAgencies = new Set();
+
+      // Traiter les paiements de billing_history
+      if (billingData) {
+        billingData.forEach(payment => {
+          allPayments.push({
+            id: payment.id,
+            userId: payment.user_id,
+            agencyId: payment.agency_id,
+            planId: payment.plan_id,
+            amount: payment.amount,
+            status: payment.status,
+            paymentMethod: payment.payment_method || 'N/A',
+            transactionId: payment.transaction_id,
+            createdAt: payment.created_at,
+            paidAt: payment.payment_date,
+            type: 'payment'
+          });
+          
+          if (payment.user_id) allUsers.add(payment.user_id);
+          if (payment.plan_id) allPlans.add(payment.plan_id);
+          if (payment.agency_id) allAgencies.add(payment.agency_id);
+        });
+      }
+
+      // Traiter les abonnements actifs (gratuits principalement)
+      if (subscriptionsData) {
+        subscriptionsData.forEach(subscription => {
+          // Vérifier si cet abonnement n'a pas déjà un paiement dans billing_history
+          const hasPayment = billingData?.some(payment => 
+            payment.user_id === subscription.user_id && 
+            payment.plan_id === subscription.plan_id &&
+            payment.status === 'paid'
+          );
+
+          if (!hasPayment) {
+            allPayments.push({
+              id: subscription.id,
+              userId: subscription.user_id,
+              agencyId: subscription.agency_id,
+              planId: subscription.plan_id,
+              amount: 0, // Abonnement gratuit
+              status: 'active', // Statut de l'abonnement
+              paymentMethod: 'Gratuit',
+              transactionId: null,
+              createdAt: subscription.created_at,
+              paidAt: subscription.start_date,
+              type: 'subscription'
+            });
+            
+            if (subscription.user_id) allUsers.add(subscription.user_id);
+            if (subscription.plan_id) allPlans.add(subscription.plan_id);
+            if (subscription.agency_id) allAgencies.add(subscription.agency_id);
+          }
+        });
+      }
+
+      if (allPayments.length === 0) {
         setPayments([]);
         setStats({
           totalPayments: 0,
@@ -447,27 +528,15 @@ export default function SubscriptionPaymentsManagement() {
         return;
       }
 
-      if (!billingData || billingData.length === 0) {
-        setPayments([]);
-        setStats({
-          totalPayments: 0,
-          pendingPayments: 0,
-          paidPayments: 0,
-          totalRevenue: 0,
-          monthlyRevenue: 0
-        });
-        return;
-      }
-
-      // Récupérer les données liées séparément
-      const userIds = [...new Set(billingData.map(p => p.user_id).filter(Boolean))];
-      const planIds = [...new Set(billingData.map(p => p.plan_id).filter(Boolean))];
-      const agencyIds = [...new Set(billingData.map(p => p.agency_id).filter(Boolean))];
+      // Récupérer les données liées
+      const userIds = Array.from(allUsers);
+      const planIds = Array.from(allPlans);
+      const agencyIds = Array.from(allAgencies);
 
       // Requêtes parallèles pour les données liées
       const [usersResult, plansResult, agenciesResult] = await Promise.all([
         userIds.length > 0 ? supabase.from('profiles').select('id, email').in('id', userIds) : { data: [] },
-        planIds.length > 0 ? supabase.from('subscription_plans').select('id, name').in('id', planIds) : { data: [] },
+        planIds.length > 0 ? supabase.from('subscription_plans').select('id, name, price').in('id', planIds) : { data: [] },
         agencyIds.length > 0 ? supabase.from('agencies').select('id, name').in('id', agencyIds) : { data: [] }
       ]);
 
@@ -476,29 +545,25 @@ export default function SubscriptionPaymentsManagement() {
       const plansMap = new Map((plansResult.data || []).map(p => [p.id, p]));
       const agenciesMap = new Map((agenciesResult.data || []).map(a => [a.id, a]));
 
-      // Combiner les données
-      const paymentsWithDetails = billingData.map(payment => ({
-        id: payment.id,
-        userId: payment.user_id,
-        agencyId: payment.agency_id,
-        planId: payment.plan_id,
-        amount: payment.amount,
-        status: payment.status,
-        paymentMethod: payment.payment_method || 'N/A',
-        transactionId: payment.transaction_id,
-        createdAt: payment.created_at,
-        paidAt: payment.payment_date,
-        agencyName: agenciesMap.get(payment.agency_id)?.name || 'N/A',
-        planName: plansMap.get(payment.plan_id)?.name || 'N/A',
-        userEmail: usersMap.get(payment.user_id)?.email || 'N/A'
-      }));
+      // Combiner les données avec les détails
+      const paymentsWithDetails = allPayments.map(payment => {
+        const plan = plansMap.get(payment.planId);
+        return {
+          ...payment,
+          agencyName: agenciesMap.get(payment.agencyId)?.name || 'N/A',
+          planName: plan?.name || 'N/A',
+          userEmail: usersMap.get(payment.userId)?.email || 'N/A',
+          // Pour les abonnements gratuits, utiliser le prix du plan si c'est 0
+          amount: payment.amount === 0 && plan ? plan.price : payment.amount
+        };
+      });
 
       setPayments(paymentsWithDetails);
 
-      // Calculer les statistiques
+      // Calculer les statistiques (inclure les abonnements gratuits)
       const totalPayments = paymentsWithDetails.length;
       const pendingPayments = paymentsWithDetails.filter(p => p.status === 'pending').length;
-      const paidPayments = paymentsWithDetails.filter(p => p.status === 'paid').length;
+      const paidPayments = paymentsWithDetails.filter(p => p.status === 'paid' || p.status === 'active').length;
       const totalRevenue = paymentsWithDetails
         .filter(p => p.status === 'paid')
         .reduce((sum, p) => sum + p.amount, 0);
@@ -654,6 +719,8 @@ export default function SubscriptionPaymentsManagement() {
         return <Badge variant="destructive"><XCircle className="w-3 h-3 mr-1" />Échoué</Badge>;
       case 'cancelled':
         return <Badge variant="outline"><XCircle className="w-3 h-3 mr-1" />Annulé</Badge>;
+      case 'active':
+        return <Badge variant="outline">{status}</Badge>;
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -965,6 +1032,7 @@ export default function SubscriptionPaymentsManagement() {
                       <SelectItem value="paid">Payé</SelectItem>
                       <SelectItem value="failed">Échoué</SelectItem>
                       <SelectItem value="cancelled">Annulé</SelectItem>
+                      <SelectItem value="active">Actif</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -982,9 +1050,9 @@ export default function SubscriptionPaymentsManagement() {
             </CardHeader>
             <CardContent className="p-0 sm:p-6">
               <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
+              <Table>
+                <TableHeader>
+                  <TableRow>
                       <TableHead className="min-w-[100px]">Date</TableHead>
                       <TableHead className="min-w-[150px]">Agence</TableHead>
                       <TableHead className="min-w-[200px] hidden sm:table-cell">Email</TableHead>
@@ -993,8 +1061,8 @@ export default function SubscriptionPaymentsManagement() {
                       <TableHead className="min-w-[100px] hidden md:table-cell">Méthode</TableHead>
                       <TableHead className="min-w-[100px]">Statut</TableHead>
                       <TableHead className="min-w-[100px]">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
+                  </TableRow>
+                </TableHeader>
                 <TableBody>
                   {filteredPayments.map((payment) => (
                     <TableRow key={payment.id}>
@@ -1100,6 +1168,7 @@ export default function SubscriptionPaymentsManagement() {
                                       <SelectItem value="paid">Payé</SelectItem>
                                       <SelectItem value="failed">Échoué</SelectItem>
                                       <SelectItem value="cancelled">Annulé</SelectItem>
+                                      <SelectItem value="active">Actif</SelectItem>
                                     </SelectContent>
                                   </Select>
                                 </div>
@@ -1232,17 +1301,17 @@ export default function SubscriptionPaymentsManagement() {
           <div className="space-y-4 py-2">
             {/* Sélection de l'utilisateur */}
             <div className="space-y-3">
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <Label htmlFor="user-search" className="text-sm font-medium">
                   Sélectionner un utilisateur
                 </Label>
-                <Input
-                  id="user-search"
+              <Input
+                id="user-search"
                   placeholder="Rechercher par email, nom ou agence..."
-                  value={userSearchTerm}
-                  onChange={(e) => setUserSearchTerm(e.target.value)}
+                value={userSearchTerm}
+                onChange={(e) => setUserSearchTerm(e.target.value)}
                   className="text-sm h-9"
-                />
+              />
               </div>
               
               <div className="space-y-2">
@@ -1260,11 +1329,11 @@ export default function SubscriptionPaymentsManagement() {
                           </span>
                           <div className="flex flex-col sm:flex-row sm:items-center gap-1">
                             <span className="text-sm text-foreground">
-                              {user.first_name} {user.last_name}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
+                            {user.first_name} {user.last_name}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
                               Agence: {user.agency_name || 'N/A'}
-                            </span>
+                          </span>
                           </div>
                           {user.current_plan && (
                             <span className="text-xs text-blue-600 font-medium">
@@ -1291,14 +1360,17 @@ export default function SubscriptionPaymentsManagement() {
                     <SelectItem key={plan.id} value={plan.id} className="py-3">
                       <div className="flex flex-col space-y-1 w-full">
                         <div className="flex items-center justify-between w-full">
-                          <span className="font-medium text-sm">{plan.name}</span>
+                        <span className="font-medium text-sm">{plan.name}</span>
                           <span className="text-sm font-semibold text-blue-600">
-                            {plan.price.toLocaleString()} FCFA
+                          {plan.price.toLocaleString()} FCFA
                           </span>
                         </div>
                         <span className="text-xs text-muted-foreground capitalize">
                           Facturation: {plan.billing_cycle === 'monthly' ? 'mensuelle' : 
-                                       plan.billing_cycle === 'yearly' ? 'annuelle' : plan.billing_cycle}
+                                       plan.billing_cycle === 'yearly' ? 'annuelle' : 
+                                       plan.billing_cycle === 'quarterly' ? 'trimestrielle' :
+                                       plan.billing_cycle === 'semestriel' ? 'semestrielle' :
+                                       plan.billing_cycle === 'lifetime' ? 'à vie' : plan.billing_cycle}
                         </span>
                       </div>
                     </SelectItem>
@@ -1456,6 +1528,7 @@ export default function SubscriptionPaymentsManagement() {
                                      cycle === 'quarterly' ? 'Plan trimestriel' :
                                      cycle === 'semestriel' || cycle === 'semestrial' ? 'Plan semestriel' :
                                      cycle === 'weekly' ? 'Plan hebdomadaire' : 
+                                     cycle === 'lifetime' ? 'Plan à vie' :
                                      `Plan ${cycle}`;
                             })()}
                           </p>
@@ -1508,6 +1581,9 @@ export default function SubscriptionPaymentsManagement() {
                                 case 'weekly':
                                   endDate.setDate(endDate.getDate() + 7);
                                   break;
+                                case 'lifetime':
+                                  endDate.setFullYear(endDate.getFullYear() + 100);
+                                  break;
                                 default:
                                   endDate.setMonth(endDate.getMonth() + 1);
                               }
@@ -1531,7 +1607,7 @@ export default function SubscriptionPaymentsManagement() {
                       return (
                         <div className="pt-3 border-t border-blue-200">
                           <div className="bg-white rounded-lg p-3 border border-blue-100">
-                            {discount > 0 && (
+                          {discount > 0 && (
                               <div className="space-y-1 mb-2">
                                 <div className="flex justify-between items-center">
                                   <span className="text-muted-foreground">Prix original:</span>
@@ -1627,6 +1703,7 @@ export default function SubscriptionPaymentsManagement() {
                           selectedPlanForDetail.billing_cycle === 'quarterly' ? 'trimestriel' :
                           (selectedPlanForDetail.billing_cycle === 'semestriel' || selectedPlanForDetail.billing_cycle === 'semestrial') ? 'semestriel' :
                           selectedPlanForDetail.billing_cycle === 'weekly' ? 'hebdomadaire' :
+                          selectedPlanForDetail.billing_cycle === 'lifetime' ? 'à vie' :
                           selectedPlanForDetail.billing_cycle}
                   </CardDescription>
                 </CardHeader>
@@ -1646,6 +1723,7 @@ export default function SubscriptionPaymentsManagement() {
                          selectedPlanForDetail.billing_cycle === 'quarterly' ? 'Trimestrielle' :
                          (selectedPlanForDetail.billing_cycle === 'semestriel' || selectedPlanForDetail.billing_cycle === 'semestrial') ? 'Semestrielle' :
                          selectedPlanForDetail.billing_cycle === 'weekly' ? 'Hebdomadaire' :
+                         selectedPlanForDetail.billing_cycle === 'lifetime' ? 'À vie' :
                          selectedPlanForDetail.billing_cycle}
                       </p>
                     </div>
@@ -1713,6 +1791,9 @@ export default function SubscriptionPaymentsManagement() {
                                 case 'semestrial':
                                   endDate.setMonth(endDate.getMonth() + 6);
                                   break;
+                                case 'lifetime':
+                                  endDate.setFullYear(endDate.getFullYear() + 100);
+                                  break;
                                 default:
                                   endDate.setMonth(endDate.getMonth() + 1);
                               }
@@ -1734,7 +1815,8 @@ export default function SubscriptionPaymentsManagement() {
                           variant={
                             selectedPlanForDetail.subscription.status === 'active' ? 'default' :
                             selectedPlanForDetail.subscription.status === 'cancelled' ? 'destructive' :
-                            'secondary'
+                            selectedPlanForDetail.subscription.status === 'expired' ? 'Expiré' :
+                            selectedPlanForDetail.subscription.status
                           }
                         >
                           {selectedPlanForDetail.subscription.status === 'active' ? 'Actif' :

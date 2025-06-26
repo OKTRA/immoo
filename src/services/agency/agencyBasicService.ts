@@ -72,11 +72,23 @@ export const getUserAgencies = async (
       throw new Error("Utilisateur non connecté");
     }
 
-    // Récupérer uniquement les agences de l'utilisateur connecté
+    // Récupérer le profil utilisateur pour obtenir l'email
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('email, agency_id')
+      .eq('id', userId)
+      .single();
+
+    console.log("Profil utilisateur:", profileData);
+
+    // Récupérer les agences de l'utilisateur de plusieurs façons :
+    // 1. Par user_id direct
+    // 2. Par agency_id dans le profil
+    // 3. Par email correspondant (pour les agences créées automatiquement)
     const { data, error, count } = await supabase
       .from('agencies_with_property_count')
       .select('*', { count: 'exact' })
-      .eq('user_id', userId) // Filtrer explicitement par l'ID utilisateur actuel
+      .or(`user_id.eq.${userId},id.eq.${profileData?.agency_id || 'null'},email.eq.${profileData?.email || 'null'}`)
       .order(sortBy === 'properties_count' ? 'computed_properties_count' : sortBy, { ascending: sortOrder === 'asc' })
       .range(offset, offset + limit - 1);
 
@@ -85,11 +97,45 @@ export const getUserAgencies = async (
       throw error;
     }
     
-    console.log(`Agences utilisateur récupérées: ${data?.length || 0}`);
+    console.log(`Agences utilisateur récupérées: ${data?.length || 0}`, data);
+
+    // Si aucune agence trouvée, essayer de corriger automatiquement la liaison
+    if (!data || data.length === 0) {
+      console.log("Aucune agence trouvée, tentative de correction automatique...");
+      
+      // Chercher une agence avec l'email de l'utilisateur
+      const { data: orphanAgency } = await supabase
+        .from('agencies')
+        .select('*')
+        .eq('email', profileData?.email)
+        .is('user_id', null)
+        .single();
+
+      if (orphanAgency) {
+        console.log("Agence orpheline trouvée, correction en cours...", orphanAgency);
+        
+        // Lier l'agence à l'utilisateur
+        await supabase
+          .from('agencies')
+          .update({ user_id: userId })
+          .eq('id', orphanAgency.id);
+
+        // Lier l'utilisateur à l'agence
+        await supabase
+          .from('profiles')
+          .update({ agency_id: orphanAgency.id })
+          .eq('id', userId);
+
+        console.log("Liaison corrigée automatiquement");
+        
+        // Récupérer à nouveau avec la liaison corrigée
+        return getUserAgencies(limit, offset, sortBy, sortOrder);
+      }
+    }
     
     const transformedData = data?.map((item) => transformAgencyData(item));
     
-    return { agencies: transformedData, count, error: null };
+    return { agencies: transformedData || [], count: count || 0, error: null };
   } catch (error: any) {
     console.error('Error getting user agencies:', error);
     // Utiliser les données mockées si la requête échoue

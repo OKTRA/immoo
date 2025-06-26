@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +13,7 @@ import {
   Edit, Trash2, CheckCircle, XCircle, Star
 } from 'lucide-react';
 import { SubscriptionPlan } from '@/assets/types';
+import { getBillingCycleSuffix, getBillingCycleLabel } from '@/utils/billingCycleUtils';
 
 interface SubscriptionPlansTableProps {
   plans: SubscriptionPlan[];
@@ -58,18 +58,16 @@ export default function SubscriptionPlansTable({
             <TableCell>
               {plan.price.toLocaleString()} FCFA
               <span className="text-sm text-muted-foreground">
-                /{plan.billingCycle === 'monthly' ? 'mois' : 
-                  plan.billingCycle === 'yearly' ? 'an' : 'trim'}
+                {getBillingCycleSuffix(plan.billingCycle || 'monthly')}
               </span>
             </TableCell>
-            <TableCell className="capitalize">
-              {plan.billingCycle === 'monthly' ? 'Mensuel' : 
-               plan.billingCycle === 'yearly' ? 'Annuel' : 'Trimestriel'}
+            <TableCell>
+              {getBillingCycleLabel(plan.billingCycle || 'monthly')}
             </TableCell>
-            <TableCell>{plan.maxProperties}</TableCell>
-            <TableCell>{plan.maxAgencies}</TableCell>
-            <TableCell>{plan.maxLeases}</TableCell>
-            <TableCell>{plan.maxUsers}</TableCell>
+            <TableCell>{plan.maxProperties === -1 ? 'Illimité' : plan.maxProperties}</TableCell>
+            <TableCell>{plan.maxAgencies === -1 ? 'Illimité' : plan.maxAgencies}</TableCell>
+            <TableCell>{plan.maxLeases === -1 ? 'Illimité' : plan.maxLeases}</TableCell>
+            <TableCell>{plan.maxUsers === -1 ? 'Illimité' : plan.maxUsers}</TableCell>
             <TableCell>
               {plan.isActive ? (
                 <Badge variant="default">

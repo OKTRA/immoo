@@ -1,7 +1,7 @@
-
 import { supabase } from '@/lib/supabase';
 import { ApartmentLease } from '@/assets/types';
 import { createInitialPayments } from './paymentUtils';
+import { checkUserResourceLimit } from '@/services/subscription/limit';
 
 /**
  * Create a new lease
@@ -9,6 +9,17 @@ import { createInitialPayments } from './paymentUtils';
 export const createLease = async (leaseData: Omit<ApartmentLease, 'id'>) => {
   try {
     console.log('Creating lease with data:', leaseData);
+    
+    // CORRECTION: Vérifier les limites avant de créer un bail
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+    
+    if (userId) {
+      const limit = await checkUserResourceLimit(userId, 'leases');
+      if (!limit.allowed) {
+        throw new Error(`Limite de ${limit.maxAllowed} baux atteinte avec votre abonnement actuel. Veuillez mettre à niveau votre abonnement.`);
+      }
+    }
     
     // First check if the property is available
     const { data: propertyData, error: propertyCheckError } = await supabase

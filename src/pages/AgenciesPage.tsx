@@ -19,7 +19,27 @@ export default function AgenciesPage() {
   
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['user-agencies', user?.id],
-    queryFn: () => getUserAgencies(),
+    queryFn: async () => {
+      const result = await getUserAgencies();
+      
+      // Si aucune agence trouvée et que l'utilisateur est une agence, 
+      // essayer de corriger automatiquement
+      if ((!result.agencies || result.agencies.length === 0) && user?.user_metadata?.role === 'agency') {
+        console.log('Aucune agence trouvée, tentative de correction automatique...');
+        
+        // Importer le service de correction
+        const { AutoFixAgencyLinksService } = await import('@/services/agency/autoFixAgencyLinks');
+        const fixResult = await AutoFixAgencyLinksService.fixUserAgencyLink(user.id);
+        
+        if (fixResult.success) {
+          console.log('Correction automatique réussie:', fixResult.message);
+          // Récupérer à nouveau les agences après correction
+          return getUserAgencies();
+        }
+      }
+      
+      return result;
+    },
     enabled: !!user && !authLoading,
   });
 

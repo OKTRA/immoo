@@ -415,13 +415,13 @@ export class ManualSubscriptionService {
         };
       } else {
         // Abonnement expiré = nouvelle prise d'abonnement
-        return {
-          canUpgrade: true,
+      return {
+        canUpgrade: true,
           reason: `Nouvelle activation possible vers ${targetPlan.name} (abonnement expiré)`,
-          currentPlan,
+        currentPlan,
           targetPlan: targetPlan as SubscriptionPlan,
           isUpgrade: false
-        };
+      };
       }
 
     } catch (error) {

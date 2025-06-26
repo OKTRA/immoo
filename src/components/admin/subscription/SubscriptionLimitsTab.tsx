@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Building, Crown, Package, Users } from 'lucide-react';
 import { SubscriptionPlan } from '@/assets/types';
+import { getBillingCycleSuffix } from '@/utils/billingCycleUtils';
 
 interface SubscriptionLimitsTabProps {
   plans: SubscriptionPlan[];
@@ -16,7 +16,7 @@ export default function SubscriptionLimitsTab({ plans }: SubscriptionLimitsTabPr
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-lg">{plan.name}</h3>
             <Badge variant={plan.popular ? "default" : "secondary"}>
-              {plan.price.toLocaleString()} FCFA/{plan.billingCycle === 'monthly' ? 'mois' : 'an'}
+              {plan.price.toLocaleString()} FCFA{getBillingCycleSuffix(plan.billingCycle || 'monthly')}
             </Badge>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

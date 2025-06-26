@@ -1,4 +1,3 @@
-
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://hzbogwleoszwtneveuvx.supabase.co';
@@ -28,6 +27,12 @@ export const handleSupabaseError = (error: any) => {
 
 // Mock data generator for fallback when Supabase is not connected
 export const getMockData = (type: string, limit: number = 10) => {
+  // DÉSACTIVÉ: Ne plus générer de données mock pour éviter la pollution
+  console.warn('Mock data generation is disabled to prevent mock agency pollution');
+  return [];
+  
+  // Code désactivé pour éviter les agences mock
+  /*
   switch (type) {
     case 'agencies':
       return Array(limit).fill(null).map((_, i) => ({
@@ -61,6 +66,33 @@ export const getMockData = (type: string, limit: number = 10) => {
       }));
     default:
       return [];
+  }
+  */
+};
+
+/**
+ * Clean all mock agencies from the database
+ */
+export const cleanMockAgencies = async () => {
+  try {
+    console.log('🧹 Starting cleanup of mock agencies...');
+    
+    // Delete mock agencies directly from database
+    const { error } = await supabase
+      .from('agencies')
+      .delete()
+      .or(`name.ilike.%mock%,name.ilike.%test%,name.ilike.%demo%,name.ilike.%example%,name.ilike.%sample%,name.like.Agency %,name.like.Test Agency%,email.like.%test%,email.like.%mock%,email.like.%example%,description.eq.This is a mock agency description`);
+    
+    if (error) {
+      console.error('❌ Error cleaning mock agencies:', error);
+      throw error;
+    }
+    
+    console.log('✅ Mock agencies cleaned successfully');
+    return { success: true, error: null };
+  } catch (error: any) {
+    console.error('❌ Failed to clean mock agencies:', error);
+    return { success: false, error: error.message };
   }
 };
 

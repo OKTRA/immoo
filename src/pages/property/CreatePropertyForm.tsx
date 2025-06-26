@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,8 @@ import PropertyBasicInfoForm from "@/components/properties/PropertyBasicInfoForm
 import PropertyFinancialInfoForm from "@/components/properties/PropertyFinancialInfoForm";
 import PropertyMediaForm from "@/components/properties/PropertyMediaForm";
 import PropertyOwnershipForm from "@/components/properties/PropertyOwnershipForm";
+import { useAuth } from '@/hooks/useAuth';
+import { checkUserResourceLimit } from '@/services/subscription/limit';
 
 interface CreatePropertyFormProps {
   formData: any;
@@ -51,6 +52,21 @@ export default function CreatePropertyForm({
     setIsSubmitting(true);
     
     try {
+      // CORRECTION: Vérifier les limites avant de créer une propriété
+      if (!isEditMode) {
+        const { user } = useAuth();
+        
+        if (user?.id) {
+          const limit = await checkUserResourceLimit(user.id, 'properties', agencyId);
+          if (!limit.allowed) {
+            toast.error(
+              `Limite atteinte : vous ne pouvez pas ajouter plus de ${limit.maxAllowed} propriétés avec votre abonnement actuel.`
+            );
+            return;
+          }
+        }
+      }
+      
       // Add the agency ID to the form data
       const propertyData = {
         ...formData,

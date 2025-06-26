@@ -8,7 +8,8 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "clean:mock": "psql -f remove-mock-agencies.sql"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { Agency } from '@/assets/types';
 import { transformAgencyData } from './agencyBasicService';
@@ -99,15 +98,74 @@ export const updateAgency = async (id: string, agencyData: Partial<Agency>) => {
  */
 export const deleteAgency = async (id: string) => {
   try {
+    // Get current user ID to ensure ownership
+    const { data: { session } } = await supabase.auth.getSession();
+    const userId = session?.user?.id;
+    
+    if (!userId) {
+      throw new Error("Utilisateur non authentifié");
+    }
+
+    // Check if the agency belongs to the current user
+    const { data: agency, error: fetchError } = await supabase
+      .from('agencies')
+      .select('id, name, user_id')
+      .eq('id', id)
+      .single();
+
+    if (fetchError) {
+      throw new Error(`Agence non trouvée: ${fetchError.message}`);
+    }
+
+    if (agency.user_id !== userId) {
+      throw new Error("Vous n'êtes pas autorisé à supprimer cette agence");
+    }
+
+    // Before deletion, check if there are profiles linked to this agency
+    const { data: linkedProfiles, error: profileError } = await supabase
+      .from('profiles')
+      .select('id, email')
+      .eq('agency_id', id);
+
+    if (profileError) {
+      console.warn('Error checking linked profiles:', profileError);
+      // Continue with deletion anyway
+    }
+
+    // Delete the agency
+    // The profiles.agency_id will be automatically set to NULL if the constraint is properly configured
     const { error } = await supabase
       .from('agencies')
       .delete()
       .eq('id', id);
 
-    if (error) throw error;
-    return { success: true, error: null };
+    if (error) {
+      // Handle specific foreign key constraint error
+      if (error.message.includes('profiles_agency_id_fkey')) {
+        throw new Error(
+          "Impossible de supprimer l'agence car elle est encore liée à des profils utilisateur. " +
+          "Veuillez exécuter le script 'fix-agency-profile-relation.sql' pour corriger les contraintes de base de données."
+        );
+      }
+      throw error;
+    }
+
+    console.log(`Agency ${agency.name} deleted successfully. ${linkedProfiles?.length || 0} profiles were automatically unlinked.`);
+    
+    return { 
+      success: true, 
+      error: null,
+      message: `Agence "${agency.name}" supprimée avec succès`,
+      affectedProfiles: linkedProfiles?.length || 0
+    };
   } catch (error: any) {
     console.error(`Error deleting agency with ID ${id}:`, error);
-    return { success: false, error: error.message };
+    return { 
+      success: false, 
+      error: error.message,
+      helpText: error.message.includes('profiles_agency_id_fkey') 
+        ? "Exécutez le script SQL 'fix-agency-profile-relation.sql' pour résoudre ce problème"
+        : undefined
+    };
   }
 };

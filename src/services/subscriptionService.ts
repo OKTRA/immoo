@@ -208,7 +208,7 @@ export const getUserSubscription = async (userId: string) => {
 };
 
 /**
- * Check if user has reached limit for a resource
+ * Check if user has reached limit for a resource - CORRECTED VERSION
  */
 export const checkResourceLimit = async (userId: string, resourceType: 'properties' | 'agencies' | 'leases' | 'users') => {
   try {
@@ -218,16 +218,26 @@ export const checkResourceLimit = async (userId: string, resourceType: 'properti
       return { hasLimit: true, currentCount: 0, maxAllowed: 1, error: 'No active subscription' };
     }
 
-    // Get current count based on resource type
+    // Get current count based on resource type - CORRECTED LOGIC
     let currentCount = 0;
     switch (resourceType) {
       case 'properties':
-        const { count: propCount } = await supabase
-          .from('properties')
-          .select('*', { count: 'exact', head: true })
-          .eq('owner_id', userId);
-        currentCount = propCount || 0;
+        // FIXED: Count properties via agencies relationship
+        const { data: agencies } = await supabase
+          .from('agencies')
+          .select('id')
+          .eq('user_id', userId);
+        
+        if (agencies && agencies.length > 0) {
+          const agencyIds = agencies.map(a => a.id);
+          const { count: propCount } = await supabase
+            .from('properties')
+            .select('*', { count: 'exact', head: true })
+            .in('agency_id', agencyIds);
+          currentCount = propCount || 0;
+        }
         break;
+        
       case 'agencies':
         const { count: agencyCount } = await supabase
           .from('agencies')
@@ -235,12 +245,30 @@ export const checkResourceLimit = async (userId: string, resourceType: 'properti
           .eq('user_id', userId);
         currentCount = agencyCount || 0;
         break;
+        
       case 'leases':
-        const { count: leaseCount } = await supabase
-          .from('leases')
-          .select('*', { count: 'exact', head: true })
-          .eq('tenant_id', userId);
-        currentCount = leaseCount || 0;
+        // FIXED: Count leases via properties->agencies relationship
+        const { data: userAgencies } = await supabase
+          .from('agencies')
+          .select('id')
+          .eq('user_id', userId);
+        
+        if (userAgencies && userAgencies.length > 0) {
+          const { data: userProperties } = await supabase
+            .from('properties')
+            .select('id')
+            .in('agency_id', userAgencies.map(a => a.id));
+          
+          if (userProperties && userProperties.length > 0) {
+            const propertyIds = userProperties.map(p => p.id);
+            const { count: leaseCount } = await supabase
+              .from('leases')
+              .select('*', { count: 'exact', head: true })
+              .in('property_id', propertyIds)
+              .eq('is_active', true);
+            currentCount = leaseCount || 0;
+          }
+        }
         break;
     }
 

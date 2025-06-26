@@ -1,0 +1,361 @@
+###
+# 🧪 TESTS API - PLANS D'ABONNEMENT
+# 
+# Fichier de tests pour REST Client (VS Code) ou Postman
+# Testez les endpoints d'abonnement étape par étape
+###
+
+# =============================================================================
+# 📋 VARIABLES GLOBALES
+# =============================================================================
+
+@baseUrl = http://localhost:3000/api
+@supabaseUrl = https://votre-projet.supabase.co
+@supabaseKey = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+@testUserId = test-user-001
+@testEmail = test@plan-verification.com
+
+# =============================================================================
+# 🧪 1. TESTS DES PLANS D'ABONNEMENT
+# =============================================================================
+
+### Récupérer tous les plans d'abonnement
+GET {{supabaseUrl}}/rest/v1/subscription_plans
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+###
+
+### Récupérer un plan spécifique par ID
+GET {{supabaseUrl}}/rest/v1/subscription_plans?id=eq.plan-id-here
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+###
+
+### Récupérer les plans actifs uniquement
+GET {{supabaseUrl}}/rest/v1/subscription_plans?is_active=eq.true
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+###
+
+### Créer un plan de test (Admin seulement)
+POST {{supabaseUrl}}/rest/v1/subscription_plans
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "name": "Test API Plan",
+  "description": "Plan créé via API pour tests",
+  "price": 29.99,
+  "billing_cycle": "monthly",
+  "max_agencies": 3,
+  "max_properties": 50,
+  "max_leases": 100,
+  "max_users": 10,
+  "is_active": true
+}
+
+# =============================================================================
+# 🧪 2. TESTS DES ABONNEMENTS UTILISATEUR
+# =============================================================================
+
+### Récupérer l'abonnement actuel d'un utilisateur
+GET {{supabaseUrl}}/rest/v1/user_subscriptions?user_id=eq.{{testUserId}}&status=eq.active&select=*,subscription_plans(*)
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+###
+
+### Récupérer l'historique des abonnements
+GET {{supabaseUrl}}/rest/v1/user_subscriptions?user_id=eq.{{testUserId}}&select=*,subscription_plans(*)&order=created_at.desc
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+###
+
+### Activer un abonnement via RPC
+POST {{supabaseUrl}}/rest/v1/rpc/activate_subscription_with_promo
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "p_user_id": "{{testUserId}}",
+  "p_plan_id": "plan-id-to-activate",
+  "p_promo_code": null
+}
+
+###
+
+### Vérifier les limites d'un utilisateur (function personnalisée)
+POST {{supabaseUrl}}/rest/v1/rpc/check_user_limits
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "p_user_id": "{{testUserId}}"
+}
+
+# =============================================================================
+# 🧪 3. TESTS DES RESSOURCES ET LIMITES
+# =============================================================================
+
+### Compter les agences d'un utilisateur
+GET {{supabaseUrl}}/rest/v1/agencies?user_id=eq.{{testUserId}}&select=*
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+###
+
+### Compter les propriétés d'un utilisateur
+GET {{supabaseUrl}}/rest/v1/properties?select=*,agencies!inner(user_id)&agencies.user_id=eq.{{testUserId}}
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+###
+
+### Créer une agence de test
+POST {{supabaseUrl}}/rest/v1/agencies
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "user_id": "{{testUserId}}",
+  "name": "Test Agency API",
+  "description": "Agence créée via API pour test des limites",
+  "phone": "+223 70 00 00 00",
+  "email": "{{testEmail}}",
+  "address": "Test Address, Bamako, Mali"
+}
+
+###
+
+### Essayer de créer une agence (peut échouer si limite atteinte)
+POST {{supabaseUrl}}/rest/v1/agencies
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "user_id": "{{testUserId}}",
+  "name": "Test Agency Limit",
+  "description": "Cette agence devrait échouer si limite atteinte",
+  "phone": "+223 70 00 00 01",
+  "email": "limit@test.com",
+  "address": "Limit Test Address"
+}
+
+# =============================================================================
+# 🧪 4. TESTS DE L'HISTORIQUE DE FACTURATION
+# =============================================================================
+
+### Récupérer l'historique de facturation
+GET {{supabaseUrl}}/rest/v1/billing_history?user_id=eq.{{testUserId}}&select=*,subscription_plans(*)&order=created_at.desc
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+###
+
+### Créer un enregistrement de paiement de test
+POST {{supabaseUrl}}/rest/v1/billing_history
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "user_id": "{{testUserId}}",
+  "plan_id": "plan-id-here",
+  "amount": 29.99,
+  "currency": "XOF",
+  "payment_method": "cinetpay",
+  "payment_status": "completed",
+  "transaction_id": "test-transaction-123",
+  "billing_cycle": "monthly"
+}
+
+# =============================================================================
+# 🧪 5. TESTS DES FONCTIONS RPC PERSONNALISÉES
+# =============================================================================
+
+### Test de la fonction upgrade_subscription
+POST {{supabaseUrl}}/rest/v1/rpc/upgrade_subscription
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "p_user_id": "{{testUserId}}",
+  "p_new_plan_id": "new-plan-id-here"
+}
+
+###
+
+### Test de vérification d'expiration
+POST {{supabaseUrl}}/rest/v1/rpc/check_subscription_expiry
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "p_user_id": "{{testUserId}}"
+}
+
+###
+
+### Test de calcul des limites actuelles
+POST {{supabaseUrl}}/rest/v1/rpc/get_user_current_usage
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "p_user_id": "{{testUserId}}"
+}
+
+# =============================================================================
+# 🧪 6. TESTS DES CODES PROMO
+# =============================================================================
+
+### Valider un code promo
+POST {{supabaseUrl}}/rest/v1/rpc/validate_promo_code
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "p_code": "PROMO2024",
+  "p_plan_id": "plan-id-here"
+}
+
+###
+
+### Appliquer un code promo
+POST {{supabaseUrl}}/rest/v1/rpc/activate_subscription_with_promo
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "p_user_id": "{{testUserId}}",
+  "p_plan_id": "plan-id-here",
+  "p_promo_code": "PROMO2024"
+}
+
+# =============================================================================
+# 🧪 7. TESTS DE STRESS ET LIMITES
+# =============================================================================
+
+### Créer plusieurs agences rapidement (test de limite)
+POST {{supabaseUrl}}/rest/v1/agencies
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "user_id": "{{testUserId}}",
+  "name": "Stress Test Agency 1",
+  "description": "Test de création rapide",
+  "phone": "+223 70 00 00 10",
+  "email": "stress1@test.com"
+}
+
+###
+
+POST {{supabaseUrl}}/rest/v1/agencies
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "user_id": "{{testUserId}}",
+  "name": "Stress Test Agency 2",
+  "description": "Test de création rapide",
+  "phone": "+223 70 00 00 11",
+  "email": "stress2@test.com"
+}
+
+###
+
+POST {{supabaseUrl}}/rest/v1/agencies
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+{
+  "user_id": "{{testUserId}}",
+  "name": "Stress Test Agency 3",
+  "description": "Test de création rapide",
+  "phone": "+223 70 00 00 12",
+  "email": "stress3@test.com"
+}
+
+# =============================================================================
+# 🧪 8. TESTS DE NETTOYAGE
+# =============================================================================
+
+### Supprimer les agences de test
+DELETE {{supabaseUrl}}/rest/v1/agencies?user_id=eq.{{testUserId}}&name=like.*Test*
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+###
+
+### Supprimer l'historique de test
+DELETE {{supabaseUrl}}/rest/v1/billing_history?user_id=eq.{{testUserId}}&transaction_id=like.test-*
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+###
+
+### Supprimer les abonnements de test
+DELETE {{supabaseUrl}}/rest/v1/user_subscriptions?user_id=eq.{{testUserId}}
+Authorization: Bearer {{supabaseKey}}
+apikey: {{supabaseKey}}
+Content-Type: application/json
+
+# =============================================================================
+# 📋 INSTRUCTIONS D'UTILISATION
+# =============================================================================
+
+###
+# 🔧 COMMENT UTILISER CE FICHIER :
+#
+# 1. Installer REST Client dans VS Code
+# 2. Remplacer les variables en haut du fichier :
+#    - @supabaseUrl : votre URL Supabase
+#    - @supabaseKey : votre clé API Supabase
+#    - @testUserId : ID d'un utilisateur de test
+#
+# 3. Exécuter les requêtes une par une en cliquant sur "Send Request"
+# 4. Vérifier les réponses pour valider le comportement
+# 5. Utiliser la section nettoyage à la fin pour supprimer les données de test
+#
+# 📊 SCÉNARIOS DE TEST RECOMMANDÉS :
+#
+# Scénario 1 - Plan gratuit :
+# 1. Récupérer plans → Créer agence → Vérifier limite
+#
+# Scénario 2 - Upgrade :
+# 1. Activer plan premium → Créer plus d'agences → Vérifier nouvelles limites
+#
+# Scénario 3 - Limites illimitées :
+# 1. Activer plan illimité → Créer beaucoup d'agences → Vérifier pas de limite
+#
+# Scénario 4 - Codes promo :
+# 1. Valider code → Appliquer code → Vérifier réduction
+### 
