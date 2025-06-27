@@ -6,6 +6,7 @@ import {
   Users,
   FileText,
   CreditCard,
+  DollarSign,
   Settings,
   Menu,
   LogOut,
@@ -71,6 +72,11 @@ export default function AgencySidebar() {
       title: "Paiements",
       icon: CreditCard,
       path: `/agencies/${agencyId}/payments`,
+    },
+    {
+      title: "Gains",
+      icon: DollarSign,
+      path: `/agencies/${agencyId}/earnings`,
     },
     {
       title: "Paramètres",
