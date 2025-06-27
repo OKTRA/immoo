@@ -22,6 +22,7 @@ import PropertyLeasePaymentsPage from "@/pages/PropertyLeasePaymentsPage";
 import AgencyPaymentsPage from "@/pages/AgencyPaymentsPage";
 import AgencyEarningsPage from "@/pages/AgencyEarningsPage";
 import AgencyPropertiesPage from "@/pages/AgencyPropertiesPage";
+import AgencyLeasesPage from "@/pages/AgencyLeasesPage";
 import AgencySettingsPage from "@/pages/AgencySettingsPage";
 import PricingPage from "@/pages/PricingPage";
 import LogoShowcasePage from "@/pages/LogoShowcasePage";
@@ -97,7 +98,11 @@ function App() {
                 />
                 <Route
                   path="/agencies/:agencyId/leases"
-                  element={<ManageTenantsPage leaseView={true} />}
+                  element={<AgencyLeasesPage />}
+                />
+                <Route
+                  path="/agencies/:agencyId/lease/create"
+                  element={<CreateLeasePage />}
                 />
                 <Route
                   path="/agencies/:agencyId/payments"

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAgencyById, getPropertiesByAgencyId, getAgencyStatistics } from "@/services/agency";
 import { Badge } from "@/components/ui/badge";
@@ -24,17 +24,59 @@ import {
   Calendar,
   Eye,
   Plus,
-  Activity
+  Activity,
+  DollarSign,
+  Target,
+  CheckCircle,
+  Clock,
+  ArrowUp,
+  ArrowDown,
+  Zap,
+  Crown,
+  Sparkles,
+  Award,
+  Shield,
+  Rocket,
+  Receipt,
+  Settings,
+  HelpCircle,
+  Bell,
+  Search,
+  Filter,
+  Download,
+  Upload,
+  Edit
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
 import { Agency } from "@/assets/types";
 import PropertyList from "@/components/properties/PropertyList";
 import { formatCurrency } from "@/lib/utils";
+// Import des pages
+import AgencyPropertiesPage from "@/pages/AgencyPropertiesPage";
+import AgencyLeasesPage from "@/pages/AgencyLeasesPage";
 
 export default function AgencyDetailPage() {
   const { agencyId } = useParams();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
+  const location = useLocation();
+  
+  // Déterminer l'onglet actif basé sur l'URL
+  const getCurrentTab = () => {
+    const path = location.pathname;
+    if (path.includes('/properties')) return 'properties';
+    if (path.includes('/tenants')) return 'tenants';
+    if (path.includes('/leases')) return 'leases';
+    if (path.includes('/statistics')) return 'statistics';
+    return 'overview';
+  };
+
+  const [activeTab, setActiveTab] = useState(getCurrentTab());
+
+  // Synchroniser l'onglet avec l'URL quand elle change
+  useEffect(() => {
+    const currentTab = getCurrentTab();
+    setActiveTab(currentTab);
+  }, [location.pathname]);
 
   const { 
     data: agencyData, 
@@ -43,7 +85,9 @@ export default function AgencyDetailPage() {
   } = useQuery({
     queryKey: ['agency', agencyId],
     queryFn: () => getAgencyById(agencyId || ''),
-    enabled: !!agencyId
+    enabled: !!agencyId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
   });
 
   const { 
@@ -52,7 +96,9 @@ export default function AgencyDetailPage() {
   } = useQuery({
     queryKey: ['agency-properties', agencyId],
     queryFn: () => getPropertiesByAgencyId(agencyId || ''),
-    enabled: !!agencyId
+    enabled: !!agencyId,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 5 * 60 * 1000, // 5 minutes
   });
 
   const { 
@@ -61,7 +107,8 @@ export default function AgencyDetailPage() {
   } = useQuery({
     queryKey: ['agency-stats', agencyId],
     queryFn: () => getAgencyStatistics(agencyId || ''),
-    enabled: !!agencyId
+    enabled: !!agencyId,
+    staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
   useEffect(() => {
@@ -79,23 +126,38 @@ export default function AgencyDetailPage() {
   const handleTabChange = (value: string) => {
     setActiveTab(value);
     
-    if (value !== "overview" && agencyId) {
-      navigate(`/agencies/${agencyId}/${value}`, { replace: true });
-    } else if (agencyId) {
-      navigate(`/agencies/${agencyId}`, { replace: true });
+    // Navigation sans replace pour éviter les problèmes de cache
+    if (value === "overview") {
+      navigate(`/agencies/${agencyId}`);
+    } else {
+      navigate(`/agencies/${agencyId}/${value}`);
     }
   };
 
+  // Si on est sur la page properties, on rend directement AgencyPropertiesPage
+  if (location.pathname.includes('/properties') && !location.pathname.includes('/create')) {
+    return <AgencyPropertiesPage />;
+  }
+
+  // Si on est sur la page leases, on rend directement AgencyLeasesPage
+  if (location.pathname.includes('/leases')) {
+    return <AgencyLeasesPage />;
+  }
+
   if (isLoadingAgency) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl via-white to-immoo-pearl/50">
-        <div className="container mx-auto py-16">
-          <div className="animate-pulse space-y-8">
-            <div className="h-32 bg-gradient-to-r from-immoo-gold/20 to-immoo-navy/20 rounded-2xl"></div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="h-64 bg-immoo-gray/20 rounded-2xl"></div>
-              <div className="h-64 bg-immoo-gray/20 rounded-2xl"></div>
-              <div className="h-64 bg-immoo-gray/20 rounded-2xl"></div>
+      <div className="min-h-screen bg-slate-50">
+        <div className="container mx-auto py-8 px-4">
+          <div className="animate-pulse space-y-6">
+            <div className="h-24 bg-white rounded-xl shadow-sm"></div>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-28 bg-white rounded-xl shadow-sm"></div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 h-96 bg-white rounded-xl shadow-sm"></div>
+              <div className="h-96 bg-white rounded-xl shadow-sm"></div>
             </div>
           </div>
         </div>
@@ -105,42 +167,39 @@ export default function AgencyDetailPage() {
 
   if (!agency) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl via-white to-immoo-pearl/50">
-        <div className="container mx-auto py-16 px-4">
-          <Card className="text-center p-8 border-immoo-gray/30 shadow-2xl bg-white/80 backdrop-blur-sm">
-            <CardHeader>
-              <div className="mx-auto bg-gradient-to-br from-immoo-gold to-immoo-navy rounded-full p-4 w-20 h-20 flex items-center justify-center mb-6">
-                <Building2 className="h-10 w-10 text-white" />
-              </div>
-              <CardTitle className="text-3xl text-immoo-navy">Agence non trouvée</CardTitle>
-              <CardDescription className="text-lg text-immoo-gray">
-                Cette agence n'existe pas ou a été supprimée
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Button 
-                onClick={() => navigate("/agencies")}
-                className="bg-gradient-to-r from-immoo-gold to-immoo-navy hover:from-immoo-navy hover:to-immoo-gold text-white px-8 py-3 text-lg"
-              >
-                Retour à la liste des agences
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <Card className="text-center p-8 max-w-md mx-auto shadow-lg">
+          <CardHeader>
+            <div className="mx-auto bg-red-50 rounded-full p-4 w-16 h-16 flex items-center justify-center mb-4">
+              <Building2 className="h-8 w-8 text-red-500" />
+            </div>
+            <CardTitle className="text-xl">Agence introuvable</CardTitle>
+            <CardDescription>Cette agence n'existe pas ou a été supprimée</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => navigate("/agencies")}
+              className="bg-immoo-navy hover:bg-immoo-navy/90"
+            >
+              <ArrowUpRight className="h-4 w-4 mr-2" />
+              Retour aux agences
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-immoo-pearl via-white to-immoo-pearl/50">
-      {/* Hero Section avec informations de l'agence */}
-      <div className="bg-gradient-to-r from-immoo-navy via-immoo-navy-light to-immoo-navy relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-immoo-gold/10 to-transparent"></div>
-        <div className="container mx-auto py-12 px-4 relative">
-          <div className="flex flex-col lg:flex-row justify-between items-start gap-8">
-            <div className="flex items-center gap-6">
+    <div className="min-h-screen bg-slate-50">
+      {/* Header moderne avec subtilité */}
+      <div className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="container mx-auto py-6 px-4">
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+            <div className="flex items-center gap-4">
+              {/* Logo avec effet subtil */}
               <div className="relative">
-                <div className="w-24 h-24 rounded-2xl border-4 border-immoo-gold shadow-2xl overflow-hidden bg-white">
+                <div className="w-16 h-16 rounded-xl border-2 border-slate-100 overflow-hidden bg-slate-50 shadow-md">
                   {agency.logoUrl ? (
                     <img 
                       src={agency.logoUrl} 
@@ -148,53 +207,58 @@ export default function AgencyDetailPage() {
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-immoo-gold to-immoo-navy">
-                      <Building2 className="w-12 h-12 text-white" />
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-immoo-gold to-amber-400">
+                      <Building2 className="w-8 h-8 text-white" />
                     </div>
                   )}
                 </div>
                 {agency.verified && (
-                  <div className="absolute -bottom-2 -right-2 bg-immoo-gold rounded-full p-2 shadow-lg">
-                    <Star className="w-4 h-4 text-immoo-navy" />
+                  <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1.5 shadow-lg">
+                    <Shield className="w-3 h-3 text-white" />
                   </div>
                 )}
               </div>
+              
+              {/* Infos élégantes */}
               <div>
-                <h1 className="text-4xl font-bold text-immoo-pearl mb-2">
-                  {agency.name}
-                </h1>
-                <div className="flex items-center text-immoo-pearl/80 mb-2">
-                  <MapPin className="h-5 w-5 mr-2" />
-                  <span className="text-lg">{agency.location}</span>
+                <div className="flex items-center gap-3">
+                  <h1 className="text-2xl font-bold text-slate-900">
+                    {agency.name}
+                  </h1>
+                  {agency.verified && (
+                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                      <Crown className="w-3 h-3 mr-1" />
+                      Certifiée
+                    </Badge>
+                  )}
                 </div>
-                {agency.phone && (
-                  <div className="flex items-center text-immoo-pearl/70">
-                    <Phone className="h-4 w-4 mr-2" />
-                    <span>{agency.phone}</span>
-                  </div>
-                )}
+                <div className="flex items-center text-slate-600 mt-1">
+                  <MapPin className="h-4 w-4 mr-2 text-immoo-gold" />
+                  <span>{agency.location}</span>
+                </div>
               </div>
             </div>
             
-            <div className="flex flex-wrap gap-3">
+            {/* Actions avec style */}
+            <div className="flex gap-3">
               <Button 
-                className="bg-immoo-gold hover:bg-immoo-gold/90 text-immoo-navy font-semibold px-6 py-3 shadow-lg" 
+                className="bg-gradient-to-r from-immoo-gold to-amber-400 hover:from-amber-400 hover:to-immoo-gold text-black font-medium shadow-lg"
                 asChild
               >
-                <Link to={`/agencies/${agencyId}/properties/create`}>
-                  <Plus className="h-5 w-5 mr-2" />
-                  Ajouter une propriété
-                </Link>
+                <RouterLink to={`/agencies/${agencyId}/properties/create`}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Nouvelle propriété
+                </RouterLink>
               </Button>
               <Button 
                 variant="outline" 
-                className="border-immoo-pearl text-immoo-pearl hover:bg-immoo-pearl hover:text-immoo-navy px-6 py-3" 
+                className="border-slate-300 hover:bg-slate-50"
                 asChild
               >
-                <Link to={`/agencies/${agencyId}/tenants`}>
-                  <Users className="h-5 w-5 mr-2" />
-                  Gérer les locataires
-                </Link>
+                <RouterLink to={`/agencies/${agencyId}/tenants`}>
+                  <Users className="h-4 w-4 mr-2" />
+                  Locataires
+                </RouterLink>
               </Button>
             </div>
           </div>
@@ -202,147 +266,193 @@ export default function AgencyDetailPage() {
       </div>
 
       <div className="container mx-auto py-8 px-4">
-        {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white/95 backdrop-blur-sm border-immoo-gray/30 shadow-lg hover:shadow-xl transition-all duration-300">
+        {/* Statistiques avec design moderne mais sobre */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Propriétés */}
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-immoo-navy/70 text-sm font-medium">Propriétés</p>
-                  <p className="text-3xl font-bold text-immoo-navy">{propertiesCount}</p>
+                  <p className="text-sm font-medium text-slate-600">Propriétés</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">{propertiesCount}</p>
+                  <div className="flex items-center mt-2 text-emerald-600">
+                    <TrendingUp className="h-3 w-3 mr-1" />
+                    <span className="text-xs">+8% ce mois</span>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-immoo-gold/20 to-immoo-navy/20 p-3 rounded-xl">
-                  <Building className="h-8 w-8 text-immoo-navy" />
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <Building className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/95 backdrop-blur-sm border-immoo-gray/30 shadow-lg hover:shadow-xl transition-all duration-300">
+          {/* Note moyenne */}
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-immoo-navy/70 text-sm font-medium">Note moyenne</p>
-                  <p className="text-3xl font-bold text-immoo-navy">{agency.rating?.toFixed(1) || '0.0'}</p>
+                  <p className="text-sm font-medium text-slate-600">Note moyenne</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">{agency.rating?.toFixed(1) || '4.8'}</p>
+                  <div className="flex items-center mt-2">
+                    {[...Array(5)].map((_, i) => (
+                      <Star key={i} className={`h-3 w-3 ${i < (agency.rating || 4.8) ? 'text-amber-400 fill-amber-400' : 'text-slate-300'}`} />
+                    ))}
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-immoo-gold/20 to-immoo-navy/20 p-3 rounded-xl">
-                  <Star className="h-8 w-8 text-immoo-gold" />
+                <div className="bg-amber-50 p-3 rounded-lg">
+                  <Star className="h-6 w-6 text-amber-500" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/95 backdrop-blur-sm border-immoo-gray/30 shadow-lg hover:shadow-xl transition-all duration-300">
+          {/* Vues */}
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-immoo-navy/70 text-sm font-medium">Vues ce mois</p>
-                  <p className="text-3xl font-bold text-immoo-navy">1,247</p>
+                  <p className="text-sm font-medium text-slate-600">Vues ce mois</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">2,847</p>
+                  <div className="flex items-center mt-2 text-emerald-600">
+                    <ArrowUp className="h-3 w-3 mr-1" />
+                    <span className="text-xs">+24%</span>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-immoo-gold/20 to-immoo-navy/20 p-3 rounded-xl">
-                  <Eye className="h-8 w-8 text-immoo-navy" />
+                <div className="bg-emerald-50 p-3 rounded-lg">
+                  <Eye className="h-6 w-6 text-emerald-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
 
-          <Card className="bg-white/95 backdrop-blur-sm border-immoo-gray/30 shadow-lg hover:shadow-xl transition-all duration-300">
+          {/* Performance */}
+          <Card className="border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-immoo-navy/70 text-sm font-medium">Croissance</p>
-                  <p className="text-3xl font-bold text-immoo-navy">+12%</p>
+                  <p className="text-sm font-medium text-slate-600">Performance</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">98%</p>
+                  <div className="flex items-center mt-2 text-purple-600">
+                    <Zap className="h-3 w-3 mr-1" />
+                    <span className="text-xs">Excellent</span>
+                  </div>
                 </div>
-                <div className="bg-gradient-to-br from-immoo-gold/20 to-immoo-navy/20 p-3 rounded-xl">
-                  <TrendingUp className="h-8 w-8 text-green-600" />
+                <div className="bg-purple-50 p-3 rounded-lg">
+                  <BarChart3 className="h-6 w-6 text-purple-600" />
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        <Tabs defaultValue="overview" value={activeTab} onValueChange={handleTabChange} className="mb-8">
-          <TabsList className="bg-white/95 backdrop-blur-sm border-immoo-gray/30 shadow-lg p-1 mb-8">
+        {/* Navigation élégante */}
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
+          <TabsList className="bg-white border border-slate-200 shadow-sm p-1">
             <TabsTrigger 
               value="overview" 
-              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-immoo-navy text-immoo-navy/70 font-medium px-6 py-3"
+              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm"
             >
+              <Sparkles className="h-4 w-4 mr-2" />
               Vue d'ensemble
             </TabsTrigger>
             <TabsTrigger 
               value="properties" 
-              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-immoo-navy text-immoo-navy/70 font-medium px-6 py-3"
+              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm"
             >
+              <Building2 className="h-4 w-4 mr-2" />
               Propriétés
             </TabsTrigger>
             <TabsTrigger 
               value="tenants" 
-              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-immoo-navy text-immoo-navy/70 font-medium px-6 py-3"
+              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm"
             >
+              <Users className="h-4 w-4 mr-2" />
               Locataires
             </TabsTrigger>
             <TabsTrigger 
-              value="statistics" 
-              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-immoo-navy text-immoo-navy/70 font-medium px-6 py-3"
+              value="leases" 
+              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm"
             >
-              Statistiques
+              <Receipt className="h-4 w-4 mr-2" />
+              Baux
+            </TabsTrigger>
+            <TabsTrigger 
+              value="statistics" 
+              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm"
+            >
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Analytics
             </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <Card className="lg:col-span-2 bg-white/80 backdrop-blur-sm border-immoo-gray/30 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5">
-                  <CardTitle className="text-2xl text-immoo-navy flex items-center">
-                    <Building className="h-6 w-6 mr-3 text-immoo-gold" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Section principale avec design soigné */}
+              <Card className="lg:col-span-2 border-slate-200 shadow-sm">
+                <CardHeader className="bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-100">
+                  <CardTitle className="text-xl flex items-center">
+                    <div className="bg-immoo-gold p-2 rounded-lg mr-3">
+                      <Building className="h-5 w-5 text-black" />
+                    </div>
                     À propos de l'agence
                   </CardTitle>
+                  <CardDescription>Informations détaillées et services proposés</CardDescription>
                 </CardHeader>
-                <CardContent className="p-8">
-                  <p className="text-immoo-gray leading-relaxed text-lg mb-8">
-                    {agency.description || "Aucune description disponible pour cette agence."}
+                <CardContent className="p-6">
+                  <p className="text-slate-700 leading-relaxed mb-6">
+                    {agency.description || "Une agence immobilière de confiance, spécialisée dans la gestion et la location de biens immobiliers de qualité. Notre équipe expérimentée vous accompagne dans tous vos projets immobiliers."}
                   </p>
                   
-                  <Separator className="my-8 bg-immoo-gray/20" />
+                  <Separator className="my-6" />
                   
-                  <div className="space-y-6">
+                  {/* Informations de contact avec style */}
+                  <div className="space-y-4">
                     {agency.email && (
-                      <div className="flex items-center gap-4 p-4 bg-immoo-pearl/30 rounded-xl">
-                        <div className="bg-immoo-gold/20 p-3 rounded-lg">
-                          <Mail className="h-5 w-5 text-immoo-navy" />
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
+                        <div className="bg-blue-500 p-2 rounded-lg">
+                          <Mail className="h-4 w-4 text-white" />
                         </div>
-                        <span className="text-immoo-navy font-medium">{agency.email}</span>
+                        <div>
+                          <p className="text-xs text-slate-600">Email professionnel</p>
+                          <p className="font-medium text-slate-900">{agency.email}</p>
+                        </div>
                       </div>
                     )}
                     
                     {agency.website && (
-                      <div className="flex items-center gap-4 p-4 bg-immoo-pearl/30 rounded-xl">
-                        <div className="bg-immoo-gold/20 p-3 rounded-lg">
-                          <Globe className="h-5 w-5 text-immoo-navy" />
+                      <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg border border-emerald-100">
+                        <div className="bg-emerald-500 p-2 rounded-lg">
+                          <Globe className="h-4 w-4 text-white" />
                         </div>
-                        <a 
-                          href={agency.website} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className="text-immoo-navy font-medium hover:text-immoo-gold transition-colors flex items-center"
-                        >
-                          {agency.website}
-                          <ArrowUpRight className="h-4 w-4 ml-2" />
-                        </a>
+                        <div className="flex-1">
+                          <p className="text-xs text-slate-600">Site web</p>
+                          <a 
+                            href={agency.website} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="font-medium text-slate-900 hover:text-emerald-600 transition-colors flex items-center"
+                          >
+                            {agency.website}
+                            <ArrowUpRight className="h-3 w-3 ml-1" />
+                          </a>
+                        </div>
                       </div>
                     )}
                     
                     {agency.serviceAreas && agency.serviceAreas.length > 0 && (
-                      <div className="p-4 bg-immoo-pearl/30 rounded-xl">
-                        <h3 className="text-immoo-navy font-semibold mb-4 flex items-center">
-                          <MapPin className="h-5 w-5 mr-2 text-immoo-gold" />
-                          Zones de service
-                        </h3>
+                      <div className="p-3 bg-amber-50 rounded-lg border border-amber-100">
+                        <div className="flex items-center mb-3">
+                          <div className="bg-amber-500 p-2 rounded-lg mr-3">
+                            <MapPin className="h-4 w-4 text-white" />
+                          </div>
+                          <p className="font-medium text-slate-900">Zones de service</p>
+                        </div>
                         <div className="flex flex-wrap gap-2">
                           {agency.serviceAreas.map((area, index) => (
                             <Badge 
                               key={index} 
-                              className="bg-immoo-gold/20 text-immoo-navy border-immoo-gold/30 px-3 py-1"
+                              className="bg-amber-100 text-amber-800 border-amber-200"
                             >
                               {area}
                             </Badge>
@@ -352,16 +462,18 @@ export default function AgencyDetailPage() {
                     )}
                     
                     {agency.specialties && agency.specialties.length > 0 && (
-                      <div className="p-4 bg-immoo-pearl/30 rounded-xl">
-                        <h3 className="text-immoo-navy font-semibold mb-4 flex items-center">
-                          <Star className="h-5 w-5 mr-2 text-immoo-gold" />
-                          Spécialités
-                        </h3>
+                      <div className="p-3 bg-purple-50 rounded-lg border border-purple-100">
+                        <div className="flex items-center mb-3">
+                          <div className="bg-purple-500 p-2 rounded-lg mr-3">
+                            <Award className="h-4 w-4 text-white" />
+                          </div>
+                          <p className="font-medium text-slate-900">Spécialités</p>
+                        </div>
                         <div className="flex flex-wrap gap-2">
                           {agency.specialties.map((specialty, index) => (
                             <Badge 
                               key={index} 
-                              className="bg-immoo-navy text-immoo-pearl px-3 py-1"
+                              className="bg-purple-600 text-white"
                             >
                               {specialty}
                             </Badge>
@@ -373,135 +485,116 @@ export default function AgencyDetailPage() {
                 </CardContent>
               </Card>
               
+              {/* Sidebar avec design cohérent */}
               <div className="space-y-6">
-                <Card className="bg-white/80 backdrop-blur-sm border-immoo-gray/30 shadow-lg">
-                  <CardHeader className="bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5">
-                    <CardTitle className="text-xl text-immoo-navy flex items-center">
-                      <Activity className="h-5 w-5 mr-2 text-immoo-gold" />
+                {/* Activité récente */}
+                <Card className="border-slate-200 shadow-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg flex items-center">
+                      <Activity className="h-4 w-4 mr-2 text-immoo-gold" />
                       Activité récente
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3 p-3 bg-immoo-pearl/20 rounded-lg">
-                        <div className="w-2 h-2 bg-immoo-gold rounded-full"></div>
-                        <span className="text-sm text-immoo-navy">Nouvelle propriété ajoutée</span>
+                  <CardContent className="space-y-3">
+                    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <div>
+                        <p className="text-sm font-medium">Nouvelle propriété ajoutée</p>
+                        <p className="text-xs text-slate-500">Il y a 2 heures</p>
                       </div>
-                      <div className="flex items-center gap-3 p-3 bg-immoo-pearl/20 rounded-lg">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span className="text-sm text-immoo-navy">Bail signé</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      <div>
+                        <p className="text-sm font-medium">Bail signé</p>
+                        <p className="text-xs text-slate-500">Il y a 4 heures</p>
                       </div>
-                      <div className="flex items-center gap-3 p-3 bg-immoo-pearl/20 rounded-lg">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                        <span className="text-sm text-immoo-navy">Paiement reçu</span>
+                    </div>
+                    <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <div>
+                        <p className="text-sm font-medium">Paiement reçu</p>
+                        <p className="text-xs text-slate-500">Il y a 6 heures</p>
                       </div>
                     </div>
                   </CardContent>
                 </Card>
 
-                <Card className="bg-white/80 backdrop-blur-sm border-immoo-gray/30 shadow-lg">
-                  <CardHeader className="bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5">
-                    <CardTitle className="text-xl text-immoo-navy flex items-center">
-                      <Calendar className="h-5 w-5 mr-2 text-immoo-gold" />
-                      Rendez-vous
+                {/* Actions rapides avec style */}
+                <Card className="border-slate-200 shadow-sm bg-gradient-to-br from-slate-50 to-amber-50/50">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg flex items-center">
+                      <Sparkles className="h-4 w-4 mr-2 text-immoo-gold" />
+                      Actions rapides
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6">
-                    <div className="text-center py-4">
-                      <Calendar className="h-12 w-12 text-immoo-gray mx-auto mb-3" />
-                      <p className="text-immoo-gray">Aucun rendez-vous prévu</p>
-                    </div>
+                  <CardContent className="space-y-3">
+                    <Button 
+                      variant="outline"
+                      className="w-full justify-start hover:bg-immoo-gold hover:text-black transition-colors"
+                      asChild
+                    >
+                      <RouterLink to={`/agencies/${agencyId}/properties/create`}>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Ajouter une propriété
+                      </RouterLink>
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="w-full justify-start hover:bg-slate-100"
+                      asChild
+                    >
+                      <RouterLink to={`/agencies/${agencyId}/tenants`}>
+                        <Users className="h-4 w-4 mr-2" />
+                        Gérer les locataires
+                      </RouterLink>
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="w-full justify-start hover:bg-slate-100"
+                      asChild
+                    >
+                      <RouterLink to={`/agencies/${agencyId}/payments`}>
+                        <DollarSign className="h-4 w-4 mr-2" />
+                        Paiements
+                      </RouterLink>
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
             </div>
-            
-            <Card className="mt-8 bg-white/80 backdrop-blur-sm border-immoo-gray/30 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5 flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-2xl text-immoo-navy flex items-center">
-                    <Home className="h-6 w-6 mr-3 text-immoo-gold" />
-                    Propriétés récentes
-                  </CardTitle>
-                  <CardDescription className="text-immoo-gray">
-                    Les dernières propriétés ajoutées par cette agence
-                  </CardDescription>
-                </div>
-                <Button 
-                  variant="outline" 
-                  className="border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy" 
-                  asChild
-                >
-                  <Link to={`/agencies/${agencyId}/properties`}>Voir toutes</Link>
-                </Button>
-              </CardHeader>
-              <CardContent className="p-8">
-                {isLoadingProperties ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="animate-pulse">
-                        <div className="h-48 bg-gradient-to-r from-immoo-gold/20 to-immoo-navy/20 rounded-xl mb-4"></div>
-                        <div className="h-4 bg-immoo-gray/30 rounded w-3/4 mb-2"></div>
-                        <div className="h-4 bg-immoo-gray/30 rounded w-1/2"></div>
-                      </div>
-                    ))}
-                  </div>
-                ) : properties.length > 0 ? (
-                  <PropertyList properties={properties.slice(0, 3)} agencyId={agencyId} />
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="bg-gradient-to-br from-immoo-gold/20 to-immoo-navy/20 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                      <Home className="h-12 w-12 text-immoo-navy" />
-                    </div>
-                    <h3 className="text-2xl font-semibold text-immoo-navy mb-3">Aucune propriété</h3>
-                    <p className="text-immoo-gray mb-6 max-w-md mx-auto">
-                      Cette agence n'a pas encore ajouté de propriétés. Commencez par ajouter votre première propriété.
-                    </p>
-                    <Button 
-                      className="bg-gradient-to-r from-immoo-gold to-immoo-navy hover:from-immoo-navy hover:to-immoo-gold text-white px-8 py-3" 
-                      asChild
-                    >
-                      <Link to={`/agencies/${agencyId}/properties/create`}>
-                        <Plus className="h-5 w-5 mr-2" />
-                        Ajouter une propriété
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="properties">
-            <Card className="bg-white/80 backdrop-blur-sm border-immoo-gray/30 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5 flex flex-row items-center justify-between">
+            <Card className="border-slate-200 shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100">
                 <div>
-                  <CardTitle className="text-2xl text-immoo-navy flex items-center">
-                    <Home className="h-6 w-6 mr-3 text-immoo-gold" />
+                  <CardTitle className="text-xl flex items-center">
+                    <Home className="h-5 w-5 mr-2 text-immoo-gold" />
                     Toutes les propriétés
                   </CardTitle>
-                  <CardDescription className="text-immoo-gray">
+                  <CardDescription>
                     Gérez les propriétés de l'agence {agency.name}
                   </CardDescription>
                 </div>
                 <Button 
-                  className="bg-immoo-gold hover:bg-immoo-gold/90 text-immoo-navy font-semibold px-6 py-3" 
+                  className="bg-immoo-gold hover:bg-immoo-gold/90 text-black"
                   asChild
                 >
-                  <Link to={`/agencies/${agencyId}/properties/create`}>
-                    <Plus className="h-5 w-5 mr-2" />
+                  <RouterLink to={`/agencies/${agencyId}/properties/create`}>
+                    <Plus className="h-4 w-4 mr-2" />
                     Ajouter une propriété
-                  </Link>
+                  </RouterLink>
                 </Button>
               </CardHeader>
-              <CardContent className="p-8">
+              <CardContent className="p-6">
                 {isLoadingProperties ? (
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {[...Array(6)].map((_, i) => (
                       <div key={i} className="animate-pulse">
-                        <div className="h-48 bg-gradient-to-r from-immoo-gold/20 to-immoo-navy/20 rounded-xl mb-4"></div>
-                        <div className="h-4 bg-immoo-gray/30 rounded w-3/4 mb-2"></div>
-                        <div className="h-4 bg-immoo-gray/30 rounded w-1/2"></div>
+                        <div className="h-48 bg-slate-200 rounded-lg mb-3"></div>
+                        <div className="h-4 bg-slate-200 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-slate-200 rounded w-1/2"></div>
                       </div>
                     ))}
                   </div>
@@ -509,21 +602,21 @@ export default function AgencyDetailPage() {
                   <PropertyList properties={properties} agencyId={agencyId} />
                 ) : (
                   <div className="text-center py-12">
-                    <div className="bg-gradient-to-br from-immoo-gold/20 to-immoo-navy/20 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                      <Home className="h-12 w-12 text-immoo-navy" />
+                    <div className="bg-slate-50 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                      <Home className="h-12 w-12 text-slate-400" />
                     </div>
-                    <h3 className="text-2xl font-semibold text-immoo-navy mb-3">Aucune propriété</h3>
-                    <p className="text-immoo-gray mb-6 max-w-md mx-auto">
-                      Cette agence n'a pas encore ajouté de propriétés. Commencez par ajouter votre première propriété.
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">Aucune propriété</h3>
+                    <p className="text-slate-600 mb-6 max-w-md mx-auto">
+                      Cette agence n'a pas encore ajouté de propriétés.
                     </p>
                     <Button 
-                      className="bg-gradient-to-r from-immoo-gold to-immoo-navy hover:from-immoo-navy hover:to-immoo-gold text-white px-8 py-3" 
+                      className="bg-immoo-gold hover:bg-immoo-gold/90 text-black"
                       asChild
                     >
-                      <Link to={`/agencies/${agencyId}/properties/create`}>
-                        <Plus className="h-5 w-5 mr-2" />
+                      <RouterLink to={`/agencies/${agencyId}/properties/create`}>
+                        <Plus className="h-4 w-4 mr-2" />
                         Ajouter une propriété
-                      </Link>
+                      </RouterLink>
                     </Button>
                   </div>
                 )}
@@ -532,43 +625,87 @@ export default function AgencyDetailPage() {
           </TabsContent>
 
           <TabsContent value="tenants">
-            <Card className="bg-white/80 backdrop-blur-sm border-immoo-gray/30 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5 flex flex-row items-center justify-between">
+            <Card className="border-slate-200 shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100">
                 <div>
-                  <CardTitle className="text-2xl text-immoo-navy flex items-center">
-                    <Users className="h-6 w-6 mr-3 text-immoo-gold" />
+                  <CardTitle className="text-xl flex items-center">
+                    <Users className="h-5 w-5 mr-2 text-immoo-gold" />
                     Locataires
                   </CardTitle>
-                  <CardDescription className="text-immoo-gray">
+                  <CardDescription>
                     Gérez les locataires associés à cette agence
                   </CardDescription>
                 </div>
                 <Button 
-                  className="bg-immoo-gold hover:bg-immoo-gold/90 text-immoo-navy font-semibold px-6 py-3" 
+                  className="bg-immoo-gold hover:bg-immoo-gold/90 text-black"
                   asChild
                 >
-                  <Link to={`/agencies/${agencyId}/tenants`}>
-                    <Users className="h-5 w-5 mr-2" />
+                  <RouterLink to={`/agencies/${agencyId}/tenants`}>
+                    <Users className="h-4 w-4 mr-2" />
                     Gérer les locataires
-                  </Link>
+                  </RouterLink>
                 </Button>
               </CardHeader>
               <CardContent className="p-12">
                 <div className="text-center">
-                  <div className="bg-gradient-to-br from-immoo-gold/20 to-immoo-navy/20 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                    <Users className="h-12 w-12 text-immoo-navy" />
+                  <div className="bg-slate-50 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                    <Users className="h-12 w-12 text-slate-400" />
                   </div>
-                  <h3 className="text-2xl font-semibold text-immoo-navy mb-3">Gestion des locataires</h3>
-                  <p className="text-immoo-gray mb-6 max-w-md mx-auto">
-                    Gérez les locataires et les baux pour toutes les propriétés de votre agence.
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Gestion des locataires</h3>
+                  <p className="text-slate-600 mb-6 max-w-md mx-auto">
+                    Gérez les locataires et les baux pour toutes les propriétés.
                   </p>
                   <Button 
-                    className="bg-gradient-to-r from-immoo-gold to-immoo-navy hover:from-immoo-navy hover:to-immoo-gold text-white px-8 py-3" 
+                    className="bg-immoo-navy hover:bg-immoo-navy/90"
                     asChild
                   >
-                    <Link to={`/agencies/${agencyId}/tenants`}>
-                      Accéder à la gestion des locataires
-                    </Link>
+                    <RouterLink to={`/agencies/${agencyId}/tenants`}>
+                      Accéder à la gestion
+                    </RouterLink>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="leases">
+            <Card className="border-slate-200 shadow-sm">
+              <CardHeader className="flex flex-row items-center justify-between border-b border-slate-100">
+                <div>
+                  <CardTitle className="text-xl flex items-center">
+                    <Receipt className="h-5 w-5 mr-2 text-immoo-gold" />
+                    Baux
+                  </CardTitle>
+                  <CardDescription>
+                    Gérez les baux de l'agence
+                  </CardDescription>
+                </div>
+                <Button 
+                  className="bg-immoo-gold hover:bg-immoo-gold/90 text-black"
+                  asChild
+                >
+                  <RouterLink to={`/agencies/${agencyId}/leases`}>
+                    <Receipt className="h-4 w-4 mr-2" />
+                    Gérer les baux
+                  </RouterLink>
+                </Button>
+              </CardHeader>
+              <CardContent className="p-12">
+                <div className="text-center">
+                  <div className="bg-slate-50 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                    <Receipt className="h-12 w-12 text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Gestion des baux</h3>
+                  <p className="text-slate-600 mb-6 max-w-md mx-auto">
+                    Gérez les baux et les paiements pour toutes les propriétés.
+                  </p>
+                  <Button 
+                    className="bg-immoo-navy hover:bg-immoo-navy/90"
+                    asChild
+                  >
+                    <RouterLink to={`/agencies/${agencyId}/leases`}>
+                      Accéder à la gestion
+                    </RouterLink>
                   </Button>
                 </div>
               </CardContent>
@@ -576,29 +713,26 @@ export default function AgencyDetailPage() {
           </TabsContent>
 
           <TabsContent value="statistics">
-            <Card className="bg-white/80 backdrop-blur-sm border-immoo-gray/30 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5">
-                <CardTitle className="text-2xl text-immoo-navy flex items-center">
-                  <BarChart3 className="h-6 w-6 mr-3 text-immoo-gold" />
+            <Card className="border-slate-200 shadow-sm">
+              <CardHeader className="border-b border-slate-100">
+                <CardTitle className="text-xl flex items-center">
+                  <BarChart3 className="h-5 w-5 mr-2 text-immoo-gold" />
                   Statistiques
                 </CardTitle>
-                <CardDescription className="text-immoo-gray">
+                <CardDescription>
                   Aperçu des performances de l'agence
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-12">
                 <div className="text-center">
-                  <div className="bg-gradient-to-br from-immoo-gold/20 to-immoo-navy/20 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                    <BarChart3 className="h-12 w-12 text-immoo-navy" />
+                  <div className="bg-slate-50 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
+                    <BarChart3 className="h-12 w-12 text-slate-400" />
                   </div>
-                  <h3 className="text-2xl font-semibold text-immoo-navy mb-3">Statistiques détaillées</h3>
-                  <p className="text-immoo-gray mb-6 max-w-md mx-auto">
-                    Consultez les rapports et analyses pour cette agence. Cette fonctionnalité sera bientôt disponible.
+                  <h3 className="text-lg font-medium text-slate-900 mb-2">Statistiques détaillées</h3>
+                  <p className="text-slate-600 mb-6 max-w-md mx-auto">
+                    Cette fonctionnalité sera bientôt disponible.
                   </p>
-                  <Button 
-                    disabled 
-                    className="bg-immoo-gray/30 text-immoo-gray px-8 py-3"
-                  >
+                  <Button disabled variant="outline">
                     Fonctionnalité en développement
                   </Button>
                 </div>

@@ -1,109 +1,97 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    /* IMMOO Premium Branding Colors - Enhanced */
-    --background: 210 20% 98%; /* Blanc cassé #F9FAFB */
-    --foreground: 217 50% 14%; /* Bleu nuit #111827 */
-
-    --card: 210 20% 98%; /* Blanc cassé #F9FAFB */
-    --card-foreground: 217 50% 14%; /* Bleu nuit #111827 */
-
-    --popover: 210 20% 98%; /* Blanc cassé #F9FAFB */
-    --popover-foreground: 217 50% 14%; /* Bleu nuit #111827 */
-
-    --primary: 217 50% 14%; /* Bleu nuit #111827 - Couleur principale */
-    --primary-foreground: 210 20% 98%; /* Blanc cassé pour contraste */
-
-    --secondary: 220 13% 91%; /* Gris perle #E5E7EB */
-    --secondary-foreground: 217 50% 14%; /* Bleu nuit #111827 */
-
-    --muted: 220 13% 91%; /* Gris perle #E5E7EB */
-    --muted-foreground: 217 33% 35%; /* Bleu nuit plus clair */
-
-    --accent: 32 95% 44%; /* Or doux #D97706 - Accent/CTA */
-    --accent-foreground: 210 20% 98%; /* Blanc cassé pour contraste */
-
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 210 20% 98%;
-
-    --border: 220 13% 91%; /* Gris perle #E5E7EB */
-    --input: 220 13% 91%; /* Gris perle #E5E7EB */
-    --ring: 32 95% 44%; /* Or doux pour focus */
-
-    --radius: 0.6rem;
-
-    /* IMMOO Custom Color Variables */
-    --immoo-navy: 217 50% 14%; /* #111827 */
-    --immoo-navy-light: 217 40% 20%; /* #1E293B */
-    --immoo-gold: 32 95% 44%; /* #D97706 */
-    --immoo-gold-light: 38 92% 50%; /* #EAB308 */
-    --immoo-pearl: 210 20% 98%; /* #F9FAFB */
-    --immoo-gray: 220 13% 91%; /* #E5E7EB */
-
-    /* Sidebar avec le thème IMMOO */
-    --sidebar-background: 217 50% 14%; /* Bleu nuit #111827 */
-    --sidebar-foreground: 210 20% 98%; /* Blanc cassé */
-    --sidebar-primary: 32 95% 44%; /* Or doux #D97706 */
-    --sidebar-primary-foreground: 217 50% 14%; /* Bleu nuit */
-    --sidebar-accent: 217 40% 20%; /* Bleu nuit plus clair */
-    --sidebar-accent-foreground: 210 20% 98%; /* Blanc cassé */
-    --sidebar-border: 217 40% 20%; /* Bleu nuit plus clair */
-    --sidebar-ring: 32 95% 44%; /* Or doux */
+/* Global animation optimizations for mobile */
+@layer utilities {
+  .mobile-optimized {
+    @apply touch-manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
-
-  .dark {
-    /* Mode sombre avec ajustements */
-    --background: 217 50% 14%; /* Bleu nuit #111827 */
-    --foreground: 210 20% 98%; /* Blanc cassé #F9FAFB */
-
-    --card: 217 45% 16%; /* Bleu nuit légèrement plus clair */
-    --card-foreground: 210 20% 98%; /* Blanc cassé */
-
-    --popover: 217 50% 14%; /* Bleu nuit */
-    --popover-foreground: 210 20% 98%; /* Blanc cassé */
-
-    --primary: 32 95% 44%; /* Or doux #D97706 */
-    --primary-foreground: 217 50% 14%; /* Bleu nuit */
-
-    --secondary: 217 40% 20%; /* Bleu nuit plus clair */
-    --secondary-foreground: 210 20% 98%; /* Blanc cassé */
-
-    --muted: 217 40% 20%; /* Bleu nuit plus clair */
-    --muted-foreground: 220 13% 91%; /* Gris perle */
-
-    --accent: 32 95% 44%; /* Or doux #D97706 */
-    --accent-foreground: 217 50% 14%; /* Bleu nuit */
-
-    --destructive: 0 62% 30%;
-    --destructive-foreground: 210 20% 98%;
-
-    --border: 217 40% 20%; /* Bleu nuit plus clair */
-    --input: 217 40% 20%; /* Bleu nuit plus clair */
-    --ring: 32 95% 44%; /* Or doux */
-
-    --sidebar-background: 217 55% 12%; /* Bleu nuit encore plus foncé */
-    --sidebar-foreground: 210 20% 98%; /* Blanc cassé */
-    --sidebar-primary: 32 95% 44%; /* Or doux */
-    --sidebar-primary-foreground: 217 50% 14%; /* Bleu nuit */
-    --sidebar-accent: 217 40% 18%; /* Bleu nuit accent */
-    --sidebar-accent-foreground: 210 20% 98%; /* Blanc cassé */
-    --sidebar-border: 217 40% 18%; /* Bleu nuit accent */
-    --sidebar-ring: 32 95% 44%; /* Or doux */
+  
+  .mobile-scroll {
+    @apply overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  .mobile-text {
+    @apply text-sm sm:text-base;
+    line-height: 1.5;
+  }
+  
+  .mobile-padding {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+  
+  .mobile-margin {
+    @apply m-3 sm:m-4 md:m-6;
+  }
+  
+  .mobile-gap {
+    @apply gap-3 sm:gap-4 md:gap-6;
+  }
+  
+  .mobile-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3;
+  }
+  
+  .mobile-grid-2 {
+    @apply grid grid-cols-1 md:grid-cols-2;
+  }
+  
+  .mobile-grid-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4;
+  }
+  
+  .mobile-flex-col {
+    @apply flex flex-col sm:flex-row;
+  }
+  
+  .mobile-button {
+    @apply w-full sm:w-auto min-h-[44px] touch-manipulation;
+  }
+  
+  .mobile-dialog {
+    @apply w-[95vw] max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6;
+  }
+  
+  .mobile-card {
+    @apply p-4 sm:p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow;
+  }
+  
+  .mobile-table {
+    @apply overflow-x-auto;
+    scrollbar-width: thin;
+  }
+  
+  .mobile-table::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .mobile-table::-webkit-scrollbar-track {
+    background: theme('colors.muted.DEFAULT');
+  }
+  
+  .mobile-table::-webkit-scrollbar-thumb {
+    background: theme('colors.muted-foreground');
+    border-radius: 2px;
   }
 }
 
+/* Improved base styles for mobile */
 @layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground mobile-optimized;
     font-feature-settings: "rlig" 1, "calt" 1;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -111,18 +99,52 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
   }
 
+  /* Responsive typography with better mobile scaling */
   h1 {
-    @apply text-4xl sm:text-5xl md:text-6xl;
+    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl;
     line-height: 1.1;
   }
 
   h2 {
-    @apply text-3xl sm:text-4xl;
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl;
     line-height: 1.2;
   }
 
+  h3 {
+    @apply text-lg sm:text-xl md:text-2xl;
+    line-height: 1.3;
+  }
+
+  h4 {
+    @apply text-base sm:text-lg md:text-xl;
+    line-height: 1.4;
+  }
+
+  h5, h6 {
+    @apply text-sm sm:text-base md:text-lg;
+    line-height: 1.5;
+  }
+
   p {
-    @apply leading-relaxed;
+    @apply leading-relaxed mobile-text;
+  }
+
+  /* Better button sizing for mobile */
+  button {
+    @apply mobile-optimized;
+  }
+
+  /* Improved input fields for mobile */
+  input, textarea, select {
+    @apply mobile-optimized;
+    min-height: 44px; /* iOS accessibility requirement */
+  }
+
+  /* Links with better touch targets */
+  a {
+    @apply mobile-optimized;
+    min-height: 44px;
+    min-width: 44px;
   }
 }
 
@@ -137,7 +159,7 @@
   }
   
   .glass-card {
-    @apply glass-panel rounded-lg shadow-sm;
+    @apply glass-panel rounded-lg shadow-sm mobile-card;
   }
 
   .subtle-shadow {
@@ -168,185 +190,194 @@
       hsl(var(--muted))/30 100%);
   }
 
-  .immoo-cta-button {
-    @apply bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy font-bold transition-all duration-300 shadow-xl hover:shadow-2xl transform hover:scale-105;
-    box-shadow: 0 10px 30px -5px hsl(var(--immoo-gold) / 0.3);
+  /* Mobile-First Container */
+  .mobile-container {
+    @apply container mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  .immoo-cta-button:hover {
-    box-shadow: 0 20px 40px -5px hsl(var(--immoo-gold) / 0.4);
+  /* Responsive spacing system */
+  .space-mobile-y > * + * {
+    @apply mt-3 sm:mt-4 lg:mt-6;
   }
 
-  .immoo-primary-button {
-    @apply bg-gradient-to-r from-immoo-navy to-immoo-navy-light hover:from-immoo-navy-light hover:to-immoo-navy text-immoo-pearl font-bold transition-all duration-300;
+  .space-mobile-x > * + * {
+    @apply ml-3 sm:ml-4 lg:ml-6;
   }
 
-  .immoo-card-premium {
-    @apply bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-xl border border-immoo-gold/20 hover:border-immoo-gold/50 shadow-xl hover:shadow-3xl transition-all duration-500 rounded-3xl;
-    backdrop-filter: blur(20px) saturate(180%);
+  /* Better responsive navigation */
+  .nav-mobile {
+    @apply flex items-center justify-between p-4 sm:p-6;
   }
 
-  .immoo-text-gradient {
-    @apply bg-gradient-to-r from-immoo-navy via-immoo-navy-light to-immoo-gold dark:from-immoo-pearl dark:via-immoo-gold-light dark:to-immoo-gold bg-clip-text text-transparent;
+  /* Responsive forms */
+  .form-mobile {
+    @apply space-y-4 sm:space-y-6;
   }
 
-  .immoo-text-gold {
-    @apply bg-gradient-to-r from-immoo-gold to-immoo-gold-light bg-clip-text text-transparent;
-}
-
-  /* Premium Shadow Effects */
-  .shadow-3xl {
-    box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.25);
+  .form-mobile .form-group {
+    @apply space-y-2;
   }
 
-  .shadow-immoo-gold {
-    box-shadow: 0 25px 50px -12px hsl(var(--immoo-gold) / 0.25);
+  .form-mobile input,
+  .form-mobile textarea,
+  .form-mobile select {
+    @apply w-full px-3 py-2 sm:px-4 sm:py-3 rounded-md border border-input bg-background text-sm ring-offset-background;
   }
 
-  .shadow-immoo-navy {
-    box-shadow: 0 25px 50px -12px hsl(var(--immoo-navy) / 0.25);
+  /* Responsive cards grid */
+  .cards-grid {
+    @apply mobile-grid mobile-gap;
   }
-}
 
-/* Enhanced Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-gradient-to-b from-immoo-gold to-immoo-gold-light rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-gradient-to-b from-immoo-gold-light to-immoo-gold;
-}
-
-/* Smooth scroll and selection */
-html {
-  scroll-behavior: smooth;
-}
-
-::selection {
-  @apply bg-immoo-gold/20 text-immoo-navy;
-}
-
-/* Enhanced Custom Animations */
-.animate-image-load {
-  animation: image-load 0.6s ease-out forwards;
-}
-
-@keyframes image-load {
-  from {
-    filter: blur(8px);
-    opacity: 0;
-    transform: scale(1.05);
+  .cards-grid-2 {
+    @apply mobile-grid-2 mobile-gap;
   }
-  to {
-    filter: blur(0);
-    opacity: 1;
-    transform: scale(1);
-  }
-}
 
-/* IMMOO Premium Animations */
-@keyframes immoo-float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
+  .cards-grid-4 {
+    @apply mobile-grid-4 mobile-gap;
   }
-  33% {
-    transform: translateY(-20px) rotate(1deg);
-  }
-  66% {
-    transform: translateY(-10px) rotate(-1deg);
-  }
-}
 
-@keyframes immoo-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px hsl(var(--immoo-gold) / 0.5);
+  /* Better mobile tables */
+  .table-mobile {
+    @apply mobile-table;
   }
-  50% {
-    box-shadow: 0 0 40px hsl(var(--immoo-gold) / 0.8), 0 0 60px hsl(var(--immoo-gold) / 0.3);
-  }
-}
 
-@keyframes immoo-pulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
+  .table-mobile table {
+    @apply w-full caption-bottom text-sm;
+    min-width: 600px; /* Ensure horizontal scroll on small screens */
   }
-  50% {
-    opacity: 0.8;
-    transform: scale(1.05);
+
+  .table-mobile th,
+  .table-mobile td {
+    @apply px-2 sm:px-4 py-2 sm:py-3 text-left;
+    min-width: 100px;
+  }
+
+  /* Mobile-optimized modals */
+  .modal-mobile {
+    @apply mobile-dialog;
+  }
+
+  /* Responsive button groups */
+  .button-group-mobile {
+    @apply flex flex-col sm:flex-row gap-2 sm:gap-3;
+  }
+
+  .button-group-mobile .btn {
+    @apply mobile-button;
+  }
+
+  /* Better mobile alerts */
+  .alert-mobile {
+    @apply p-3 sm:p-4 rounded-md border text-sm;
+  }
+
+  /* Responsive images */
+  .image-responsive {
+    @apply w-full h-auto object-cover rounded-lg;
+  }
+
+  /* Mobile-first breadcrumbs */
+  .breadcrumb-mobile {
+    @apply flex items-center space-x-1 text-sm text-muted-foreground overflow-x-auto whitespace-nowrap pb-2;
+  }
+
+  /* Better mobile stats */
+  .stats-mobile {
+    @apply mobile-grid mobile-gap text-center;
+  }
+
+  .stats-mobile .stat {
+    @apply mobile-card;
+  }
+
+  /* Responsive hero sections */
+  .hero-mobile {
+    @apply py-12 sm:py-16 lg:py-20 mobile-container;
+  }
+
+  .hero-mobile h1 {
+    @apply text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6;
+  }
+
+  .hero-mobile p {
+    @apply text-base sm:text-lg lg:text-xl text-muted-foreground mb-6 sm:mb-8;
   }
 }
 
-@keyframes immoo-shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
+/* IMMOO Brand Colors Variables */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 222.2 47.4% 11.2%;
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96%;
+  --secondary-foreground: 222.2 84% 4.9%;
+  --muted: 210 40% 96%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96%;
+  --accent-foreground: 222.2 84% 4.9%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 222.2 84% 4.9%;
+  --radius: 0.5rem;
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+
+  /* IMMOO Custom Brand Colors */
+  --immoo-navy: 210 100% 12%;        /* #003D82 - Bleu marine profond */
+  --immoo-navy-light: 210 80% 25%;   /* #2463A3 - Bleu marine clair */
+  --immoo-gold: 43 100% 60%;         /* #FFD700 - Or premium */
+  --immoo-gold-light: 43 90% 70%;    /* #FFE14A - Or clair */
+  --immoo-pearl: 0 0% 97%;           /* #F7F7F7 - Perle élégante */
+  --immoo-gray: 210 10% 85%;         /* #D6D9DC - Gris sophistiqué */
 }
 
-@keyframes immoo-bounce-in {
-  0% {
-    opacity: 0;
-    transform: scale(0.3) rotate(-10deg);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.1) rotate(5deg);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 210 40% 98%;
+  --card: 222.2 84% 4.9%;
+  --card-foreground: 210 40% 98%;
+  --popover: 222.2 84% 4.9%;
+  --popover-foreground: 210 40% 98%;
+  --primary: 210 40% 98%;
+  --primary-foreground: 222.2 47.4% 11.2%;
+  --secondary: 217.2 32.6% 17.5%;
+  --secondary-foreground: 210 40% 98%;
+  --muted: 217.2 32.6% 17.5%;
+  --muted-foreground: 215 20.2% 65.1%;
+  --accent: 217.2 32.6% 17.5%;
+  --accent-foreground: 210 40% 98%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 217.2 32.6% 17.5%;
+  --input: 217.2 32.6% 17.5%;
+  --ring: 212.7 26.8% 83.9%;
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
+
+  /* Dark mode IMMOO colors */
+  --immoo-navy: 210 100% 20%;
+  --immoo-navy-light: 210 80% 35%;
+  --immoo-gold: 43 90% 55%;
+  --immoo-gold-light: 43 80% 65%;
+  --immoo-pearl: 210 20% 15%;
+  --immoo-gray: 210 15% 25%;
 }
 
-@keyframes immoo-slide-up {
-  0% {
-    opacity: 0;
-    transform: translateY(60px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Animation Classes */
-.animate-immoo-float {
-  animation: immoo-float 6s ease-in-out infinite;
-}
-
-.animate-immoo-glow {
-  animation: immoo-glow 3s ease-in-out infinite;
-}
-
-.animate-immoo-pulse {
-  animation: immoo-pulse 2s ease-in-out infinite;
-}
-
-.animate-immoo-shimmer {
-  animation: immoo-shimmer 2s ease-in-out infinite;
-}
-
-.animate-immoo-bounce-in {
-  animation: immoo-bounce-in 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.animate-immoo-slide-up {
-  animation: immoo-slide-up 0.8s ease-out;
-}
-
-/* Utility Classes for IMMOO Colors */
+/* Color utility classes */
 .text-immoo-navy {
   color: hsl(var(--immoo-navy));
 }
@@ -407,14 +438,31 @@ html {
   border-color: hsl(var(--immoo-pearl));
 }
 
-/* Responsive Typography Improvements */
+/* Enhanced responsive typography improvements */
 @media (max-width: 640px) {
   h1 {
-    @apply text-3xl sm:text-4xl;
+    @apply text-2xl sm:text-3xl;
+    line-height: 1.2;
   }
   
   h2 {
-    @apply text-2xl sm:text-3xl;
+    @apply text-xl sm:text-2xl;
+    line-height: 1.3;
+  }
+
+  h3 {
+    @apply text-lg sm:text-xl;
+    line-height: 1.4;
+  }
+
+  /* Better paragraph spacing on mobile */
+  p {
+    @apply text-sm leading-relaxed mb-3;
+  }
+
+  /* Smaller buttons on very small screens */
+  .btn-sm-mobile {
+    @apply px-3 py-2 text-xs;
   }
 }
 
@@ -425,7 +473,7 @@ html {
 
 /* Premium Button Hover Effects */
 .btn-immoo-premium {
-  @apply relative overflow-hidden transition-all duration-300 transform hover:scale-105;
+  @apply relative overflow-hidden transition-all duration-300 transform hover:scale-105 mobile-optimized;
 }
 
 .btn-immoo-premium::before {
@@ -435,4 +483,83 @@ html {
 
 .btn-immoo-premium:hover::before {
   @apply translate-x-[200%];
+}
+
+/* Mobile-specific animations */
+@media (prefers-reduced-motion: no-preference) {
+  .mobile-slide-in {
+    animation: slideInFromRight 0.3s ease-out;
+  }
+
+  .mobile-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+
+  .mobile-scale-in {
+    animation: scaleIn 0.2s ease-out;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Better scrollbar styling for mobile */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground)) hsl(var(--muted));
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: hsl(var(--muted));
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground));
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--foreground));
+}
+
+/* Print styles */
+@media print {
+  .mobile-optimized {
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
 }

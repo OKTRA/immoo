@@ -73,7 +73,9 @@ export default function AgencyPropertiesPage() {
       if (!agencyId) return [];
 
       try {
-        // Test simple query first
+        console.log("Fetching properties for agency:", agencyId);
+        
+        // Requête simplifiée pour éviter les erreurs de jointure
         const { data: propertiesData, error: propertiesError } = await supabase
           .from('properties')
           .select(`
@@ -88,8 +90,7 @@ export default function AgencyPropertiesPage() {
             area,
             status,
             is_visible,
-            created_at,
-            property_images!inner(image_url)
+            created_at
           `)
           .eq('agency_id', agencyId)
           .order('created_at', { ascending: false });
@@ -101,8 +102,20 @@ export default function AgencyPropertiesPage() {
 
         console.log("Properties data retrieved:", propertiesData);
 
+        // Si pas de données, retourner un tableau vide
+        if (!propertiesData || propertiesData.length === 0) {
+          return [];
+        }
+
+        // Récupérer les images séparément pour éviter les erreurs de jointure
+        const propertyIds = propertiesData.map(p => p.id);
+        const { data: imagesData } = await supabase
+          .from('property_images')
+          .select('property_id, image_url')
+          .in('property_id', propertyIds);
+
         // Transformer les données
-        const transformedProperties: Property[] = (propertiesData || []).map(property => ({
+        const transformedProperties: Property[] = propertiesData.map(property => ({
           id: property.id,
           title: property.title || 'Propriété sans titre',
           description: property.description || '',
@@ -112,26 +125,40 @@ export default function AgencyPropertiesPage() {
           bedrooms: property.bedrooms || 0,
           bathrooms: property.bathrooms || 0,
           area: property.area || 0,
-          status: property.status as 'available' | 'rented' | 'maintenance',
-          isVisible: property.is_visible || false,
+          status: (property.status as 'available' | 'rented' | 'maintenance') || 'available',
+          isVisible: property.is_visible !== false,
           createdAt: property.created_at,
-          images: (property.property_images || []).map((img: any) => ({ url: img.image_url })),
-          leases: [] // We'll add this in a separate query if needed
+          images: imagesData 
+            ? imagesData
+                .filter(img => img.property_id === property.id)
+                .map(img => ({ url: img.image_url }))
+            : [],
+          leases: []
         }));
 
         return transformedProperties;
       } catch (error: any) {
         console.error("Erreur lors de la récupération des propriétés:", error);
-        throw new Error(`Impossible de récupérer les propriétés: ${error.message}`);
+        // Ne pas throw, mais retourner un tableau vide pour éviter la page blanche
+        toast.error(`Erreur lors du chargement: ${error.message}`);
+        return [];
       }
     },
     enabled: !!agencyId,
     refetchOnWindowFocus: false,
+    retry: 3,
+    retryDelay: 1000,
   });
+
+  // Debug log
+  console.log("Agency ID:", agencyId);
+  console.log("Properties:", properties);
+  console.log("Is Loading:", isLoading);
+  console.log("Error:", error);
 
   if (!agencyId) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 sm:p-6">
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>Identifiant d'agence manquant.</AlertDescription>
@@ -214,7 +241,7 @@ export default function AgencyPropertiesPage() {
 
   if (isLoading) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 sm:p-6">
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-immoo-gold mx-auto mb-4"></div>
@@ -227,7 +254,7 @@ export default function AgencyPropertiesPage() {
 
   if (error) {
     return (
-      <div className="container mx-auto p-6">
+      <div className="container mx-auto p-4 sm:p-6">
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
@@ -248,32 +275,32 @@ export default function AgencyPropertiesPage() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
-      {/* Header Premium */}
-      <div className="flex justify-between items-start">
+    <div className="container mx-auto p-4 sm:p-6 space-y-4 sm:space-y-6 bg-gradient-to-br from-slate-50 to-blue-50 min-h-screen">
+      {/* Header Premium - Mobile First */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-gradient-to-br from-immoo-gold to-immoo-navy rounded-xl">
-              <Building2 className="h-6 w-6 text-white" />
+            <div className="p-2 sm:p-3 bg-gradient-to-br from-immoo-gold to-immoo-navy rounded-xl">
+              <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-immoo-navy to-immoo-gold bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-immoo-navy to-immoo-gold bg-clip-text text-transparent">
                 Portfolio Immobilier
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Gestion complète de vos biens immobiliers
               </p>
             </div>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button variant="outline" size="sm" className="hidden sm:flex">
             <Download className="h-4 w-4 mr-2" />
             Exporter
           </Button>
           <Button 
             onClick={handleCreateProperty}
-            className="bg-gradient-to-r from-immoo-gold to-immoo-navy"
+            className="bg-gradient-to-r from-immoo-gold to-immoo-navy w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
             Nouvelle propriété
@@ -281,11 +308,12 @@ export default function AgencyPropertiesPage() {
         </div>
       </div>
 
-      {/* Filtres Premium */}
+      {/* Filtres Premium - Mobile Responsive */}
       <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
-        <CardContent className="p-6">
-          <div className="flex flex-wrap gap-4 items-center">
-            <div className="flex gap-2">
+        <CardContent className="p-4 sm:p-6">
+          <div className="space-y-4">
+            {/* Boutons de filtre status - Responsive */}
+            <div className="flex flex-wrap gap-2">
               {[
                 { value: 'all', label: 'Toutes', icon: Building2 },
                 { value: 'available', label: 'Disponibles', icon: CheckCircle },
@@ -297,47 +325,51 @@ export default function AgencyPropertiesPage() {
                   variant={selectedStatus === status.value ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedStatus(status.value)}
-                  className={selectedStatus === status.value ? 'bg-gradient-to-r from-immoo-gold to-immoo-navy' : ''}
+                  className={`flex-1 sm:flex-none ${selectedStatus === status.value ? 'bg-gradient-to-r from-immoo-gold to-immoo-navy' : ''}`}
                 >
-                  <status.icon className="h-4 w-4 mr-2" />
-                  {status.label}
+                  <status.icon className="h-4 w-4 mr-1 sm:mr-2" />
+                  <span className="hidden sm:inline">{status.label}</span>
+                  <span className="sm:hidden">{status.label.charAt(0)}</span>
                 </Button>
               ))}
             </div>
             
-            <select 
-              value={selectedType} 
-              onChange={(e) => setSelectedType(e.target.value)}
-              className="px-3 py-2 border rounded-lg bg-white/80 backdrop-blur-sm"
-            >
-              <option value="all">Tous les types</option>
-              <option value="apartment">Appartements</option>
-              <option value="house">Maisons</option>
-              <option value="villa">Villas</option>
-              <option value="studio">Studios</option>
-              <option value="office">Bureaux</option>
-              <option value="commercial">Commercial</option>
-              <option value="land">Terrains</option>
-            </select>
+            {/* Sélecteur de type et recherche */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <select 
+                value={selectedType} 
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="px-3 py-2 border rounded-lg bg-white/80 backdrop-blur-sm w-full sm:w-auto"
+              >
+                <option value="all">Tous les types</option>
+                <option value="apartment">Appartements</option>
+                <option value="house">Maisons</option>
+                <option value="villa">Villas</option>
+                <option value="studio">Studios</option>
+                <option value="office">Bureaux</option>
+                <option value="commercial">Commercial</option>
+                <option value="land">Terrains</option>
+              </select>
 
-            <div className="flex-1 min-w-[200px]">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Rechercher par titre, adresse ou type..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border rounded-lg bg-white/80 backdrop-blur-sm"
-                />
+              <div className="flex-1">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border rounded-lg bg-white/80 backdrop-blur-sm"
+                  />
+                </div>
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Cartes de résumé premium */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Cartes de résumé premium - Mobile Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         <Card className="bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200/50 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-blue-700 flex items-center justify-between">
@@ -403,7 +435,7 @@ export default function AgencyPropertiesPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-purple-800 mb-1">
+            <div className="text-lg sm:text-2xl font-bold text-purple-800 mb-1">
               {formatCurrency(totalValue, "FCFA")}
             </div>
             <div className="flex items-center justify-between text-xs">
@@ -448,24 +480,24 @@ export default function AgencyPropertiesPage() {
         </Card>
       </div>
 
-      {/* Grille des propriétés */}
+      {/* Grille des propriétés - Mobile Responsive */}
       <Card className="border-0 shadow-lg bg-white/80 backdrop-blur-sm">
         <CardHeader className="bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5">
-          <CardTitle className="flex items-center justify-between">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-immoo-navy" />
-              Mes propriétés
+              <span>Mes propriétés</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Home className="h-4 w-4" />
-              {filteredProperties.length} propriétés
+              <span>{filteredProperties.length} propriétés</span>
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-4 sm:p-6">
           {filteredProperties.length === 0 ? (
-            <div className="text-center py-12">
-              <Building2 className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
+            <div className="text-center py-8 sm:py-12">
+              <Building2 className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium text-muted-foreground mb-2">
                 {searchTerm || selectedStatus !== 'all' || selectedType !== 'all'
                   ? 'Aucune propriété trouvée'
@@ -481,7 +513,7 @@ export default function AgencyPropertiesPage() {
               {(!searchTerm && selectedStatus === 'all' && selectedType === 'all') && (
                 <Button 
                   onClick={handleCreateProperty}
-                  className="bg-gradient-to-r from-immoo-gold to-immoo-navy"
+                  className="bg-gradient-to-r from-immoo-gold to-immoo-navy w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Ajouter une propriété
@@ -489,7 +521,7 @@ export default function AgencyPropertiesPage() {
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredProperties.map((property) => (
                 <Card 
                   key={property.id} 
@@ -497,7 +529,7 @@ export default function AgencyPropertiesPage() {
                 >
                   <div className="relative">
                     {/* Image de la propriété */}
-                    <div className="h-48 bg-gradient-to-br from-immoo-pearl to-immoo-gold/20 rounded-t-lg flex items-center justify-center overflow-hidden">
+                    <div className="h-40 sm:h-48 bg-gradient-to-br from-immoo-pearl to-immoo-gold/20 rounded-t-lg flex items-center justify-center overflow-hidden">
                       {property.images && property.images.length > 0 ? (
                         <img 
                           src={property.images[0].url} 
@@ -506,25 +538,25 @@ export default function AgencyPropertiesPage() {
                         />
                       ) : (
                         <div className="text-center">
-                          <Building2 className="h-12 w-12 text-immoo-navy/50 mx-auto mb-2" />
-                          <p className="text-sm text-immoo-navy/50">Aucune image</p>
+                          <Building2 className="h-10 w-10 sm:h-12 sm:w-12 text-immoo-navy/50 mx-auto mb-2" />
+                          <p className="text-xs sm:text-sm text-immoo-navy/50">Aucune image</p>
                         </div>
                       )}
                     </div>
                     
                     {/* Badge de statut */}
-                    <div className="absolute top-3 left-3">
+                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
                       {getStatusBadge(property.status)}
                     </div>
                     
                     {/* Menu actions */}
-                    <div className="absolute top-3 right-3">
+                    <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="bg-white/90 backdrop-blur-sm hover:bg-white"
+                            className="bg-white/90 backdrop-blur-sm hover:bg-white h-8 w-8 p-0"
                           >
                             <MoreVertical className="h-4 w-4" />
                           </Button>
@@ -548,14 +580,14 @@ export default function AgencyPropertiesPage() {
                     </div>
                   </div>
                   
-                  <CardContent className="p-6">
+                  <CardContent className="p-4 sm:p-6">
                     <div className="space-y-3">
                       {/* Titre et prix */}
                       <div>
-                        <h3 className="font-semibold text-lg text-gray-900 group-hover:text-immoo-navy transition-colors">
+                        <h3 className="font-semibold text-base sm:text-lg text-gray-900 group-hover:text-immoo-navy transition-colors line-clamp-2">
                           {property.title}
                         </h3>
-                        <div className="text-2xl font-bold text-immoo-gold">
+                        <div className="text-lg sm:text-2xl font-bold text-immoo-gold">
                           {formatCurrency(property.price, "FCFA")}
                         </div>
                       </div>
@@ -568,23 +600,23 @@ export default function AgencyPropertiesPage() {
                           </Badge>
                         </div>
                         <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                          <MapPin className="h-3 w-3" />
+                          <MapPin className="h-3 w-3 flex-shrink-0" />
                           <span className="truncate">{property.address}</span>
                         </div>
                       </div>
                       
                       {/* Caractéristiques */}
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground">
                         {property.bedrooms > 0 && (
                           <div className="flex items-center gap-1">
                             <Bed className="h-3 w-3" />
-                            <span>{property.bedrooms} ch.</span>
+                            <span>{property.bedrooms}</span>
                           </div>
                         )}
                         {property.bathrooms > 0 && (
                           <div className="flex items-center gap-1">
                             <Bath className="h-3 w-3" />
-                            <span>{property.bathrooms} sdb</span>
+                            <span>{property.bathrooms}</span>
                           </div>
                         )}
                         {property.area > 0 && (
@@ -601,18 +633,18 @@ export default function AgencyPropertiesPage() {
                           size="sm"
                           variant="outline"
                           onClick={() => handleViewProperty(property.id)}
-                          className="flex-1 hover:bg-immoo-navy hover:text-white"
+                          className="flex-1 hover:bg-immoo-navy hover:text-white text-xs sm:text-sm"
                         >
-                          <Eye className="h-4 w-4 mr-1" />
+                          <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                           Voir
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleEditProperty(property.id)}
-                          className="flex-1 hover:bg-immoo-gold hover:text-white"
+                          className="flex-1 hover:bg-immoo-gold hover:text-white text-xs sm:text-sm"
                         >
-                          <Edit className="h-4 w-4 mr-1" />
+                          <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                           Modifier
                         </Button>
                       </div>
