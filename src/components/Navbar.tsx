@@ -2,22 +2,21 @@ import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Menu, X } from "lucide-react";
-import { getCurrentUser } from "@/services/authService";
-import { toast } from "sonner";
 import { NavbarDesktopMenu } from "./navbar/NavbarDesktopMenu";
 import { NavbarMobileMenu } from "./navbar/NavbarMobileMenu";
 import { UserType } from "./navbar/types";
-import { supabase } from "@/lib/supabase";
 import ImmooLogoAdaptive from "./ui/ImmooLogoAdaptive";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<any>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Utilisation du contexte d'authentification global
+  const { user, profile, signOut, isLoading } = useAuth();
+  const userRole = profile?.role || null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,68 +29,6 @@ export default function Navbar() {
 
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Fetch the current user on component mount
-  useEffect(() => {
-    const fetchCurrentUser = async () => {
-      try {
-        setIsLoading(true);
-        const { data } = await supabase.auth.getSession();
-        const currentUser = data.session?.user || null;
-        
-        if (currentUser) {
-          setUser(currentUser);
-          
-          // Fetch user profile to get role
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', currentUser.id)
-            .single();
-            
-          setUserRole(profileData?.role || null);
-        } else {
-          setUser(null);
-          setUserRole(null);
-        }
-      } catch (error) {
-        console.error('Error fetching user:', error);
-        setUser(null);
-        setUserRole(null);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchCurrentUser();
-    
-    // Listen for auth state changes
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log(`Auth state changed: ${event}`);
-        
-        if (session?.user) {
-          setUser(session.user);
-          
-          // Fetch user profile to get role
-          const { data: profileData } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
-            
-          setUserRole(profileData?.role || null);
-        } else {
-          setUser(null);
-          setUserRole(null);
-        }
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
   }, []);
 
   // Fermer le menu mobile lors du changement de route
@@ -111,39 +48,6 @@ export default function Navbar() {
       role: "admin" 
     },
   ];
-
-  const handleLogout = async () => {
-    try {
-      console.log('Starting logout process...');
-      
-      // Clear local storage first
-      localStorage.removeItem('supabase.auth.token');
-      localStorage.removeItem('sb-hzbogwleoszwtneveuvx-auth-token');
-      
-      // Sign out from Supabase - this will trigger onAuthStateChange
-      const { error } = await supabase.auth.signOut();
-      
-      if (error && error.message !== 'Auth session missing!') {
-        console.warn('Logout warning:', error);
-        // Force clear state if signOut fails
-        setUser(null);
-        setUserRole(null);
-      }
-      
-      console.log('Logout successful');
-      toast.success("Vous avez été déconnecté avec succès");
-      
-      // Navigate to home page
-      navigate("/");
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      // Force clear state and navigate if there's an error
-      setUser(null);
-      setUserRole(null);
-      toast.success("Vous avez été déconnecté avec succès");
-      navigate("/");
-    }
-  };
 
   return (
     <header
@@ -173,7 +77,7 @@ export default function Navbar() {
               user={user}
               userRole={userRole}
               location={location}
-              handleLogout={handleLogout}
+              handleLogout={signOut}
             />
           </div>
 
@@ -214,7 +118,7 @@ export default function Navbar() {
         setMobileMenuOpen={setMobileMenuOpen}
         navLinks={[]}
         userTypes={userTypes}
-        handleLogout={handleLogout}
+        handleLogout={signOut}
         user={user}
         location={location}
       />

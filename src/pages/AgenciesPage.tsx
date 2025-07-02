@@ -16,11 +16,38 @@ export default function AgenciesPage() {
   const { isAuthenticated, isReady } = useAuthStatus();
   const { subscription, checkLimit, isFreePlan, loading: subscriptionLoading, reloadSubscription } = useUserSubscription();
   const [agencyLimit, setAgencyLimit] = useState<any>(null);
+  const [forceLoad, setForceLoad] = useState(false);
   const navigate = useNavigate();
+  
+  // Debug logs pour identifier le problème
+  useEffect(() => {
+    console.log('🔍 AgenciesPage Debug:', {
+      user: !!user,
+      userId: user?.id,
+      isReady,
+      isAuthenticated,
+      initialized,
+      subscriptionLoading,
+      forceLoad
+    });
+  }, [user, isReady, isAuthenticated, initialized, subscriptionLoading, forceLoad]);
+
+  // Forcer le chargement après 3 secondes si l'auth ne se charge pas
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!initialized && !forceLoad) {
+        console.log('⚠️ Forcing load after timeout');
+        setForceLoad(true);
+      }
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [initialized, forceLoad]);
   
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['user-agencies', user?.id],
     queryFn: async () => {
+      console.log('🔍 Fetching user agencies for user:', user?.id);
       const result = await getUserAgencies();
       
       // Si aucune agence trouvée et que l'utilisateur est une agence, 
@@ -41,7 +68,14 @@ export default function AgenciesPage() {
       
       return result;
     },
-    enabled: !!user && isReady,
+    // Permettre le chargement si l'utilisateur est présent OU si on force le chargement
+    enabled: (!!user?.id && initialized) || forceLoad,
+    // Ajouter des options pour améliorer la fiabilité
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 30000, // 30 secondes
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 
   const agencies = data?.agencies || [];
@@ -49,6 +83,7 @@ export default function AgenciesPage() {
   // Charger l'abonnement au montage du composant
   useEffect(() => {
     if (user?.id && !subscriptionLoading && !subscription) {
+      console.log('🔍 Reloading subscription for user:', user.id);
       reloadSubscription();
     }
   }, [user?.id, subscriptionLoading, subscription, reloadSubscription]);
@@ -57,6 +92,7 @@ export default function AgenciesPage() {
   useEffect(() => {
     const checkAgencyLimits = async () => {
       if (user?.id && subscription) {
+        console.log('🔍 Checking agency limits for user:', user.id);
         const limit = await checkLimit('agencies');
         setAgencyLimit(limit);
       }
@@ -75,7 +111,8 @@ export default function AgenciesPage() {
   };
 
   // Afficher un loading pendant que l'auth se charge
-  if (!isReady || subscriptionLoading) {
+  if (!initialized || subscriptionLoading) {
+    console.log('🔍 Showing loading state - initialized:', initialized, 'subscriptionLoading:', subscriptionLoading);
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="animate-pulse">
@@ -91,6 +128,7 @@ export default function AgenciesPage() {
   }
 
   if (isLoading) {
+    console.log('🔍 Query is loading...');
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="animate-pulse">
@@ -106,6 +144,7 @@ export default function AgenciesPage() {
   }
 
   if (error) {
+    console.error('🔍 Query error:', error);
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="text-center">
@@ -113,13 +152,20 @@ export default function AgenciesPage() {
           <p className="text-muted-foreground mb-4">
             Impossible de charger vos agences
           </p>
-          <Button onClick={() => refetch()}>Réessayer</Button>
+          <div className="space-y-2">
+            <Button onClick={() => refetch()}>Réessayer</Button>
+            <div className="text-sm text-muted-foreground">
+              {error instanceof Error ? error.message : 'Erreur inconnue'}
+            </div>
+          </div>
         </div>
       </div>
     );
   }
 
   const canCreateAgency = agencyLimit ? agencyLimit.allowed : true; // Default to true if no limit check yet
+
+  console.log('🔍 Rendering agencies page with', agencies.length, 'agencies');
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -137,6 +183,14 @@ export default function AgenciesPage() {
         </div>
         <div className="flex items-center gap-4">
           {isFreePlan() && <UpgradeButton />}
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={() => refetch()}
+            className="flex items-center gap-2"
+          >
+            ↻ Actualiser
+          </Button>
           <Button 
             onClick={handleCreateAgency}
             disabled={!canCreateAgency}

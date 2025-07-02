@@ -27,19 +27,23 @@ export const BrowseAgencyCard: React.FC<BrowseAgencyCardProps> = ({ agency }) =>
   const navigate = useNavigate();
   const [showMiniLogin, setShowMiniLogin] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [forceLoggedIn, setForceLoggedIn] = useState(false); // Force logged in state after successful login
   const { isLoggedIn, isLoading } = useQuickVisitorAccess();
+
+  // Combined logged in state (either from hook or forced after login)
+  const effectivelyLoggedIn = isLoggedIn || forceLoggedIn;
 
   const handleViewAgency = (e: React.MouseEvent) => {
     e.preventDefault();
     
     console.log('🏢 handleViewAgency called:', { 
       agencyName: agency.name,
-      isLoggedIn, 
+      isLoggedIn: effectivelyLoggedIn, 
       isLoading 
     });
     
     // If visitor is not logged in, show mini login
-    if (!isLoggedIn) {
+    if (!effectivelyLoggedIn) {
       console.log('🏢 Opening mini login for agency access');
       setShowMiniLogin(true);
     } else {
@@ -53,11 +57,13 @@ export const BrowseAgencyCard: React.FC<BrowseAgencyCardProps> = ({ agency }) =>
     // After successful login, navigate to public agency page
     console.log('✅ Quick login successful, navigating to public agency page:', visitorData);
     setShowMiniLogin(false);
+    setForceLoggedIn(true); // Force logged in state immediately
     navigate(`/public-agency/${agency.id}`);
   };
 
   const handleCloseLogin = () => {
     setShowMiniLogin(false);
+    setForceLoggedIn(false); // Reset forced logged in state when closing
   };
 
   return (

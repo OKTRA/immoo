@@ -87,44 +87,49 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Fonction de connexion
   const signIn = useCallback(async (email: string, password: string) => {
-    try {
-      console.log('🔑 Signing in...', email);
-      dispatch({ type: 'SET_LOADING', payload: true });
-      
-      const { user, session, error } = await signInWithEmail(email, password);
-      
-      if (error) {
-        console.error('❌ Sign in error:', error);
-        dispatch({ type: 'SET_ERROR', payload: error });
-        return { success: false, error };
-      }
-
-      if (user) {
-        console.log('✅ User signed in, fetching profile...');
-        const profile = await fetchUserProfile(user);
+    return new Promise<{ success: boolean; error?: string }>(async (resolve) => {
+      try {
+        console.log('🔑 Signing in...', email);
+        dispatch({ type: 'SET_LOADING', payload: true });
         
-        if (profile) {
-          console.log('✅ Profile loaded after sign in:', profile.role);
-          dispatch({
-            type: 'SET_AUTHENTICATED',
-            payload: { user, profile }
-          });
-          toast.success('Connexion réussie !');
-          return { success: true };
-        } else {
-          console.error('❌ Profile not found after sign in');
-          dispatch({ type: 'SET_ERROR', payload: 'Profil utilisateur non trouvé' });
-          return { success: false, error: 'Profil utilisateur non trouvé' };
+        const { user, session, error } = await signInWithEmail(email, password);
+        
+        if (error) {
+          console.error('❌ Sign in error:', error);
+          dispatch({ type: 'SET_ERROR', payload: error });
+          resolve({ success: false, error });
+          return;
         }
-      }
 
-      return { success: false, error: 'Échec de la connexion' };
-    } catch (error: any) {
-      console.error('❌ Sign in exception:', error);
-      const errorMessage = error.message || 'Erreur lors de la connexion';
-      dispatch({ type: 'SET_ERROR', payload: errorMessage });
-      return { success: false, error: errorMessage };
-    }
+        if (user) {
+          console.log('✅ User signed in, fetching profile...');
+          const profile = await fetchUserProfile(user);
+          
+          if (profile) {
+            console.log('✅ Profile loaded after sign in:', profile.role);
+            dispatch({
+              type: 'SET_AUTHENTICATED',
+              payload: { user, profile }
+            });
+            toast.success('Connexion réussie !');
+            resolve({ success: true });
+            return;
+          } else {
+            console.error('❌ Profile not found after sign in');
+            dispatch({ type: 'SET_ERROR', payload: 'Profil utilisateur non trouvé' });
+            resolve({ success: false, error: 'Profil utilisateur non trouvé' });
+            return;
+          }
+        }
+
+        resolve({ success: false, error: 'Échec de la connexion' });
+      } catch (error: any) {
+        console.error('❌ Sign in exception:', error);
+        const errorMessage = error.message || 'Erreur lors de la connexion';
+        dispatch({ type: 'SET_ERROR', payload: errorMessage });
+        resolve({ success: false, error: errorMessage });
+      }
+    });
   }, [fetchUserProfile]);
 
   // Fonction d'inscription

@@ -3,7 +3,7 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Heart } from 'lucide-react';
 import { Property } from '@/assets/types';
-import PropertyImagesCarousel from './PropertyImagesCarousel';
+import PropertyImageGallery from './PropertyImageGallery';
 
 interface PropertyCardImageProps {
   property: Property;
@@ -23,9 +23,12 @@ export default function PropertyCardImage({
   return (
     <div className="relative h-48 overflow-hidden">
       {property.id ? (
-        <PropertyImagesCarousel 
+        <PropertyImageGallery 
           propertyId={property.id} 
-          mainImageUrl={property.imageUrl} 
+          mainImageUrl={property.imageUrl}
+          height="h-48"
+          enableZoom={true}
+          showThumbnails={false}
         />
       ) : (
         <img

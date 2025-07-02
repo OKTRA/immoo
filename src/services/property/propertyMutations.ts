@@ -2,6 +2,7 @@
 import { supabase } from '@/lib/supabase';
 import { Property } from '@/assets/types';
 import { formatPropertyToDb } from './propertyUtils';
+import { associateTempImagesToProperty } from './propertyMedia';
 
 // Function to create a new property
 export const createProperty = async (propertyData: any) => {
@@ -48,6 +49,34 @@ export const createProperty = async (propertyData: any) => {
     if (error) {
       console.error('Error creating property:', error);
       throw error;
+    }
+    
+    // Associer les images temporaires à la propriété créée
+    if (data && data.id && propertyData.additionalImages && propertyData.additionalImages.length > 0) {
+      console.log(`[createProperty] Association des images temporaires à la propriété ${data.id}`, propertyData.additionalImages);
+      
+      // Préparer toutes les images (principale + alternatives)
+      const allImages = [...propertyData.additionalImages];
+      
+      // Ajouter l'image principale si elle existe et n'est pas déjà dans les images
+      if (propertyData.imageUrl && !allImages.some(img => img.url === propertyData.imageUrl)) {
+        allImages.unshift({
+          url: propertyData.imageUrl,
+          isPrimary: true,
+          description: 'Image principale'
+        });
+      }
+      
+      // Associer toutes les images à la propriété
+      const { success, error: associationError } = await associateTempImagesToProperty(data.id, allImages);
+      
+      if (!success && associationError) {
+        console.error('Error associating images to property:', associationError);
+        // Ne pas faire échouer la création de propriété à cause des images
+        console.warn('Property created but images could not be associated');
+      } else {
+        console.log(`[createProperty] ${allImages.length} images associées avec succès à la propriété ${data.id}`);
+      }
     }
     
     return { property: data, error: null };

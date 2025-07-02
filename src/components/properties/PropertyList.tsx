@@ -10,6 +10,7 @@ import QuickVisitorLogin from "@/components/visitor/QuickVisitorLogin";
 import { useQuickVisitorAccess } from "@/hooks/useQuickVisitorAccess";
 import { Link } from "react-router-dom";
 import { PropertyImageService } from "@/services/property/propertyImageService";
+import PropertyImageGallery from "./PropertyImageGallery";
 
 interface PropertyListProps {
   properties: Property[];
@@ -20,22 +21,26 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showMiniLogin, setShowMiniLogin] = useState(false);
+  const [forceLoggedIn, setForceLoggedIn] = useState(false); // Force logged in state after successful login
   
   // Use the visitor access hook for public view
   const { isLoggedIn, isLoading } = useQuickVisitorAccess();
+  
+  // Combined logged in state (either from hook or forced after login)
+  const effectivelyLoggedIn = isLoggedIn || forceLoggedIn;
   
   const openPropertyDetails = (property: Property) => {
     console.log('🏠 openPropertyDetails called:', { 
       propertyTitle: property.title,
       agencyId, 
-      isLoggedIn, 
+      isLoggedIn: effectivelyLoggedIn, 
       isLoading 
     });
     
     setSelectedProperty(property);
     
     // If this is public view and user is not logged in, show mini login
-    if (!agencyId && !isLoggedIn) {
+    if (!agencyId && !effectivelyLoggedIn) {
       console.log('🏠 Opening mini login');
       setShowMiniLogin(true);
     } else {
@@ -49,12 +54,15 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
     setIsDialogOpen(false);
     setShowMiniLogin(false);
     setSelectedProperty(null);
+    // Reset forced logged in state when closing
+    setForceLoggedIn(false);
   };
 
   const handleMiniLoginSuccess = (visitorData: any) => {
     // After successful login, open property details
     console.log('✅ Quick login successful:', visitorData);
     setShowMiniLogin(false);
+    setForceLoggedIn(true); // Force logged in state immediately
     setIsDialogOpen(true);
   };
   
@@ -87,15 +95,25 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
           >
             {/* Property Image */}
             <div className="relative h-64 overflow-hidden">
-              <img 
-                src={PropertyImageService.getImageUrl(property.imageUrl)} 
-                alt={property.title} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer"
-                onClick={() => agencyId ? null : openPropertyDetails(property)}
-                onError={(e) => {
-                  e.currentTarget.src = PropertyImageService.getImageUrl(null);
-                }}
-              />
+              {property.id ? (
+                <PropertyImageGallery 
+                  propertyId={property.id} 
+                  mainImageUrl={property.imageUrl}
+                  height="h-64"
+                  enableZoom={true}
+                  showThumbnails={false}
+                />
+              ) : (
+                <img 
+                  src={PropertyImageService.getImageUrl(property.imageUrl)} 
+                  alt={property.title} 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer"
+                  onClick={() => agencyId ? null : openPropertyDetails(property)}
+                  onError={(e) => {
+                    e.currentTarget.src = PropertyImageService.getImageUrl(null);
+                  }}
+                />
+              )}
               
               {/* Status Badge */}
               <Badge 
@@ -222,7 +240,7 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
       )}
       
       {/* Property Details Dialog - Only show when logged in or in agency context */}
-      {isDialogOpen && selectedProperty && (agencyId || isLoggedIn) && (
+      {isDialogOpen && selectedProperty && (agencyId || effectivelyLoggedIn) && (
         <PropertyDetailsDialog 
           property={selectedProperty} 
           isOpen={isDialogOpen} 

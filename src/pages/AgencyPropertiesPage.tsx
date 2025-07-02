@@ -530,7 +530,16 @@ export default function AgencyPropertiesPage() {
                   <div className="relative">
                     {/* Image de la propriété */}
                     <div className="h-40 sm:h-48 bg-gradient-to-br from-immoo-pearl to-immoo-gold/20 rounded-t-lg flex items-center justify-center overflow-hidden">
-                      {property.images && property.images.length > 0 ? (
+                      {property.id ? (
+                        <PropertyImageGallery 
+                          propertyId={property.id} 
+                          mainImageUrl={property.images?.[0]?.url}
+                          height="h-40 sm:h-48"
+                          enableZoom={true}
+                          showThumbnails={false}
+                          className="rounded-t-lg"
+                        />
+                      ) : property.images && property.images.length > 0 ? (
                         <img 
                           src={property.images[0].url} 
                           alt={property.title}

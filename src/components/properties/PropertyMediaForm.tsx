@@ -40,8 +40,14 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
     onChange({
       imageUrl: formData.imageUrl,
       virtualTourUrl: formData.virtualTourUrl,
+      // Ajouter les images additionnelles aux données du formulaire
+      additionalImages: additionalImages.filter(img => !img.file).map(img => ({
+        url: img.url,
+        isPrimary: img.isPrimary,
+        description: img.description
+      }))
     });
-  }, [formData.imageUrl, formData.virtualTourUrl]);
+  }, [formData.imageUrl, formData.virtualTourUrl, additionalImages]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

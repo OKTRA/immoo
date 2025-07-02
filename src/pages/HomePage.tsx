@@ -22,10 +22,13 @@ export default function HomePage() {
   const { isAuthenticated, isReady } = useAuthStatus();
 
   useEffect(() => {
+    // On s'assure que le contexte d'authentification a terminé son initialisation
+    if (!initialized) {
+      console.log('🏠 HomePage: Auth not initialized, waiting...');
+      return;
+    }
+
     const fetchProperties = async () => {
-      // Attendre que l'authentification soit initialisée pour éviter les race conditions
-      if (!isReady) return;
-      
       setLoading(true);
       try {
         console.log('🏠 HomePage: Fetching properties for user:', user?.id || 'anonymous');
@@ -74,7 +77,7 @@ export default function HomePage() {
     };
 
     fetchProperties();
-  }, [isReady, user?.id]); // Dépend de isReady pour éviter les race conditions
+  }, [initialized, user?.id]); // Se déclenche quand l'auth est prête ET quand l'user change
   
   return (
     <div className="flex flex-col min-h-screen immoo-hero-bg">

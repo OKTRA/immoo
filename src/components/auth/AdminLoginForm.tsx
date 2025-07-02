@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { AlertCircle, Loader2, Shield } from 'lucide-react';
-import { signIn } from '@/services/authService';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 interface AdminLoginFormProps {
@@ -18,6 +17,7 @@ const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onSuccess }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { signIn } = useAuth();
 
   const validateForm = () => {
     setError(null);
@@ -47,17 +47,17 @@ const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onSuccess }) => {
 
     try {
       console.log('Attempting admin login with:', email);
-      const { error: signInError } = await signIn(email, password);
+      const result = await signIn(email, password);
       
-      if (signInError) {
-        console.error('Error signing in:', signInError);
-        setError(signInError === "Invalid login credentials" 
+      if (!result.success) {
+        const errorMessage = result.error === "Invalid login credentials" 
           ? "Email ou mot de passe incorrect" 
-          : signInError);
+          : result.error || 'Erreur inconnue';
+        
+        console.error('Error signing in:', errorMessage);
+        setError(errorMessage);
         toast.error("Échec de connexion", { 
-          description: signInError === "Invalid login credentials" 
-            ? "Email ou mot de passe incorrect" 
-            : signInError 
+          description: errorMessage 
         });
         setIsLoading(false);
         return;
@@ -68,9 +68,10 @@ const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onSuccess }) => {
       navigate('/admin');
     } catch (error: any) {
       console.error('Error during admin login:', error.message);
-      setError(error.message || 'Une erreur s\'est produite');
+      const errorMessage = error.message || 'Une erreur s\'est produite';
+      setError(errorMessage);
       toast.error("Erreur", { 
-        description: error.message || 'Une erreur s\'est produite' 
+        description: errorMessage
       });
     } finally {
       setIsLoading(false);

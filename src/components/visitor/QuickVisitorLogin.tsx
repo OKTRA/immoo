@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { X } from 'lucide-react';
-import { useQuickVisitorAccess } from '@/hooks/useQuickVisitorAccess';
+import { useQuickVisitorAccess, refreshVisitorState } from '@/hooks/useQuickVisitorAccess';
 import { toast } from 'sonner';
 
 interface QuickVisitorLoginProps {
@@ -42,12 +42,13 @@ export default function QuickVisitorLogin({
         console.log('✅ Quick login successful:', result);
         toast.success('Connexion réussie !');
         
-        // Small delay to ensure state propagation
-        setTimeout(() => {
-          onSuccess?.(result);
-          onClose();
-          setContact(''); // Reset form
-        }, 100);
+        // Force refresh of visitor state across all components
+        refreshVisitorState();
+        
+        // Call success callback immediately - state is now synchronized
+        onSuccess?.(result);
+        onClose();
+        setContact(''); // Reset form
       } else {
         console.error('❌ Quick login failed');
         toast.error('Erreur lors de la connexion');

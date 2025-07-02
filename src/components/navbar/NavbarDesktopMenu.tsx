@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ButtonEffects } from "@/components/ui/ButtonEffects";
@@ -31,9 +30,13 @@ export function NavbarDesktopMenu({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleUserTypeClick = (type: UserType) => {
+    console.log('Espace Agence Clicked. User authenticated:', !!user);
     if (user) {
+      console.log('User object:', user);
+      console.log('Redirecting to:', type.path);
       navigate(type.path);
     } else {
+      console.log('No user session, opening login dialog.');
       setSelectedUserType(type.role === 'admin' ? 'admin' : 'agency');
       setLoginDialogOpen(true);
     }
