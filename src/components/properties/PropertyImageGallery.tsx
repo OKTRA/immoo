@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
 interface PropertyImageGalleryProps {
   propertyId: string;
   mainImageUrl?: string;
+  images?: Array<{ id: string; image_url: string; is_primary: boolean }>;
   height?: string;
   className?: string;
   showControls?: boolean;
@@ -20,6 +21,7 @@ interface ImageData {
 export default function PropertyImageGallery({ 
   propertyId, 
   mainImageUrl, 
+  images: initialImages,
   height = "h-64",
   className = "",
   showControls = true
@@ -29,68 +31,49 @@ export default function PropertyImageGallery({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchImages = async () => {
+    const processImages = async () => {
       setLoading(true);
-      
-      try {
-        const { images, error } = await getPropertyImages(propertyId);
-        
-        if (error) {
-          // En cas d'erreur, utiliser l'image principale si disponible
-          if (mainImageUrl) {
-            setImages([{ 
-              id: 'main', 
-              url: mainImageUrl,
-              description: 'Image principale'
-            }]);
-          }
-          return;
-        }
-        
-        // Récupérer toutes les images (principale + alternatives) déjà triées
-        const allImages = images.map((img, index) => ({
+      let finalImages: ImageData[] = [];
+
+      // Priorité 1: Utiliser les images passées directement en props
+      if (initialImages && initialImages.length > 0) {
+        finalImages = initialImages.map((img, index) => ({
           id: img.id,
           url: img.image_url,
-          description: img.description || (img.is_primary ? 'Image principale' : `Image ${index + 1}`)
+          description: `Image ${index + 1}`
         }));
-        
-        // Si pas d'images en base, utiliser l'image principale comme fallback
-        if (allImages.length === 0 && mainImageUrl) {
-          allImages.push({ 
-            id: 'fallback', 
-            url: mainImageUrl,
-            description: 'Image principale'
-          });
+      } 
+      // Priorité 2: Récupérer les images avec l'ID de la propriété
+      else if (propertyId) {
+        try {
+          const { images: fetchedImages, error } = await getPropertyImages(propertyId);
+          if (error) throw error;
+          finalImages = fetchedImages.map((img, index) => ({
+            id: img.id,
+            url: img.image_url,
+            description: img.description || (img.is_primary ? 'Image principale' : `Image ${index + 1}`)
+          }));
+        } catch (err) {
+          console.error('Échec de la récupération des images:', err);
+          // Laisser finalImages vide en cas d'erreur
         }
-        
-        setImages(allImages);
-      } catch (err) {
-        console.error('Failed to fetch images:', err);
-        if (mainImageUrl) {
-          setImages([{ 
-            id: 'error', 
-            url: mainImageUrl,
-            description: 'Image principale'
-          }]);
-        }
-      } finally {
-        setLoading(false);
       }
+
+      // Fallback: Si aucune image n'a été trouvée, utiliser l'URL principale
+      if (finalImages.length === 0 && mainImageUrl) {
+        finalImages.push({
+          id: 'fallback',
+          url: mainImageUrl,
+          description: 'Image principale'
+        });
+      }
+      
+      setImages(finalImages);
+      setLoading(false);
     };
-    
-    if (propertyId) {
-      fetchImages();
-    } else if (mainImageUrl) {
-      setImages([{ 
-        id: 'no-id', 
-        url: mainImageUrl,
-        description: 'Image principale'
-      }]);
-      setLoading(false);
-    } else {
-      setLoading(false);
-    }
-  }, [propertyId, mainImageUrl]);
+
+    processImages();
+  }, [propertyId, mainImageUrl, JSON.stringify(initialImages)]); // Utiliser JSON.stringify pour stabiliser la dépendance
 
   const nextImage = () => {
     setCurrentIndex(current => (current === images.length - 1 ? 0 : current + 1));

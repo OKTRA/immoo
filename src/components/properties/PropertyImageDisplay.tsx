@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge } from "@/components/ui/badge";
 import { Home } from "lucide-react";
@@ -10,26 +9,25 @@ interface DisplayStatus {
 }
 
 interface PropertyImageDisplayProps {
-  property: any;
+  property: {
+    id: string;
+    title: string;
+    images?: Array<{ id: string; image_url: string; is_primary: boolean; }>;
+  };
   statusInfo: DisplayStatus;
 }
 
 export default function PropertyImageDisplay({ property, statusInfo }: PropertyImageDisplayProps) {
+  const mainImageUrl = property.images?.[0]?.image_url || '/placeholder.svg';
+
   return (
     <div className="mb-8 relative overflow-hidden rounded-lg">
       {property.id ? (
         <PropertyImageGallery 
           propertyId={property.id} 
-          mainImageUrl={property.imageUrl}
+          images={property.images || []}
           height="h-96"
-          enableZoom={true}
-          showThumbnails={true}
-        />
-      ) : property.imageUrl ? (
-        <img 
-          src={property.imageUrl} 
-          alt={property.title} 
-          className="w-full h-96 object-cover"
+          showControls={true}
         />
       ) : (
         <div className="w-full h-96 bg-muted flex items-center justify-center">

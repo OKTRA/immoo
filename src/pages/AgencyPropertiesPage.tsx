@@ -42,6 +42,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import PropertyImageGallery from '@/components/properties/PropertyImageGallery';
+
+interface PropertyImage {
+  id: string;
+  image_url: string;
+  is_primary: boolean;
+}
 
 interface Property {
   id: string;
@@ -56,7 +63,7 @@ interface Property {
   status: 'available' | 'rented' | 'maintenance';
   isVisible: boolean;
   createdAt: string;
-  images?: { url: string }[];
+  images: PropertyImage[];
   leases?: { id: string; status: string }[];
 }
 
@@ -68,86 +75,32 @@ export default function AgencyPropertiesPage() {
   const [selectedType, setSelectedType] = useState('all');
 
   const { data: properties = [], isLoading, error, refetch } = useQuery({
-    queryKey: ['agency-properties', agencyId],
+    queryKey: ['agency-properties-with-images', agencyId],
     queryFn: async () => {
       if (!agencyId) return [];
 
-      try {
-        console.log("Fetching properties for agency:", agencyId);
-        
-        // Requête simplifiée pour éviter les erreurs de jointure
         const { data: propertiesData, error: propertiesError } = await supabase
           .from('properties')
           .select(`
+          *,
+          images:property_images (
             id,
-            title,
-            description,
-            location,
-            price,
-            type,
-            bedrooms,
-            bathrooms,
-            area,
-            status,
-            is_visible,
-            created_at
+            image_url,
+            is_primary
+          )
           `)
           .eq('agency_id', agencyId)
           .order('created_at', { ascending: false });
 
         if (propertiesError) {
-          console.error("Database error:", propertiesError);
-          throw propertiesError;
-        }
-
-        console.log("Properties data retrieved:", propertiesData);
-
-        // Si pas de données, retourner un tableau vide
-        if (!propertiesData || propertiesData.length === 0) {
-          return [];
-        }
-
-        // Récupérer les images séparément pour éviter les erreurs de jointure
-        const propertyIds = propertiesData.map(p => p.id);
-        const { data: imagesData } = await supabase
-          .from('property_images')
-          .select('property_id, image_url')
-          .in('property_id', propertyIds);
-
-        // Transformer les données
-        const transformedProperties: Property[] = propertiesData.map(property => ({
-          id: property.id,
-          title: property.title || 'Propriété sans titre',
-          description: property.description || '',
-          address: property.location || 'Adresse non renseignée',
-          price: property.price || 0,
-          propertyType: property.type || 'unknown',
-          bedrooms: property.bedrooms || 0,
-          bathrooms: property.bathrooms || 0,
-          area: property.area || 0,
-          status: (property.status as 'available' | 'rented' | 'maintenance') || 'available',
-          isVisible: property.is_visible !== false,
-          createdAt: property.created_at,
-          images: imagesData 
-            ? imagesData
-                .filter(img => img.property_id === property.id)
-                .map(img => ({ url: img.image_url }))
-            : [],
-          leases: []
-        }));
-
-        return transformedProperties;
-      } catch (error: any) {
-        console.error("Erreur lors de la récupération des propriétés:", error);
-        // Ne pas throw, mais retourner un tableau vide pour éviter la page blanche
-        toast.error(`Erreur lors du chargement: ${error.message}`);
-        return [];
+        console.error('Error fetching properties with images:', propertiesError);
+        toast.error("Erreur lors de la récupération des propriétés.");
+        throw new Error(propertiesError.message);
       }
+      
+      return propertiesData || [];
     },
     enabled: !!agencyId,
-    refetchOnWindowFocus: false,
-    retry: 3,
-    retryDelay: 1000,
   });
 
   // Debug log
@@ -523,62 +476,18 @@ export default function AgencyPropertiesPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredProperties.map((property) => (
-                <Card 
-                  key={property.id} 
-                  className="group hover:shadow-xl transition-all duration-300 border-0 bg-white/90 backdrop-blur-sm"
-                >
-                  <div className="relative">
-                    {/* Image de la propriété */}
+                <Card key={property.id} className="group overflow-hidden shadow-sm hover:shadow-lg transition-shadow duration-300 flex flex-col">
+                  <CardContent className="p-0 flex-grow flex flex-col">
                     <div className="relative mb-4">
                       <PropertyImageGallery
                         propertyId={property.id}
-                        mainImageUrl={property.images?.[0]?.url || '/placeholder.svg'}
+                        images={property.images || []}
                         height="h-48"
                         className="rounded-t-lg"
-                        // `showControls` est `true` par défaut, donc pas besoin de le spécifier
-                        // sauf si on voulait le cacher.
                       />
                     </div>
-                    
-                    {/* Badge de statut */}
-                    <div className="absolute top-2 sm:top-3 left-2 sm:left-3">
-                      {getStatusBadge(property.status)}
-                    </div>
-                    
-                    {/* Menu actions */}
-                    <div className="absolute top-2 sm:top-3 right-2 sm:right-3">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="bg-white/90 backdrop-blur-sm hover:bg-white h-8 w-8 p-0"
-                          >
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleViewProperty(property.id)}>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Voir détails
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleEditProperty(property.id)}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Modifier
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem className="text-red-600">
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Supprimer
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
-                  
-                  <CardContent className="p-4 sm:p-6">
-                    <div className="space-y-3">
-                      {/* Titre et prix */}
+                    <div className="p-4 flex-grow flex flex-col">
+                      <div className="flex-grow">
                       <div>
                         <h3 className="font-semibold text-base sm:text-lg text-gray-900 group-hover:text-immoo-navy transition-colors line-clamp-2">
                           {property.title}
@@ -587,8 +496,6 @@ export default function AgencyPropertiesPage() {
                           {formatCurrency(property.price, "FCFA")}
                         </div>
                       </div>
-                      
-                      {/* Type et adresse */}
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           <Badge variant="outline" className="text-xs">
@@ -600,8 +507,6 @@ export default function AgencyPropertiesPage() {
                           <span className="truncate">{property.address}</span>
                         </div>
                       </div>
-                      
-                      {/* Caractéristiques */}
                       <div className="flex items-center gap-3 sm:gap-4 text-sm text-muted-foreground">
                         {property.bedrooms > 0 && (
                           <div className="flex items-center gap-1">
@@ -622,8 +527,6 @@ export default function AgencyPropertiesPage() {
                           </div>
                         )}
                       </div>
-                      
-                      {/* Actions */}
                       <div className="flex gap-2 pt-2">
                         <Button
                           size="sm"
@@ -643,6 +546,7 @@ export default function AgencyPropertiesPage() {
                           <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
                           Modifier
                         </Button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>

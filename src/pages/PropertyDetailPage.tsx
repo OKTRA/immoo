@@ -1,9 +1,9 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getPropertyById } from "@/services/propertyService";
 import { toast } from "sonner";
+import { supabase } from "@/lib/supabase";
 
 // Import refactored components
 import PropertyDetailHeader from "@/components/properties/PropertyDetailHeader";
@@ -41,8 +41,30 @@ export default function PropertyDetailPage() {
     isLoading, 
     error 
   } = useQuery({
-    queryKey: ['property', propertyId],
-    queryFn: () => getPropertyById(propertyId || ''),
+    queryKey: ['property-with-images', propertyId],
+    queryFn: async () => {
+      if (!propertyId) return null;
+      
+      const { data, error } = await supabase
+        .from('properties')
+        .select(`
+          *,
+          property_images (
+            id,
+            image_url,
+            is_primary
+          )
+        `)
+        .eq('id', propertyId)
+        .single();
+      
+      if (error) {
+        console.error("Error fetching property with images:", error);
+        throw new Error(error.message);
+      }
+      
+      return data;
+    },
     enabled: !!propertyId
   });
 
@@ -54,14 +76,14 @@ export default function PropertyDetailPage() {
   }, [error, navigate, agencyId]);
 
   useEffect(() => {
-    if (propertyData?.property) {
+    if (propertyData) {
       const activeLeases = leases.filter((lease: any) => lease.status === 'active').length > 0;
-      const status = activeLeases ? 'rented' : propertyData.property.status;
+      const status = activeLeases ? 'rented' : propertyData.status;
       setDisplayStatus(formatPropertyStatus(status));
     }
   }, [propertyData, leases, formatPropertyStatus]);
 
-  const property = propertyData?.property;
+  const property = propertyData;
 
   const handleViewPayments = (leaseId: string) => {
     navigate(`/agencies/${agencyId}/properties/${propertyId}/leases/${leaseId}/payments`);
