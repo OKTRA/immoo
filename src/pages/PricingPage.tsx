@@ -12,7 +12,7 @@ import Navbar from '@/components/Navbar';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, useAuthStatus } from '@/hooks/useAuth';
 import { supabase } from '@/lib/supabase';
 
 export default function PricingPage() {
@@ -22,20 +22,26 @@ export default function PricingPage() {
   const [upgrading, setUpgrading] = useState<string | null>(null);
   const { subscription, upgradeSubscription, reloadSubscription } = useUserSubscription();
   const { processSubscriptionPayment } = useSubscriptionPayment();
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, profile, initialized } = useAuth();
+  const { isAuthenticated, isReady } = useAuthStatus();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    console.log('PricingPage: Auth state', { user: user?.id, authLoading, subscription: subscription?.id });
-  }, [user, authLoading, subscription]);
+    console.log('💰 PricingPage: Auth state', { 
+      user: user?.id, 
+      isReady, 
+      isAuthenticated, 
+      subscription: subscription?.id 
+    });
+  }, [user?.id, isReady, isAuthenticated, subscription?.id]);
 
   useEffect(() => {
     // Attendre que l'auth soit prête avant de charger les plans
-    if (!authLoading) {
+    if (isReady) {
       loadPlans();
     }
-  }, [authLoading]);
+  }, [isReady]);
 
   // Gérer le retour de paiement
   useEffect(() => {
@@ -134,7 +140,7 @@ export default function PricingPage() {
   };
 
   // Afficher le loading pendant que l'auth se charge
-  if (authLoading || loading) {
+  if (!isReady || loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
         <Navbar />

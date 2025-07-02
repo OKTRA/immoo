@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, useAuthStatus } from '@/hooks/useAuth';
 import { useUserSubscription } from '@/hooks/useUserSubscription';
 import { getAllAgencies } from '@/services/agency/agencyBasicService';
 import { toast } from 'sonner';
@@ -24,7 +24,8 @@ interface AgencyWithSubscription {
 }
 
 export default function BrowseAgenciesPage() {
-  const { user } = useAuth();
+  const { user, profile, initialized } = useAuth();
+  const { isAuthenticated, isReady } = useAuthStatus();
   const { subscription, checkLimit } = useUserSubscription();
   const [agencies, setAgencies] = useState<AgencyWithSubscription[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -32,12 +33,17 @@ export default function BrowseAgenciesPage() {
   const [agencyLimit, setAgencyLimit] = useState<any>(null);
 
   useEffect(() => {
+    // Charger les agences dès que possible (pas besoin d'attendre l'auth pour cette page publique)
     loadAgencies();
   }, []);
 
   useEffect(() => {
-    checkAgencyLimits();
-  }, [user]);
+    // Vérifier les limites seulement si l'utilisateur est authentifié et que l'auth est prête
+    if (isReady && isAuthenticated && user?.id) {
+      console.log('🔍 BrowseAgenciesPage: Checking agency limits for user:', user.id);
+      checkAgencyLimits();
+    }
+  }, [isReady, isAuthenticated, user?.id]);
 
   const loadAgencies = async () => {
     setLoading(true);

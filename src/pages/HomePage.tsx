@@ -11,19 +11,24 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import PropertyList from '@/components/properties/PropertyList';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, useAuthStatus } from '@/hooks/useAuth';
 
 export default function HomePage() {
   const navigate = useNavigate();
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasProperties, setHasProperties] = useState(false);
-  const { user } = useAuth();
+  const { user, profile, initialized } = useAuth();
+  const { isAuthenticated, isReady } = useAuthStatus();
 
   useEffect(() => {
     const fetchProperties = async () => {
+      // Attendre que l'authentification soit initialisée pour éviter les race conditions
+      if (!isReady) return;
+      
       setLoading(true);
       try {
+        console.log('🏠 HomePage: Fetching properties for user:', user?.id || 'anonymous');
         const { properties } = await getProperties(undefined, 24);
         
         if (!properties || properties.length === 0) {
@@ -69,7 +74,7 @@ export default function HomePage() {
     };
 
     fetchProperties();
-  }, [user]);
+  }, [isReady, user?.id]); // Dépend de isReady pour éviter les race conditions
   
   return (
     <div className="flex flex-col min-h-screen immoo-hero-bg">

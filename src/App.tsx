@@ -38,6 +38,7 @@ import NotFoundPage from "@/pages/NotFoundPage";
 import { VisitorTracker } from "./components/analytics/VisitorTracker";
 import { useAutoVisitorSession } from "./hooks/useAutoVisitorSession";
 import routes from "tempo-routes";
+import AuthProvider from "@/contexts/auth/AuthContext";
 
 const queryClient = new QueryClient();
 
@@ -54,11 +55,12 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="min-h-screen flex flex-col">
-          <main className="flex-1">
-            <TempoRoutes />
-            <Routes>
+      <AuthProvider>
+        <Router>
+          <div className="min-h-screen flex flex-col">
+            <main className="flex-1">
+              <TempoRoutes />
+              <Routes>
               {/* Routes publiques - AUCUNE authentification requise */}
               <Route path="/" element={<HomePage />} />
               <Route path="/browse-agencies" element={<BrowseAgenciesPage />} />
@@ -157,6 +159,7 @@ function App() {
         <Toaster />
         <VisitorTracker />
       </Router>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

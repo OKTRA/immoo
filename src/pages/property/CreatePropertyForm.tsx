@@ -8,7 +8,7 @@ import PropertyBasicInfoForm from "@/components/properties/PropertyBasicInfoForm
 import PropertyFinancialInfoForm from "@/components/properties/PropertyFinancialInfoForm";
 import PropertyMediaForm from "@/components/properties/PropertyMediaForm";
 import PropertyOwnershipForm from "@/components/properties/PropertyOwnershipForm";
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, useAuthStatus } from '@/hooks/useAuth';
 import { checkUserResourceLimit } from '@/services/subscription/limit';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Lock, Crown } from "lucide-react";
@@ -45,13 +45,16 @@ export default function CreatePropertyForm({
     loading: true
   });
   
-  const { user } = useAuth();
+  const { user, profile, initialized } = useAuth();
+  const { isAuthenticated, isReady } = useAuthStatus();
   const isEditMode = !!propertyId;
 
   // Vérifier les limites dès le chargement du composant
   useEffect(() => {
     const checkLimits = async () => {
-      if (!isEditMode && user?.id) {
+      // Attendre que l'auth soit prête et que l'utilisateur soit authentifié
+      if (!isEditMode && isReady && isAuthenticated && user?.id) {
+        console.log('🏠 CreatePropertyForm: Checking limits for user:', user.id);
         try {
           const limit = await checkUserResourceLimit(user.id, 'properties', agencyId);
           setLimitCheck({
@@ -89,7 +92,7 @@ export default function CreatePropertyForm({
     };
 
     checkLimits();
-  }, [user?.id, agencyId, isEditMode]);
+  }, [isReady, isAuthenticated, user?.id, agencyId, isEditMode]);
 
   // This function has the correct signature to match the child component props
   const handleFormDataChange = (data: Partial<any>) => {

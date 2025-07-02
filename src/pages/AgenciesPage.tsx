@@ -7,12 +7,13 @@ import { Link } from "react-router-dom";
 import UpgradeButton from "@/components/subscription/UpgradeButton";
 import LimitWarning from "@/components/subscription/LimitWarning";
 import { useUserSubscription } from "@/hooks/useUserSubscription";
-import { useAuth } from "@/hooks/useAuth";
+import { useAuth, useAuthStatus } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function AgenciesPage() {
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, profile, initialized } = useAuth();
+  const { isAuthenticated, isReady } = useAuthStatus();
   const { subscription, checkLimit, isFreePlan, loading: subscriptionLoading, reloadSubscription } = useUserSubscription();
   const [agencyLimit, setAgencyLimit] = useState<any>(null);
   const navigate = useNavigate();
@@ -40,7 +41,7 @@ export default function AgenciesPage() {
       
       return result;
     },
-    enabled: !!user && !authLoading,
+    enabled: !!user && isReady,
   });
 
   const agencies = data?.agencies || [];
@@ -74,7 +75,7 @@ export default function AgenciesPage() {
   };
 
   // Afficher un loading pendant que l'auth se charge
-  if (authLoading || subscriptionLoading) {
+  if (!isReady || subscriptionLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <div className="animate-pulse">
