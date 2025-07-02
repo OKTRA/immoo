@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
@@ -25,12 +24,17 @@ import {
   User, 
   Calendar,
   Search,
-  FileText
+  FileText,
+  Trash2
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { getLeasesByAgencyId } from "@/services/tenant/leaseService";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
+import { cancelLease } from '@/services/tenant/lease';
+import { terminateLease } from '@/services/tenant/lease';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,AlertDialogDescription,AlertDialogFooter,AlertDialogCancel,AlertDialogAction } from '@/components/ui/alert-dialog';
+import LeaseDetailsDialog from './LeaseDetailsDialog';
 
 interface AgencyLeasesDisplayProps {
   agencyId: string;
@@ -42,6 +46,14 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
   const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [cancelTarget, setCancelTarget] = useState<any>(null);
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const [actionType, setActionType] = useState<'cancel' | 'terminate'>('cancel');
+  const [depositOption, setDepositOption] = useState<'full' | 'partial' | 'none'>('full');
+  const [partialAmount, setPartialAmount] = useState('');
+  const [damageDesc, setDamageDesc] = useState('');
+  const [selectedLease, setSelectedLease] = useState<any|null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   useEffect(() => {
     const fetchLeases = async () => {
@@ -95,8 +107,9 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
     navigate(`/agencies/${agencyId}/tenants/${tenantId}`);
   };
 
-  const handleViewLeaseDetails = (leaseId: string) => {
-    navigate(`/agencies/${agencyId}/leases/${leaseId}`);
+  const handleViewLeaseDetails = (lease:any) => {
+    setSelectedLease(lease);
+    setIsDetailsOpen(true);
   };
 
   const handleViewLeasePayments = (leaseId: string, propertyId: string) => {
@@ -105,6 +118,44 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
 
   const handleCreateLease = () => {
     navigate(`/agencies/${agencyId}/lease/create`);
+  };
+
+  const handleCancelRequest = (lease:any) => {
+    setCancelTarget(lease);
+    setActionType('cancel');
+    setIsCancelOpen(true);
+  };
+
+  const handleTerminateRequest = (lease:any) => {
+    setCancelTarget(lease);
+    setActionType('terminate');
+    setDepositOption('full');
+    setPartialAmount('');
+    setDamageDesc('');
+    setIsCancelOpen(true);
+  };
+
+  const confirmAction = async () => {
+    if(!cancelTarget) return;
+    let result;
+    if(actionType==='cancel'){
+      result = await cancelLease(cancelTarget.id);
+    }else{
+      const details = {
+        depositReturn: depositOption,
+        partialAmount: depositOption === 'partial' ? Number(partialAmount) || 0 : 0,
+        damages: damageDesc
+      };
+      result = await terminateLease(cancelTarget.id, details);
+    }
+    const { success, error } = result;
+    if(success){
+      toast({title:'Succès',description: actionType === 'cancel' ? 'Bail annulé' : 'Bail résilié'});
+      setLeases(prev => prev.map(lease => lease.id === cancelTarget.id ? {...lease, status: actionType==='cancel' ? 'cancelled' : 'terminated'} : lease));
+    } else {
+      toast({title:'Erreur',description:error,variant:'destructive'});
+    }
+    setIsCancelOpen(false);
   };
 
   return (
@@ -206,28 +257,48 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                       {formatCurrency(lease.monthly_rent, 'FCFA')}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={lease.status === 'active' ? 'success' : 'default'}>
-                        {lease.status === 'active' ? 'Actif' : 'Inactif'}
+                      <Badge variant={
+                        lease.status === 'active' ? 'success' : lease.status === 'terminated' || lease.status==='cancelled' ? 'destructive' : 'default'
+                      }>
+                        {lease.status === 'active' ? 'Actif' : lease.status === 'terminated' ? 'Résilié' : lease.status==='cancelled' ? 'Annulé' : 'Inactif'}
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
-                        <Button 
-                          size="sm" 
-                          variant="outline"
-                          onClick={() => handleViewLeasePayments(lease.id, lease.property_id)}
-                        >
-                          <Receipt className="h-4 w-4 mr-1" />
-                          Paiements
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="default"
-                          onClick={() => handleViewLeaseDetails(lease.id)}
-                        >
-                          Détails
-                        </Button>
-                      </div>
+                      {lease.status === 'active' && (
+                        <>
+                          <Button 
+                            size="sm" 
+                            variant="outline"
+                            onClick={() => handleViewLeasePayments(lease.id, lease.property_id)}
+                          >
+                            <Receipt className="h-4 w-4 mr-1" />
+                            Paiements
+                          </Button>
+                        </>
+                      )}
+                      <Button 
+                        size="sm" 
+                        variant="default"
+                        onClick={() => handleViewLeaseDetails(lease)}
+                      >
+                        Détails
+                      </Button>
+                      {lease.status === 'active' && (() => {
+                        const hasPaid = lease.payments?.some((p:any) => p.status === 'paid' && p.payment_type === 'rent');
+                        if (!hasPaid) {
+                          return (
+                            <Button size="sm" variant="destructive" onClick={()=>handleCancelRequest(lease)}>
+                              <Trash2 className="h-4 w-4 mr-1"/> Annuler
+                            </Button>
+                          );
+                        } else {
+                          return (
+                            <Button size="sm" variant="destructive" onClick={()=>handleTerminateRequest(lease)}>
+                              <Trash2 className="h-4 w-4 mr-1"/> Résilier
+                            </Button>
+                          );
+                        }
+                      })()}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -236,6 +307,71 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
           </div>
         )}
       </CardContent>
+      {cancelTarget && (
+      <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {actionType === 'cancel' ? "Confirmer l'annulation du bail" : "Confirmer la résiliation du bail"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {actionType === 'cancel' ?
+                "Cette action supprimera également les paiements générés automatiquement." :
+                "Veuillez remplir l'état des lieux et préciser le traitement de la caution."}
+            </AlertDialogDescription>
+            {actionType === 'terminate' && (
+              <div className="space-y-3 mt-4">
+                <div>
+                  <label className="font-medium mb-1 block">Restitution de la caution</label>
+                  <select
+                    className="w-full border rounded px-2 py-1"
+                    value={depositOption}
+                    onChange={e => setDepositOption(e.target.value as any)}
+                  >
+                    <option value="full">Totale</option>
+                    <option value="partial">Partielle</option>
+                    <option value="none">Aucune</option>
+                  </select>
+                </div>
+                {depositOption === 'partial' && (
+                  <div>
+                    <label className="font-medium mb-1 block">Montant restitué (FCFA)</label>
+                    <input
+                      type="number"
+                      className="w-full border rounded px-2 py-1"
+                      value={partialAmount}
+                      onChange={e => setPartialAmount(e.target.value)}
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="font-medium mb-1 block">Dégâts / Observations</label>
+                  <textarea
+                    className="w-full border rounded px-2 py-1"
+                    rows={3}
+                    value={damageDesc}
+                    onChange={e => setDamageDesc(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Retour</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmAction} disabled={actionType==='terminate' && depositOption==='partial' && !partialAmount}>
+              {actionType === 'cancel' ? 'Annuler le bail' : 'Résilier le bail'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>)}
+      {selectedLease && (
+        <LeaseDetailsDialog
+          lease={selectedLease}
+          isOpen={isDetailsOpen}
+          onClose={()=>setIsDetailsOpen(false)}
+          onViewPayments={(id:string)=>handleViewLeasePayments(id, selectedLease.property_id)}
+        />
+      )}
     </Card>
   );
 }

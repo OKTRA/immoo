@@ -1,4 +1,3 @@
-
 import { z } from "zod";
 
 export const tenantFormSchema = z.object({
@@ -16,6 +15,14 @@ export const tenantFormSchema = z.object({
   }),
   profession: z.string().optional(),
   employmentStatus: z.string().optional(),
+  photoUrl: z.string().optional(),
+  emergencyContact: z.object({
+    name: z.string().optional(),
+    phone: z.string().optional(),
+    relationship: z.string().optional(),
+  }).optional(),
+  identityPhotos: z.array(z.string()).optional(),
+  identityFiles: z.any().optional(),
 });
 
 export type TenantFormValues = z.infer<typeof tenantFormSchema>;

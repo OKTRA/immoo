@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -63,11 +62,13 @@ export const getTenantsByPropertyId = async (propertyId: string) => {
         profession: tenant.profession,
         employmentStatus: tenant.employment_status,
         photoUrl: tenant.photo_url,
+        identityPhotos: tenant.identity_photos,
         emergencyContact: tenant.emergency_contact,
         hasLease: !!propertyLease,
         leaseId: propertyLease?.id,
         leaseStatus: propertyLease?.status,
-        propertyId: propertyLease?.property_id || null
+        propertyId: propertyLease?.property_id || null,
+        createdAt: tenant.created_at
       };
     });
 
@@ -141,6 +142,7 @@ export const getTenantsByAgencyId = async (agencyId: string) => {
         profession: tenant.profession,
         employmentStatus: tenant.employment_status,
         photoUrl: tenant.photo_url,
+        identityPhotos: tenant.identity_photos,
         emergencyContact: tenant.emergency_contact,
         hasLease: tenantLeases.length > 0,
         leaseId: hasActiveLease 
@@ -151,7 +153,8 @@ export const getTenantsByAgencyId = async (agencyId: string) => {
           : (tenantLeases.length > 0 ? firstLease.status : null),
         propertyId: hasActiveLease 
           ? tenantLeases.find(lease => lease.status === 'active')?.property_id 
-          : firstLease?.property_id
+          : firstLease?.property_id,
+        createdAt: tenant.created_at
       };
     });
 

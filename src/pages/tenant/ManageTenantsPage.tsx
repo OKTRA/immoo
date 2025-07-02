@@ -26,12 +26,18 @@ import {
   Target,
   TrendingUp,
   Activity,
-  Download
+  Download,
+  Trash2,
+  Briefcase
 } from "lucide-react";
 import { toast } from "sonner";
 import AddTenantForm from '@/components/tenants/AddTenantForm';
 import { getTenantsByPropertyId, getTenantsByAgencyId } from '@/services/tenant/tenantPropertyQueries';
 import { TenantWithLease } from '@/components/tenants/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
+import EditTenantForm from '@/components/tenants/EditTenantForm';
+import { deleteTenant } from '@/services/tenant/tenantService';
 
 interface ManageTenantsPageProps {
   leaseView?: boolean;
@@ -43,6 +49,14 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
   const [isAddingTenant, setIsAddingTenant] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
+
+  // States pour vue, édition et suppression
+  const [viewTenant, setViewTenant] = useState<TenantWithLease | null>(null);
+  const [isViewOpen, setIsViewOpen] = useState(false);
+  const [editTenant, setEditTenant] = useState<TenantWithLease | null>(null);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [deleteTenantTarget, setDeleteTenantTarget] = useState<TenantWithLease | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
 
   const { data: tenants = [], isLoading, error, refetch } = useQuery({
     queryKey: ['tenants', agencyId, propertyId],
@@ -105,6 +119,41 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
     setIsAddingTenant(false);
     refetch();
     toast.success("Locataire ajouté avec succès!");
+  };
+
+  // Gestion vue / édition / suppression
+  const handleViewTenant = (tenant: TenantWithLease) => {
+    setViewTenant(tenant);
+    setIsViewOpen(true);
+  };
+
+  const handleEditTenant = (tenant: TenantWithLease) => {
+    setEditTenant(tenant);
+    setIsEditOpen(true);
+  };
+
+  const handleDeleteTenant = (tenant: TenantWithLease) => {
+    setDeleteTenantTarget(tenant);
+    setIsDeleteOpen(true);
+  };
+
+  const confirmDeleteTenant = async () => {
+    if (!deleteTenantTarget) return;
+
+    if (deleteTenantTarget.hasLease) {
+      toast.error("Impossible de supprimer un locataire ayant un bail actif");
+      setIsDeleteOpen(false);
+      return;
+    }
+
+    const { error } = await deleteTenant(deleteTenantTarget.id || '');
+    if (error) {
+      toast.error(`Erreur lors de la suppression: ${error}`);
+    } else {
+      toast.success("Locataire supprimé");
+      refetch();
+    }
+    setIsDeleteOpen(false);
   };
 
   if (isLoading) {
@@ -432,6 +481,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
                         size="sm"
                         variant="ghost"
                         className="hover:bg-immoo-navy hover:text-white"
+                        onClick={() => handleViewTenant(tenant)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -439,8 +489,17 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
                         size="sm"
                         variant="ghost"
                         className="hover:bg-immoo-gold hover:text-white"
+                        onClick={() => handleEditTenant(tenant)}
                       >
                         <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="hover:bg-red-600 hover:text-white"
+                        onClick={() => handleDeleteTenant(tenant)}
+                      >
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -458,6 +517,109 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
           onSuccess={handleAddTenantSuccess}
           agencyId={agencyId}
         />
+      )}
+
+      {/* Dialog de visualisation du locataire */}
+      {viewTenant && (
+        <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
+          <DialogContent className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Détails du locataire</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-2">
+              <div className="flex flex-col items-center gap-3">
+                {viewTenant.photoUrl ? (
+                  <img src={viewTenant.photoUrl} alt="Photo" className="h-24 w-24 rounded-full object-cover" />
+                ) : (
+                  <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center">
+                    <Users className="h-10 w-10 text-muted-foreground" />
+                  </div>
+                )}
+                <h2 className="text-xl font-semibold">
+                  {viewTenant.firstName} {viewTenant.lastName}
+                </h2>
+              </div>
+              <div className="space-y-2 mt-4">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" /> {viewTenant.email || 'Email non renseigné'}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" /> {viewTenant.phone || 'Téléphone non renseigné'}
+                </div>
+                {viewTenant.employmentStatus && (
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" /> {viewTenant.employmentStatus}
+                  </div>
+                )}
+                {viewTenant.profession && (
+                  <div className="flex items-center gap-2">
+                    <Edit className="h-4 w-4" /> {viewTenant.profession}
+                  </div>
+                )}
+                {viewTenant.emergencyContact && (
+                  <div>
+                    <p className="font-medium">Contact d'urgence :</p>
+                    <p>{viewTenant.emergencyContact.name} - {viewTenant.emergencyContact.phone} ({viewTenant.emergencyContact.relationship})</p>
+                  </div>
+                )}
+                {viewTenant.identityPhotos && viewTenant.identityPhotos.length > 0 && (
+                  <div>
+                    <p className="font-medium mb-2">Photos d'identité :</p>
+                    <div className="grid grid-cols-3 gap-2">
+                      {viewTenant.identityPhotos.map((photo: any, idx: number) => {
+                        const url = typeof photo === 'string' ? photo : (photo.url || '');
+                        return (
+                          <img
+                            key={idx}
+                            src={url}
+                            alt={`ID-${idx}`}
+                            className="h-24 w-24 object-cover rounded-lg shadow-sm border"
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                {viewTenant.createdAt && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                    <Calendar className="h-3 w-3" /> Ajouté le {new Date(viewTenant.createdAt).toLocaleDateString('fr-FR')}
+                  </div>
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Dialog d'édition du locataire */}
+      {editTenant && (
+        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+          <DialogContent className="max-w-2xl p-0">
+            <EditTenantForm 
+              tenant={editTenant} 
+              onCancel={() => setIsEditOpen(false)} 
+              onSuccess={() => { setIsEditOpen(false); refetch(); }}
+            />
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Confirmation suppression */}
+      {deleteTenantTarget && (
+        <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+              <AlertDialogDescription>
+                Êtes-vous sûr de vouloir supprimer {deleteTenantTarget.firstName} {deleteTenantTarget.lastName} ? Cette action est irréversible.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Annuler</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteTenant}>Supprimer</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
     </div>
   );

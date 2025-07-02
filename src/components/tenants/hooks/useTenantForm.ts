@@ -1,9 +1,9 @@
-
 import { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { createTenant } from "@/services/tenant/tenantService";
+import { createTenant, updateTenant } from "@/services/tenant/tenantService";
+import { uploadIdentityPhotos } from "@/services/tenant/tenantMedia";
 import { tenantFormSchema, TenantFormValues } from '../schemas/tenantFormSchema';
 
 interface UseTenantFormProps {
@@ -23,6 +23,14 @@ export const useTenantForm = ({ agencyId, onSuccess }: UseTenantFormProps) => {
       phone: "",
       profession: "",
       employmentStatus: "",
+      photoUrl: "",
+      emergencyContact: {
+        name: "",
+        phone: "",
+        relationship: "",
+      },
+      identityPhotos: [],
+      identityFiles: [],
     },
   });
 
@@ -44,10 +52,14 @@ export const useTenantForm = ({ agencyId, onSuccess }: UseTenantFormProps) => {
         phone: values.phone,
         profession: values.profession || null,
         employment_status: values.employmentStatus || null,
-        agency_id: agencyId // Ensure the agency_id is included
+        photo_url: values.photoUrl || null,
+        emergency_contact: values.emergencyContact && (values.emergencyContact.name || values.emergencyContact.phone || values.emergencyContact.relationship) 
+          ? values.emergencyContact 
+          : null,
+        agency_id: agencyId
       };
 
-      console.log("Sending tenant data to create API:", tenantData);
+      console.log("Creating tenant:", tenantData);
       const { tenant, error } = await createTenant(tenantData);
 
       if (error) {
@@ -56,6 +68,18 @@ export const useTenantForm = ({ agencyId, onSuccess }: UseTenantFormProps) => {
       }
 
       if (tenant) {
+        // Upload identity photos if any
+        let identityUrls: string[] = [];
+        const files: File[] = (values as any).identityFiles || [];
+        if (files.length > 0) {
+          try {
+            identityUrls = await uploadIdentityPhotos(tenant.id, files);
+            await updateTenant(tenant.id, { identity_photos: identityUrls } as any);
+          } catch (uploadErr) {
+            console.error('Error uploading identity photos', uploadErr);
+          }
+        }
+
         console.log("Successfully created tenant:", tenant);
         toast.success("Locataire ajouté avec succès!");
         
@@ -68,6 +92,9 @@ export const useTenantForm = ({ agencyId, onSuccess }: UseTenantFormProps) => {
           phone: tenant.phone,
           profession: tenant.profession,
           employmentStatus: tenant.employment_status,
+          photoUrl: tenant.photo_url,
+          emergencyContact: tenant.emergency_contact,
+          identityPhotos: identityUrls.length ? identityUrls : tenant.identity_photos,
           hasLease: false
         };
         

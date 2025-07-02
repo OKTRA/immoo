@@ -1,12 +1,14 @@
-
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CreditCard, FileText, ChevronRight } from "lucide-react";
+import { CreditCard, FileText, ChevronRight, Trash2 } from "lucide-react";
 import { format } from 'date-fns';
 import { Card, CardContent } from "@/components/ui/card";
 import LeaseDetailsDialog from './LeaseDetailsDialog';
 import { formatCurrency } from "@/lib/utils";
+import { cancelLease, terminateLease } from '@/services/tenant/lease';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,AlertDialogDescription,AlertDialogFooter,AlertDialogCancel,AlertDialogAction } from '@/components/ui/alert-dialog';
+import { toast } from 'sonner';
 
 interface LeaseData {
   id: string;
@@ -31,6 +33,12 @@ interface LeaseData {
     first_name: string;
     last_name: string;
   };
+  payments?: {
+    id: string;
+    status: string;
+    type: string;
+    amount: number;
+  }[];
 }
 
 interface LeaseListProps {
@@ -42,6 +50,12 @@ interface LeaseListProps {
 const LeaseList: React.FC<LeaseListProps> = ({ leases, loading, onViewLeaseDetails }) => {
   const [selectedLease, setSelectedLease] = useState<LeaseData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [cancelTarget, setCancelTarget] = useState<LeaseData|null>(null);
+  const [isCancelOpen, setIsCancelOpen] = useState(false);
+  const [actionType, setActionType] = useState<'cancel' | 'terminate'>('cancel');
+  const [depositOption, setDepositOption] = useState<'full' | 'partial' | 'none'>('full');
+  const [partialAmount, setPartialAmount] = useState('');
+  const [damageDesc, setDamageDesc] = useState('');
 
   const handleOpenLeaseDetails = (lease: LeaseData) => {
     console.log("Opening lease details:", lease);
@@ -49,16 +63,58 @@ const LeaseList: React.FC<LeaseListProps> = ({ leases, loading, onViewLeaseDetai
     setIsDialogOpen(true);
   };
 
+  const handleCancelRequest = (lease: LeaseData) => {
+    setCancelTarget(lease);
+    setActionType('cancel');
+    setIsCancelOpen(true);
+  };
+
+  const handleTerminateRequest = (lease: LeaseData) => {
+    setCancelTarget(lease);
+    setActionType('terminate');
+    setDepositOption('full');
+    setPartialAmount('');
+    setDamageDesc('');
+    setIsCancelOpen(true);
+  };
+
+  const confirmAction = async () => {
+    if (!cancelTarget) return;
+    let result;
+    if(actionType==='cancel'){
+      result = await cancelLease(cancelTarget.id);
+    }else{
+      const details = {
+        depositReturn: depositOption,
+        partialAmount: depositOption === 'partial' ? Number(partialAmount) || 0 : 0,
+        damages: damageDesc
+      };
+      result = await terminateLease(cancelTarget.id, details);
+    }
+    const { success, error } = result;
+    if (success) {
+      toast.success(actionType === 'cancel' ? 'Bail annulé' : 'Bail résilié');
+      setIsCancelOpen(false);
+      window.location.reload();
+    } else {
+      toast.error(error);
+    }
+  };
+
   const getStatusBadgeClass = (status: string) => {
-    return status === 'active' ? 'bg-green-100 text-green-800' : 
-           status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
-           'bg-gray-100 text-gray-800';
+    if (status === 'active') return 'bg-green-100 text-green-800';
+    if (status === 'pending') return 'bg-yellow-100 text-yellow-800';
+    if (status === 'cancelled' || status === 'terminated') return 'bg-red-100 text-red-800';
+    return 'bg-gray-100 text-gray-800';
   };
 
   const getStatusLabel = (status: string) => {
-    return status === 'active' ? 'Actif' : 
-           status === 'pending' ? 'En attente' : 
-           status === 'expired' ? 'Expiré' : status;
+    if (status === 'active') return 'Actif';
+    if (status === 'pending') return 'En attente';
+    if (status === 'cancelled') return 'Annulé';
+    if (status === 'terminated') return 'Résilié';
+    if (status === 'expired') return 'Expiré';
+    return status;
   };
 
   // Détermine le nom de la propriété en tenant compte des différentes structures de données possibles
@@ -156,9 +212,26 @@ const LeaseList: React.FC<LeaseListProps> = ({ leases, loading, onViewLeaseDetai
                   <Button variant="outline" size="sm" onClick={() => handleOpenLeaseDetails(lease)}>
                     <FileText className="h-4 w-4 mr-2" /> Détails
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => onViewLeaseDetails(lease.id)}>
-                    <CreditCard className="h-4 w-4 mr-2" /> Paiements
-                  </Button>
+                  {lease.status === 'active' && (
+                    <Button variant="outline" size="sm" onClick={() => onViewLeaseDetails(lease.id)}>
+                      <CreditCard className="h-4 w-4 mr-2" /> Paiements
+                    </Button>
+                  )}
+                  {lease.status === 'active' && (() => {
+                    const hasPaid = (lease as any).payments?.some((p:any) => p.status === 'paid' && p.payment_type === 'rent');
+                    if (!hasPaid) {
+                      return (
+                        <Button variant="destructive" size="sm" onClick={() => handleCancelRequest(lease)}>
+                          <Trash2 className="h-4 w-4 mr-2" /> Annuler
+                        </Button>
+                      );
+                    }
+                    return (
+                      <Button variant="destructive" size="sm" onClick={() => handleTerminateRequest(lease)}>
+                        <Trash2 className="h-4 w-4 mr-2" /> Résilier
+                      </Button>
+                    );
+                  })()}
                 </div>
                 <Button 
                   variant="ghost" 
@@ -241,9 +314,26 @@ const LeaseList: React.FC<LeaseListProps> = ({ leases, loading, onViewLeaseDetai
                       <Button variant="outline" size="sm" onClick={() => handleOpenLeaseDetails(lease)}>
                         <FileText className="h-4 w-4 mr-2" /> Détails
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => onViewLeaseDetails(lease.id)}>
-                        <CreditCard className="h-4 w-4 mr-2" /> Paiements
-                      </Button>
+                      {lease.status === 'active' && (
+                        <Button variant="outline" size="sm" onClick={() => onViewLeaseDetails(lease.id)}>
+                          <CreditCard className="h-4 w-4 mr-2" /> Paiements
+                        </Button>
+                      )}
+                      {lease.status === 'active' && (() => {
+                        const hasPaid = (lease as any).payments?.some((p:any) => p.status === 'paid' && p.payment_type === 'rent');
+                        if (!hasPaid) {
+                          return (
+                            <Button variant="destructive" size="sm" onClick={() => handleCancelRequest(lease)}>
+                              <Trash2 className="h-4 w-4 mr-2" /> Annuler
+                            </Button>
+                          );
+                        }
+                        return (
+                          <Button variant="destructive" size="sm" onClick={() => handleTerminateRequest(lease)}>
+                            <Trash2 className="h-4 w-4 mr-2" /> Résilier
+                          </Button>
+                        );
+                      })()}
                     </div>
                   </td>
                 </tr>
@@ -280,6 +370,61 @@ const LeaseList: React.FC<LeaseListProps> = ({ leases, loading, onViewLeaseDetai
         onClose={() => setIsDialogOpen(false)}
         onViewPayments={onViewLeaseDetails}
       />
+
+      {/* cancel dialog */}
+      {cancelTarget && (
+      <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{actionType === 'cancel' ? "Confirmer l'annulation du bail" : "Confirmer la résiliation du bail"}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {actionType === 'cancel' ?
+                "Cette action supprimera également les paiements générés automatiquement." :
+                "Veuillez remplir l'état des lieux et préciser le traitement de la caution."}
+            </AlertDialogDescription>
+            {actionType === 'terminate' && (
+              <div className="space-y-3 mt-4">
+                <div>
+                  <label className="font-medium mb-1 block">Restitution de la caution</label>
+                  <select
+                    className="w-full border rounded px-2 py-1"
+                    value={depositOption}
+                    onChange={e => setDepositOption(e.target.value as any)}
+                  >
+                    <option value="full">Totale</option>
+                    <option value="partial">Partielle</option>
+                    <option value="none">Aucune</option>
+                  </select>
+                </div>
+                {depositOption === 'partial' && (
+                  <div>
+                    <label className="font-medium mb-1 block">Montant restitué (FCFA)</label>
+                    <input
+                      type="number"
+                      className="w-full border rounded px-2 py-1"
+                      value={partialAmount}
+                      onChange={e => setPartialAmount(e.target.value)}
+                    />
+                  </div>
+                )}
+                <div>
+                  <label className="font-medium mb-1 block">Dégâts / Observations</label>
+                  <textarea
+                    className="w-full border rounded px-2 py-1"
+                    rows={3}
+                    value={damageDesc}
+                    onChange={e => setDamageDesc(e.target.value)}
+                  />
+                </div>
+              </div>
+            )}
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Retour</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmAction} disabled={actionType==='terminate' && depositOption==='partial' && !partialAmount}>{actionType === 'cancel' ? 'Annuler le bail' : 'Résilier le bail'}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>) }
     </div>
   );
 };

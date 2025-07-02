@@ -52,6 +52,12 @@ interface Lease {
     email: string;
     phone: string;
   };
+  payments: {
+    id: string;
+    status: string;
+    amount: number;
+    payment_type: string;
+  }[];
 }
 
 interface LeaseListContainerProps {
@@ -94,6 +100,12 @@ export default function LeaseListContainer({ agencyId, propertyId }: LeaseListCo
               last_name,
               email,
               phone
+            ),
+            payments:payments (
+              id,
+              status,
+              amount,
+              payment_type
             )
           `)
           .eq('properties.agency_id', agencyId)
@@ -108,27 +120,34 @@ export default function LeaseListContainer({ agencyId, propertyId }: LeaseListCo
         if (leasesError) throw leasesError;
 
         // Transformer les données
-        const transformedLeases: Lease[] = (leasesData || []).map(lease => ({
-          id: lease.id,
-          propertyId: lease.property_id,
-          tenantId: lease.tenant_id,
-          startDate: lease.start_date,
-          endDate: lease.end_date,
-          monthlyRent: lease.monthly_rent || 0,
-          securityDeposit: lease.security_deposit || 0,
-          status: lease.status as 'active' | 'terminated' | 'pending',
-          createdAt: lease.created_at,
-          property: {
-            title: lease.properties?.title || 'Propriété inconnue',
-            address: lease.properties?.address || 'Adresse non renseignée'
-          },
-          tenant: lease.tenants ? {
-            firstName: lease.tenants.first_name || '',
-            lastName: lease.tenants.last_name || '',
-            email: lease.tenants.email || '',
-            phone: lease.tenants.phone || ''
-          } : undefined
-        }));
+        const transformedLeases: Lease[] = (leasesData || []).map(lease => {
+          // Gestion des jointures pouvant renvoyer des tableaux
+          const propertyData = Array.isArray(lease.properties) ? lease.properties[0] : lease.properties;
+          const tenantData = Array.isArray(lease.tenants) ? lease.tenants[0] : lease.tenants;
+
+          return {
+            id: lease.id,
+            propertyId: lease.property_id,
+            tenantId: lease.tenant_id,
+            startDate: lease.start_date,
+            endDate: lease.end_date,
+            monthlyRent: lease.monthly_rent || 0,
+            securityDeposit: lease.security_deposit || 0,
+            status: lease.status as 'active' | 'terminated' | 'pending',
+            createdAt: lease.created_at,
+            property: propertyData ? {
+              title: propertyData.title || 'Propriété inconnue',
+              address: propertyData.address || 'Adresse non renseignée'
+            } : undefined,
+            tenant: tenantData ? {
+              firstName: tenantData.first_name || '',
+              lastName: tenantData.last_name || '',
+              email: tenantData.email || '',
+              phone: tenantData.phone || ''
+            } : undefined,
+            payments: lease.payments || []
+          };
+        });
 
         return transformedLeases;
       } catch (error: any) {

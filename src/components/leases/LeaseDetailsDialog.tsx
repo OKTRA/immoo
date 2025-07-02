@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogHeader, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, Home, User, CreditCard, Receipt } from "lucide-react";
+import { Calendar, Home, User, CreditCard, Receipt, CheckCircle, XCircle } from "lucide-react";
 import { format } from 'date-fns';
 import { formatCurrency } from "@/lib/utils";
 
@@ -43,7 +42,7 @@ const LeaseDetailsDialog: React.FC<LeaseDetailsDialogProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Détails du bail {lease && getStatusBadge(lease.status)}
@@ -117,6 +116,31 @@ const LeaseDetailsDialog: React.FC<LeaseDetailsDialogProps> = ({
                   <p className="text-sm font-semibold">{formatCurrency(lease.security_deposit || 0)}</p>
                 </div>
               </div>
+
+              {/* Liste des paiements si disponible */}
+              {lease.payments && lease.payments.length > 0 && (
+                <>
+                  <Separator className="my-4" />
+                  <h3 className="text-sm font-medium text-muted-foreground flex items-center mb-2">
+                    <CreditCard className="mr-2 h-4 w-4" /> Paiements ({lease.payments.length})
+                  </h3>
+                  <div className="space-y-3">
+                    {lease.payments.map((p:any) => (
+                      <div key={p.id} className="flex items-center justify-between border rounded px-3 py-2 shadow-sm bg-gray-50">
+                        <div className="flex items-center gap-2">
+                          {p.status === 'paid' ? (
+                            <CheckCircle className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <XCircle className="h-4 w-4 text-red-500" />
+                          )}
+                          <span className="text-sm font-medium capitalize">{p.payment_type || 'Paiement'}</span>
+                        </div>
+                        <span className="text-sm font-semibold">{formatCurrency(p.amount)}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         ) : null}

@@ -213,6 +213,7 @@ export interface Tenant {
   profession?: string;
   employmentStatus?: string;
   photoUrl?: string;
+  identityPhotos?: string[];
   emergencyContact?: {
     name?: string;
     phone?: string;

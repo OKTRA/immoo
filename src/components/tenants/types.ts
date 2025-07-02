@@ -1,6 +1,5 @@
-
 export interface TenantWithLease {
-  id?: string;
+  id: string;
   firstName?: string;
   lastName?: string;
   email?: string;
@@ -8,6 +7,8 @@ export interface TenantWithLease {
   employmentStatus?: string;
   profession?: string;
   photoUrl?: string;
+  identityPhotos?: string[];
+  createdAt?: string;
   hasLease?: boolean;
   leaseId?: string;
   leaseStatus?: string;

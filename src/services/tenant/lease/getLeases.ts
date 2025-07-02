@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -98,6 +97,12 @@ export const getLeasesByAgencyId = async (agencyId: string) => {
           last_name,
           email,
           phone
+        ),
+        payments:payments (
+          id,
+          status,
+          amount,
+          payment_type
         )
       `)
       .eq('properties.agency_id', agencyId);
