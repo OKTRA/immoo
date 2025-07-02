@@ -1,4 +1,3 @@
-
 import { supabase } from '@/lib/supabase';
 import { Property } from '@/assets/types';
 import { formatPropertyFromDb } from './propertyUtils';
@@ -203,6 +202,13 @@ export const getPropertyById = async (propertyId: string) => {
           properties_count,
           rating,
           created_at
+        ),
+        property_images(
+          id,
+          image_url,
+          description,
+          is_primary,
+          position
         )
       `)
       .eq('id', propertyId)
@@ -211,6 +217,7 @@ export const getPropertyById = async (propertyId: string) => {
     
     if (error) throw error;
     
+    // Get active leases to determine real status
     const { data: leases, error: leaseError } = await supabase
       .from('leases')
       .select('id, status')
@@ -228,6 +235,17 @@ export const getPropertyById = async (propertyId: string) => {
     }
     
     const property = formatPropertyFromDb(data);
+    
+    // Add images to the property
+    if (data.property_images && data.property_images.length > 0) {
+      property.images = data.property_images.map((img: any) => ({
+        id: img.id,
+        image_url: img.image_url,
+        description: img.description,
+        is_primary: img.is_primary,
+        position: img.position
+      }));
+    }
     
     // Add complete agency information
     if (data.agency) {
@@ -258,5 +276,115 @@ export const getPropertyById = async (propertyId: string) => {
   } catch (error: any) {
     console.error(`Error fetching property ${propertyId}:`, error);
     return { property: null, error: error.message, hasActiveLeases: false };
+  }
+};
+
+// Special version for editing that includes hidden properties and additional data
+export const getPropertyByIdForEdit = async (propertyId: string) => {
+  try {
+    const { data, error } = await supabase
+      .from('properties')
+      .select(`
+        *,
+        property_owners!owner_id(
+          id,
+          user_id,
+          company_name,
+          tax_id,
+          payment_method,
+          payment_percentage
+        ),
+        agencies!agency_id(
+          id,
+          name,
+          logo_url,
+          email,
+          phone,
+          website,
+          verified,
+          description,
+          specialties,
+          service_areas,
+          properties_count,
+          rating,
+          created_at
+        ),
+        property_images(
+          id,
+          image_url,
+          description,
+          is_primary,
+          position
+        )
+      `)
+      .eq('id', propertyId)
+      // Don't filter by is_visible for editing
+      .single();
+    
+    if (error) throw error;
+    
+    const property = formatPropertyFromDb(data);
+    
+    // Add images to the property for editing
+    if (data.property_images && data.property_images.length > 0) {
+      property.images = data.property_images.map((img: any) => ({
+        id: img.id,
+        image_url: img.image_url,
+        description: img.description,
+        is_primary: img.is_primary,
+        position: img.position
+      }));
+      
+      // Also prepare additionalImages format for the media form
+      property.additionalImages = data.property_images
+        .filter((img: any) => !img.is_primary)
+        .map((img: any) => ({
+          url: img.image_url,
+          isPrimary: img.is_primary,
+          description: img.description || ''
+        }));
+    }
+    
+    // Add complete agency information
+    if (data.agencies) {
+      property.agencyName = data.agencies.name;
+      property.agencyLogo = data.agencies.logo_url;
+      property.agencyPhone = data.agencies.phone;
+      property.agencyEmail = data.agencies.email;
+      property.agencyWebsite = data.agencies.website;
+      property.agencyVerified = data.agencies.verified;
+      property.agencyRating = typeof data.agencies.rating === 'number' ? data.agencies.rating : 0;
+      property.agencyDescription = data.agencies.description;
+      property.agencySpecialties = data.agencies.specialties || [];
+      property.agencyServiceAreas = data.agencies.service_areas || [];
+      property.agencyPropertiesCount = data.agencies.properties_count || 0;
+      
+      // Calculate years active from creation date
+      if (data.agencies.created_at) {
+        const createdDate = new Date(data.agencies.created_at);
+        const currentDate = new Date();
+        const yearsDiff = currentDate.getFullYear() - createdDate.getFullYear();
+        property.agencyYearsActive = yearsDiff > 0 ? yearsDiff : 1;
+      }
+      
+      property.agencyJoinDate = data.agencies.created_at;
+    }
+
+    // Add property owner information
+    if (data.property_owners) {
+      property.ownerInfo = {
+        ownerId: data.property_owners.id
+      };
+      // Add additional owner fields directly to property
+      property.ownerCompanyName = data.property_owners.company_name;
+      property.ownerTaxId = data.property_owners.tax_id;
+      property.ownerPaymentMethod = data.property_owners.payment_method;
+      property.ownerPaymentPercentage = data.property_owners.payment_percentage;
+    }
+    
+    return { property, error: null };
+  } catch (error: any) {
+    console.error(`Error fetching property ${propertyId} for edit:`, error);
+    return { property: null, error: error.message };
   }
 };

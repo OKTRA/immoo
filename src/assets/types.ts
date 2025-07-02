@@ -42,6 +42,19 @@ export interface Property {
   petsAllowed?: boolean;
   furnished?: boolean;
   yearBuilt?: string;
+  // Images data
+  images?: Array<{
+    id: string;
+    image_url: string;
+    description?: string;
+    is_primary: boolean;
+    position?: number;
+  }>;
+  additionalImages?: Array<{
+    url: string;
+    isPrimary: boolean;
+    description: string;
+  }>;
   ownerInfo?: {
     ownerId: string;
     firstName?: string;
@@ -49,6 +62,11 @@ export interface Property {
     email?: string;
     phone?: string;
   };
+  // Additional owner information
+  ownerCompanyName?: string;
+  ownerTaxId?: string;
+  ownerPaymentMethod?: string;
+  ownerPaymentPercentage?: number;
   agencyName?: string;
   agencyLogo?: string;
   agencyPhone?: string;

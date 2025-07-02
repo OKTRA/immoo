@@ -36,6 +36,21 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
   // Pour suivre si l'image principale a changé
   const [mainImageChanged, setMainImageChanged] = useState(false);
 
+  // Initialize existing additional images when editing
+  useEffect(() => {
+    if (initialData.additionalImages && initialData.additionalImages.length > 0) {
+      const existingImages = initialData.additionalImages.map((img, index) => ({
+        id: `existing-${index}`,
+        url: img.url,
+        file: null,
+        isPrimary: img.isPrimary,
+        uploading: false,
+        description: img.description || ''
+      }));
+      setAdditionalImages(existingImages);
+    }
+  }, [initialData.additionalImages]);
+
   useEffect(() => {
     onChange({
       imageUrl: formData.imageUrl,

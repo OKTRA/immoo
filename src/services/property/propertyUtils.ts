@@ -21,6 +21,7 @@ export const formatPropertyFromDb = (item: any): Property => {
     furnished: item.furnished,
     yearBuilt: item.year_built,
     agencyFees: item.agency_fees,
+    commissionRate: item.commission_rate,
     propertyCategory: item.property_category,
     paymentFrequency: item.payment_frequency,
     securityDeposit: item.security_deposit,
@@ -67,6 +68,7 @@ export const formatPropertyToDb = (propertyData: any, ownerId: string | null = n
   if (propertyData.furnished !== undefined) dbData.furnished = propertyData.furnished;
   if (propertyData.yearBuilt !== undefined) dbData.year_built = propertyData.yearBuilt;
   if (propertyData.agencyFees !== undefined) dbData.agency_fees = propertyData.agencyFees;
+  if (propertyData.commissionRate !== undefined) dbData.commission_rate = propertyData.commissionRate;
   if (propertyData.propertyCategory !== undefined) dbData.property_category = propertyData.propertyCategory;
   if (propertyData.paymentFrequency !== undefined) dbData.payment_frequency = propertyData.paymentFrequency;
   if (propertyData.securityDeposit !== undefined) dbData.security_deposit = propertyData.securityDeposit;
