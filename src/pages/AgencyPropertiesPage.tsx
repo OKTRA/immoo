@@ -529,28 +529,15 @@ export default function AgencyPropertiesPage() {
                 >
                   <div className="relative">
                     {/* Image de la propriété */}
-                    <div className="h-40 sm:h-48 bg-gradient-to-br from-immoo-pearl to-immoo-gold/20 rounded-t-lg flex items-center justify-center overflow-hidden">
-                      {property.id ? (
-                        <PropertyImageGallery 
-                          propertyId={property.id} 
-                          mainImageUrl={property.images?.[0]?.url}
-                          height="h-40 sm:h-48"
-                          enableZoom={true}
-                          showThumbnails={false}
-                          className="rounded-t-lg"
-                        />
-                      ) : property.images && property.images.length > 0 ? (
-                        <img 
-                          src={property.images[0].url} 
-                          alt={property.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                        />
-                      ) : (
-                        <div className="text-center">
-                          <Building2 className="h-10 w-10 sm:h-12 sm:w-12 text-immoo-navy/50 mx-auto mb-2" />
-                          <p className="text-xs sm:text-sm text-immoo-navy/50">Aucune image</p>
-                        </div>
-                      )}
+                    <div className="relative mb-4">
+                      <PropertyImageGallery
+                        propertyId={property.id}
+                        mainImageUrl={property.images?.[0]?.url || '/placeholder.svg'}
+                        height="h-48"
+                        className="rounded-t-lg"
+                        // `showControls` est `true` par défaut, donc pas besoin de le spécifier
+                        // sauf si on voulait le cacher.
+                      />
                     </div>
                     
                     {/* Badge de statut */}
