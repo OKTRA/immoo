@@ -481,6 +481,7 @@ export default function AgencyPropertiesPage() {
                     <div className="relative mb-4">
                       <PropertyImageGallery
                         propertyId={property.id}
+                        mainImageUrl={(property as any).image_url}
                         images={property.images || []}
                         height="h-48"
                         className="rounded-t-lg"

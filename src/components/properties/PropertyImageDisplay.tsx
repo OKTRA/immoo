@@ -25,6 +25,7 @@ export default function PropertyImageDisplay({ property, statusInfo }: PropertyI
       {property.id ? (
         <PropertyImageGallery 
           propertyId={property.id} 
+          mainImageUrl={(property as any).image_url}
           images={property.images || []}
           height="h-96"
           showControls={true}
