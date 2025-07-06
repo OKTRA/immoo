@@ -1,4 +1,3 @@
-
 import { getPaymentsByLeaseId } from './paymentCore';
 import { supabase } from '@/lib/supabase';
 import { determinePaymentStatus } from '@/lib/utils';
@@ -24,8 +23,10 @@ export const getLeasePaymentStats = async (leaseId: string) => {
         // Add to total due
         stats.totalDue += payment.amount;
         
-        // Determine effective status
-        const effectiveStatus = determinePaymentStatus(
+        // Déterminer le statut effectif
+        // On privilégie la colonne `status` (renseignée côté application) pour éviter
+        // de fausser les résultats à cause d'un `payment_date` artificiel.
+        const effectiveStatus = payment.status || determinePaymentStatus(
           payment.dueDate,
           payment.paymentDate,
           5 // 5-day grace period

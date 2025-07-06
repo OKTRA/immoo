@@ -1,25 +1,32 @@
-
 import { TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface PaymentsTableHeaderProps {
   sortField: string;
   sortDirection: "asc" | "desc";
   onSort: (field: string) => void;
   showSelectionColumn: boolean;
+  allSelected?: boolean;
+  onToggleSelectAll?: (checked: boolean) => void;
 }
 
 export default function PaymentsTableHeader({ 
   sortField, 
   sortDirection, 
   onSort,
-  showSelectionColumn
+  showSelectionColumn,
+  allSelected = false,
+  onToggleSelectAll
 }: PaymentsTableHeaderProps) {
   return (
     <TableHeader>
       <TableRow>
         {showSelectionColumn && (
           <TableHead style={{ width: 40 }}>
-            <span className="sr-only">Sélection</span>
+            <Checkbox 
+              checked={allSelected}
+              onCheckedChange={(checked) => onToggleSelectAll && onToggleSelectAll(!!checked)}
+            />
           </TableHead>
         )}
         <TableHead 

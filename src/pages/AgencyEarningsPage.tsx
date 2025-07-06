@@ -32,13 +32,16 @@ import {
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { getAgencyEarnings, getEarningsByProperty, PropertyEarning } from "@/services/agency/agencyEarningsService";
+import EarningsAnalytics from "@/components/analytics/EarningsAnalytics";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 
 export default function AgencyEarningsPage() {
   const { agencyId } = useParams();
-  const [selectedPeriod, setSelectedPeriod] = useState('month');
+  const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'quarter' | 'year'>('month');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [granularity, setGranularity] = useState<'month' | 'year'>('month');
 
   const { data: earningsData, isLoading, error } = useQuery({
     queryKey: ['agency-earnings', agencyId, selectedPeriod, selectedYear],
@@ -148,7 +151,7 @@ export default function AgencyEarningsPage() {
                   key={period.value}
                   variant={selectedPeriod === period.value ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => setSelectedPeriod(period.value)}
+                  onClick={() => setSelectedPeriod(period.value as 'month' | 'quarter' | 'year')}
                   className={selectedPeriod === period.value ? 'bg-gradient-to-r from-immoo-gold to-immoo-navy' : ''}
                 >
                   <period.icon className="h-4 w-4 mr-2" />
@@ -166,6 +169,21 @@ export default function AgencyEarningsPage() {
                 <option key={year} value={year}>{year}</option>
               ))}
             </select>
+
+            {/* Toggle granularity */}
+            <ToggleGroup
+              type="single"
+              value={granularity}
+              onValueChange={(v) => v && setGranularity(v as 'month' | 'year')}
+              className="px-1 py-1 bg-white/80 backdrop-blur-sm border rounded-lg"
+            >
+              <ToggleGroupItem value="month" className="px-2 py-1 text-sm">
+                Mensuel
+              </ToggleGroupItem>
+              <ToggleGroupItem value="year" className="px-2 py-1 text-sm">
+                Annuel
+              </ToggleGroupItem>
+            </ToggleGroup>
 
             <div className="flex-1 min-w-[200px]">
               <div className="relative">
@@ -527,11 +545,7 @@ export default function AgencyEarningsPage() {
             </CardHeader>
             <CardContent className="p-6">
               <div className="text-center py-12">
-                <BarChart3 className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                <p className="text-lg font-medium text-muted-foreground mb-2">Analytics avancées</p>
-                <p className="text-sm text-muted-foreground">
-                  Graphiques détaillés et analyse des tendances - Prochainement disponible
-                </p>
+                <EarningsAnalytics agencyId={agencyId!} year={selectedYear} granularity={granularity} />
               </div>
             </CardContent>
           </Card>

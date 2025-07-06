@@ -1,4 +1,3 @@
-
 import { supabase, handleSupabaseError } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { PaymentData } from './types';
@@ -30,6 +29,8 @@ export const createPayment = async (paymentData: PaymentData) => {
 
     if (error) return handleSupabaseError(error);
 
+    // Créer commission si applicable
+    await createCommissionForPayment(data);
     return { data, error: null };
   } catch (error) {
     return handleSupabaseError(error);
@@ -92,6 +93,8 @@ export const updatePayment = async (paymentId: string, paymentData: Partial<Paym
 
     if (error) return handleSupabaseError(error);
 
+    // Créer commission si applicable
+    await createCommissionForPayment(data);
     return { data, error: null };
   } catch (error) {
     return handleSupabaseError(error);
@@ -143,3 +146,48 @@ export const getLeaseWithPayments = async (leaseId: string) => {
     return { lease: null, payments: null, error: error.message || 'An unknown error occurred' };
   }
 };
+
+// Helper: créer une commission pour un paiement de loyer
+export async function createCommissionForPayment(payment: any) {
+  try {
+    if (payment.payment_type !== 'rent') return;
+    if (!(payment.status === 'paid' || payment.status === 'advanced')) return;
+
+    // Vérifier si la commission existe déjà
+    const { data: existing } = await supabase
+      .from('commissions')
+      .select('id')
+      .eq('payment_id', payment.id)
+      .maybeSingle();
+    if (existing) return;
+
+    // Récupérer propriété pour le taux
+    const { data: leaseData } = await supabase
+      .from('leases')
+      .select('property_id')
+      .eq('id', payment.lease_id)
+      .single();
+    if (!leaseData) return;
+
+    const { data: propertyData } = await supabase
+      .from('properties')
+      .select('agency_commission_rate')
+      .eq('id', leaseData.property_id)
+      .single();
+    const rate = propertyData?.agency_commission_rate || 0;
+    if (rate <= 0) return;
+
+    const commissionAmount = (payment.amount || 0) * rate / 100;
+
+    await supabase.from('commissions').insert({
+      payment_id: payment.id,
+      lease_id: payment.lease_id,
+      property_id: leaseData.property_id,
+      amount: commissionAmount,
+      rate,
+      status: 'paid',
+    });
+  } catch (err) {
+    console.error('Erreur création commission:', err);
+  }
+}

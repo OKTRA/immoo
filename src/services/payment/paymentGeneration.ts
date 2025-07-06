@@ -1,4 +1,3 @@
-
 import { supabase, handleSupabaseError } from '@/lib/supabase';
 import { PaymentData } from './types';
 import { getPaymentFrequency, calculateNextDueDate } from '@/lib/utils';
@@ -40,7 +39,7 @@ export const generateHistoricalPayments = async (
       .from('payments')
       .select('id, payment_type')
       .eq('lease_id', leaseId)
-      .in('payment_type', ['deposit', 'agency_fee', 'initial']);
+      .in('payment_type', ['deposit', 'agency_fee']);
       
     if (checkError) {
       console.error('Error checking for existing payments:', checkError);

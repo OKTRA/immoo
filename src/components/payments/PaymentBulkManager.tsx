@@ -115,7 +115,7 @@ export default function PaymentBulkManager({
       if (!result.success) {
         toast({
           title: "Erreur",
-          description: result.error || "Une erreur est survenue lors de la mise �� jour des paiements",
+          description: result.error || "Une erreur est survenue lors de la mise à jour des paiements",
           variant: "destructive"
         });
         return;
@@ -142,10 +142,53 @@ export default function PaymentBulkManager({
     }
   };
   
+  // Action rapide : marquer comme payé
+  const handleQuickMarkPaid = async () => {
+    if (selectedPaymentIds.length === 0) return;
+
+    try {
+      const result = await updateBulkPayments({
+        paymentIds: selectedPaymentIds,
+        status: 'paid',
+        notes: undefined
+      } as any);
+
+      if (!result.success) {
+        toast({
+          title: 'Erreur',
+          description: result.error || 'Impossible de mettre à jour',
+          variant: 'destructive'
+        });
+        return;
+      }
+
+      toast({
+        title: 'Statut mis à jour',
+        description: `${selectedPaymentIds.length} paiement(s) marqué(s) comme payé`,
+        variant: 'default'
+      });
+      onPaymentsUpdated();
+    } catch (e) {
+      console.error(e);
+      toast({
+        title: 'Erreur',
+        description: 'Une erreur est survenue',
+        variant: 'destructive'
+      });
+    }
+  };
+  
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Gestion des paiements</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Gestion des paiements</CardTitle>
+          {selectedPaymentIds.length > 0 && (
+            <Button size="sm" onClick={handleQuickMarkPaid} variant="secondary">
+              Marquer comme payé ({selectedPaymentIds.length})
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <Tabs defaultValue="generate" value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2">

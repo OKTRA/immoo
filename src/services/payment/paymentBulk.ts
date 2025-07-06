@@ -1,6 +1,6 @@
-
 import { supabase } from '@/lib/supabase';
 import { BulkUpdateParams } from './types';
+import { createCommissionForPayment } from './paymentCore';
 
 export const updateBulkPayments = async ({ paymentIds, status, notes, userId }: BulkUpdateParams): Promise<{ success: boolean; error: string | null }> => {
   try {
@@ -36,17 +36,25 @@ export const updateBulkPayments = async ({ paymentIds, status, notes, userId }: 
       return acc;
     }, {} as Record<string, string>);
     
-    // Update all payments
-    const { error: updateError } = await supabase
+    // Update all payments and get updated rows
+    const { data: updatedPayments, error: updateError } = await supabase
       .from('payments')
       .update({ 
         status, 
         notes: notes ? notes : undefined,
         processed_by: userId ? userId : undefined
       })
-      .in('id', paymentIds);
+      .in('id', paymentIds)
+      .select();
       
     if (updateError) return { success: false, error: updateError.message };
+    
+    // Créer d'éventuelles commissions sur les loyers maintenant payés
+    if (updatedPayments) {
+      for (const p of updatedPayments) {
+        await createCommissionForPayment(p);
+      }
+    }
     
     // Create bulk update items for tracking
     const bulkUpdateItems = paymentIds.map(paymentId => ({

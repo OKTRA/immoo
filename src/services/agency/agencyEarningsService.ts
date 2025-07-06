@@ -73,6 +73,7 @@ export const getAgencyEarnings = async (
           amount,
           payment_type,
           payment_date,
+          due_date,
           status
         ),
         properties(
@@ -109,6 +110,7 @@ export const getAgencyEarnings = async (
         amount,
         status,
         payment_date,
+        due_date,
         created_at,
         lease_id,
         payment_type,
@@ -156,14 +158,14 @@ export const getAgencyEarnings = async (
         leaseId: comm.lease_id,
         paymentId: comm.payment_id,
         tenantName: `${comm.leases?.tenants?.first_name || ''} ${comm.leases?.tenants?.last_name || ''}`.trim() || 'Locataire inconnu',
-        createdAt: comm.created_at,
+        createdAt: (comm.payments?.due_date as string) || comm.created_at,
         processedAt: comm.processed_at
       }));
 
     // 4. Transformer les frais d'agence
     const agencyFeeEarnings: AgencyEarning[] = (agencyFees || [])
       .filter(fee => fee.leases?.properties)
-      .map(fee => ({
+      .map((fee: any) => ({
         id: `agency_fee_${fee.id}`,
         amount: fee.amount || 0,
         type: 'agency_fee' as const,
@@ -173,7 +175,7 @@ export const getAgencyEarnings = async (
         leaseId: fee.lease_id,
         paymentId: fee.id,
         tenantName: `${fee.leases?.tenants?.first_name || ''} ${fee.leases?.tenants?.last_name || ''}`.trim() || 'Locataire inconnu',
-        createdAt: fee.created_at,
+        createdAt: (fee.due_date as string) || fee.payment_date || fee.created_at,
         processedAt: fee.status === 'paid' ? fee.payment_date : undefined
       }));
 
@@ -222,65 +224,41 @@ export const getEarningsByProperty = async (
   year: number = new Date().getFullYear()
 ): Promise<PropertyEarning[]> => {
   try {
-    const { startDate, endDate } = getPeriodDates(period, year);
+    // On récupère d'abord tous les gains détaillés puis on agrège localement.
+    const { earnings } = await getAgencyEarnings(agencyId, period, year);
 
-    // Récupérer toutes les propriétés de l'agence avec leurs gains
-    const { data: properties, error } = await supabase
-      .from('properties')
-      .select(`
-        id,
-        title,
-        commissions(
-          amount,
-          rate,
-          status,
-          created_at
-        ),
-        payments(
-          amount,
-          status,
-          payment_type,
-          created_at
-        )
-      `)
-      .eq('agency_id', agencyId);
+    // Groupe par propriété
+    const map = new Map<string, PropertyEarning>();
 
-    if (error) throw error;
+    earnings.forEach((e) => {
+      const existing = map.get(e.propertyId) || {
+        propertyId: e.propertyId,
+        propertyTitle: e.propertyTitle,
+        totalEarnings: 0,
+        commissionEarnings: 0,
+        agencyFeeEarnings: 0,
+        transactionCount: 0,
+        averageCommissionRate: 0,
+      } as PropertyEarning;
 
-    const propertyEarnings: PropertyEarning[] = (properties || []).map(property => {
-      // Filtrer les commissions dans la période
-      const relevantCommissions = (property.commissions || []).filter(c => 
-        new Date(c.created_at) >= startDate && new Date(c.created_at) <= endDate
-      );
+      existing.totalEarnings += e.amount;
+      existing.transactionCount += 1;
 
-      // Filtrer les frais d'agence dans la période
-      const relevantAgencyFees = (property.payments || []).filter(p => 
-        p.payment_type === 'agency_fee' &&
-        new Date(p.created_at) >= startDate && 
-        new Date(p.created_at) <= endDate
-      );
+      if (e.type === 'commission') {
+        existing.commissionEarnings += e.amount;
+        // recalculer moyenne
+        existing.averageCommissionRate = existing.commissionEarnings > 0 && e.rate ?
+          ((existing.averageCommissionRate * (existing.transactionCount - 1) + e.rate) / existing.transactionCount)
+          : existing.averageCommissionRate;
+      } else {
+        existing.agencyFeeEarnings += e.amount;
+      }
 
-      const commissionTotal = relevantCommissions.reduce((sum, c) => sum + (c.amount || 0), 0);
-      const agencyFeeTotal = relevantAgencyFees.reduce((sum, f) => sum + (f.amount || 0), 0);
-      const totalEarnings = commissionTotal + agencyFeeTotal;
-      const transactionCount = relevantCommissions.length + relevantAgencyFees.length;
-      const averageCommissionRate = relevantCommissions.length > 0
-        ? relevantCommissions.reduce((sum, c) => sum + (c.rate || 0), 0) / relevantCommissions.length
-        : 0;
+      map.set(e.propertyId, existing);
+    });
 
-      return {
-        propertyId: property.id,
-        propertyTitle: property.title,
-        totalEarnings,
-        commissionEarnings: commissionTotal,
-        agencyFeeEarnings: agencyFeeTotal,
-        transactionCount,
-        averageCommissionRate
-      };
-    }).filter(p => p.totalEarnings > 0); // Ne garder que les propriétés avec des gains
-
-    return propertyEarnings.sort((a, b) => b.totalEarnings - a.totalEarnings);
-
+    const result = Array.from(map.values()).sort((a, b) => b.totalEarnings - a.totalEarnings);
+    return result;
   } catch (error: any) {
     console.error('Error fetching earnings by property:', error);
     throw new Error(`Erreur lors de la récupération des gains par propriété: ${error.message}`);
@@ -295,23 +273,33 @@ export const getMonthlyEarnings = async (
   year: number = new Date().getFullYear()
 ): Promise<{ month: string; commissions: number; agencyFees: number; total: number }[]> => {
   try {
-    const monthlyData = [];
+    // Récupère les gains de toute l'année une seule fois
+    const { earnings } = await getAgencyEarnings(agencyId, 'year', year);
 
-    for (let month = 0; month < 12; month++) {
-      const startDate = new Date(year, month, 1);
-      const endDate = new Date(year, month + 1, 0, 23, 59, 59);
+    // Tableau 12 mois initialisé à zéro
+    const monthsArray = Array.from({ length: 12 }, (_, idx) => ({
+      monthIndex: idx,
+      commissions: 0,
+      agencyFees: 0,
+      total: 0,
+    }));
 
-      const { summary } = await getAgencyEarnings(agencyId, 'month', year);
-      
-      monthlyData.push({
-        month: startDate.toLocaleDateString('fr-FR', { month: 'short' }),
-        commissions: summary.commissionEarnings,
-        agencyFees: summary.agencyFeeEarnings,
-        total: summary.totalEarnings
-      });
-    }
+    earnings.forEach((e) => {
+      const d = new Date(e.createdAt);
+      if (d.getFullYear() !== year) return;
+      const m = d.getMonth();
+      const bucket = monthsArray[m];
+      if (e.type === 'commission') bucket.commissions += e.amount;
+      else bucket.agencyFees += e.amount;
+      bucket.total += e.amount;
+    });
 
-    return monthlyData;
+    return monthsArray.map((m) => ({
+      month: new Date(year, m.monthIndex, 1).toLocaleDateString('fr-FR', { month: 'short' }),
+      commissions: m.commissions,
+      agencyFees: m.agencyFees,
+      total: m.total,
+    }));
   } catch (error: any) {
     console.error('Error fetching monthly earnings:', error);
     throw new Error(`Erreur lors de la récupération des gains mensuels: ${error.message}`);
