@@ -2,20 +2,19 @@ import { useQuery } from "@tanstack/react-query";
 import { getUserAgencies } from "@/services/agency";
 import AgencyCard from "@/components/AgencyCard";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Building2 } from "lucide-react";
 import { Link } from "react-router-dom";
-import UpgradeButton from "@/components/subscription/UpgradeButton";
-import LimitWarning from "@/components/subscription/LimitWarning";
-import { useUserSubscription } from "@/hooks/useUserSubscription";
 import { useAuth, useAuthStatus } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Navbar from "@/components/Navbar";
+import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 
 export default function AgenciesPage() {
   const { user, profile, initialized } = useAuth();
   const { isAuthenticated, isReady } = useAuthStatus();
-  const { subscription, checkLimit, isFreePlan, loading: subscriptionLoading, reloadSubscription } = useUserSubscription();
-  const [agencyLimit, setAgencyLimit] = useState<any>(null);
   const [forceLoad, setForceLoad] = useState(false);
   const navigate = useNavigate();
   
@@ -27,10 +26,9 @@ export default function AgenciesPage() {
       isReady,
       isAuthenticated,
       initialized,
-      subscriptionLoading,
       forceLoad
     });
-  }, [user, isReady, isAuthenticated, initialized, subscriptionLoading, forceLoad]);
+  }, [user, isReady, isAuthenticated, initialized, forceLoad]);
 
   // Forcer le chargement après 3 secondes si l'auth ne se charge pas
   useEffect(() => {
@@ -80,47 +78,24 @@ export default function AgenciesPage() {
 
   const agencies = data?.agencies || [];
 
-  // Charger l'abonnement au montage du composant
-  useEffect(() => {
-    if (user?.id && !subscriptionLoading && !subscription) {
-      console.log('🔍 Reloading subscription for user:', user.id);
-      reloadSubscription();
-    }
-  }, [user?.id, subscriptionLoading, subscription, reloadSubscription]);
-
-  // Vérifier les limites dès que l'abonnement est chargé
-  useEffect(() => {
-    const checkAgencyLimits = async () => {
-      if (user?.id && subscription) {
-        console.log('🔍 Checking agency limits for user:', user.id);
-        const limit = await checkLimit('agencies');
-        setAgencyLimit(limit);
-      }
-    };
-
-    if (!subscriptionLoading) {
-      checkAgencyLimits();
-    }
-  }, [user?.id, subscription, checkLimit, subscriptionLoading]);
-
   const handleCreateAgency = () => {
-    if (agencyLimit && !agencyLimit.allowed) {
-      return;
-    }
     navigate('/agencies/create');
   };
 
   // Afficher un loading pendant que l'auth se charge
-  if (!initialized || subscriptionLoading) {
-    console.log('🔍 Showing loading state - initialized:', initialized, 'subscriptionLoading:', subscriptionLoading);
+  if (!initialized) {
+    console.log('🔍 Showing loading state - initialized:', initialized);
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted/50 rounded w-1/4 mb-4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-muted/50 rounded-lg"></div>
-            ))}
+      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 pt-24">
+          <div className="animate-pulse">
+            <div className="h-8 bg-muted/50 rounded w-1/4 mb-4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-64 bg-muted/50 rounded-lg"></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -130,13 +105,16 @@ export default function AgenciesPage() {
   if (isLoading) {
     console.log('🔍 Query is loading...');
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-muted/50 rounded w-1/4 mb-4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-64 bg-muted/50 rounded-lg"></div>
-            ))}
+      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 pt-24">
+          <div className="animate-pulse">
+            <div className="h-8 bg-muted/50 rounded w-1/4 mb-4"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="h-64 bg-muted/50 rounded-lg"></div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -146,16 +124,19 @@ export default function AgenciesPage() {
   if (error) {
     console.error('🔍 Query error:', error);
     return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Erreur</h2>
-          <p className="text-muted-foreground mb-4">
-            Impossible de charger vos agences
-          </p>
-          <div className="space-y-2">
-            <Button onClick={() => refetch()}>Réessayer</Button>
-            <div className="text-sm text-muted-foreground">
-              {error instanceof Error ? error.message : 'Erreur inconnue'}
+      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8 pt-24">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold mb-4">Erreur</h2>
+            <p className="text-muted-foreground mb-4">
+              Impossible de charger vos agences
+            </p>
+            <div className="space-y-2">
+              <Button onClick={() => refetch()}>Réessayer</Button>
+              <div className="text-sm text-muted-foreground">
+                {error instanceof Error ? error.message : 'Erreur inconnue'}
+              </div>
             </div>
           </div>
         </div>
@@ -163,130 +144,102 @@ export default function AgenciesPage() {
     );
   }
 
-  const canCreateAgency = agencyLimit ? agencyLimit.allowed : true; // Default to true if no limit check yet
-
   console.log('🔍 Rendering agencies page with', agencies.length, 'agencies');
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Mes Agences</h1>
-          <p className="text-muted-foreground">
-            {subscription?.plan ? `Plan ${subscription.plan.name}` : 'Plan gratuit'}
-            {agencyLimit && (
-              <span className="ml-2">
-                - {agencyLimit.currentCount}/{agencyLimit.maxAllowed} agences utilisées
-              </span>
-            )}
-          </p>
-        </div>
-        <div className="flex items-center gap-4">
-          {isFreePlan() && <UpgradeButton />}
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => refetch()}
-            className="flex items-center gap-2"
+    <div className="min-h-screen bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50">
+      <Navbar />
+      
+      {/* Hero Section */}
+      <section className="pt-24 pb-8">
+        <div className="container mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-8"
           >
-            ↻ Actualiser
-          </Button>
-          <Button 
-            onClick={handleCreateAgency}
-            disabled={!canCreateAgency}
-            className={!canCreateAgency ? "opacity-50 cursor-not-allowed" : ""}
+            <div className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full bg-immoo-gold/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/20 mb-4">
+              <Building2 className="mr-2 h-4 w-4" />
+              Gestion d'Agences
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-immoo-navy dark:text-immoo-pearl mb-4">
+              Mes Agences
+            </h1>
+            <p className="text-lg text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-2xl mx-auto">
+              Gérez vos agences immobilières et optimisez votre activité
+            </p>
+          </motion.div>
+
+          {/* Create Agency Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="flex justify-center mb-8"
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Créer une agence
-          </Button>
-        </div>
-      </div>
-
-      {/* Alerte de limite */}
-      {agencyLimit && !agencyLimit.allowed && (
-        <div className="mb-6">
-          <LimitWarning
-            resourceType="agencies"
-            currentCount={agencyLimit.currentCount}
-            maxAllowed={agencyLimit.maxAllowed}
-            onUpgrade={() => navigate('/pricing')}
-          />
-        </div>
-      )}
-
-      {/* Information sur les limitations - Affichage corrigé */}
-      {subscription?.plan && (
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-          <h3 className="font-semibold mb-2">Limitations de votre plan {subscription.plan.name}</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <span className="text-muted-foreground">Agences:</span>
-              <span className="ml-2 font-medium">
-                {agencyLimit ? `${agencyLimit.currentCount}/${agencyLimit.maxAllowed}` : `${agencies.length}/${subscription.plan.maxAgencies || 1}`}
-              </span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Propriétés:</span>
-              <span className="ml-2 font-medium">{subscription.plan.maxProperties || 1}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Baux:</span>
-              <span className="ml-2 font-medium">{subscription.plan.maxLeases || 1}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Utilisateurs:</span>
-              <span className="ml-2 font-medium">{subscription.plan.maxUsers || 1}</span>
-            </div>
-          </div>
-          
-          {/* Debug info en mode développement */}
-          {process.env.NODE_ENV === 'development' && (
-            <details className="mt-4">
-              <summary className="cursor-pointer text-sm text-muted-foreground">Debug Info (Dev only)</summary>
-              <pre className="mt-2 text-xs bg-muted p-2 rounded overflow-auto">
-                {JSON.stringify({
-                  subscription: subscription,
-                  agencyLimit: agencyLimit,
-                  agenciesCount: agencies.length,
-                  isFreePlan: isFreePlan()
-                }, null, 2)}
-              </pre>
-            </details>
-          )}
-        </div>
-      )}
-
-      {agencies.length === 0 ? (
-        <div className="text-center py-16">
-          <h3 className="text-xl font-medium mb-2">Aucune agence trouvée</h3>
-          <p className="text-muted-foreground mb-6">
-            Commencez par créer votre première agence
-          </p>
-          {canCreateAgency ? (
-            <Button onClick={handleCreateAgency}>
-              <Plus className="w-4 h-4 mr-2" />
-              Créer une agence
+            <Button
+              onClick={handleCreateAgency}
+              className="h-12 px-8 rounded-xl bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <Plus className="h-5 w-5 mr-2" />
+              Nouvelle Agence
             </Button>
-          ) : (
-            <div className="space-y-4">
-              <p className="text-red-600 dark:text-red-400">
-                Vous avez atteint la limite de votre plan gratuit
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Agencies Grid */}
+      <section className="pb-16">
+        <div className="container mx-auto px-4">
+          {agencies.length === 0 ? (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+              className="text-center py-16"
+            >
+              <div className="w-24 h-24 bg-gradient-to-r from-immoo-gold/20 to-immoo-gold-light/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Building2 className="h-12 w-12 text-immoo-gold" />
+              </div>
+              <h3 className="text-xl font-semibold text-immoo-navy dark:text-immoo-pearl mb-2">
+                Aucune agence trouvée
+              </h3>
+              <p className="text-immoo-navy/70 dark:text-immoo-pearl/70 mb-6 max-w-md mx-auto">
+                Commencez par créer votre première agence pour gérer vos biens immobiliers
               </p>
-              <UpgradeButton />
-            </div>
+              <Button
+                onClick={handleCreateAgency}
+                className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Plus className="h-5 w-5 mr-2" />
+                Créer ma première agence
+              </Button>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {agencies.map((agency, index) => (
+                <motion.div
+                  key={agency.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: index * 0.1 }}
+                >
+                  <AgencyCard 
+                    agency={agency} 
+                    onDelete={() => refetch()}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
           )}
         </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {agencies.map((agency) => (
-            <AgencyCard 
-              key={agency.id} 
-              agency={agency} 
-              onDelete={() => refetch()}
-            />
-          ))}
-        </div>
-      )}
+      </section>
     </div>
   );
 }

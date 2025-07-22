@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { AlertCircle, Loader2, Building2 } from 'lucide-react';
+import { AlertCircle, Loader2, Building2, User, Mail, Lock, Phone, FileText } from 'lucide-react';
 import { signUp } from '@/services/authService';
 import { toast } from 'sonner';
 
@@ -105,137 +105,205 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-          <Building2 className="w-6 h-6 text-primary" />
+    <div className="w-full max-w-2xl mx-auto">
+      {/* Modern Header */}
+      <div className="text-center space-y-4 mb-8">
+        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-immoo-gold to-immoo-gold-light rounded-2xl flex items-center justify-center shadow-lg">
+          <Building2 className="w-8 h-8 text-immoo-navy" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Devenir Agence</h2>
-        <p className="text-gray-600">Rejoignez notre réseau d'agences immobilières</p>
+        <div className="space-y-2">
+          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-immoo-navy to-immoo-navy-light bg-clip-text text-transparent">
+            Devenir Agence
+          </h2>
+          <p className="text-lg text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-md mx-auto">
+            Rejoignez notre réseau d'agences immobilières
+          </p>
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-8">
         {error && (
-          <div className="bg-destructive/15 p-3 rounded-md flex items-start space-x-2 text-sm text-destructive">
-            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-xl flex items-start space-x-3 text-sm text-red-700 dark:text-red-300">
+            <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
         {/* Informations personnelles */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">Informations personnelles</h3>
+        <div className="bg-white/50 dark:bg-immoo-navy-light/30 backdrop-blur-sm rounded-2xl p-6 border border-immoo-gold/10">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-r from-immoo-gold/20 to-immoo-gold-light/20 rounded-xl flex items-center justify-center">
+              <User className="w-5 h-5 text-immoo-gold" />
+            </div>
+            <h3 className="text-xl font-bold text-immoo-navy dark:text-immoo-pearl">
+              Informations personnelles
+            </h3>
+          </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">Prénom</Label>
+              <Label htmlFor="firstName" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+                Prénom
+              </Label>
+              <div className="relative">
+                <Input
+                  id="firstName"
+                  type="text"
+                  value={formData.firstName}
+                  onChange={(e) => handleInputChange('firstName', e.target.value)}
+                  placeholder="Votre prénom"
+                  className="h-12 px-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
+                  required
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="lastName" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+                Nom
+              </Label>
+              <div className="relative">
+                <Input
+                  id="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={(e) => handleInputChange('lastName', e.target.value)}
+                  placeholder="Votre nom"
+                  className="h-12 px-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2 mb-4">
+            <Label htmlFor="email" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+              Email professionnel
+            </Label>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-immoo-navy/40 dark:text-immoo-pearl/40" />
               <Input
-                id="firstName"
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                placeholder="votre@email.com"
+                autoComplete="email"
+                className="h-12 pl-10 pr-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
+                required
+              />
+            </div>
+          </div>
+          
+          <div className="space-y-2 mb-4">
+            <Label htmlFor="password" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+              Mot de passe
+            </Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-immoo-navy/40 dark:text-immoo-pearl/40" />
+              <Input
+                id="password"
+                type="password"
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                placeholder="Minimum 6 caractères"
+                autoComplete="new-password"
+                className="h-12 pl-10 pr-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="phone" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+              Téléphone
+            </Label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-immoo-navy/40 dark:text-immoo-pearl/40" />
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => handleInputChange('phone', e.target.value)}
+                placeholder="+223 X XX XX XX XX"
+                className="h-12 pl-10 pr-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Informations agence */}
+        <div className="bg-white/50 dark:bg-immoo-navy-light/30 backdrop-blur-sm rounded-2xl p-6 border border-immoo-gold/10">
+          <div className="flex items-center space-x-3 mb-6">
+            <div className="w-10 h-10 bg-gradient-to-r from-immoo-navy/20 to-immoo-navy-light/20 rounded-xl flex items-center justify-center">
+              <Building2 className="w-5 h-5 text-immoo-navy dark:text-immoo-pearl" />
+            </div>
+            <h3 className="text-xl font-bold text-immoo-navy dark:text-immoo-pearl">
+              Informations agence
+            </h3>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="agencyName" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+                Nom de l'agence
+              </Label>
+              <Input
+                id="agencyName"
                 type="text"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange('firstName', e.target.value)}
-                placeholder="Votre prénom"
+                value={formData.agencyName}
+                onChange={(e) => handleInputChange('agencyName', e.target.value)}
+                placeholder="Nom de votre agence"
+                className="h-12 px-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
                 required
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="lastName">Nom</Label>
-              <Input
-                id="lastName"
-                type="text"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange('lastName', e.target.value)}
-                placeholder="Votre nom"
-                required
-              />
+              <Label htmlFor="description" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+                Description de l'agence
+              </Label>
+              <div className="relative">
+                <FileText className="absolute left-3 top-3 w-5 h-5 text-immoo-navy/40 dark:text-immoo-pearl/40" />
+                <Textarea
+                  id="description"
+                  value={formData.description}
+                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  placeholder="Décrivez votre agence, vos services, votre expérience..."
+                  rows={4}
+                  className="pl-10 pr-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200 resize-none"
+                />
+              </div>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email professionnel</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              placeholder="votre@email.com"
-              autoComplete="email"
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="password">Mot de passe</Label>
-            <Input
-              id="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleInputChange('password', e.target.value)}
-              placeholder="Minimum 6 caractères"
-              autoComplete="new-password"
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone">Téléphone</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
-              placeholder="+33 X XX XX XX XX"
-            />
-          </div>
-        </div>
-
-        {/* Informations agence */}
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900">Informations agence</h3>
-          
-          <div className="space-y-2">
-            <Label htmlFor="agencyName">Nom de l'agence</Label>
-            <Input
-              id="agencyName"
-              type="text"
-              value={formData.agencyName}
-              onChange={(e) => handleInputChange('agencyName', e.target.value)}
-              placeholder="Nom de votre agence"
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="description">Description de l'agence</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Décrivez votre agence, vos services, votre expérience..."
-              rows={4}
-            />
           </div>
         </div>
         
-        <Button type="submit" className="w-full" disabled={isLoading}>
+        <Button 
+          type="submit" 
+          className="w-full h-14 bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]" 
+          disabled={isLoading}
+        >
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-3 h-5 w-5 animate-spin" />
               Envoi en cours...
             </>
-          ) : 'Soumettre ma demande'}
+          ) : (
+            <>
+              <Building2 className="mr-3 h-5 w-5" />
+              Soumettre ma demande
+            </>
+          )}
         </Button>
       </form>
 
       {onSwitchToLogin && (
-        <div className="text-center space-y-2">
-          <p className="text-sm text-gray-600">
+        <div className="text-center space-y-2 mt-8">
+          <p className="text-sm text-immoo-navy/70 dark:text-immoo-pearl/70">
             Déjà une agence?{' '}
             <button 
               type="button"
-              className="text-primary hover:underline font-medium"
+              className="text-immoo-gold hover:text-immoo-gold-light font-semibold transition-colors duration-200"
               onClick={onSwitchToLogin}
             >
               Se connecter

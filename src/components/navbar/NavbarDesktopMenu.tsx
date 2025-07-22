@@ -30,7 +30,15 @@ export function NavbarDesktopMenu({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleUserTypeClick = (type: UserType) => {
-    console.log('Espace Agence Clicked. User authenticated:', !!user);
+    console.log(`${type.name} Clicked. User authenticated:`, !!user);
+    
+    // Les pages publiques sont accessibles sans authentification
+    if (type.isPublic) {
+      console.log('Navigating to public page:', type.name);
+      navigate(type.path);
+      return;
+    }
+    
     if (user) {
       console.log('User object:', user);
       console.log('Redirecting to:', type.path);

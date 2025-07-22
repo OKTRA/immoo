@@ -21,11 +21,13 @@ import ManageTenantsPage from "@/pages/ManageTenantsPage";
 import PropertyLeasePaymentsPage from "@/pages/PropertyLeasePaymentsPage";
 import AgencyPaymentsPage from "@/pages/AgencyPaymentsPage";
 import AgencyEarningsPage from "@/pages/AgencyEarningsPage";
+import AgencyExpensesPage from "@/pages/AgencyExpensesPage";
 import AgencyPropertiesPage from "@/pages/AgencyPropertiesPage";
 import AgencyLeasesPage from "@/pages/AgencyLeasesPage";
 import AgencySettingsPage from "@/pages/AgencySettingsPage";
 import PricingPage from "@/pages/PricingPage";
 import LogoShowcasePage from "@/pages/LogoShowcasePage";
+import ImmoAgencyPage from "@/pages/ImmoAgencyPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AgencyLayout from "@/components/agency/AgencyLayout";
 import Auth from "@/pages/Auth";
@@ -39,6 +41,8 @@ import { VisitorTracker } from "./components/analytics/VisitorTracker";
 import { useAutoVisitorSession } from "./hooks/useAutoVisitorSession";
 import routes from "tempo-routes";
 import AuthProvider from "@/contexts/auth/AuthContext";
+import AgencyContractsPage from "./pages/agency/AgencyContractsPage";
+import AgencyCreateContractPage from "./pages/agency/AgencyCreateContractPage";
 
 const queryClient = new QueryClient();
 
@@ -68,6 +72,7 @@ function App() {
               <Route path="/public-agency/:agencyId" element={<PublicAgencyPage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/immo-agency" element={<ImmoAgencyPage />} />
               <Route path="/logo-showcase" element={<LogoShowcasePage />} />
               
               {/* Routes d'authentification */}
@@ -115,6 +120,10 @@ function App() {
                   element={<AgencyEarningsPage />}
                 />
                 <Route
+                  path="/agencies/:agencyId/expenses"
+                  element={<AgencyExpensesPage />}
+                />
+                <Route
                   path="/agencies/:agencyId/settings"
                   element={<AgencySettingsPage />}
                 />
@@ -149,6 +158,15 @@ function App() {
                 <Route
                   path="/agencies/:agencyId/properties/:propertyId/leases/:leaseId/payments"
                   element={<PropertyLeasePaymentsPage />}
+                />
+                {/* Ajout des routes contrats */}
+                <Route
+                  path="/agencies/:agencyId/contracts"
+                  element={<AgencyContractsPage />}
+                />
+                <Route
+                  path="/agencies/:agencyId/contracts/create"
+                  element={<AgencyCreateContractPage />}
                 />
               </Route>
 

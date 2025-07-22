@@ -11,9 +11,14 @@ export default function Footer() {
             © {currentYear} Made with 
             <Heart className="w-4 h-4 text-red-400 fill-current animate-pulse" /> 
             by 
-            <span className="text-immoo-gold font-semibold hover:text-immoo-gold-light transition-colors duration-300">
+            <a 
+              href="https://www.oktra.dev" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-immoo-gold font-semibold hover:text-immoo-gold-light transition-colors duration-300"
+            >
               OKTRA
-            </span>
+            </a>
           </p>
         </div>
       </div>

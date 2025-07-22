@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useInView, motion } from "framer-motion";
-import { BarChart3, Building2, Briefcase, Shield, Users2, FileText, ArrowRight } from "lucide-react";
-import { Feature, UserTypeOption } from "@/assets/types";
+import { BarChart3, Building2, Briefcase, Shield, Users2, FileText } from "lucide-react";
+import { Feature } from "@/assets/types";
 
 export default function FeatureSection() {
   const features: Feature[] = [
@@ -37,26 +37,10 @@ export default function FeatureSection() {
     }
   ];
 
-  const userTypes: UserTypeOption[] = [
-    {
-      type: "agency",
-      label: "Espace Agence",
-      path: "/agence",
-      description: "Suite complète d'outils pour optimiser votre gestion locative et développer votre activité."
-    },
-    {
-      type: "owner",
-      label: "Espace Propriétaire",
-      path: "/owner",
-      description: "Interface simplifiée pour suivre vos biens, revenus et communiquer avec votre agence."
-    },
 
-  ];
 
   const featureRef = useRef(null);
-  const userTypeRef = useRef(null);
   const isFeatureInView = useInView(featureRef, { once: true, amount: 0.2 });
-  const isUserTypeInView = useInView(userTypeRef, { once: true, amount: 0.2 });
 
   // Map icon string to icon component
   const getIconComponent = (iconName: string) => {
@@ -146,59 +130,7 @@ export default function FeatureSection() {
           </div>
         </motion.div>
 
-        {/* User Types Section */}
-        <motion.div 
-          ref={userTypeRef}
-          className="max-w-5xl mx-auto mt-16"
-          initial="hidden"
-          animate={isUserTypeInView ? "visible" : "hidden"}
-          variants={containerVariants}
-        >
-          <motion.div variants={itemVariants} className="text-center mb-8">
-            <div className="mb-3">
-              <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-immoo-navy/10 dark:bg-immoo-pearl/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-navy/20 dark:border-immoo-pearl/20">
-                Espaces dédiés
-              </span>
-            </div>
-            <h2 className="text-2xl md:text-3xl font-bold mb-4 text-immoo-navy dark:text-immoo-pearl">
-              Pour chaque utilisateur
-            </h2>
-            <p className="text-sm md:text-base text-immoo-navy/60 dark:text-immoo-pearl/60 max-w-2xl mx-auto">
-              IMMOO s'adapte à vos besoins spécifiques
-            </p>
-          </motion.div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-            {userTypes.map((userType, index) => (
-              <motion.a 
-                key={index} 
-                href={userType.path}
-                className="block h-full group"
-                variants={itemVariants}
-              >
-                <div className="relative p-6 h-full bg-white/90 dark:bg-immoo-navy-light/90 backdrop-blur-sm rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300">
-                  {/* Number Badge */}
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-gradient-to-r from-immoo-gold to-immoo-gold-light rounded-full flex items-center justify-center text-immoo-navy font-bold text-xs shadow-sm">
-                    {index + 1}
-                  </div>
-                  
-                  <div className="flex flex-col h-full">
-                    <h3 className="text-lg font-bold mb-3 text-immoo-navy dark:text-immoo-pearl group-hover:text-immoo-gold transition-colors duration-300">{userType.label}</h3>
-                    <p className="text-sm text-immoo-navy/60 dark:text-immoo-pearl/60 mb-4 flex-grow leading-relaxed">
-                      {userType.description}
-                    </p>
-                    <div className="mt-auto">
-                      <div className="inline-flex items-center text-immoo-gold font-medium text-sm group-hover:text-immoo-gold-light transition-all duration-300">
-                        Découvrir
-                        <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.a>
-            ))}
-          </div>
-        </motion.div>
+
       </div>
     </section>
   );

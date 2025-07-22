@@ -28,6 +28,13 @@ export function NavbarMobileMenu({
 
   const handleUserTypeClick = (type: UserType) => {
     setMobileMenuOpen(false);
+    
+    // Les pages publiques sont accessibles sans authentification
+    if (type.isPublic) {
+      navigate(type.path);
+      return;
+    }
+    
     if (user) {
       navigate(type.path);
     } else {

@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { Spinner } from '@/components/ui/spinner';
+import AgencyLayout from "@/components/agency/AgencyLayout";
 
 // Lazy-loaded components that exist
 const HomePage = lazy(() => import('@/pages/HomePage'));
@@ -15,7 +16,11 @@ const PublicAgencyPage = lazy(() => import('@/pages/PublicAgencyPage'));
 const LogoShowcasePage = lazy(() => import('@/pages/LogoShowcasePage'));
 const TestLogoAdaptive = lazy(() => import('@/pages/TestLogoAdaptive'));
 const TestMobileNavigation = lazy(() => import('@/pages/TestMobileNavigation'));
+const ImmoAgencyPage = lazy(() => import('@/pages/ImmoAgencyPage'));
 import PricingPage from '@/pages/PricingPage';
+import ContractsPage from "./pages/ContractsPage";
+import AgencyContractsPage from "./pages/agency/AgencyContractsPage";
+import AgencyCreateContractPage from "./pages/agency/AgencyCreateContractPage";
 
 export const router = createBrowserRouter([
   {
@@ -44,6 +49,17 @@ export const router = createBrowserRouter([
             <BrowseAgenciesPage />
           </Suspense>
         ),
+      },
+      {
+        path: '/agencies/:agencyId',
+        element: <AgencyLayout />,
+        children: [
+          // Ajoute ici les autres sous-pages agence si besoin, ex :
+          // { path: '', element: <AgencyOverviewPage /> },
+          { path: 'contracts', element: <AgencyContractsPage /> },
+          { path: 'contracts/create', element: <AgencyCreateContractPage /> },
+          // ... autres sous-pages (properties, tenants, etc.)
+        ]
       },
       {
         path: '/public-agency/:agencyId',
@@ -96,6 +112,14 @@ export const router = createBrowserRouter([
         element: <PricingPage />
       },
       {
+        path: "/immo-agency",
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <ImmoAgencyPage />
+          </Suspense>
+        ),
+      },
+      {
         path: "/logo-showcase",
         element: (
           <Suspense fallback={<Spinner />}>
@@ -118,6 +142,10 @@ export const router = createBrowserRouter([
             <TestMobileNavigation />
           </Suspense>
         ),
+      },
+      {
+        path: "/contracts",
+        element: <ContractsPage />,
       },
       {
         path: '/login',

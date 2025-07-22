@@ -10,6 +10,7 @@ import {
   Settings,
   Menu,
   LogOut,
+  Receipt,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -69,6 +70,11 @@ export default function AgencySidebar() {
       path: `/agencies/${agencyId}/leases`,
     },
     {
+      title: "Contrats",
+      icon: FileText,
+      path: `/agencies/${agencyId}/contracts`,
+    },
+    {
       title: "Paiements",
       icon: CreditCard,
       path: `/agencies/${agencyId}/payments`,
@@ -77,6 +83,11 @@ export default function AgencySidebar() {
       title: "Gains",
       icon: DollarSign,
       path: `/agencies/${agencyId}/earnings`,
+    },
+    {
+      title: "Dépenses",
+      icon: Receipt,
+      path: `/agencies/${agencyId}/expenses`,
     },
     {
       title: "Paramètres",

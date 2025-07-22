@@ -177,20 +177,7 @@ export default function HeroSection() {
               {/* Compact Quick Filters */}
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {searchType === "properties" ? (
-                  <>
-                    <span className="flex items-center px-3 py-1.5 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg text-xs font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/10 cursor-pointer hover:border-immoo-gold/30 transition-colors">
-                      <MapPin className="h-3 w-3 mr-1.5 text-immoo-gold" />
-                      Paris 15ème
-                    </span>
-                    <span className="flex items-center px-3 py-1.5 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg text-xs font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/10 cursor-pointer hover:border-immoo-gold/30 transition-colors">
-                      <Home className="h-3 w-3 mr-1.5 text-immoo-gold" />
-                      2-3 pièces
-                    </span>
-                    <span className="flex items-center px-3 py-1.5 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg text-xs font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/10 cursor-pointer hover:border-immoo-gold/30 transition-colors">
-                      <Building className="h-3 w-3 mr-1.5 text-immoo-gold" />
-                      {"< 1500€"}
-                    </span>
-                  </>
+                  <></>
                 ) : (
                   <>
                     <span className="flex items-center px-3 py-1.5 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg text-xs font-medium text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/10 cursor-pointer hover:border-immoo-gold/30 transition-colors">

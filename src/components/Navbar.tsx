@@ -43,6 +43,12 @@ export default function Navbar() {
       role: "agency" 
     },
     { 
+      name: "IMMOO Agency", 
+      path: "/immo-agency",
+      role: "agency",
+      isPublic: true
+    },
+    { 
       name: "Admin", 
       path: "/admin",
       role: "admin" 
