@@ -25,7 +25,9 @@ import {
   Calendar,
   Search,
   FileText,
-  Trash2
+  Trash2,
+  Eye,
+  Link
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { getLeasesByAgencyId } from "@/services/tenant/leaseService";
@@ -35,6 +37,7 @@ import { cancelLease } from '@/services/tenant/lease';
 import { terminateLease } from '@/services/tenant/lease';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,AlertDialogDescription,AlertDialogFooter,AlertDialogCancel,AlertDialogAction } from '@/components/ui/alert-dialog';
 import LeaseDetailsDialog from './LeaseDetailsDialog';
+import { getContractByLeaseId } from '@/services/contracts/contractWysiwygService';
 
 interface AgencyLeasesDisplayProps {
   agencyId: string;
@@ -114,6 +117,38 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
 
   const handleViewLeasePayments = (leaseId: string, propertyId: string) => {
     navigate(`/agencies/${agencyId}/properties/${propertyId}/leases/${leaseId}/payments`);
+  };
+
+  const handleViewContract = async (leaseId: string) => {
+    try {
+      // Vérifier s'il existe déjà un contrat pour ce bail
+      const existingContract = await getContractByLeaseId(leaseId);
+      
+      if (existingContract) {
+        // Naviguer vers la page des contrats en mode vue avec ce contrat spécifique
+        navigate(`/agencies/${agencyId}/contracts`, { 
+          state: { 
+            viewContractId: existingContract.id,
+            contractData: existingContract 
+          } 
+        });
+      } else {
+        // Aucun contrat existant, naviguer vers la création avec le bail pré-sélectionné
+        navigate(`/agencies/${agencyId}/contracts/create?leaseId=${leaseId}`);
+      }
+    } catch (error) {
+      console.error('Error checking contract for lease:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de vérifier le contrat associé",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleAssignContract = (leaseId: string) => {
+    // Naviguer vers la page de création de contrat avec le bail pré-sélectionné
+    navigate(`/agencies/${agencyId}/contracts/create?leaseId=${leaseId}`);
   };
 
   const handleCreateLease = () => {
@@ -276,6 +311,24 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                           </Button>
                         </>
                       )}
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleViewContract(lease.id)}
+                        title="Voir le contrat"
+                      >
+                        <Eye className="h-4 w-4 mr-1" />
+                        Voir contrat
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="outline"
+                        onClick={() => handleAssignContract(lease.id)}
+                        title="Attribuer un contrat"
+                      >
+                        <Link className="h-4 w-4 mr-1" />
+                        Attribuer
+                      </Button>
                       <Button 
                         size="sm" 
                         variant="default"

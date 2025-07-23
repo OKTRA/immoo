@@ -43,6 +43,10 @@ import routes from "tempo-routes";
 import AuthProvider from "@/contexts/auth/AuthContext";
 import AgencyContractsPage from "./pages/agency/AgencyContractsPage";
 import AgencyCreateContractPage from "./pages/agency/AgencyCreateContractPage";
+import ContractEditorPage from "./pages/contracts/ContractEditorPage";
+import ContractsListPage from "./pages/contracts/ContractsListPage";
+import TestContractEditor from "./pages/TestContractEditor";
+import TestContractFormatting from "./pages/TestContractFormatting";
 
 const queryClient = new QueryClient();
 
@@ -168,7 +172,20 @@ function App() {
                   path="/agencies/:agencyId/contracts/create"
                   element={<AgencyCreateContractPage />}
                 />
+                <Route
+                  path="/agencies/:agencyId/contracts/:contractId"
+                  element={<ContractEditorPage />}
+                />
               </Route>
+
+              {/* Routes pour l'éditeur WYSIWYG de contrats */}
+              <Route path="/contracts" element={<ContractsListPage />} />
+              <Route path="/contracts/new" element={<ContractEditorPage />} />
+              <Route path="/contracts/:contractId" element={<ContractEditorPage />} />
+
+              {/* Routes de test pour l'éditeur */}
+              <Route path="/test-contract-editor" element={<TestContractEditor />} />
+              <Route path="/test-contract-formatting" element={<TestContractFormatting />} />
 
               <Route path="*" element={<NotFoundPage />} />
             </Routes>

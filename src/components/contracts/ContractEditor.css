@@ -1,0 +1,613 @@
+/* Styles pour l'éditeur WYSIWYG de contrats */
+
+/* Éditeur principal */
+.contract-editor {
+  @apply min-h-[600px] border border-gray-200 rounded-md bg-white;
+}
+
+/* Barre d'outils */
+.contract-editor-toolbar {
+  @apply border-b border-gray-200 bg-white p-4 space-y-4;
+}
+
+.contract-editor-toolbar-group {
+  @apply flex flex-wrap gap-2;
+}
+
+.contract-editor-toolbar-button {
+  @apply flex items-center gap-1 px-3 py-2 text-sm font-medium rounded-md transition-colors;
+}
+
+.contract-editor-toolbar-button.active {
+  @apply bg-blue-100 text-blue-700 border-blue-300;
+}
+
+.contract-editor-toolbar-button:hover:not(:disabled) {
+  @apply bg-gray-100;
+}
+
+.contract-editor-toolbar-button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Zone d'édition */
+.contract-editor-content {
+  @apply p-6 min-h-[500px] focus:outline-none;
+  line-height: 1.8;
+  font-family: 'Times New Roman', serif;
+  background-color: #ffffff;
+  color: #1f2937;
+}
+
+/* Styles pour le contenu éditable */
+.contract-editor-content h1 {
+  @apply text-3xl font-bold mb-6 text-center;
+  color: #111827;
+  text-decoration: underline;
+}
+
+.contract-editor-content h2 {
+  @apply text-2xl font-bold mb-4 mt-6;
+  color: #111827;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.contract-editor-content h3 {
+  @apply text-xl font-semibold mb-3 mt-4;
+  color: #1f2937;
+}
+
+.contract-editor-content p {
+  @apply mb-6;
+  color: #1f2937;
+  line-height: 1.8;
+  text-align: justify;
+  text-indent: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.contract-editor-content ul {
+  @apply mb-6 pl-8 list-disc;
+  color: #1f2937;
+  line-height: 1.8;
+}
+
+.contract-editor-content ol {
+  @apply mb-6 pl-8 list-decimal;
+  color: #1f2937;
+  line-height: 1.8;
+}
+
+.contract-editor-content li {
+  @apply mb-3 pl-2;
+  color: #1f2937;
+  line-height: 1.8;
+}
+
+.contract-editor-content li p {
+  margin-bottom: 0.5rem;
+  text-indent: 0;
+}
+
+.contract-editor-content blockquote {
+  @apply border-l-4 border-gray-400 pl-4 italic mb-6;
+  color: #374151;
+  background-color: #f9fafb;
+  padding: 1rem;
+  margin: 1.5rem 0;
+}
+
+.contract-editor-content code {
+  @apply bg-gray-100 px-2 py-1 rounded text-sm font-mono;
+  color: #1f2937;
+}
+
+.contract-editor-content pre {
+  @apply bg-gray-100 p-4 rounded-md font-mono text-sm mb-6 overflow-x-auto;
+  color: #1f2937;
+}
+
+.contract-editor-content table {
+  @apply w-full border-collapse border border-gray-300 mb-6;
+}
+
+.contract-editor-content th {
+  @apply border border-gray-300 px-4 py-2 bg-gray-50 font-semibold text-left;
+  color: #1f2937;
+}
+
+.contract-editor-content td {
+  @apply border border-gray-300 px-4 py-2;
+  color: #1f2937;
+}
+
+.contract-editor-content a {
+  @apply text-blue-600 underline hover:text-blue-800;
+}
+
+.contract-editor-content strong {
+  @apply font-bold;
+  color: #111827;
+}
+
+.contract-editor-content em {
+  @apply italic;
+}
+
+.contract-editor-content u {
+  @apply underline;
+}
+
+.contract-editor-content s {
+  @apply line-through;
+}
+
+/* Styles pour les éléments de formulaire */
+.contract-form-section {
+  @apply space-y-4;
+}
+
+.contract-form-group {
+  @apply space-y-2;
+}
+
+.contract-form-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+.contract-form-input {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+.contract-form-textarea {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-y;
+}
+
+.contract-form-select {
+  @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}
+
+/* Styles pour les badges de statut */
+.contract-status-badge {
+  @apply inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-full;
+}
+
+.contract-status-draft {
+  @apply bg-gray-100 text-gray-800;
+}
+
+.contract-status-validated {
+  @apply bg-green-100 text-green-800;
+}
+
+.contract-status-signed {
+  @apply bg-blue-100 text-blue-800;
+}
+
+.contract-status-archived {
+  @apply bg-gray-100 text-gray-600;
+}
+
+/* Styles pour les boutons d'action */
+.contract-action-button {
+  @apply inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-md transition-colors;
+}
+
+.contract-action-button-primary {
+  @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2;
+}
+
+.contract-action-button-secondary {
+  @apply bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
+}
+
+.contract-action-button-danger {
+  @apply bg-red-600 text-white hover:bg-red-700 focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+}
+
+/* Styles pour les modales */
+.contract-modal {
+  @apply fixed inset-0 z-50 overflow-y-auto;
+}
+
+.contract-modal-overlay {
+  @apply fixed inset-0 bg-black bg-opacity-50 transition-opacity;
+}
+
+.contract-modal-content {
+  @apply relative bg-white rounded-lg shadow-xl max-w-md mx-auto mt-20 p-6;
+}
+
+.contract-modal-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.contract-modal-title {
+  @apply text-lg font-medium text-gray-900;
+}
+
+.contract-modal-body {
+  @apply text-sm text-gray-600 mb-6;
+}
+
+.contract-modal-footer {
+  @apply flex justify-end gap-3;
+}
+
+/* Styles pour les notifications */
+.contract-notification {
+  @apply fixed top-4 right-4 z-50 p-4 rounded-md shadow-lg max-w-sm;
+}
+
+.contract-notification-success {
+  @apply bg-green-100 border border-green-400 text-green-800;
+}
+
+.contract-notification-error {
+  @apply bg-red-100 border border-red-400 text-red-800;
+}
+
+.contract-notification-warning {
+  @apply bg-yellow-100 border border-yellow-400 text-yellow-800;
+}
+
+.contract-notification-info {
+  @apply bg-blue-100 border border-blue-400 text-blue-800;
+}
+
+/* Styles pour les listes de contrats */
+.contract-list {
+  @apply space-y-4;
+}
+
+.contract-list-item {
+  @apply bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow;
+}
+
+.contract-list-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.contract-list-title {
+  @apply text-lg font-medium text-gray-900;
+}
+
+.contract-list-meta {
+  @apply flex items-center gap-4 text-sm text-gray-600;
+}
+
+.contract-list-actions {
+  @apply flex items-center gap-2;
+}
+
+/* Styles pour les filtres */
+.contract-filters {
+  @apply bg-white border border-gray-200 rounded-lg p-4 mb-6;
+}
+
+.contract-filters-grid {
+  @apply grid grid-cols-1 md:grid-cols-4 gap-4;
+}
+
+.contract-filter-group {
+  @apply space-y-2;
+}
+
+.contract-filter-label {
+  @apply block text-sm font-medium text-gray-700;
+}
+
+/* Styles pour les statistiques */
+.contract-stats {
+  @apply grid grid-cols-2 md:grid-cols-4 gap-4;
+}
+
+.contract-stat-item {
+  @apply text-center p-4 bg-white border border-gray-200 rounded-lg;
+}
+
+.contract-stat-number {
+  @apply text-2xl font-bold;
+}
+
+.contract-stat-label {
+  @apply text-sm text-gray-600 mt-1;
+}
+
+/* Styles pour les liens rapides */
+.contract-quick-links {
+  @apply space-y-2;
+}
+
+.contract-quick-link {
+  @apply w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors;
+}
+
+/* Styles pour les aperçus de contrats */
+.contract-preview {
+  @apply bg-white border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-shadow;
+}
+
+.contract-preview-header {
+  @apply flex items-start justify-between mb-4;
+}
+
+.contract-preview-title {
+  @apply text-lg font-medium text-gray-900 mb-2;
+}
+
+.contract-preview-meta {
+  @apply flex items-center gap-4 text-sm text-gray-600 mb-4;
+}
+
+.contract-preview-content {
+  @apply text-sm text-gray-600 bg-gray-50 p-3 rounded border mb-4;
+}
+
+.contract-preview-actions {
+  @apply flex items-center justify-between pt-4 border-t;
+}
+
+/* Styles pour les formulaires de métadonnées */
+.contract-metadata-form {
+  @apply space-y-6;
+}
+
+.contract-metadata-section {
+  @apply space-y-4;
+}
+
+.contract-metadata-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 gap-4;
+}
+
+/* Styles pour les exports */
+.contract-export-options {
+  @apply space-y-4;
+}
+
+.contract-export-option {
+  @apply flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors;
+}
+
+.contract-export-option-icon {
+  @apply p-2 bg-gray-100 rounded-md;
+}
+
+.contract-export-option-content {
+  @apply flex-1;
+}
+
+.contract-export-option-title {
+  @apply font-medium text-gray-900;
+}
+
+.contract-export-option-description {
+  @apply text-sm text-gray-600;
+}
+
+/* Styles pour les assignations de baux */
+.contract-lease-assignment {
+  @apply space-y-4;
+}
+
+.contract-lease-list {
+  @apply space-y-2 max-h-60 overflow-y-auto;
+}
+
+.contract-lease-item {
+  @apply flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors;
+}
+
+.contract-lease-info {
+  @apply flex-1;
+}
+
+.contract-lease-title {
+  @apply font-medium text-gray-900;
+}
+
+.contract-lease-details {
+  @apply text-sm text-gray-600;
+}
+
+/* Styles responsifs */
+@media (max-width: 768px) {
+  .contract-editor-toolbar-group {
+    @apply flex-col items-start;
+  }
+  
+  .contract-filters-grid {
+    @apply grid-cols-1;
+  }
+  
+  .contract-stats {
+    @apply grid-cols-2;
+  }
+  
+  .contract-metadata-grid {
+    @apply grid-cols-1;
+  }
+  
+  .contract-preview-header {
+    @apply flex-col items-start gap-2;
+  }
+  
+  .contract-preview-actions {
+    @apply flex-col gap-2;
+  }
+}
+
+/* Styles pour les thèmes sombres (optionnel) */
+@media (prefers-color-scheme: dark) {
+  .contract-editor {
+    @apply bg-gray-900 border-gray-700;
+  }
+  
+  .contract-editor-content {
+    @apply text-gray-100;
+  }
+  
+  .contract-editor-content h1,
+  .contract-editor-content h2,
+  .contract-editor-content h3 {
+    @apply text-gray-100;
+  }
+  
+  .contract-editor-content p,
+  .contract-editor-content li {
+    @apply text-gray-300;
+  }
+  
+  .contract-editor-content blockquote {
+    @apply border-gray-600 text-gray-400;
+  }
+  
+  .contract-editor-content code,
+  .contract-editor-content pre {
+    @apply bg-gray-800 text-gray-200;
+  }
+  
+  .contract-editor-content table {
+    @apply border-gray-600;
+  }
+  
+  .contract-editor-content th {
+    @apply border-gray-600 bg-gray-800;
+  }
+  
+  .contract-editor-content td {
+    @apply border-gray-600;
+  }
+} 
+
+/* Styles spécifiques pour TipTap Editor */
+.ProseMirror {
+  outline: none !important;
+  border: none !important;
+  min-height: 500px;
+  padding: 2rem;
+  background-color: #ffffff;
+  color: #1f2937;
+  line-height: 1.8;
+  font-family: 'Times New Roman', serif;
+  font-size: 16px;
+}
+
+.ProseMirror p {
+  margin-bottom: 1.5rem !important;
+  color: #1f2937 !important;
+  line-height: 1.8 !important;
+  text-align: justify;
+  text-indent: 1.5rem;
+}
+
+.ProseMirror h1 {
+  font-size: 2rem !important;
+  font-weight: bold !important;
+  margin-bottom: 2rem !important;
+  margin-top: 2rem !important;
+  color: #111827 !important;
+  text-align: center;
+  text-decoration: underline;
+}
+
+.ProseMirror h2 {
+  font-size: 1.5rem !important;
+  font-weight: bold !important;
+  margin-bottom: 1.5rem !important;
+  margin-top: 2rem !important;
+  color: #111827 !important;
+  border-bottom: 2px solid #e5e7eb;
+  padding-bottom: 0.5rem;
+}
+
+.ProseMirror h3 {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  margin-bottom: 1rem !important;
+  margin-top: 1.5rem !important;
+  color: #1f2937 !important;
+}
+
+.ProseMirror ul {
+  margin-bottom: 1.5rem !important;
+  padding-left: 2rem !important;
+  list-style-type: disc !important;
+  color: #1f2937 !important;
+}
+
+.ProseMirror ol {
+  margin-bottom: 1.5rem !important;
+  padding-left: 2rem !important;
+  list-style-type: decimal !important;
+  color: #1f2937 !important;
+}
+
+.ProseMirror li {
+  margin-bottom: 0.75rem !important;
+  padding-left: 0.5rem !important;
+  color: #1f2937 !important;
+  line-height: 1.8 !important;
+}
+
+.ProseMirror li p {
+  margin-bottom: 0.5rem !important;
+  text-indent: 0 !important;
+}
+
+.ProseMirror strong {
+  font-weight: bold !important;
+  color: #111827 !important;
+}
+
+.ProseMirror em {
+  font-style: italic !important;
+}
+
+.ProseMirror u {
+  text-decoration: underline !important;
+}
+
+.ProseMirror blockquote {
+  border-left: 4px solid #9ca3af !important;
+  padding-left: 1rem !important;
+  margin: 1.5rem 0 !important;
+  background-color: #f9fafb !important;
+  padding: 1rem !important;
+  font-style: italic !important;
+  color: #374151 !important;
+}
+
+.ProseMirror table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin-bottom: 1.5rem !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.ProseMirror th {
+  border: 1px solid #d1d5db !important;
+  padding: 0.75rem !important;
+  background-color: #f9fafb !important;
+  font-weight: 600 !important;
+  text-align: left !important;
+  color: #1f2937 !important;
+}
+
+.ProseMirror td {
+  border: 1px solid #d1d5db !important;
+  padding: 0.75rem !important;
+  color: #1f2937 !important;
+}
+
+/* Placeholder style */
+.ProseMirror .is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: #9ca3af;
+  pointer-events: none;
+  height: 0;
+  font-style: italic;
+} 
