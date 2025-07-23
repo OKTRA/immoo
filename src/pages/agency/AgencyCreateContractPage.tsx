@@ -77,6 +77,8 @@ export default function AgencyCreateContractPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    console.log("🚀 Starting contract generation with:", { type, title, parties, details, jurisdiction, agency_id: agencyId });
+    
     try {
       const result = await generateContract({
         type,
@@ -86,9 +88,11 @@ export default function AgencyCreateContractPage() {
         jurisdiction,
         agency_id: agencyId,
       });
+      console.log("✅ Contract generated successfully:", result);
       setContract(result.contract);
       setStep(2);
     } catch (err) {
+      console.error("❌ Error generating contract:", err);
       setError("Erreur lors de la génération du contrat");
     } finally {
       setLoading(false);
@@ -179,17 +183,31 @@ export default function AgencyCreateContractPage() {
             <div className="bg-white rounded-xl shadow p-6">
               <h3 className="font-bold mb-2">Aperçu du contrat généré</h3>
               {loading ? (
-                <div>Génération du contrat...</div>
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-immoo-gold"></div>
+                  Génération du contrat...
+                </div>
               ) : contract ? (
-                <pre className="bg-gray-100 p-4 rounded text-xs whitespace-pre-wrap max-h-96 overflow-auto">{contract.content}</pre>
+                <div>
+                  <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded">
+                    <span className="text-green-800 font-medium">✅ Contrat généré avec succès !</span>
+                  </div>
+                  <pre className="bg-gray-100 p-4 rounded text-xs whitespace-pre-wrap max-h-96 overflow-auto border">{contract.content}</pre>
+                </div>
               ) : (
                 <div className="text-immoo-gray">Clique sur "Générer le contrat" pour voir l'aperçu.</div>
               )}
             </div>
-            {error && <div className="text-red-600">{error}</div>}
+            {error && (
+              <div className="p-4 bg-red-50 border border-red-200 rounded">
+                <span className="text-red-800 font-medium">❌ Erreur :</span> {error}
+              </div>
+            )}
             <div className="flex justify-between mt-6">
               <Button type="button" variant="outline" onClick={handleBack}>Précédent</Button>
-              <Button type="submit" disabled={loading || contract}>Générer le contrat</Button>
+              <Button type="submit" disabled={loading || contract}>
+                {loading ? "Génération..." : contract ? "Contrat généré" : "Générer le contrat"}
+              </Button>
             </div>
             {contract && (
               <div className="flex justify-end mt-4">
