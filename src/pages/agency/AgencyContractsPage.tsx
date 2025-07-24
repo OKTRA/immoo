@@ -50,7 +50,7 @@ interface Contract {
   parties: any;
   created_at: string;
   updated_at: string;
-  lease_id?: string;
+  related_entity?: string; // Changé de lease_id à related_entity
   isViewMode?: boolean; // Added for view mode
 }
 
@@ -229,12 +229,12 @@ export default function AgencyContractsPage() {
       if (success) {
         // Mettre à jour la liste des contrats
         setContracts(prev => prev.map(c => 
-          c.id === contractId ? { ...c, status: 'assigned' as const, lease_id: leaseId } : c
+          c.id === contractId ? { ...c, status: 'assigned' as const, related_entity: leaseId } : c
         ));
         
         // Mettre à jour le contrat en cours d'édition
         if (editingContract && editingContract.id === contractId) {
-          setEditingContract({ ...editingContract, status: 'assigned' as const, lease_id: leaseId });
+          setEditingContract({ ...editingContract, status: 'assigned' as const, related_entity: leaseId });
         }
         
         toast.success('Contrat attribué au bail avec succès !');
@@ -395,7 +395,7 @@ export default function AgencyContractsPage() {
                         <div className="text-sm text-gray-500">
                           {new Date(contract.created_at).toLocaleDateString('fr-FR')}
                         </div>
-                        {contract.lease_id && (
+                        {contract.related_entity && (
                           <div className="text-xs text-blue-600 flex items-center gap-1 mt-1">
                             <Link className="h-3 w-3" />
                             Attribué à un bail

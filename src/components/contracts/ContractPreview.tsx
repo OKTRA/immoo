@@ -31,7 +31,7 @@ interface ContractPreviewProps {
     details: Record<string, any>;
     created_at: string;
     updated_at: string;
-    lease_id?: string;
+    related_entity?: string;
     property_id?: string;
     tenant_id?: string;
     lease?: {
@@ -236,7 +236,7 @@ export default function ContractPreview({
         {showActions && (
           <div className="flex items-center justify-between pt-4 border-t">
             <div className="flex items-center gap-2">
-              {!contract.lease_id && onAssignToLease && (
+              {!contract.related_entity && onAssignToLease && (
                 <Button
                   variant="outline"
                   size="sm"

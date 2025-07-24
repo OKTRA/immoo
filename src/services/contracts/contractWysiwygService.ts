@@ -11,7 +11,7 @@ export interface ContractData {
   details: Record<string, any>;
   status: 'draft' | 'assigned' | 'signed';
   agency_id?: string;
-  lease_id?: string;
+  related_entity?: string; // Changé de lease_id à related_entity
   property_id?: string;
   tenant_id?: string;
   created_by?: string;
@@ -93,7 +93,7 @@ export const getContractById = async (id: string): Promise<ContractData | null> 
           id,
           name
         ),
-        leases:lease_id (
+        leases:related_entity (
           id,
           start_date,
           end_date,
@@ -131,7 +131,7 @@ export const getContractsByAgency = async (agencyId: string): Promise<ContractDa
       .from('contracts')
       .select(`
         *,
-        leases:lease_id (
+        leases:related_entity (
           id,
           start_date,
           end_date,
@@ -161,22 +161,50 @@ export const getContractsByAgency = async (agencyId: string): Promise<ContractDa
  */
 export const assignContractToLease = async (contractId: string, leaseId: string): Promise<boolean> => {
   try {
-    const { error } = await supabase
+    console.log('Assigning contract', contractId, 'to lease', leaseId);
+    
+    // Vérifier d'abord que le contrat existe
+    const { data: contract, error: fetchError } = await supabase
+      .from('contracts')
+      .select('id, related_entity, status')
+      .eq('id', contractId)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching contract:', fetchError);
+      throw new Error(`Contrat non trouvé: ${fetchError.message}`);
+    }
+
+    if (!contract) {
+      throw new Error('Contrat non trouvé');
+    }
+
+    // Vérifier que le contrat n'est pas déjà assigné à un autre bail
+    if (contract.related_entity && contract.related_entity !== leaseId) {
+      throw new Error('Ce contrat est déjà assigné à un autre bail');
+    }
+
+    // Mettre à jour le contrat
+    const { error: updateError } = await supabase
       .from('contracts')
       .update({
-        lease_id: leaseId,
-        status: 'assigned', // Met le statut à 'assigned' lors de l'attribution
+        related_entity: leaseId,
+        status: 'assigned',
         updated_at: new Date().toISOString()
       })
       .eq('id', contractId);
 
-    if (error) throw error;
+    if (updateError) {
+      console.error('Error updating contract:', updateError);
+      throw updateError;
+    }
 
     toast.success('Contrat attribué au bail avec succès');
     return true;
   } catch (error: any) {
     console.error('Error assigning contract to lease:', error);
-    toast.error('Erreur lors de l\'attribution du contrat');
+    const errorMessage = error.message || 'Erreur lors de l\'attribution du contrat';
+    toast.error(errorMessage);
     return false;
   }
 };
@@ -237,15 +265,21 @@ export const getAvailableLeasesForAssignment = async (agencyId: string): Promise
 
     if (error) throw error;
 
-    return (data || []).map(lease => ({
-      id: lease.id,
-      title: `Bail - ${lease.properties?.title || 'Propriété'}`,
-      tenantName: `${lease.tenants?.first_name || ''} ${lease.tenants?.last_name || ''}`.trim(),
-      propertyName: lease.properties?.title || 'Propriété inconnue',
-      startDate: lease.start_date,
-      endDate: lease.end_date,
-      monthlyRent: lease.monthly_rent
-    }));
+    return (data || []).map(lease => {
+      // Gérer les jointures qui peuvent retourner des tableaux
+      const propertyData = Array.isArray(lease.properties) ? lease.properties[0] : lease.properties;
+      const tenantData = Array.isArray(lease.tenants) ? lease.tenants[0] : lease.tenants;
+      
+      return {
+        id: lease.id,
+        title: `Bail - ${propertyData?.title || 'Propriété'}`,
+        tenantName: `${tenantData?.first_name || ''} ${tenantData?.last_name || ''}`.trim(),
+        propertyName: propertyData?.title || 'Propriété inconnue',
+        startDate: lease.start_date,
+        endDate: lease.end_date,
+        monthlyRent: lease.monthly_rent
+      };
+    });
   } catch (error: any) {
     console.error('Error getting available leases:', error);
     return [];
@@ -306,7 +340,7 @@ export const getContractByLeaseId = async (leaseId: string): Promise<ContractDat
     const { data, error } = await supabase
       .from('contracts')
       .select('*')
-      .eq('lease_id', leaseId)
+      .eq('related_entity', leaseId)
       .single();
 
     if (error) {
@@ -345,6 +379,42 @@ export const signContract = async (contractId: string): Promise<boolean> => {
     console.error('Error signing contract:', error);
     toast.error('Erreur lors de la signature du contrat');
     return false;
+  }
+};
+
+/**
+ * Récupérer les contrats disponibles d'une agence (non assignés)
+ */
+export const getAvailableContractsForAssignment = async (agencyId: string): Promise<ContractData[]> => {
+  try {
+    console.log('Fetching available contracts for agency:', agencyId);
+    
+    const { data, error } = await supabase
+      .from('contracts')
+      .select(`
+        *,
+        agencies:agency_id (
+          id,
+          name
+        )
+      `)
+      .eq('agency_id', agencyId)
+      .is('related_entity', null) // Contrats non assignés
+      .in('status', ['draft', 'assigned']) // Contrats en brouillon ou assignés mais pas encore signés
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
+    
+    console.log('Found contracts:', data?.length || 0);
+    return data || [];
+  } catch (error: any) {
+    console.error('Error getting available contracts:', error);
+    const errorMessage = error.message || 'Erreur lors de la récupération des contrats disponibles';
+    toast.error(errorMessage);
+    return [];
   }
 };
 

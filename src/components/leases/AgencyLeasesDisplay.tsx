@@ -36,8 +36,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { cancelLease } from '@/services/tenant/lease';
 import { terminateLease } from '@/services/tenant/lease';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,AlertDialogDescription,AlertDialogFooter,AlertDialogCancel,AlertDialogAction } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import LeaseDetailsDialog from './LeaseDetailsDialog';
-import { getContractByLeaseId } from '@/services/contracts/contractWysiwygService';
+import ContractViewDialog from '../contracts/ContractViewDialog';
+import { getContractByLeaseId, getAvailableContractsForAssignment, assignContractToLease } from '@/services/contracts/contractWysiwygService';
 
 interface AgencyLeasesDisplayProps {
   agencyId: string;
@@ -57,6 +59,18 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
   const [damageDesc, setDamageDesc] = useState('');
   const [selectedLease, setSelectedLease] = useState<any|null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  
+  // États pour le contrat
+  const [selectedContract, setSelectedContract] = useState<any>(null);
+  const [isContractDialogOpen, setIsContractDialogOpen] = useState(false);
+  const [loadingContract, setLoadingContract] = useState(false);
+  
+  // États pour la sélection de contrat
+  const [isContractSelectionOpen, setIsContractSelectionOpen] = useState(false);
+  const [availableContracts, setAvailableContracts] = useState<any[]>([]);
+  const [selectedContractToAssign, setSelectedContractToAssign] = useState<string>('');
+  const [leaseToAssignContract, setLeaseToAssignContract] = useState<any>(null);
+  const [loadingContracts, setLoadingContracts] = useState(false);
 
   useEffect(() => {
     const fetchLeases = async () => {
@@ -119,36 +133,75 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
     navigate(`/agencies/${agencyId}/properties/${propertyId}/leases/${leaseId}/payments`);
   };
 
-  const handleViewContract = async (leaseId: string) => {
+  const handleViewContract = async (lease: any) => {
+    setLoadingContract(true);
     try {
-      // Vérifier s'il existe déjà un contrat pour ce bail
-      const existingContract = await getContractByLeaseId(leaseId);
-      
-      if (existingContract) {
-        // Naviguer vers la page des contrats en mode vue avec ce contrat spécifique
-        navigate(`/agencies/${agencyId}/contracts`, { 
-          state: { 
-            viewContractId: existingContract.id,
-            contractData: existingContract 
-          } 
-        });
+      const contract = await getContractByLeaseId(lease.id);
+      if (contract) {
+        setSelectedContract(contract);
+        setIsContractDialogOpen(true);
       } else {
-        // Aucun contrat existant, naviguer vers la création avec le bail pré-sélectionné
-        navigate(`/agencies/${agencyId}/contracts/create?leaseId=${leaseId}`);
+        toast({
+          title: "Aucun contrat",
+          description: "Aucun contrat n'est rattaché à ce bail",
+          variant: "destructive"
+        });
       }
     } catch (error) {
-      console.error('Error checking contract for lease:', error);
+      console.error('Error getting contract:', error);
       toast({
         title: "Erreur",
-        description: "Impossible de vérifier le contrat associé",
+        description: "Erreur lors de la récupération du contrat",
         variant: "destructive"
       });
+    } finally {
+      setLoadingContract(false);
     }
   };
 
-  const handleAssignContract = (leaseId: string) => {
-    // Naviguer vers la page de création de contrat avec le bail pré-sélectionné
-    navigate(`/agencies/${agencyId}/contracts/create?leaseId=${leaseId}`);
+  const handleSelectContract = async (lease: any) => {
+    setLeaseToAssignContract(lease);
+    setLoadingContracts(true);
+    try {
+      const contracts = await getAvailableContractsForAssignment(agencyId);
+      setAvailableContracts(contracts);
+      setIsContractSelectionOpen(true);
+    } catch (error) {
+      console.error('Error loading contracts:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors du chargement des contrats",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingContracts(false);
+    }
+  };
+
+  const handleAssignSelectedContract = async () => {
+    if (!selectedContractToAssign || !leaseToAssignContract) return;
+    
+    try {
+      const success = await assignContractToLease(selectedContractToAssign, leaseToAssignContract.id);
+      if (success) {
+        toast({
+          title: "Succès",
+          description: "Contrat assigné au bail avec succès"
+        });
+        setIsContractSelectionOpen(false);
+        setSelectedContractToAssign('');
+        setLeaseToAssignContract(null);
+        // Recharger les baux pour mettre à jour l'affichage
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error assigning contract:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de l'assignation du contrat",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleCreateLease = () => {
@@ -314,20 +367,22 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => handleViewContract(lease.id)}
+                        onClick={() => handleViewContract(lease)}
+                        disabled={loadingContract}
                         title="Voir le contrat"
                       >
                         <Eye className="h-4 w-4 mr-1" />
-                        Voir contrat
+                        {loadingContract ? 'Chargement...' : 'Contrat'}
                       </Button>
                       <Button 
                         size="sm" 
                         variant="outline"
-                        onClick={() => handleAssignContract(lease.id)}
-                        title="Attribuer un contrat"
+                        onClick={() => handleSelectContract(lease)}
+                        disabled={loadingContracts}
+                        title="Sélectionner un contrat"
                       >
-                        <Link className="h-4 w-4 mr-1" />
-                        Attribuer
+                        <FileText className="h-4 w-4 mr-1" />
+                        {loadingContracts ? 'Chargement...' : 'Sélectionner'}
                       </Button>
                       <Button 
                         size="sm" 
@@ -360,6 +415,86 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
           </div>
         )}
       </CardContent>
+      
+      {/* Dialog de sélection de contrat */}
+      <Dialog open={isContractSelectionOpen} onOpenChange={setIsContractSelectionOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Sélectionner un contrat</DialogTitle>
+            <DialogDescription>
+              Choisissez un contrat parmi ceux disponibles pour l'assigner à ce bail.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4">
+            {loadingContracts ? (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              </div>
+            ) : availableContracts.length === 0 ? (
+              <div className="text-center py-8">
+                <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground mb-4">
+                  Aucun contrat disponible. Créez d'abord un contrat.
+                </p>
+                <Button onClick={() => {
+                  setIsContractSelectionOpen(false);
+                  navigate(`/agencies/${agencyId}/contracts/create`);
+                }}>
+                  <PlusCircle className="h-4 w-4 mr-2" />
+                  Créer un contrat
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {availableContracts.map((contract) => (
+                  <div
+                    key={contract.id}
+                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      selectedContractToAssign === contract.id
+                        ? 'border-primary bg-primary/5'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => setSelectedContractToAssign(contract.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium">{contract.title}</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Type: {contract.type} | Statut: {contract.status}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Créé le {new Date(contract.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
+                      {selectedContractToAssign === contract.id && (
+                        <div className="text-primary">
+                          <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsContractSelectionOpen(false)}>
+              Annuler
+            </Button>
+            <Button 
+              onClick={handleAssignSelectedContract}
+              disabled={!selectedContractToAssign || loadingContracts}
+            >
+              Assigner le contrat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
       {cancelTarget && (
       <AlertDialog open={isCancelOpen} onOpenChange={setIsCancelOpen}>
         <AlertDialogContent>
@@ -425,6 +560,13 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
           onViewPayments={(id:string)=>handleViewLeasePayments(id, selectedLease.property_id)}
         />
       )}
+
+      {/* Contract View Dialog */}
+      <ContractViewDialog
+        isOpen={isContractDialogOpen}
+        onClose={() => setIsContractDialogOpen(false)}
+        contract={selectedContract}
+      />
     </Card>
   );
 }

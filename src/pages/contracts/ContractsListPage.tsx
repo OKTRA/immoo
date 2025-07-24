@@ -44,15 +44,17 @@ import {
   Building,
   AlertTriangle,
   XCircle,
-  MoreHorizontal
+  MoreHorizontal,
+  Link2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { fr } from 'date-fns/locale';
+import AttachLeaseDialog from '@/components/contracts/AttachLeaseDialog';
 
 export default function ContractsListPage() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { profile } = useAuth();
   
   const [contracts, setContracts] = useState<ContractData[]>([]);
   const [filteredContracts, setFilteredContracts] = useState<ContractData[]>([]);
@@ -62,21 +64,25 @@ export default function ContractsListPage() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [contractToDelete, setContractToDelete] = useState<ContractData | null>(null);
+  
+  // États pour le rattachement de bail
+  const [showAttachDialog, setShowAttachDialog] = useState(false);
+  const [contractToAttach, setContractToAttach] = useState<ContractData | null>(null);
 
   useEffect(() => {
     loadContracts();
-  }, [user?.agency_id]);
+  }, [profile?.agency_id]);
 
   useEffect(() => {
     filterContracts();
   }, [contracts, searchTerm, statusFilter, typeFilter]);
 
   const loadContracts = async () => {
-    if (!user?.agency_id) return;
+    if (!profile?.agency_id) return;
     
     setIsLoading(true);
     try {
-      const contractsData = await getContractsByAgency(user.agency_id);
+      const contractsData = await getContractsByAgency(profile.agency_id);
       setContracts(contractsData);
     } catch (error) {
       console.error('Error loading contracts:', error);
@@ -139,6 +145,15 @@ export default function ContractsListPage() {
     } catch (error) {
       console.error('Error signing contract:', error);
     }
+  };
+
+  const handleAttachLease = (contract: ContractData) => {
+    setContractToAttach(contract);
+    setShowAttachDialog(true);
+  };
+
+  const handleAttachSuccess = () => {
+    loadContracts(); // Recharger la liste pour voir les changements
   };
 
   const getStatusBadge = (status: string) => {
@@ -321,7 +336,7 @@ export default function ContractsListPage() {
                       {contract.created_at && format(new Date(contract.created_at), 'dd/MM/yyyy', { locale: fr })}
                     </TableCell>
                     <TableCell>
-                      {contract.lease_id ? (
+                      {contract.related_entity ? (
                         <Badge variant="secondary" className="flex items-center gap-1">
                           <Users className="h-3 w-3" />
                           Associé
@@ -357,6 +372,17 @@ export default function ContractsListPage() {
                             onClick={() => handleSign(contract.id!)}
                           >
                             <FileText className="h-4 w-4" />
+                          </Button>
+                        )}
+                        
+                        {!contract.related_entity && contract.status !== 'signed' && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleAttachLease(contract)}
+                            title="Rattacher à un bail"
+                          >
+                            <Link2 className="h-4 w-4" />
                           </Button>
                         )}
                         
@@ -400,6 +426,15 @@ export default function ContractsListPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Attach Lease Dialog */}
+      <AttachLeaseDialog
+        isOpen={showAttachDialog}
+        onClose={() => setShowAttachDialog(false)}
+        contract={contractToAttach}
+        agencyId={profile?.agency_id || ''}
+        onSuccess={handleAttachSuccess}
+      />
     </div>
   );
 } 
