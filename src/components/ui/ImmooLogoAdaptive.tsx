@@ -137,13 +137,13 @@ export default function ImmooLogoAdaptive({
     <div 
       ref={logoRef}
       className={`inline-flex items-center justify-center cursor-pointer select-none ${className} ${
-        isDark ? 'bg-immoo-navy p-4 rounded-lg' : ''
+        isDark ? 'bg-background p-4 rounded-lg' : ''
       }`}
       onClick={onClick}
       title={useAutoAnimation ? "Animation automatique" : "Suit le mouvement de la souris"}
     >
       {/* IMM en texte normal */}
-      <span className={`font-extrabold tracking-tight flex items-center ${config.textSize}`} style={{ color: '#D97706' }}>
+      <span className={`font-extrabold tracking-tight flex items-center ${config.textSize}`} style={{ color: 'hsl(var(--primary))' }}>
         IMM
       </span>
       
@@ -154,7 +154,7 @@ export default function ImmooLogoAdaptive({
           <div 
             className={`${config.pupilSize} rounded-full transition-transform ${useAutoAnimation ? 'duration-300' : 'duration-100'} ease-out shadow-sm`}
             style={{
-              backgroundColor: '#D97706',
+              backgroundColor: 'hsl(var(--primary))',
               transform: `translate(${eyePositions.x}px, ${eyePositions.y}px)`
             }}
           />
@@ -168,7 +168,7 @@ export default function ImmooLogoAdaptive({
           <div 
             className={`${config.pupilSize} rounded-full transition-transform ${useAutoAnimation ? 'duration-300' : 'duration-100'} ease-out shadow-sm`}
             style={{
-              backgroundColor: '#D97706',
+              backgroundColor: 'hsl(var(--primary))',
               transform: `translate(${eyePositions.x}px, ${eyePositions.y}px)`
             }}
           />

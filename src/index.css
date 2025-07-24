@@ -307,25 +307,25 @@
 
 /* IMMOO Brand Colors Variables */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222.2 84% 4.9%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222.2 84% 4.9%;
+  --background: 206 79% 92%; /* #ADD7F6 */ /* #F7FAF8 */
+  --foreground: 247 67% 25%; /* #3B28CC */ /* #3A2937 */
+  --card: 206 79% 92%; /* #ADD7F6 */ /* #F7FAF8 */
+  --card-foreground: 247 67% 25%; /* #3B28CC */ /* #3A2937 */
+  --popover: 206 79% 92%; /* #ADD7F6 */ /* #F7FAF8 */
+  --popover-foreground: 247 67% 25%; /* #3B28CC */ /* #3A2937 */
+  --primary: 221 100% 57%; /* #2667FF */ /* #652C3B */
+  --primary-foreground: 206 79% 92%; /* #ADD7F6 */ /* #F7FAF8 */
+  --secondary: 210 100% 76%; /* #87BFFF */ /* #E6E8E7 */
+  --secondary-foreground: 247 67% 25%; /* #3B28CC */ /* #3A2937 */
+  --muted: 210 100% 76%; /* #87BFFF */ /* #E6E8E7 */
+  --muted-foreground: 213 96% 62%; /* #3F8EFC */ /* #B49BA6 */
+  --accent: 213 96% 62%; /* #3F8EFC */ /* #B49BA6 */
+  --accent-foreground: 206 79% 92%; /* #ADD7F6 */ /* #F7FAF8 */
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
+  --border: 210 100% 76%; /* #87BFFF */ /* #E6E8E7 */
+  --input: 210 100% 76%; /* #87BFFF */ /* #E6E8E7 */
+  --ring: 221 100% 57%; /* #2667FF */ /* #652C3B */
   --radius: 0.5rem;
   --chart-1: 12 76% 61%;
   --chart-2: 173 58% 39%;
@@ -334,12 +334,12 @@
   --chart-5: 27 87% 67%;
 
   /* IMMOO Custom Brand Colors */
-  --immoo-navy: 210 100% 12%;        /* #003D82 - Bleu marine profond */
-  --immoo-navy-light: 210 80% 25%;   /* #2463A3 - Bleu marine clair */
-  --immoo-gold: 43 100% 60%;         /* #FFD700 - Or premium */
-  --immoo-gold-light: 43 90% 70%;    /* #FFE14A - Or clair */
-  --immoo-pearl: 0 0% 97%;           /* #F7F7F7 - Perle élégante */
-  --immoo-gray: 210 10% 85%;         /* #D6D9DC - Gris sophistiqué */
+  --immoo-navy: 247 67% 25%;        /* #3B28CC */        /* #3A2937 - Prune sombre */
+  --immoo-navy-light: 221 100% 57%;   /* #2667FF */   /* #B49BA6 - Rose grisé */
+  --immoo-gold: 213 96% 62%;         /* #3F8EFC */         /* #652C3B - Bordeaux */
+  --immoo-gold-light: 210 100% 76%;    /* #87BFFF */    /* #B49BA6 - Rose grisé */
+  --immoo-pearl: 206 79% 92%;         /* #ADD7F6 */         /* #F7FAF8 - Vert très pâle */
+  --immoo-gray: 210 100% 76%;           /* #87BFFF */           /* #E6E8E7 - Gris clair */
 }
 
 .dark {
@@ -369,12 +369,12 @@
   --chart-5: 340 75% 55%;
 
   /* Dark mode IMMOO colors */
-  --immoo-navy: 210 100% 20%;
-  --immoo-navy-light: 210 80% 35%;
-  --immoo-gold: 43 90% 55%;
-  --immoo-gold-light: 43 80% 65%;
-  --immoo-pearl: 210 20% 15%;
-  --immoo-gray: 210 15% 25%;
+  --immoo-navy: 247 67% 35%;
+  --immoo-navy-light: 221 100% 65%;
+  --immoo-gold: 213 96% 72%;
+  --immoo-gold-light: 210 100% 80%;
+  --immoo-pearl: 247 67% 15%;
+  --immoo-gray: 210 100% 30%;
 }
 
 /* Color utility classes */
