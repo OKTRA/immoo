@@ -68,7 +68,7 @@ interface ContractMetadata {
   jurisdiction: string;
   parties: Record<string, any>;
   details: Record<string, any>;
-  status: 'draft' | 'validated' | 'signed' | 'archived';
+  status: 'draft' | 'validated' | 'closed';
   assignedLeaseId?: string;
 }
 

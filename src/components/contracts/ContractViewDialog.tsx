@@ -46,8 +46,8 @@ export default function ContractViewDialog({
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       draft: { variant: 'secondary' as const, label: 'Brouillon', className: '' },
-      assigned: { variant: 'default' as const, label: 'Attribué', className: 'bg-blue-600 text-white' },
-      signed: { variant: 'default' as const, label: 'Signé', className: 'bg-green-600 text-white' }
+          validated: { variant: 'default' as const, label: 'Validé', className: 'bg-blue-600 text-white' },
+    closed: { variant: 'default' as const, label: 'Fermé', className: 'bg-green-600 text-white' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
@@ -91,7 +91,7 @@ export default function ContractViewDialog({
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {onEdit && contract.status !== 'signed' && (
+              {onEdit && contract.status !== 'closed' && (
                 <Button variant="outline" size="sm" onClick={onEdit}>
                   <Edit3 className="h-4 w-4 mr-2" />
                   Modifier

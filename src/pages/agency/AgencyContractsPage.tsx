@@ -44,7 +44,7 @@ interface Contract {
   type: string;
   title: string;
   jurisdiction: string;
-  status: 'draft' | 'assigned' | 'signed';
+  status: 'draft' | 'validated' | 'closed';
   content: string;
   details: any;
   parties: any;
@@ -133,8 +133,8 @@ export default function AgencyContractsPage() {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       draft: { variant: 'secondary' as const, icon: AlertTriangle, label: 'Brouillon', className: '' },
-      assigned: { variant: 'default' as const, icon: CheckCircle, label: 'Attribué', className: 'bg-blue-600 text-white' },
-      signed: { variant: 'default' as const, icon: CheckCircle, label: 'Signé', className: 'bg-green-600 text-white' }
+          validated: { variant: 'default' as const, icon: CheckCircle, label: 'Validé', className: 'bg-blue-600 text-white' },
+    closed: { variant: 'default' as const, icon: CheckCircle, label: 'Fermé', className: 'bg-green-600 text-white' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
@@ -193,7 +193,7 @@ export default function AgencyContractsPage() {
       const success = await signContract(contractId);
       if (success) {
         setContracts(prev => prev.map(c => 
-          c.id === contractId ? { ...c, status: 'signed' as const } : c
+          c.id === contractId ? { ...c, status: 'closed' as const } : c
         ));
       }
     } catch (error) {
@@ -229,12 +229,12 @@ export default function AgencyContractsPage() {
       if (success) {
         // Mettre à jour la liste des contrats
         setContracts(prev => prev.map(c => 
-          c.id === contractId ? { ...c, status: 'assigned' as const, related_entity: leaseId } : c
+          c.id === contractId ? { ...c, status: 'validated' as const, related_entity: leaseId } : c
         ));
         
         // Mettre à jour le contrat en cours d'édition
         if (editingContract && editingContract.id === contractId) {
-          setEditingContract({ ...editingContract, status: 'assigned' as const, related_entity: leaseId });
+          setEditingContract({ ...editingContract, status: 'validated' as const, related_entity: leaseId });
         }
         
         toast.success('Contrat attribué au bail avec succès !');
@@ -286,7 +286,7 @@ export default function AgencyContractsPage() {
             ← Retour à la liste
           </Button>
           <h1 className="text-3xl font-bold">
-            {editingContract.status === 'signed'
+            {editingContract.status === 'closed'
               ? 'Consulter le contrat' 
               : 'Modifier le contrat'
             }
@@ -299,8 +299,8 @@ export default function AgencyContractsPage() {
           onSave={handleSaveContract}
           onAssignToLease={handleAssignToLease}
           availableLeases={availableLeases}
-          isReadOnly={editingContract.status === 'signed' || editingContract.isViewMode}
-          showToolbar={editingContract.status !== 'signed' && !editingContract.isViewMode}
+                  isReadOnly={editingContract.status === 'closed' || editingContract.isViewMode}
+        showToolbar={editingContract.status !== 'closed' && !editingContract.isViewMode}
         />
       </div>
     );
@@ -449,7 +449,7 @@ export default function AgencyContractsPage() {
                           )}
                           
                           {/* Bouton Signer (pour contrats attribués) */}
-                          {contract.status === 'assigned' && (
+                          {contract.status === 'validated' && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -461,7 +461,7 @@ export default function AgencyContractsPage() {
                           )}
                           
                           {/* Bouton Supprimer */}
-                          {contract.status !== 'signed' && (
+                          {contract.status !== 'closed' && (
                             <Button
                               variant="outline"
                               size="sm"

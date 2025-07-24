@@ -70,7 +70,7 @@ export default function ContractEditorPage() {
         if (!isNewContract) {
           const contractData = await getContractById(contractId);
           setContract(contractData);
-          setIsReadOnly(contractData?.status === 'signed');
+          setIsReadOnly(contractData?.status === 'closed');
         }
 
         // Charger les baux disponibles si l'utilisateur est connecté
@@ -131,7 +131,7 @@ export default function ContractEditorPage() {
     try {
       const success = await signContract(contractId);
       if (success && contract) {
-        setContract({ ...contract, status: 'signed' });
+        setContract({ ...contract, status: 'closed' });
         setIsReadOnly(true);
       }
     } catch (error) {
@@ -156,8 +156,8 @@ export default function ContractEditorPage() {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       draft: { variant: 'secondary' as const, icon: AlertTriangle, label: 'Brouillon', className: '' },
-      assigned: { variant: 'default' as const, icon: CheckCircle, label: 'Attribué', className: 'bg-blue-600 text-white' },
-      signed: { variant: 'default' as const, icon: FileText, label: 'Signé', className: 'bg-green-600 text-white' }
+          validated: { variant: 'default' as const, icon: CheckCircle, label: 'Validé', className: 'bg-blue-600 text-white' },
+    closed: { variant: 'default' as const, icon: FileText, label: 'Fermé', className: 'bg-green-600 text-white' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
@@ -252,7 +252,7 @@ export default function ContractEditorPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex flex-wrap gap-2">
-              {contract.status === 'assigned' && (
+              {contract.status === 'validated' && (
                 <Button onClick={handleSign} className="flex items-center gap-2">
                   <FileText className="h-4 w-4" />
                   Signer

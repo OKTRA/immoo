@@ -138,7 +138,7 @@ export default function ContractsListPage() {
       const success = await signContract(contractId);
       if (success) {
         setContracts(prev => prev.map(c => 
-          c.id === contractId ? { ...c, status: 'signed' } : c
+          c.id === contractId ? { ...c, status: 'closed' } : c
         ));
         toast.success('Contrat signé avec succès');
       }
@@ -159,8 +159,8 @@ export default function ContractsListPage() {
   const getStatusBadge = (status: string) => {
     const statusConfig = {
       draft: { variant: 'secondary' as const, icon: AlertTriangle, label: 'Brouillon', className: '' },
-      assigned: { variant: 'default' as const, icon: CheckCircle, label: 'Attribué', className: 'bg-blue-600 text-white' },
-      signed: { variant: 'default' as const, icon: FileText, label: 'Signé', className: 'bg-green-600 text-white' }
+          validated: { variant: 'default' as const, icon: CheckCircle, label: 'Validé', className: 'bg-blue-600 text-white' },
+    closed: { variant: 'default' as const, icon: FileText, label: 'Fermé', className: 'bg-green-600 text-white' }
     };
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft;
@@ -243,8 +243,8 @@ export default function ContractsListPage() {
                 <SelectContent>
                   <SelectItem value="all">Tous les statuts</SelectItem>
                   <SelectItem value="draft">Brouillon</SelectItem>
-                  <SelectItem value="assigned">Attribué</SelectItem>
-                  <SelectItem value="signed">Signé</SelectItem>
+                                  <SelectItem value="validated">Validé</SelectItem>
+                <SelectItem value="closed">Fermé</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -355,7 +355,7 @@ export default function ContractsListPage() {
                           <Eye className="h-4 w-4" />
                         </Button>
                         
-                        {contract.status !== 'signed' && (
+                        {contract.status !== 'closed' && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -365,7 +365,7 @@ export default function ContractsListPage() {
                           </Button>
                         )}
                         
-                        {contract.status === 'assigned' && (
+                        {contract.status === 'validated' && (
                           <Button
                             variant="outline"
                             size="sm"
@@ -375,7 +375,7 @@ export default function ContractsListPage() {
                           </Button>
                         )}
                         
-                        {!contract.related_entity && contract.status !== 'signed' && (
+                        {!contract.related_entity && contract.status !== 'closed' && (
                           <Button
                             variant="outline"
                             size="sm"

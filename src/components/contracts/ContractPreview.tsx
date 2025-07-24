@@ -71,7 +71,7 @@ export default function ContractPreview({
     const statusConfig = {
       draft: { variant: 'secondary' as const, icon: AlertTriangle, label: 'Brouillon' },
       validated: { variant: 'default' as const, icon: CheckCircle, label: 'Validé' },
-      signed: { variant: 'default' as const, icon: CheckCircle, label: 'Signé' },
+      closed: { variant: 'default' as const, icon: CheckCircle, label: 'Fermé' },
       archived: { variant: 'outline' as const, icon: Archive, label: 'Archivé' }
     };
 
@@ -135,7 +135,7 @@ export default function ContractPreview({
           
           {showActions && (
             <div className="flex items-center gap-1">
-              {contract.status !== 'signed' && contract.status !== 'archived' && (
+              {contract.status !== 'closed' && contract.status !== 'archived' && (
                 <Button
                   variant="outline"
                   size="sm"

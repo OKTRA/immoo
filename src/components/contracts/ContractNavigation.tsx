@@ -50,7 +50,7 @@ export default function ContractNavigation({
         return <AlertTriangle className="h-4 w-4" />;
       case 'validated':
         return <CheckCircle className="h-4 w-4" />;
-      case 'signed':
+      case 'closed':
         return <CheckCircle className="h-4 w-4" />;
       case 'archived':
         return <XCircle className="h-4 w-4" />;
@@ -65,8 +65,8 @@ export default function ContractNavigation({
         return 'Brouillon';
       case 'validated':
         return 'Validé';
-      case 'signed':
-        return 'Signé';
+      case 'closed':
+        return 'Fermé';
       case 'archived':
         return 'Archivé';
       default:
@@ -80,7 +80,7 @@ export default function ContractNavigation({
         return 'secondary' as const;
       case 'validated':
         return 'default' as const;
-      case 'signed':
+      case 'closed':
         return 'default' as const;
       case 'archived':
         return 'outline' as const;
@@ -144,7 +144,7 @@ export default function ContractNavigation({
 
               {/* Actions disponibles */}
               <div className="flex flex-wrap gap-2">
-                {contractStatus !== 'signed' && contractStatus !== 'archived' && (
+                {contractStatus !== 'closed' && contractStatus !== 'archived' && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -199,7 +199,7 @@ export default function ContractNavigation({
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-green-600">8</div>
-              <div className="text-sm text-gray-600">Signés</div>
+              <div className="text-sm text-gray-600">Fermés</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-yellow-600">3</div>
@@ -244,10 +244,10 @@ export default function ContractNavigation({
             <Button
               variant="ghost"
               className="w-full justify-start"
-              onClick={() => navigate('/contracts?status=signed')}
+              onClick={() => navigate('/contracts?status=closed')}
             >
               <FileText className="h-4 w-4 mr-2" />
-              Contrats signés
+              Contrats fermés
             </Button>
             
             <Button

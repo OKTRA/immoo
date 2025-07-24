@@ -9,7 +9,7 @@ export interface ContractData {
   content: string;
   parties: Record<string, any>;
   details: Record<string, any>;
-  status: 'draft' | 'assigned' | 'signed';
+  status: 'draft' | 'validated' | 'closed';
   agency_id?: string;
   related_entity?: string; // Changé de lease_id à related_entity
   property_id?: string;
@@ -189,7 +189,7 @@ export const assignContractToLease = async (contractId: string, leaseId: string)
       .from('contracts')
       .update({
         related_entity: leaseId,
-        status: 'assigned',
+        status: 'validated',
         updated_at: new Date().toISOString()
       })
       .eq('id', contractId);
@@ -366,7 +366,7 @@ export const signContract = async (contractId: string): Promise<boolean> => {
     const { error } = await supabase
       .from('contracts')
       .update({
-        status: 'signed',
+        status: 'closed',
         updated_at: new Date().toISOString()
       })
       .eq('id', contractId);
@@ -400,7 +400,7 @@ export const getAvailableContractsForAssignment = async (agencyId: string): Prom
       `)
       .eq('agency_id', agencyId)
       .is('related_entity', null) // Contrats non assignés
-      .in('status', ['draft', 'assigned']) // Contrats en brouillon ou assignés mais pas encore signés
+      .in('status', ['draft', 'validated']) // Contrats en brouillon ou validés mais pas encore fermés
       .order('created_at', { ascending: false });
 
     if (error) {
