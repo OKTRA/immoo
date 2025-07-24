@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { getLeasesByAgencyId } from "@/services/tenant/leaseService";
+import { supabase } from "@/lib/supabase";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/components/ui/use-toast";
 import { cancelLease } from '@/services/tenant/lease';
@@ -78,7 +79,7 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
       
       try {
         setLoading(true);
-        const { leases: agencyLeases, error } = await getLeasesByAgencyId(agencyId);
+        const { leases: fetchedLeases, error } = await getLeasesByAgencyId(agencyId);
         
         if (error) {
           toast({
@@ -89,7 +90,20 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
           return;
         }
         
-        setLeases(agencyLeases || []);
+        // Après avoir obtenu les baux, déterminer ceux qui ont déjà un contrat
+        let enrichedLeases = fetchedLeases ?? [];
+        if (enrichedLeases.length > 0) {
+          const leaseIds = enrichedLeases.map((l:any) => l.id);
+          const { data: contracts, error: contractsError } = await supabase
+            .from('contracts')
+            .select('id, related_entity')
+            .in('related_entity', leaseIds);
+          if (!contractsError) {
+            const leasesWithContract = new Set(contracts.map(c => c.related_entity));
+            enrichedLeases = enrichedLeases.map((l:any) => ({ ...l, hasContract: leasesWithContract.has(l.id) }));
+          }
+        }
+        setLeases(enrichedLeases);
       } catch (err: any) {
         console.error("Erreur lors de la récupération des baux:", err);
         toast({
@@ -374,16 +388,18 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                         <Eye className="h-4 w-4 mr-1" />
                         {loadingContract ? 'Chargement...' : 'Contrat'}
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline"
-                        onClick={() => handleSelectContract(lease)}
-                        disabled={loadingContracts}
-                        title="Sélectionner un contrat"
-                      >
-                        <FileText className="h-4 w-4 mr-1" />
-                        {loadingContracts ? 'Chargement...' : 'Sélectionner'}
-                      </Button>
+                      {!lease.hasContract && (
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleSelectContract(lease)}
+                          disabled={loadingContracts}
+                          title="Sélectionner un contrat"
+                        >
+                          <FileText className="h-4 w-4 mr-1" />
+                          {loadingContracts ? 'Chargement...' : 'Sélectionner'}
+                        </Button>
+                      )}
                       <Button 
                         size="sm" 
                         variant="default"
