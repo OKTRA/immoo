@@ -139,28 +139,28 @@ export default function AgencySidebar() {
 
       {/* Navigation items */}
       <div className="flex-1 py-6 overflow-y-auto">
-        <nav className="space-y-2 px-4">
+        <nav className="space-y-1 px-2">
           {navigationItems.map((item) => (
             <Link
               key={item.path}
               to={item.path}
               className={cn(
-                "flex items-center py-4 px-4 rounded-xl transition-all duration-200 group",
+                "flex items-center py-2 px-3 rounded-md transition-all duration-200 group relative overflow-hidden",
                 isActive(item.path, item.exact) 
-                  ? "bg-gradient-to-r from-immoo-gold to-immoo-navy text-white shadow-lg" 
-                  : "text-immoo-navy hover:bg-immoo-pearl/50 hover:text-immoo-navy",
+                  ? "bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--primary))] text-white shadow-lg" 
+                  : "text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent)/0.15)] hover:text-[hsl(var(--primary))] group-hover:translate-x-1 group-hover:scale-[1.02]",
                 collapsed ? "justify-center" : "justify-start"
               )}
             >
               <item.icon className={cn(
-                "h-7 w-7 transition-colors", 
-                collapsed ? "mr-0" : "mr-4",
+                "h-6 w-6 transition-colors group-hover:scale-[1.1]", 
+                collapsed ? "mr-0" : "mr-3",
                 isActive(item.path, item.exact) 
                   ? "text-white" 
-                  : "text-immoo-navy group-hover:text-immoo-gold"
+                  : "text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--primary))]"
               )} />
               {!collapsed && (
-                <span className="font-medium text-base">
+                <span className="font-medium text-sm">
                   {item.title}
                 </span>
               )}

@@ -85,18 +85,54 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
   const handleAdditionalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files);
-      
-      // Créer de nouvelles entrées pour chaque fichier
+
+      // Préparer les nouvelles images à ajouter dans le state
       const newImages = filesArray.map(file => ({
         id: Math.random().toString(36).substring(2, 9),
         url: URL.createObjectURL(file),
         file,
         isPrimary: false,
-        uploading: false,
+        uploading: true, // On démarre l'upload immédiatement
         description: ""
       }));
-      
+
+      // Index de départ des nouvelles images dans le tableau final
+      const startIndex = additionalImages.length;
+
+      // 1) Ajouter les images au state pour affichage immédiat du preview
       setAdditionalImages(prev => [...prev, ...newImages]);
+
+      // 2) Lancer l'upload pour chaque nouveau fichier
+      newImages.forEach(async (img, idx) => {
+        const globalIndex = startIndex + idx; // position réelle dans le tableau après ajout
+        try {
+          const tempId = propertyId || "temp-" + Date.now();
+          const { imageUrl, error } = await uploadPropertyImage(tempId, img.file!, false, img.description);
+          if (error) throw new Error(error);
+
+          // Mettre à jour l'URL et l'état uploading
+          setAdditionalImages(prev => {
+            const updated = [...prev];
+            updated[globalIndex] = {
+              ...updated[globalIndex],
+              url: imageUrl,
+              uploading: false,
+              file: null // libérer le fichier
+            };
+            return updated;
+          });
+        } catch (err: any) {
+          toast.error(`Erreur lors du téléchargement: ${err.message}`);
+          // Échec -> réinitialiser uploading
+          setAdditionalImages(prev => {
+            const updated = [...prev];
+            if (updated[globalIndex]) {
+              updated[globalIndex] = { ...updated[globalIndex], uploading: false };
+            }
+            return updated;
+          });
+        }
+      });
     }
   };
 
