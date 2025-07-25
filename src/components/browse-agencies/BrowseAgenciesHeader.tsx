@@ -47,6 +47,17 @@ export const BrowseAgenciesHeader: React.FC<BrowseAgenciesHeaderProps> = ({ user
           
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
+            <Button 
+              asChild
+              variant="outline"
+              className="border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-white shadow-lg hover:shadow-xl transition-all duration-300 px-6 py-2.5 font-medium"
+            >
+              <Link to="/agencies/all" className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Filtrer les agences
+              </Link>
+            </Button>
+            
             {user && isFreePlan() && (
               <UpgradeButton 
                 planName="Premium"

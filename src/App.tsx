@@ -11,6 +11,7 @@ import BrowseAgenciesPage from "@/pages/BrowseAgenciesPage";
 import AgencyProfilePage from "@/pages/AgencyProfilePage";
 import PublicAgencyPage from "@/pages/PublicAgencyPage";
 import PublicPropertyPage from "@/pages/PublicPropertyPage";
+import PublicAgenciesPage from "@/pages/PublicAgenciesPage";
 import AgencyDetailPage from "@/pages/AgencyDetailPage";
 import CreateAgencyPage from "@/pages/CreateAgencyPage";
 import EditAgencyPage from "@/pages/EditAgencyPage";
@@ -92,7 +93,9 @@ function App() {
               <Route path="/admin" element={<AdminPage />} />
               
               {/* Routes protégées pour les agences */}
-              <Route path="/agencies" element={<AgenciesPage />} />
+              <Route path="/agencies" element={<BrowseAgenciesPage />} />
+              <Route path="/agencies/all" element={<PublicAgenciesPage />} />
+              <Route path="/agency/:id" element={<PublicAgencyPage />} />
               <Route path="/agencies/create" element={<CreateAgencyPage />} />
               <Route path="/agencies/edit/:agencyId" element={<EditAgencyPage />} />
 

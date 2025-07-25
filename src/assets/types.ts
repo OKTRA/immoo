@@ -2,8 +2,10 @@ export interface Agency {
   id: string;
   name: string;
   logoUrl: string;
+  logo_url?: string;
   location: string;
   properties: number;
+  properties_count?: number;
   rating: number;
   verified: boolean;
   description?: string;
@@ -13,6 +15,11 @@ export interface Agency {
   specialties?: string[];
   serviceAreas?: string[];
   agencyYearsActive?: number;
+  years_of_experience?: number;
+  created_at?: string;
+  updated_at?: string;
+  is_active?: boolean;
+  user_id?: string;
 }
 
 export interface Property {

@@ -144,6 +144,12 @@ export default function HomePage() {
                           Parcourir les agences
                         </Link>
                       </Button>
+                      <Button asChild variant="secondary" size="default" className="bg-immoo-navy/10 text-immoo-navy hover:bg-immoo-navy hover:text-white px-6 py-2.5 font-medium transition-all duration-200">
+                        <Link to="/agencies/all" className="flex items-center">
+                          <Building2 className="mr-2 h-4 w-4" />
+                          Filtrer les agences
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                 </div>

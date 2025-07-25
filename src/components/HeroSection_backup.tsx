@@ -385,58 +385,57 @@ export default function HeroSection() {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {/* Verification Status */}
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                        <Building className="h-4 w-4 mr-2 text-immoo-gold" />
-                        Statut
-                      </label>
-                      <select 
-                        className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                        value={agencyStatus}
-                        onChange={(e) => setAgencyStatus(e.target.value)}
-                      >
-                        <option value="">Toutes agences</option>
-                        <option value="verified">Agences vérifiées</option>
-                        <option value="non-verified">Agences non vérifiées</option>
-                      </select>
-                    </div>
+                    <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
+                      <Building className="h-4 w-4 mr-2 text-immoo-gold" />
+                      Statut
+                    </label>
+                    <select 
+                      className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    >
+                      <option value="">Toutes agences</option>
+                      <option value="verified">Agences vérifiées</option>
+                      <option value="non-verified">Agences non vérifiées</option>
+                    </select>
+                  </div>
 
-                    {/* Country/Location */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                        <MapPin className="h-4 w-4 mr-2 text-immoo-gold" />
-                        Pays
-                      </label>
-                      <select 
-                        className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                      >
-                        <option value="">Tous pays</option>
-                        <option value="mali">Mali</option>
-                        <option value="senegal">Sénégal</option>
-                        <option value="burkina">Burkina Faso</option>
-                        <option value="cote-ivoire">Côte d'Ivoire</option>
-                        <option value="guinea">Guinée</option>
-                      </select>
-                    </div>
+                  {/* Country/Location */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
+                      <MapPin className="h-4 w-4 mr-2 text-immoo-gold" />
+                      Pays
+                    </label>
+                    <select 
+                      className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
+                      value={propertyType}
+                      onChange={(e) => setPropertyType(e.target.value)}
+                    >
+                      <option value="">Tous pays</option>
+                      <option value="mali">Mali</option>
+                      <option value="senegal">Sénégal</option>
+                      <option value="burkina">Burkina Faso</option>
+                      <option value="cote-ivoire">Côte d'Ivoire</option>
+                      <option value="guinea">Guinée</option>
+                    </select>
+                  </div>
 
-                    {/* Properties Count */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                        <Home className="h-4 w-4 mr-2 text-immoo-gold" />
-                        Propriétés
-                      </label>
-                      <select 
-                        className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                        value={agencyPropertiesCount}
-                        onChange={(e) => setAgencyPropertiesCount(e.target.value)}
-                      >
-                        <option value="">Toutes</option>
-                        <option value="0">Nouvelles agences</option>
-                        <option value="1-5">1-5 propriétés</option>
-                        <option value="5+">5+ propriétés</option>
-                      </select>
-                    </div>
+                  {/* Properties Count */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
+                      <Home className="h-4 w-4 mr-2 text-immoo-gold" />
+                      Propriétés
+                    </label>
+                    <select 
+                      className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
+                      value={priceRange}
+                      onChange={(e) => setPriceRange(e.target.value)}
+                    >
+                      <option value="">Toutes</option>
+                      <option value="0">Nouvelles agences</option>
+                      <option value="1-5">1-5 propriétés</option>
+                      <option value="5+">5+ propriétés</option>
+                    </select>
                   </div>
                 </div>
               )}
@@ -545,7 +544,7 @@ export default function HeroSection() {
                       )
                     )}
                   </div>
-                )}
+                </div>
               </div>
             </motion.div>
           )}
@@ -593,4 +592,3 @@ export default function HeroSection() {
     </section>
   );
 }
-

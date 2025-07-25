@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Property } from "@/assets/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -8,9 +8,9 @@ import { formatCurrency } from "@/lib/utils";
 import PropertyDetailsDialog from "./PropertyDetailsDialog";
 import QuickVisitorLogin from "@/components/visitor/QuickVisitorLogin";
 import { useQuickVisitorAccess, refreshVisitorState } from "@/hooks/useQuickVisitorAccess";
-import { Link, useNavigate } from "react-router-dom";
-import { PropertyImageService } from "@/services/property/propertyImageService";
+import { useNavigate } from "react-router-dom";
 import PropertyImageGallery from "./PropertyImageGallery";
+
 
 interface PropertyListProps {
   properties: Property[];
@@ -22,7 +22,8 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showMiniLogin, setShowMiniLogin] = useState(false);
-  const [forceLoggedIn, setForceLoggedIn] = useState(false); // Force logged in state after successful login
+  const [forceLoggedIn, setForceLoggedIn] = useState(false);
+
   
   // Use the visitor access hook for public view
   const { isLoggedIn, isLoading } = useQuickVisitorAccess();
@@ -87,170 +88,110 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
     }
   };
   
-  if (properties.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-center">
-        <div className="w-24 h-24 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
-          <Home className="h-12 w-12 text-gray-400" />
-        </div>
-        <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-          Aucune propriété trouvée
-        </h3>
-        <p className="text-gray-500 dark:text-gray-400">
-          Il n'y a pas de propriétés disponibles pour le moment.
-        </p>
-      </div>
-    );
-  }
+
 
   return (
-    <>
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-        {properties.map((property, index) => (
-          <Card 
-            key={property.id} 
-            className="group overflow-hidden border-0 shadow-lg hover:shadow-2xl transition-all duration-500 bg-white dark:bg-gray-900 rounded-2xl flex flex-col"
-            style={{
-              animationDelay: `${index * 100}ms`
-            }}
-          >
-            {/* Property Image */}
-            <div className="relative h-64 overflow-hidden">
-              {property.id ? (
-                <PropertyImageGallery 
-                  propertyId={property.id} 
+    <div className="space-y-6">
+      {/* Results Count */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-600">
+          {properties.length} propriété{properties.length !== 1 ? 's' : ''} trouvée{properties.length !== 1 ? 's' : ''}
+        </p>
+      </div>
+
+      {/* Properties Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {properties.length === 0 ? (
+          <div className="col-span-full text-center py-12">
+            <p className="text-gray-500">Aucune propriété trouvée</p>
+          </div>
+        ) : (
+          properties.map((property) => (
+            <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+              <div className="relative">
+                <PropertyImageGallery
+                  propertyId={property.id}
+                  images={[]}
                   mainImageUrl={property.imageUrl}
-                  height="h-64"
-                  enableZoom={true}
-                  showThumbnails={false}
+                  height="200"
+                  className="w-full"
                 />
-              ) : (
-                <img 
-                  src={PropertyImageService.getImageUrl(property.imageUrl)} 
-                  alt={property.title} 
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 cursor-pointer"
-                  onClick={() => agencyId ? null : openPropertyDetails(property)}
-                  onError={(e) => {
-                    e.currentTarget.src = PropertyImageService.getImageUrl(null);
-                  }}
-                />
-              )}
-              
-              {/* Status Badge */}
-              <Badge 
-                className="absolute top-4 right-4 backdrop-blur-sm bg-white/90 dark:bg-gray-900/90 text-gray-900 dark:text-white border-0 font-medium px-3 py-1.5" 
-                variant="secondary"
-              >
-                {property.status === "available" ? "Disponible" :
-                 property.status === "sold" ? "Vendu" :
-                 property.status === "pending" ? "En attente" :
-                 property.status}
+              <Badge className="absolute top-2 left-2 bg-primary/90">
+                {formatCurrency(property.price)}
               </Badge>
-
-              {/* Favorite Button (for non-agency view) */}
-              {!agencyId && (
-                <button className="absolute top-4 left-4 p-2 rounded-full bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm hover:bg-white dark:hover:bg-gray-900 transition-colors">
-                  <Heart className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                </button>
-              )}
-
-              {/* Gradient Overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-2 right-2 bg-white/80 hover:bg-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  // Handle favorite toggle
+                }}
+              >
+                <Heart className="h-4 w-4" />
+              </Button>
             </div>
             
-            <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
-              {/* Header */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-xl line-clamp-1 text-gray-900 dark:text-white group-hover:text-primary transition-colors">
-                    {property.title}
-                  </h3>
-                  <span className="font-bold text-xl text-primary bg-primary/10 px-3 py-1 rounded-lg">
-                    {formatCurrency(property.price)}
-                  </span>
-                </div>
-                
-                <div className="flex items-center text-gray-500 dark:text-gray-400">
-                  <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                  <span className="truncate text-sm">{property.location}</span>
-                </div>
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-lg mb-2 line-clamp-2">{property.title}</h3>
+              
+              <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
+                <MapPin className="h-4 w-4" />
+                <span>{property.location || property.address}</span>
               </div>
               
-              {/* Property Details */}
-              <div className="flex flex-wrap gap-4 py-2 flex-1">
-                <div className="flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
-                  <Ruler className="h-4 w-4 mr-2 text-primary" />
-                  <span className="text-sm font-medium">{property.area} m²</span>
-                </div>
-                
-                {property.bedrooms > 0 && (
-                  <div className="flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
-                    <Hotel className="h-4 w-4 mr-2 text-primary" />
-                    <span className="text-sm font-medium">{property.bedrooms} ch.</span>
+              <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                {property.surface && (
+                  <div className="flex items-center gap-1">
+                    <Ruler className="h-4 w-4" />
+                    <span>{property.surface} m²</span>
                   </div>
                 )}
-                
-                {property.bathrooms > 0 && (
-                  <div className="flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
-                    <Bath className="h-4 w-4 mr-2 text-primary" />
-                    <span className="text-sm font-medium">{property.bathrooms} SdB</span>
+                {property.rooms && (
+                  <div className="flex items-center gap-1">
+                    <Hotel className="h-4 w-4" />
+                    <span>{property.rooms} pièces</span>
                   </div>
                 )}
-                
-                {property.type && (
-                  <div className="flex items-center bg-gray-50 dark:bg-gray-800 rounded-lg px-3 py-2">
-                    <Tag className="h-4 w-4 mr-2 text-primary" />
-                    <span className="text-sm font-medium">{property.type}</span>
+                {property.bedrooms && (
+                  <div className="flex items-center gap-1">
+                    <Bath className="h-4 w-4" />
+                    <span>{property.bedrooms} chambres</span>
                   </div>
                 )}
               </div>
               
-              {/* Action Buttons - Always at bottom */}
-              <div className="mt-auto pt-4">
-                {agencyId ? (
-                  // Agency management context
-                  <div className="flex gap-3">
-                    <Button 
-                      variant="default" 
-                      className="flex-1 h-12 font-medium rounded-xl shadow-md hover:shadow-lg transition-all duration-300" 
-                      asChild
-                    >
-                      <Link to={`/agencies/${agencyId}/properties/${property.id}`} className="flex items-center justify-center">
-                        <Eye className="h-4 w-4 mr-2" />
-                        Détails
-                      </Link>
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="flex-1 h-12 font-medium rounded-xl border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300" 
-                      asChild
-                    >
-                      <Link to={`/agencies/${agencyId}/properties/${property.id}/edit`} className="flex items-center justify-center">
-                        <Edit className="h-4 w-4 mr-2" />
-                        Modifier
-                      </Link>
-                    </Button>
-                  </div>
-                ) : (
-                  // Public context
+              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                {property.description}
+              </p>
+              
+              <div className="flex gap-2">
+                <Button 
+                  className="flex-1" 
+                  size="sm"
+                  onClick={() => openPropertyDetails(property)}
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Voir détails
+                </Button>
+                
+                {agencyId && (
                   <Button 
-                    variant="default" 
-                    className="w-full h-12 font-medium rounded-xl bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-md hover:shadow-lg transition-all duration-300" 
-                    onClick={() => openPropertyDetails(property)}
-                    disabled={isLoading}
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => navigate(`/properties/${property.id}/edit`)}
                   >
-                    <Eye className="h-4 w-4 mr-2" />
-                    {isLoading ? "Chargement..." : effectivelyLoggedIn ? "Voir les détails" : "Voir les détails"}
+                    <Edit className="h-4 w-4 mr-2" />
+                    Modifier
                   </Button>
                 )}
               </div>
             </CardContent>
           </Card>
-        ))}
+          ))
+        )}
       </div>
       
-
-
       {/* Quick Visitor Login */}
       {!agencyId && showMiniLogin && selectedProperty && (
         <QuickVisitorLogin
@@ -268,6 +209,6 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
           onClose={closePropertyDetails} 
         />
       )}
-    </>
+    </div>
   );
 }

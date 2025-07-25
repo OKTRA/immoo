@@ -6,3 +6,4 @@ export * from './agencyPropertiesService';
 export * from './agencyMediaService';
 export * from './agencyStatisticsService';
 export * from './agencyUtils';
+export * from './agencyService';
