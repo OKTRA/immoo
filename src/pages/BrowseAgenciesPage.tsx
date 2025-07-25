@@ -28,14 +28,18 @@ export default function BrowseAgenciesPage() {
   const { isAuthenticated, isReady } = useAuthStatus();
   const { subscription, checkLimit } = useUserSubscription();
   const [agencies, setAgencies] = useState<AgencyWithSubscription[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('search') || '';
+  });
   const [loading, setLoading] = useState(true);
   const [agencyLimit, setAgencyLimit] = useState<any>(null);
 
   useEffect(() => {
     // Charger les agences dès que possible (pas besoin d'attendre l'auth pour cette page publique)
     loadAgencies();
-  }, []);
+    // If URL search param changes (e.g., via navigation), update search term
+  }, [window.location.search]);
 
   useEffect(() => {
     // Vérifier les limites seulement si l'utilisateur est authentifié et que l'auth est prête

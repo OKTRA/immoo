@@ -22,9 +22,9 @@ export default function HeroSection() {
   const handleSearch = () => {
     if (searchTerm.trim()) {
       if (searchType === "agencies") {
-        navigate("/browse-agencies");
+        navigate(`/browse-agencies?search=${encodeURIComponent(searchTerm)}`);
       } else {
-        navigate("/search");
+        navigate(`/search?search=${encodeURIComponent(searchTerm)}`);
       }
     }
   };

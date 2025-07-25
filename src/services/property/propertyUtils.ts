@@ -8,11 +8,15 @@ export const formatPropertyFromDb = (item: any): Property => {
     title: item.title,
     description: item.description,
     type: item.type,
-    location: item.location,
-    area: item.area,
-    bedrooms: item.bedrooms,
+    location: item.location || item.address, // Handle both location and address fields
+    address: item.address || item.location, // Add address field
+    area: item.area || item.surface, // Handle both area and surface fields
+    surface: item.surface || item.area, // Add surface field
+    bedrooms: item.bedrooms || item.rooms, // Handle both bedrooms and rooms fields
+    rooms: item.rooms || item.bedrooms, // Add rooms field
     bathrooms: item.bathrooms,
     price: item.price,
+    charges: item.charges, // Add charges field
     status: item.status,
     imageUrl: item.image_url,
     virtualTourUrl: item.virtual_tour_url,
@@ -30,6 +34,8 @@ export const formatPropertyFromDb = (item: any): Property => {
     livingRooms: item.living_rooms,
     kitchens: item.kitchens,
     shops: item.shops,
+    createdAt: item.created_at, // Add creation date
+    updatedAt: item.updated_at, // Add update date
     ownerInfo: item.owner ? {
       ownerId: item.owner.id,
       firstName: item.owner.first_name,
@@ -57,7 +63,11 @@ export const formatPropertyToDb = (propertyData: any, ownerId: string | null = n
   if (propertyData.type !== undefined || !isUpdate) dbData.type = propertyData.type;
   if (propertyData.location !== undefined) dbData.location = propertyData.location;
   if (propertyData.area !== undefined || !isUpdate) dbData.area = propertyData.area;
-  if (propertyData.bedrooms !== undefined || !isUpdate) dbData.bedrooms = propertyData.bedrooms;
+  if (propertyData.surface !== undefined || !isUpdate) dbData.surface = propertyData.surface;
+  if (propertyData.address !== undefined) dbData.address = propertyData.address;
+  if (propertyData.charges !== undefined) dbData.charges = propertyData.charges;
+  if (propertyData.rooms !== undefined || !isUpdate) dbData.rooms = propertyData.rooms;
+  if (propertyData.bedrooms !== undefined || !isUpdate) dbData.bedrooms = propertyData.bedrooms || propertyData.rooms;
   if (propertyData.bathrooms !== undefined || !isUpdate) dbData.bathrooms = propertyData.bathrooms;
   if (propertyData.price !== undefined || !isUpdate) dbData.price = propertyData.price;
   if (propertyData.status !== undefined) dbData.status = propertyData.status;

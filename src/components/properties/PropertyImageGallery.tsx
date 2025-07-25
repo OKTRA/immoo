@@ -146,7 +146,7 @@ export default function PropertyImageGallery({
 
   const MainImageDisplay = ({ inModal = false }) => (
     <div 
-      className={`relative w-full ${inModal ? 'h-[80vh]' : height} bg-black ${inModal ? '' : 'rounded-lg overflow-hidden group'}`}
+      className={`relative w-full ${inModal ? 'h-[80vh]' : 'h-full'} bg-black ${inModal ? '' : 'rounded-lg overflow-hidden group'}`}
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
@@ -156,7 +156,7 @@ export default function PropertyImageGallery({
         <img
           src={images[currentIndex]?.url}
           alt={images[currentIndex]?.description}
-          className={`w-full h-full object-cover transition-transform duration-300 ${inModal ? 'object-contain' : 'group-hover:scale-105'}`}
+          className={`w-full h-full object-contain transition-transform duration-300 ${inModal ? 'object-contain' : 'group-hover:scale-105'}`}
         />
         
         {/* Overlay gradient subtil */}
@@ -169,7 +169,7 @@ export default function PropertyImageGallery({
       {images.length > 1 && showControls && (
         <>
           {/* Boutons de navigation */}
-          <div className={`absolute inset-0 flex items-center justify-between p-2 ${inModal ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity duration-200`}>
+          <div className={`absolute inset-0 flex items-center justify-between p-2 ${inModal ? 'opacity-100' : 'opacity-70 group-hover:opacity-100'} transition-opacity duration-200`}>
             <Button
               variant="ghost"
               size="icon"
@@ -241,7 +241,7 @@ export default function PropertyImageGallery({
   );
 
   return (
-    <div className={`space-y-3 ${className}`}>
+    <div className={`space-y-3 w-full ${className}`}>
       {/* Image principale */}
       <MainImageDisplay />
 

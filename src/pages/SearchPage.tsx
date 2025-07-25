@@ -8,7 +8,10 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
 export default function SearchPage() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('search') || '';
+  });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {

@@ -21,8 +21,11 @@ export interface Property {
   type: string;
   price: number;
   location: string;
+  address?: string; // Add address field
   area: number;
+  surface?: number; // Add surface field
   bedrooms: number;
+  rooms?: number; // Add rooms field
   bathrooms: number;
   features: string[];
   imageUrl: string;
@@ -31,6 +34,7 @@ export interface Property {
   agencyId?: string;
   ownerId?: string;
   agencyFees?: number;
+  charges?: number; // Add charges field
   kitchens?: number;
   shops?: number;
   livingRooms?: number;
@@ -42,6 +46,8 @@ export interface Property {
   petsAllowed?: boolean;
   furnished?: boolean;
   yearBuilt?: string;
+  createdAt?: string; // Add creation date
+  updatedAt?: string; // Add update date
   // Images data
   images?: Array<{
     id: string;

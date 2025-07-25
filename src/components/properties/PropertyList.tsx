@@ -7,8 +7,8 @@ import { Eye, Home, MapPin, Ruler, Hotel, Bath, Tag, Edit, Heart } from "lucide-
 import { formatCurrency } from "@/lib/utils";
 import PropertyDetailsDialog from "./PropertyDetailsDialog";
 import QuickVisitorLogin from "@/components/visitor/QuickVisitorLogin";
-import { useQuickVisitorAccess } from "@/hooks/useQuickVisitorAccess";
-import { Link } from "react-router-dom";
+import { useQuickVisitorAccess, refreshVisitorState } from "@/hooks/useQuickVisitorAccess";
+import { Link, useNavigate } from "react-router-dom";
 import { PropertyImageService } from "@/services/property/propertyImageService";
 import PropertyImageGallery from "./PropertyImageGallery";
 
@@ -18,6 +18,7 @@ interface PropertyListProps {
 }
 
 export default function PropertyList({ properties, agencyId }: PropertyListProps) {
+  const navigate = useNavigate();
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showMiniLogin, setShowMiniLogin] = useState(false);
@@ -37,17 +38,28 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
       isLoading 
     });
     
+    // Toujours stocker la propriété sélectionnée
     setSelectedProperty(property);
     
-    // If this is public view and user is not logged in, show mini login
-    if (!agencyId && !effectivelyLoggedIn) {
-      console.log('🏠 Opening mini login');
-      setShowMiniLogin(true);
-    } else {
-      console.log('🏠 Opening property details directly');
-      // Direct access to details (agency view or visitor logged in)
-      setIsDialogOpen(true);
+    // For public view (no agencyId)
+    if (!agencyId) {
+      // Rafraîchir l'état de connexion pour être sûr d'avoir les dernières infos
+      refreshVisitorState();
+      
+      // Check if user is logged in
+      if (effectivelyLoggedIn) {
+        console.log('🏠 Navigating to public property page');
+        navigate(`/property/${property.id}`);
+      } else {
+        console.log('🔒 User not logged in, showing mini login');
+        setShowMiniLogin(true);
+      }
+      return;
     }
+    
+    // For agency view, keep the existing dialog behavior
+    console.log('🏠 Opening property details dialog');
+    setIsDialogOpen(true);
   };
   
   const closePropertyDetails = () => {
@@ -61,9 +73,18 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
   const handleMiniLoginSuccess = (visitorData: any) => {
     // After successful login, open property details
     console.log('✅ Quick login successful:', visitorData);
+    
+    // Forcer la mise à jour de l'état de connexion
     setShowMiniLogin(false);
-    setForceLoggedIn(true); // Force logged in state immediately
-    setIsDialogOpen(true);
+    setForceLoggedIn(true);
+    
+    // Si nous avons une propriété sélectionnée, naviguer vers sa page de détails
+    if (selectedProperty) {
+      // Légère pause pour s'assurer que le toast est visible avant la navigation
+      setTimeout(() => {
+        navigate(`/property/${selectedProperty.id}`);
+      }, 500);
+    }
   };
   
   if (properties.length === 0) {
@@ -219,7 +240,7 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
                     disabled={isLoading}
                   >
                     <Eye className="h-4 w-4 mr-2" />
-                    {isLoading ? "Chargement..." : "Voir les détails"}
+                    {isLoading ? "Chargement..." : effectivelyLoggedIn ? "Voir les détails" : "Voir les détails"}
                   </Button>
                 )}
               </div>

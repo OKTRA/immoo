@@ -73,248 +73,294 @@ export default function PublicAgencyPage() {
   return (
     <>
       <Navbar />
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
-        {/* Hero Section with Agency Profile */}
-        <div className="relative overflow-hidden bg-white dark:bg-gray-900 border-b">
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-purple-600/10"></div>
-          <div className="container mx-auto px-4 py-16 relative">
-            <div className="max-w-5xl mx-auto">
-              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-8">
-                {/* Agency Avatar */}
-                <div className="relative flex-shrink-0">
-                  <div className="w-32 h-32 rounded-2xl border-4 border-white shadow-2xl overflow-hidden bg-background">
-                    {agency.logoUrl ? (
-                      <img 
-                        src={agency.logoUrl} 
-                        alt={agency.name} 
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-                        <Building className="w-16 h-16 text-white" />
+      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl via-white to-immoo-gold/5 dark:from-immoo-navy dark:via-immoo-navy-light/50 dark:to-immoo-navy">
+        {/* Modern Hero Section */}
+        <div className="relative overflow-hidden">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-br from-immoo-gold/5 via-transparent to-immoo-navy/5"></div>
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.1),transparent_50%)] dark:bg-[radial-gradient(circle_at_30%_20%,rgba(255,215,0,0.1),transparent_50%)]"></div>
+          
+          <div className="container mx-auto px-4 py-8 sm:py-12 relative">
+            <div className="max-w-6xl mx-auto">
+              {/* Mobile-First Layout */}
+              <div className="space-y-8">
+                {/* Agency Header Card */}
+                <div className="bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-immoo-gold/10 p-6 sm:p-8">
+                  <div className="flex flex-col sm:flex-row items-center gap-6">
+                    {/* Agency Avatar */}
+                    <div className="relative">
+                      <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-gradient-to-br from-immoo-gold/20 to-immoo-navy/20 shadow-xl ring-4 ring-white/50 dark:ring-immoo-gold/20">
+                        {agency.logoUrl ? (
+                          <img 
+                            src={agency.logoUrl} 
+                            alt={agency.name} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-immoo-gold to-immoo-navy">
+                            <Building className="w-12 h-12 sm:w-16 sm:h-16 text-white" />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  {agency.verified && (
-                    <div className="absolute -bottom-2 -right-2 bg-green-500 rounded-full p-3 shadow-lg">
-                      <CheckCircle className="w-5 h-5 text-white" />
+                      {agency.verified && (
+                        <div className="absolute -bottom-1 -right-1 bg-green-500 rounded-full p-2 shadow-lg ring-2 ring-white">
+                          <CheckCircle className="w-4 h-4 text-white" />
+                        </div>
+                      )}
                     </div>
-                  )}
+                    
+                    {/* Agency Info */}
+                    <div className="flex-1 text-center sm:text-left">
+                      <div className="space-y-3">
+                        <div>
+                          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-immoo-navy dark:text-immoo-pearl mb-2">
+                            {agency.name}
+                          </h1>
+                          {agency.verified && (
+                            <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg">
+                              <CheckCircle className="w-3 h-3 mr-1" />
+                              Agence certifiée
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {agency.location && (
+                          <div className="flex items-center justify-center sm:justify-start text-gray-600 dark:text-gray-300">
+                            <MapPin className="h-5 w-5 mr-2 text-immoo-gold" />
+                            <span className="text-base sm:text-lg font-medium">{agency.location}</span>
+                          </div>
+                        )}
+                        
+                        {agency.description && (
+                          <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base leading-relaxed max-w-2xl">
+                            {agency.description}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                
-                {/* Agency Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-start gap-4 mb-6">
-                    <div className="flex-1">
-                      <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                      {agency.name}
-                    </h1>
-                    {agency.verified && (
-                        <Badge className="bg-green-500 hover:bg-green-600 text-white mb-4">
-                        <CheckCircle className="w-3 h-3 mr-1" />
-                        Agence vérifiée
-                      </Badge>
-                    )}
+
+                {/* Stats Cards - Mobile Optimized */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                  {/* Rating Card */}
+                  <div className="group bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-immoo-gold/10 p-6 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                    <div className="text-center space-y-3">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 shadow-lg">
+                        <Star className="h-6 w-6 text-white fill-current" />
+                      </div>
+                      <div>
+                        <div className="text-2xl sm:text-3xl font-bold text-immoo-navy dark:text-immoo-pearl">
+                          {agency.rating.toFixed(1)}
+                          <span className="text-lg text-gray-500 ml-1">/5</span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Note moyenne</p>
+                      </div>
                     </div>
                   </div>
-                  
-                  {agency.location && (
-                    <div className="flex items-center text-gray-600 dark:text-gray-400 mb-6">
-                      <MapPin className="h-5 w-5 mr-2 text-blue-500" />
-                      <span className="text-lg">{agency.location}</span>
-                    </div>
-                  )}
-                  
-                  {/* Stats Row */}
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-6">
-                    <div className="text-center lg:text-left">
-                      <div className="flex items-center justify-center lg:justify-start mb-2">
-                        <Star className="h-5 w-5 text-yellow-400 fill-current mr-2" />
-                        <span className="text-2xl font-bold text-gray-900 dark:text-white">{agency.rating.toFixed(1)}</span>
-                        <span className="text-gray-600 dark:text-gray-400 ml-1">/5</span>
+
+                  {/* Properties Card */}
+                  <div className="group bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-immoo-gold/10 p-6 hover:shadow-2xl hover:scale-105 transition-all duration-300">
+                    <div className="text-center space-y-3">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 shadow-lg">
+                        <Home className="h-6 w-6 text-white" />
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Note moyenne</p>
-                    </div>
-                    <div className="text-center lg:text-left">
-                      <div className="flex items-center justify-center lg:justify-start mb-2">
-                        <Home className="h-5 w-5 text-blue-500 mr-2" />
-                        <span className="text-2xl font-bold text-gray-900 dark:text-white">{agency.properties}</span>
+                      <div>
+                        <div className="text-2xl sm:text-3xl font-bold text-immoo-navy dark:text-immoo-pearl">
+                          {agency.properties}
+                        </div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          Propriété{agency.properties > 1 ? 's' : ''}
+                        </p>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Propriété{agency.properties > 1 ? 's' : ''}</p>
-                    </div>
-                    <div className="text-center lg:text-left">
-                      <div className="flex items-center justify-center lg:justify-start mb-2">
-                        <Calendar className="h-5 w-5 text-purple-500 mr-2" />
-                        <span className="text-2xl font-bold text-gray-900 dark:text-white">{yearsActive}</span>
-                      </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">An{yearsActive > 1 ? 's' : ''} d'expérience</p>
                     </div>
                   </div>
-                  
-                  {agency.description && (
-                    <p className="text-gray-700 dark:text-gray-300 text-lg leading-relaxed mb-6">
-                      {agency.description}
-                    </p>
-                  )}
+
+                  {/* Experience Card */}
+                  <div className="group bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-xl rounded-2xl shadow-xl border border-white/20 dark:border-immoo-gold/10 p-6 hover:shadow-2xl hover:scale-105 transition-all duration-300 sm:col-span-1">
+                    <div className="text-center space-y-3">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg">
+                        <Calendar className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-2xl sm:text-3xl font-bold text-immoo-navy dark:text-immoo-pearl">
+                          {yearsActive}
+                        </div>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                          An{yearsActive > 1 ? 's' : ''} d'expérience
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-12">
-          <div className="max-w-5xl mx-auto space-y-8">
-            {/* Contact & Specialties Section */}
-            <div className="grid md:grid-cols-2 gap-8">
-              {/* Contact Information */}
-              <Card className="shadow-lg">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center text-xl">
-                    <Phone className="w-5 h-5 mr-2 text-blue-500" />
-                    Informations de contact
-                  </CardTitle>
-                  <CardDescription>
-                    Contactez notre équipe pour plus d'informations
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {agency.phone && (
-                    <div className="flex items-center p-3 rounded-lg bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-colors">
-                      <Phone className="w-5 h-5 text-blue-500 mr-3" />
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900 dark:text-white">Téléphone</p>
-                        <a 
-                          href={`tel:${agency.phone}`} 
-                          className="text-blue-600 dark:text-blue-400 hover:underline"
-                        >
-                          {agency.phone}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {agency.email && (
-                    <div className="flex items-center p-3 rounded-lg bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">
-                      <Mail className="w-5 h-5 text-green-500 mr-3" />
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900 dark:text-white">Email</p>
-                        <a 
-                          href={`mailto:${agency.email}`} 
-                          className="text-green-600 dark:text-green-400 hover:underline"
-                        >
-                          {agency.email}
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {agency.website && (
-                    <div className="flex items-center p-3 rounded-lg bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors">
-                      <Globe className="w-5 h-5 text-purple-500 mr-3" />
-                      <div className="flex-1">
-                        <p className="font-medium text-gray-900 dark:text-white">Site web</p>
-                        <a 
-                          href={agency.website.startsWith('http') ? agency.website : `https://${agency.website}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-purple-600 dark:text-purple-400 hover:underline inline-flex items-center"
-                        >
-                          {agency.website}
-                          <ExternalLink className="w-3 h-3 ml-1" />
-                        </a>
+        <div className="container mx-auto px-4 py-8 sm:py-12">
+          <div className="max-w-6xl mx-auto space-y-8">
+            {/* Contact Information - Full Width Modern Card */}
+            <div className="bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-immoo-gold/10 p-6 sm:p-8">
+              <div className="text-center mb-8">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-immoo-gold to-immoo-navy shadow-xl mb-4">
+                  <Phone className="w-8 h-8 text-white" />
                 </div>
+                <h2 className="text-2xl sm:text-3xl font-bold text-immoo-navy dark:text-immoo-pearl mb-2">
+                  Informations de contact
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
+                  Contactez notre équipe pour plus d'informations
+                </p>
               </div>
-                  )}
-                  
-                  {(!agency.phone && !agency.email && !agency.website) && (
-                    <div className="text-center py-6">
-                      <Phone className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                      <p className="text-gray-500 dark:text-gray-400">
-                        Informations de contact non disponibles
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {agency.phone && (
+                  <a 
+                    href={`tel:${agency.phone}`}
+                    className="group flex items-center p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 hover:from-blue-100 hover:to-blue-200 dark:hover:from-blue-800/40 dark:hover:to-blue-700/40 transition-all duration-300 hover:scale-105 hover:shadow-xl border border-blue-200/50 dark:border-blue-700/50"
+                  >
+                    <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500 shadow-lg mr-4 group-hover:scale-110 transition-transform duration-300">
+                      <Phone className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Téléphone</p>
+                      <p className="text-blue-600 dark:text-blue-400 font-medium text-sm sm:text-base truncate">
+                        {agency.phone}
                       </p>
                     </div>
-                  )}
-            </CardContent>
-          </Card>
-
-              {/* Specialties */}
-              {agency.specialties && agency.specialties.length > 0 && (
-                <Card className="shadow-lg">
-                  <CardHeader className="pb-4">
-                    <CardTitle className="flex items-center text-xl">
-                      <Award className="w-5 h-5 mr-2 text-orange-500" />
-                      Spécialités
-              </CardTitle>
-              <CardDescription>
-                      Domaines d'expertise de l'agence
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-                    <div className="grid grid-cols-1 gap-3">
-                      {agency.specialties.map((specialty, index) => (
-                        <div 
-                          key={index}
-                          className="flex items-center p-3 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800"
-                        >
-                          <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
-                          <Badge variant="secondary" className="bg-orange-100 dark:bg-orange-900/40 text-orange-800 dark:text-orange-200 border-0">
-                            {specialty}
-                          </Badge>
-                        </div>
-                      ))}
+                  </a>
+                )}
+                
+                {agency.email && (
+                  <a 
+                    href={`mailto:${agency.email}`}
+                    className="group flex items-center p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30 hover:from-green-100 hover:to-green-200 dark:hover:from-green-800/40 dark:hover:to-green-700/40 transition-all duration-300 hover:scale-105 hover:shadow-xl border border-green-200/50 dark:border-green-700/50"
+                  >
+                    <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-green-500 shadow-lg mr-4 group-hover:scale-110 transition-transform duration-300">
+                      <Mail className="w-6 h-6 text-white" />
                     </div>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-
-            {/* Properties Section */}
-            <Card className="shadow-lg">
-              <CardHeader className="border-b bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center text-2xl">
-                      <Home className="w-6 h-6 mr-3 text-blue-500" />
-                      Propriétés disponibles
-                      <Badge variant="secondary" className="ml-3 text-lg px-3 py-1">
-                        {properties.length}
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription className="text-lg mt-2">
-                      Découvrez les biens immobiliers proposés par {agency.name}
-                    </CardDescription>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Email</p>
+                      <p className="text-green-600 dark:text-green-400 font-medium text-sm sm:text-base truncate">
+                        {agency.email}
+                      </p>
+                    </div>
+                  </a>
+                )}
+                
+                {agency.website && (
+                  <a 
+                    href={agency.website.startsWith('http') ? agency.website : `https://${agency.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 hover:from-purple-100 hover:to-purple-200 dark:hover:from-purple-800/40 dark:hover:to-purple-700/40 transition-all duration-300 hover:scale-105 hover:shadow-xl border border-purple-200/50 dark:border-purple-700/50"
+                  >
+                    <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-purple-500 shadow-lg mr-4 group-hover:scale-110 transition-transform duration-300">
+                      <Globe className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Site web</p>
+                      <p className="text-purple-600 dark:text-purple-400 font-medium text-sm sm:text-base truncate flex items-center">
+                        {agency.website}
+                        <ExternalLink className="w-3 h-3 ml-1 flex-shrink-0" />
+                      </p>
+                    </div>
+                  </a>
+                )}
+              </div>
+              
+              {(!agency.phone && !agency.email && !agency.website) && (
+                <div className="text-center py-12">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gray-100 dark:bg-gray-800 mb-4">
+                    <Phone className="w-8 h-8 text-gray-400" />
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-              {propertiesLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {[...Array(6)].map((_, index) => (
-                    <div key={index} className="animate-pulse">
-                      <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-lg mb-4"></div>
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                    </div>
-                  ))}
-                </div>
-              ) : properties.length > 0 ? (
-                <PropertyList properties={properties} />
-              ) : (
-                  <div className="text-center py-16">
-                    <div className="w-20 h-20 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <Home className="w-10 h-10 text-gray-400" />
-                    </div>
-                    <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-3">
-                    Aucune propriété disponible
-                  </h3>
-                    <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-                    Cette agence n'a actuellement aucune propriété disponible à la location.
-                      Contactez-les directement pour connaître les futures disponibilités.
+                  <p className="text-gray-500 dark:text-gray-400 text-lg">
+                    Informations de contact non disponibles
                   </p>
                 </div>
               )}
-            </CardContent>
-          </Card>
+            </div>
+
+            {/* Specialties Section */}
+            {agency.specialties && agency.specialties.length > 0 && (
+              <div className="bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-immoo-gold/10 p-6 sm:p-8">
+                <div className="text-center mb-8">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-orange-400 to-red-500 shadow-xl mb-4">
+                    <Award className="w-8 h-8 text-white" />
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-immoo-navy dark:text-immoo-pearl mb-2">
+                    Spécialités
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
+                    Domaines d'expertise de l'agence
+                  </p>
+                </div>
+                
+                <div className="flex flex-wrap gap-3 justify-center">
+                  {agency.specialties.map((specialty, index) => (
+                    <div 
+                      key={index}
+                      className="inline-flex items-center px-4 py-3 rounded-2xl bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900/30 dark:to-red-900/30 border border-orange-200/50 dark:border-orange-700/50 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105"
+                    >
+                      <div className="w-2 h-2 bg-orange-500 rounded-full mr-3"></div>
+                      <span className="font-medium text-orange-800 dark:text-orange-200 text-sm sm:text-base">
+                        {specialty}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Properties Section */}
+            <div className="bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-immoo-gold/10 overflow-hidden">
+              <div className="bg-gradient-to-r from-immoo-gold/10 to-immoo-navy/10 p-6 sm:p-8 border-b border-white/20 dark:border-immoo-gold/10">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-immoo-gold to-immoo-navy shadow-xl mb-4">
+                    <Home className="w-8 h-8 text-white" />
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-immoo-navy dark:text-immoo-pearl mb-2">
+                    Propriétés disponibles
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-immoo-gold text-immoo-navy text-sm font-bold ml-3">
+                      {properties.length}
+                    </span>
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
+                    Découvrez les biens immobiliers proposés par {agency.name}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="p-6 sm:p-8">
+                {propertiesLoading ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[...Array(6)].map((_, index) => (
+                      <div key={index} className="animate-pulse">
+                        <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 rounded-2xl mb-4"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
+                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : properties.length > 0 ? (
+                  <PropertyList properties={properties} />
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gray-100 dark:bg-gray-800 mb-6">
+                      <Home className="w-10 h-10 text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                      Aucune propriété disponible
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
+                      Cette agence n'a actuellement aucune propriété disponible à la location.
+                      Contactez-les directement pour connaître les futures disponibilités.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>
