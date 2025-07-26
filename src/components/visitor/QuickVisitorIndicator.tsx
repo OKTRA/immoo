@@ -8,13 +8,10 @@ export default function QuickVisitorIndicator() {
 
   if (!isLoggedIn) return null;
 
-  const displayText = visitorContact?.email || visitorContact?.phone || 'Visiteur';
-
   return (
     <div className="flex items-center gap-2 text-sm">
-      <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full">
+      <div className="flex items-center justify-center p-1.5 bg-green-100 text-green-800 rounded-full">
         <User className="h-3 w-3" />
-        <span className="max-w-20 truncate">{displayText}</span>
       </div>
       <Button 
         variant="ghost" 

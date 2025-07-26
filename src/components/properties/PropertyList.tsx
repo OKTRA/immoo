@@ -100,94 +100,104 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
       </div>
 
       {/* Properties Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {properties.length === 0 ? (
           <div className="col-span-full text-center py-12">
             <p className="text-gray-500">Aucune propriété trouvée</p>
           </div>
         ) : (
           properties.map((property) => (
-            <Card key={property.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-              <div className="relative">
+            <Card key={property.id} className="group overflow-hidden border-0 shadow-sm hover:shadow-xl transition-all duration-300 rounded-2xl bg-white">
+              <div className="relative overflow-hidden rounded-t-2xl">
                 <PropertyImageGallery
                   propertyId={property.id}
                   images={[]}
                   mainImageUrl={property.imageUrl}
-                  height="200"
-                  className="w-full"
+                  height="h-60"
+                  className="w-full group-hover:scale-105 transition-transform duration-300"
                 />
-              <Badge className="absolute top-2 left-2 bg-primary/90">
-                {formatCurrency(property.price)}
-              </Badge>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-2 right-2 bg-white/80 hover:bg-white"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Handle favorite toggle
-                }}
-              >
-                <Heart className="h-4 w-4" />
-              </Button>
-            </div>
-            
-            <CardContent className="p-4">
-              <h3 className="font-semibold text-lg mb-2 line-clamp-2">{property.title}</h3>
-              
-              <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
-                <MapPin className="h-4 w-4" />
-                <span>{property.location || property.address}</span>
-              </div>
-              
-              <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
-                {property.surface && (
-                  <div className="flex items-center gap-1">
-                    <Ruler className="h-4 w-4" />
-                    <span>{property.surface} m²</span>
-                  </div>
-                )}
-                {property.rooms && (
-                  <div className="flex items-center gap-1">
-                    <Hotel className="h-4 w-4" />
-                    <span>{property.rooms} pièces</span>
-                  </div>
-                )}
-                {property.bedrooms && (
-                  <div className="flex items-center gap-1">
-                    <Bath className="h-4 w-4" />
-                    <span>{property.bedrooms} chambres</span>
-                  </div>
-                )}
-              </div>
-              
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                {property.description}
-              </p>
-              
-              <div className="flex gap-2">
-                <Button 
-                  className="flex-1" 
-                  size="sm"
-                  onClick={() => openPropertyDetails(property)}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-3 right-3 bg-white/90 hover:bg-white shadow-sm backdrop-blur-sm rounded-full h-8 w-8"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Handle favorite toggle
+                  }}
                 >
-                  <Eye className="h-4 w-4 mr-2" />
-                  Voir détails
+                  <Heart className="h-4 w-4 text-gray-600" />
                 </Button>
-                
-                {agencyId && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => navigate(`/properties/${property.id}/edit`)}
-                  >
-                    <Edit className="h-4 w-4 mr-2" />
-                    Modifier
-                  </Button>
-                )}
               </div>
-            </CardContent>
-          </Card>
+              
+              <CardContent className="p-5 flex flex-col h-[280px]">
+                <div className="flex-1">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-lg text-gray-900 line-clamp-2 leading-tight">{property.title}</h3>
+                  </div>
+                  
+                  <div className="flex items-center gap-1 text-sm text-gray-500 mb-3">
+                    <MapPin className="h-4 w-4 flex-shrink-0" />
+                    <span className="line-clamp-1">{property.location || property.address}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-3">
+                    {property.surface && (
+                      <div className="flex items-center gap-1">
+                        <Ruler className="h-3 w-3" />
+                        <span>{property.surface} m²</span>
+                      </div>
+                    )}
+                    {property.rooms && (
+                      <div className="flex items-center gap-1">
+                        <Hotel className="h-3 w-3" />
+                        <span>{property.rooms} pièces</span>
+                      </div>
+                    )}
+                    {property.bedrooms && (
+                      <div className="flex items-center gap-1">
+                        <Bath className="h-3 w-3" />
+                        <span>{property.bedrooms} ch.</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <p className="text-sm text-gray-600 line-clamp-3 mb-4">
+                    {property.description}
+                  </p>
+                  
+                  {property.price && (
+                    <div className="mb-4">
+                      <span className="text-lg font-semibold text-gray-900">{formatCurrency(property.price)}</span>
+                      <span className="text-sm text-gray-500 ml-1">/ mois</span>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="flex gap-2 mt-auto pt-4 border-t border-gray-100">
+                  <Button 
+                    className="flex-1 bg-gray-900 hover:bg-gray-800 text-white rounded-lg font-medium transition-colors duration-200" 
+                    size="sm"
+                    onClick={() => openPropertyDetails(property)}
+                  >
+                    <Eye className="h-4 w-4 mr-2" />
+                    Voir détails
+                  </Button>
+                  
+                  {agencyId && (
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="border-gray-300 hover:border-gray-400 rounded-lg font-medium transition-colors duration-200"
+                      onClick={() => navigate(`/properties/${property.id}/edit`)}
+                    >
+                      <Edit className="h-4 w-4 mr-2" />
+                      Modifier
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
           ))
         )}
       </div>

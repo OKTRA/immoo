@@ -129,29 +129,7 @@ export default function HomePage() {
                 <div className="space-y-6">
                   <PropertyList properties={featuredProperties} />
                   
-                  {/* Compact Call to Action */}
-                  <div className="text-center pt-6">
-                    <div className="inline-flex flex-col sm:flex-row gap-3">
-                      <Button asChild size="default" className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy px-6 py-2.5 font-medium shadow-md hover:shadow-lg transition-all duration-200">
-                        <Link to="/properties" className="flex items-center">
-                          Voir toutes les propriétés
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </Link>
-                      </Button>
-                      <Button asChild variant="outline" size="default" className="border border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy px-6 py-2.5 font-medium transition-all duration-200">
-                        <Link to="/agencies" className="flex items-center">
-                          <Building2 className="mr-2 h-4 w-4" />
-                          Parcourir les agences
-                        </Link>
-                      </Button>
-                      <Button asChild variant="secondary" size="default" className="bg-immoo-navy/10 text-immoo-navy hover:bg-immoo-navy hover:text-white px-6 py-2.5 font-medium transition-all duration-200">
-                        <Link to="/agencies/all" className="flex items-center">
-                          <Building2 className="mr-2 h-4 w-4" />
-                          Filtrer les agences
-                        </Link>
-                      </Button>
-                    </div>
-                  </div>
+
                 </div>
               )}
             </div>

@@ -156,7 +156,7 @@ export default function PropertyImageGallery({
         <img
           src={images[currentIndex]?.url}
           alt={images[currentIndex]?.description}
-          className={`w-full h-full object-contain transition-transform duration-300 ${inModal ? 'object-contain' : 'group-hover:scale-105'}`}
+          className={`w-full h-full transition-transform duration-300 ${inModal ? 'object-contain' : 'object-cover group-hover:scale-105'}`}
         />
         
         {/* Overlay gradient subtil */}
@@ -243,7 +243,9 @@ export default function PropertyImageGallery({
   return (
     <div className={`space-y-3 w-full ${className}`}>
       {/* Image principale */}
-      <MainImageDisplay />
+      <div className={`w-full ${height} overflow-hidden`}>
+        <MainImageDisplay />
+      </div>
 
       {/* Thumbnails */}
       {images.length > 1 && showThumbnails && (

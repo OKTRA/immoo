@@ -48,11 +48,6 @@ export default function Navbar() {
       role: "agency",
       isPublic: true
     },
-    { 
-      name: "Admin", 
-      path: "/admin",
-      role: "admin" 
-    },
   ];
 
   return (

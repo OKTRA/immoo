@@ -1,13 +1,16 @@
 import { useState, useEffect } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ButtonEffects } from "./ui/ButtonEffects";
-import { Search, MapPin, Home, Building, ArrowRight, Sparkles } from "lucide-react";
+import { Search, MapPin, Home, Building, ArrowRight, Sparkles, Shield, Star, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Property } from "@/assets/types";
 import { getProperties } from "@/services/propertyService";
 import { supabase } from "@/integrations/supabase/client";
 import PropertyList from "./properties/PropertyList";
 import { Card, CardContent } from "./ui/card";
+import { useAuth } from "@/contexts/auth/AuthContext";
+import QuickVisitorLogin from "./visitor/QuickVisitorLogin";
+import { useQuickVisitorAccess } from "@/hooks/useQuickVisitorAccess";
 
 export default function HeroSection() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -25,7 +28,11 @@ export default function HeroSection() {
   const [agencies, setAgencies] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [showVisitorLogin, setShowVisitorLogin] = useState(false);
+  const [selectedAgency, setSelectedAgency] = useState<any>(null);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { isLoggedIn: visitorIsLoggedIn } = useQuickVisitorAccess();
   
   const { scrollY } = useScroll();
   const y1 = useTransform(scrollY, [0, 300], [0, -50]);
@@ -82,10 +89,10 @@ export default function HeroSection() {
         setSearchResults(filteredProperties);
         setAgencies([]);
       } else {
-        // Search agencies with username
+        // Search agencies and get real properties count
         const { data: agenciesData, error } = await supabase
           .from('agencies')
-          .select('id, name, username, description, email, phone, website, verified, properties_count, rating, location, status, is_visible')
+          .select('*')
           .eq('is_visible', true);
           
         if (error) {
@@ -94,8 +101,48 @@ export default function HeroSection() {
           return;
         }
         
-        if (agenciesData) {
-          let filteredAgencies = agenciesData;
+        if (agenciesData && Array.isArray(agenciesData)) {
+          // Get properties count and rating for each agency
+          const agenciesWithPropertiesCount = await Promise.all(
+            agenciesData.map(async (agency: any) => {
+              try {
+                // Get properties count
+                const { count } = await supabase
+                  .from('properties')
+                  .select('*', { count: 'exact', head: true })
+                  .eq('agency_id', agency.id);
+                
+                // Get average rating from visitor contacts or reviews
+                const { data: contactsData } = await supabase
+                  .from('visitor_contacts')
+                  .select('rating')
+                  .eq('agency_id', agency.id)
+                  .not('rating', 'is', null);
+                
+                let averageRating = null;
+                if (contactsData && contactsData.length > 0) {
+                  const totalRating = contactsData.reduce((sum: number, contact: any) => sum + (contact.rating || 0), 0);
+                  averageRating = (totalRating / contactsData.length).toFixed(1);
+                }
+                
+                return {
+                  ...agency,
+                  properties_count: count || 0,
+                  calculated_rating: averageRating,
+                  reviews_count: contactsData?.length || 0
+                };
+              } catch (err) {
+                console.error('Error processing agency:', agency.id, err);
+                return {
+                  ...agency,
+                  properties_count: 0,
+                  calculated_rating: null,
+                  reviews_count: 0
+                };
+              }
+            })
+          );
+          let filteredAgencies = agenciesWithPropertiesCount;
           
           // Apply filters - Enhanced search with username and keywords
           if (searchTerm) {
@@ -130,13 +177,13 @@ export default function HeroSection() {
             );
           }
           
-          if (priceRange) {
-            // Filter by properties count (using priceRange state)
-            if (priceRange === '0') {
+          if (agencyPropertiesCount) {
+            // Filter by properties count
+            if (agencyPropertiesCount === '0') {
               filteredAgencies = filteredAgencies.filter(a => a.properties_count === 0);
-            } else if (priceRange === '1-5') {
+            } else if (agencyPropertiesCount === '1-5') {
               filteredAgencies = filteredAgencies.filter(a => a.properties_count >= 1 && a.properties_count <= 5);
-            } else if (priceRange === '5+') {
+            } else if (agencyPropertiesCount === '5+') {
               filteredAgencies = filteredAgencies.filter(a => a.properties_count > 5);
             }
           }
@@ -502,45 +549,110 @@ export default function HeroSection() {
                       agencies.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                           {agencies.map((agency) => (
-                            <Card key={agency.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                              <CardContent className="p-6">
-                                <div className="flex items-center mb-4">
-                                  <div className="w-12 h-12 bg-immoo-gold/20 rounded-lg flex items-center justify-center mr-4">
-                                    <Building className="h-6 w-6 text-immoo-gold" />
+                            <motion.div
+                              key={agency.id}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.3 }}
+                              className="group"
+                            >
+                              <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-gradient-to-br from-white via-immoo-pearl/5 to-white dark:from-immoo-navy-light dark:via-immoo-navy-light/80 dark:to-immoo-navy-light backdrop-blur-sm">
+                                <CardContent className="p-0">
+                                  {/* Header with gradient */}
+                                  <div className="bg-gradient-to-r from-immoo-gold/10 via-immoo-pearl/20 to-immoo-gold/10 p-6 pb-4">
+                                    <div className="flex items-start justify-between mb-3">
+                                      <div className="flex items-center">
+                                        <div className="w-14 h-14 bg-gradient-to-br from-immoo-gold to-immoo-gold/80 rounded-xl flex items-center justify-center mr-4 shadow-lg">
+                                          <Building className="h-7 w-7 text-white" />
+                                        </div>
+                                        <div>
+                                          <h3 className="font-bold text-xl text-immoo-navy dark:text-immoo-pearl mb-1">
+                                            {agency.name}
+                                          </h3>
+                                          <p className="text-sm text-immoo-gold font-semibold">
+                                            @{agency.username}
+                                          </p>
+                                        </div>
+                                      </div>
+                                      {agency.verified && (
+                                        <div className="flex items-center bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                                          <Shield className="h-3 w-3 text-green-600 mr-1" />
+                                          <span className="text-xs text-green-600 font-medium">Vérifiée</span>
+                                        </div>
+                                      )}
+                                    </div>
                                   </div>
-                                  <div>
-                                    <h3 className="font-semibold text-lg text-immoo-navy dark:text-immoo-pearl">
-                                      {agency.name}
-                                    </h3>
-                                    <p className="text-xs text-immoo-gold font-medium mb-1">
-                                      @{agency.username}
+
+                                  {/* Content */}
+                                  <div className="p-6 pt-4">
+                                    {/* Description */}
+                                    <p className="text-sm text-immoo-navy/70 dark:text-immoo-pearl/70 mb-4 line-clamp-2 leading-relaxed">
+                                      {agency.description || "Agence créée automatiquement lors de l'inscription"}
                                     </p>
-                                    <p className="text-sm text-gray-600">
-                                      {agency.verified ? '✓ Vérifiée' : 'Non vérifiée'}
-                                    </p>
+
+                                    {/* Stats */}
+                                    <div className="flex items-center justify-between mb-4">
+                                      <div className="flex items-center space-x-4">
+                                        <div className="flex items-center">
+                                          <Home className="h-4 w-4 text-immoo-gold mr-1" />
+                                          <span className="text-sm font-semibold text-immoo-navy dark:text-immoo-pearl">
+                                            {agency.properties_count}
+                                          </span>
+                                          <span className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 ml-1">
+                                            propriété{agency.properties_count !== 1 ? 's' : ''}
+                                          </span>
+                                        </div>
+                                        <div className="flex items-center">
+                                          <Star className="h-4 w-4 text-yellow-500 mr-1" />
+                                          <span className="text-sm font-semibold text-immoo-navy dark:text-immoo-pearl">
+                                            {agency.calculated_rating || agency.rating || 'Nouveau'}
+                                          </span>
+                                          {agency.reviews_count > 0 && (
+                                            <span className="text-xs text-immoo-navy/50 dark:text-immoo-pearl/50 ml-1">
+                                              ({agency.reviews_count})
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Simple Clickable Area */}
+                                    <div 
+                                      onClick={() => {
+                                        if (user || visitorIsLoggedIn) {
+                                          navigate(`/public-agency/${agency.id}`);
+                                        } else {
+                                          setSelectedAgency(agency);
+                                          setShowVisitorLogin(true);
+                                        }
+                                      }}
+                                      className="cursor-pointer"
+                                    >
+                                      <div className="flex items-center justify-center">
+                                        <div className="w-8 h-8 bg-immoo-gold/20 rounded-full flex items-center justify-center">
+                                          <Users className="h-4 w-4 text-immoo-gold" />
+                                        </div>
+                                        {user && (
+                                          <div className="ml-2 flex items-center text-xs text-immoo-navy/60 dark:text-immoo-pearl/60">
+                                            <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
+                                            Connecté
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
                                   </div>
-                                </div>
-                                <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                                  {agency.description}
-                                </p>
-                                <div className="flex justify-between items-center text-sm">
-                                  <span className="text-immoo-gold font-medium">
-                                    {agency.properties_count} propriété{agency.properties_count !== 1 ? 's' : ''}
-                                  </span>
-                                  <button 
-                                    onClick={() => navigate(`/agencies/${agency.id}`)}
-                                    className="text-immoo-navy hover:text-immoo-gold transition-colors"
-                                  >
-                                    Voir détails →
-                                  </button>
-                                </div>
-                              </CardContent>
-                            </Card>
+                                </CardContent>
+                              </Card>
+                            </motion.div>
                           ))}
                         </div>
                       ) : (
                         <div className="text-center py-12">
-                          <p className="text-gray-500">Aucune agence trouvée avec ces critères</p>
+                          <div className="bg-gradient-to-br from-immoo-pearl/20 to-immoo-gold/10 rounded-2xl p-8 max-w-md mx-auto">
+                            <Building className="h-12 w-12 text-immoo-gold/60 mx-auto mb-4" />
+                            <p className="text-immoo-navy/70 dark:text-immoo-pearl/70 font-medium">Aucune agence trouvée avec ces critères</p>
+                            <p className="text-sm text-immoo-navy/50 dark:text-immoo-pearl/50 mt-2">Essayez de modifier vos filtres de recherche</p>
+                          </div>
                         </div>
                       )
                     )}
@@ -590,6 +702,20 @@ export default function HeroSection() {
           </motion.div>
         </motion.div>
       </motion.div>
+
+      {/* Quick Visitor Login Modal */}
+      <QuickVisitorLogin
+        isOpen={showVisitorLogin}
+        onClose={() => {
+          setShowVisitorLogin(false);
+          setSelectedAgency(null);
+        }}
+        onSuccess={() => {
+          if (selectedAgency) {
+            navigate(`/public-agency/${selectedAgency.id}`);
+          }
+        }}
+      />
     </section>
   );
 }
