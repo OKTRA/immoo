@@ -80,8 +80,8 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-t border-immoo-gray/20 shadow-lg">
-      <div className="flex items-center justify-around px-2 py-2 h-16">
+    <nav className="fixed bottom-0 left-0 w-full z-50 bg-gradient-to-t from-white/95 to-white/90 backdrop-blur-lg border-t border-immoo-gray/10 shadow-xl rounded-t-2xl">
+      <div className="flex items-center justify-around px-4 py-3 h-16">
         {navItems.map((item, index) => {
           const isActive = item.isActive(location.pathname);
           
@@ -90,6 +90,12 @@ export default function MobileBottomNav() {
               key={index}
               variant="ghost"
               size="sm"
+              className={cn(
+                "flex flex-col items-center justify-center gap-1 h-12 px-3 rounded-xl transition-all duration-300 hover:scale-105",
+                isActive 
+                  ? "bg-immoo-navy/5 text-immoo-navy" 
+                  : "text-immoo-gray hover:bg-immoo-gold/5 hover:text-immoo-navy"
+              )}
               onClick={() => handleNavClick(item)}
               className={cn(
                 "flex flex-col items-center justify-center gap-1 h-12 px-3 rounded-xl transition-all duration-200",
@@ -99,21 +105,21 @@ export default function MobileBottomNav() {
               )}
             >
               <div className={cn(
-                "transition-all duration-200",
-                isActive && "scale-110"
+                "transition-all duration-300",
+                isActive && "scale-110 text-immoo-gold drop-shadow-md"
               )}>
                 {item.icon}
               </div>
               <span className={cn(
-                "text-xs font-medium transition-all duration-200",
-                isActive ? "text-immoo-navy" : "text-immoo-gray"
+                "text-xs font-semibold tracking-wide transition-all duration-300",
+                isActive ? "text-immoo-gold" : "text-immoo-gray/80"
               )}>
                 {item.label}
               </span>
               
               {/* Indicateur actif */}
               {isActive && (
-                <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-immoo-gold rounded-full" />
+                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-10 h-1 bg-gradient-to-r from-immoo-gold/0 to-immoo-gold to-immoo-gold/0 rounded-full animate-pulse" />
               )}
             </Button>
           );
