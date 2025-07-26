@@ -12,12 +12,12 @@ export const createDefaultFreeSubscription = (userId: string): DefaultUserSubscr
   createdAt: new Date().toISOString(),
   updatedAt: new Date().toISOString(),
   plan: {
-    name: 'free',
+    name: 'Gratuit',
     price: 0,
     maxAgencies: 1,
-    maxProperties: 1,
+    maxProperties: 2, // Updated to match database free plan
     maxLeases: 2,
     maxUsers: 1,
-    features: []
+    features: ['Gestion de base', 'Support email'] // Updated to match database
   }
 });

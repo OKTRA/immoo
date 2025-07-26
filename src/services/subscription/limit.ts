@@ -37,20 +37,20 @@ export const checkUserResourceLimit = async (
     console.log(`📊 Subscription query result:`, { subscription, error: subError });
 
     if (subError || !subscription) {
-      console.log(`⚠️ No active subscription found, using free plan limits`);
-      // No active subscription found, treat as free plan
+      console.log(`⚠️ No active subscription found, using database free plan`);
+      // No active subscription found, get free plan from database
       const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
-      const freePlanResult = getFreePlanLimits(currentCount, resourceType);
-      console.log(`🆓 Free plan result:`, freePlanResult);
+      const freePlanResult = await getDatabaseFreePlanLimits(currentCount, resourceType);
+      console.log(`🆓 Database free plan result:`, freePlanResult);
       return freePlanResult;
     }
 
     if (!subscription.subscription_plans) {
-      console.log(`⚠️ No plan found in subscription, using free plan limits`);
-      // No plan found, treat as free plan
+      console.log(`⚠️ No plan found in subscription, using database free plan`);
+      // No plan found, get free plan from database
       const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
-      const freePlanResult = getFreePlanLimits(currentCount, resourceType);
-      console.log(`🆓 Free plan result (no plan):`, freePlanResult);
+      const freePlanResult = await getDatabaseFreePlanLimits(currentCount, resourceType);
+      console.log(`🆓 Database free plan result (no plan):`, freePlanResult);
       return freePlanResult;
     }
 
@@ -237,11 +237,59 @@ export const getCurrentResourceCount = async (
 };
 
 /**
- * CORRECTED free plan limits function
+ * Get free plan limits from database instead of hardcoded values
  */
-const getFreePlanLimits = (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users'): SubscriptionLimit => {
+const getDatabaseFreePlanLimits = async (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users'): Promise<SubscriptionLimit> => {
+  try {
+    // Get the free plan from database
+    const { data: freePlan, error } = await supabase
+      .from('subscription_plans')
+      .select('*')
+      .eq('id', '00000000-0000-0000-0000-000000000001')
+      .single();
+
+    if (error || !freePlan) {
+      console.error('Error fetching free plan from database:', error);
+      // Fallback to hardcoded limits if database fails
+      return getHardcodedFreePlanLimits(currentCount, resourceType);
+    }
+
+    // Map database fields to resource types
+    const resourceLimits = {
+      properties: freePlan.max_properties,
+      agencies: freePlan.max_agencies,
+      leases: freePlan.max_leases,
+      users: freePlan.max_users
+    };
+
+    const maxAllowed = resourceLimits[resourceType];
+    const allowed = currentCount < maxAllowed;
+    const percentageUsed = Math.round((currentCount / maxAllowed) * 100);
+
+    return {
+      allowed,
+      currentCount,
+      maxAllowed,
+      planName: freePlan.name,
+      planId: freePlan.id,
+      percentageUsed,
+      resourceType,
+      isUnlimited: false,
+      error: null
+    };
+  } catch (err) {
+    console.error('Error in getDatabaseFreePlanLimits:', err);
+    // Fallback to hardcoded limits
+    return getHardcodedFreePlanLimits(currentCount, resourceType);
+  }
+};
+
+/**
+ * Fallback hardcoded free plan limits (only used if database fails)
+ */
+const getHardcodedFreePlanLimits = (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users'): SubscriptionLimit => {
   const freeLimits = {
-    properties: 1,
+    properties: 2, // Updated to match database
     agencies: 1, 
     leases: 2,
     users: 1
@@ -255,7 +303,7 @@ const getFreePlanLimits = (currentCount: number, resourceType: 'properties' | 'a
     allowed,
     currentCount,
     maxAllowed,
-    planName: 'free',
+    planName: 'Gratuit (fallback)',
     percentageUsed,
     resourceType,
     isUnlimited: false,

@@ -188,9 +188,8 @@ export const signUpWithEmail = async (email: string, password: string, userData:
             agency_id: agencyId, // Will be null for non-agency users
             plan_id: FREE_PLAN_ID,
             status: 'active',
-            start_date: new Date().toISOString().split('T')[0],
+            start_date: new Date().toISOString(),
             end_date: null, // Free plan doesn't expire
-            payment_method: 'free',
             auto_renew: false
           });
 

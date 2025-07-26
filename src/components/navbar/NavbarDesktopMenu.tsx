@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import LoginDialog from "@/components/auth/LoginDialog";
 import QuickVisitorIndicator from "@/components/visitor/QuickVisitorIndicator";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavbarDesktopMenuProps {
   navLinks: { name: string; path: string }[];
@@ -29,6 +30,8 @@ export function NavbarDesktopMenu({
   const [selectedUserType, setSelectedUserType] = useState<'agency' | 'admin'>('agency');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  const { profile } = useAuth();
+
   const handleUserTypeClick = (type: UserType) => {
     console.log(`${type.name} Clicked. User authenticated:`, !!user);
     
@@ -36,6 +39,27 @@ export function NavbarDesktopMenu({
     if (type.isPublic) {
       console.log('Navigating to public page:', type.name);
       navigate(type.path);
+      return;
+    }
+    
+    // Pour l'espace agence - dashboard d'administration
+    if (type.path === '/agencies') {
+      console.log('🏢 Navigation Desktop Espace Agence:', {
+        user: !!user,
+        role: profile?.role,
+        agency_id: profile?.agency_id
+      });
+      
+      if (user && profile?.role === 'agency' && profile?.agency_id) {
+        // Rediriger vers le dashboard de l'agence connectée
+        console.log(`🎯 Redirection desktop vers: /agencies/${profile.agency_id}`);
+        navigate(`/agencies/${profile.agency_id}`);
+      } else {
+        // Ouvrir popup de connexion agence
+        console.log('🔐 Ouverture popup de connexion agence (desktop)');
+        setSelectedUserType('agency');
+        setLoginDialogOpen(true);
+      }
       return;
     }
     
