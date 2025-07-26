@@ -85,45 +85,45 @@ export default function HomePage() {
         
         {/* Only show properties section if there are properties or while loading */}
         {(hasProperties || loading) && (
-          <section className="py-12 bg-gradient-to-b from-immoo-pearl/20 to-white dark:from-immoo-navy-light/20 dark:to-immoo-navy">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <section className="py-6 sm:py-8 md:py-12 bg-gradient-to-b from-immoo-pearl/20 to-white dark:from-immoo-navy-light/20 dark:to-immoo-navy">
+            <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
               {/* Section Header */}
-              <div className="text-center mb-12">
-                <div className="inline-flex items-center px-4 py-2 bg-immoo-gold/10 text-immoo-gold rounded-full text-xs font-medium mb-4 border border-immoo-gold/20">
-                  <Building2 className="w-3 h-3 mr-2" />
-                  Sélection immobilière
+              <div className="text-center mb-6 sm:mb-8 md:mb-12">
+                <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-immoo-gold/10 text-immoo-gold rounded-full text-xs font-medium mb-3 sm:mb-4 border border-immoo-gold/20">
+                  <Building2 className="w-3 h-3 mr-1.5 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Sélection immobilière</span>
                 </div>
-                <h2 className="text-2xl md:text-3xl font-bold mb-4 text-immoo-navy dark:text-immoo-pearl">
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-immoo-navy dark:text-immoo-pearl px-2">
                   Propriétés en vedette
                 </h2>
-                <p className="text-sm md:text-base text-immoo-navy/60 dark:text-immoo-pearl/60 max-w-2xl mx-auto">
+                <p className="text-sm md:text-base text-immoo-navy/60 dark:text-immoo-pearl/60 max-w-2xl mx-auto px-4">
                   Découvrez notre sélection de biens d'exception
                 </p>
               </div>
 
               {/* Properties Grid */}
               {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                   {[...Array(6)].map((_, index) => (
                     <Card key={index} className="overflow-hidden animate-pulse border-immoo-gray/20 shadow-sm">
-                      <div className="h-48 bg-immoo-gray/30"></div>
-                      <CardContent className="p-4">
+                      <div className="h-40 sm:h-44 md:h-48 bg-immoo-gray/30"></div>
+                      <CardContent className="p-3 sm:p-4">
                         <div className="h-4 bg-immoo-gray/30 rounded mb-2"></div>
                         <div className="h-3 bg-immoo-gray/30 rounded mb-3 w-2/3"></div>
                         <div className="flex justify-between items-center mb-3">
                           <div className="h-4 bg-immoo-gray/30 rounded w-1/3"></div>
                           <div className="h-3 bg-immoo-gray/30 rounded w-1/4"></div>
                         </div>
-                        <div className="flex space-x-3">
-                          <div className="h-3 bg-immoo-gray/30 rounded w-12"></div>
-                          <div className="h-3 bg-immoo-gray/30 rounded w-10"></div>
+                        <div className="flex space-x-2 sm:space-x-3">
+                          <div className="h-3 bg-immoo-gray/30 rounded w-10 sm:w-12"></div>
+                          <div className="h-3 bg-immoo-gray/30 rounded w-8 sm:w-10"></div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   <PropertyList properties={featuredProperties} />
                   
 

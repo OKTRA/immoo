@@ -81,48 +81,48 @@ export default function FeatureSection() {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 relative overflow-hidden" id="features">
+    <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 relative overflow-hidden" id="features">
       {/* Subtle Background */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 right-20 w-32 h-32 bg-gradient-to-r from-immoo-gold/5 to-immoo-gold-light/3 rounded-full filter blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-24 h-24 bg-gradient-to-r from-immoo-navy/5 to-immoo-navy-light/3 rounded-full filter blur-3xl" />
+        <div className="absolute top-10 sm:top-20 right-10 sm:right-20 w-20 sm:w-32 h-20 sm:h-32 bg-gradient-to-r from-immoo-gold/5 to-immoo-gold-light/3 rounded-full filter blur-3xl" />
+        <div className="absolute bottom-10 sm:bottom-20 left-10 sm:left-20 w-16 sm:w-24 h-16 sm:h-24 bg-gradient-to-r from-immoo-navy/5 to-immoo-navy-light/3 rounded-full filter blur-3xl" />
       </div>
 
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 relative z-10">
         {/* Features Section */}
         <motion.div 
           ref={featureRef}
-          className="max-w-5xl mx-auto text-center mb-16"
+          className="max-w-5xl mx-auto text-center mb-8 sm:mb-12 md:mb-16 px-2 sm:px-0"
           initial="hidden"
           animate={isFeatureInView ? "visible" : "hidden"}
           variants={containerVariants}
         >
-          <motion.div variants={itemVariants} className="mb-3">
+          <motion.div variants={itemVariants} className="mb-2 sm:mb-3">
             <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-immoo-gold/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/20">
               Fonctionnalités
             </span>
           </motion.div>
           
-          <motion.h2 variants={itemVariants} className="text-2xl md:text-3xl font-bold mb-4 text-immoo-navy dark:text-immoo-pearl">
+          <motion.h2 variants={itemVariants} className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-immoo-navy dark:text-immoo-pearl px-2">
             Tout ce dont vous avez besoin
           </motion.h2>
           
-          <motion.p variants={itemVariants} className="text-sm md:text-base text-immoo-navy/60 dark:text-immoo-pearl/60 mb-12 max-w-2xl mx-auto">
+          <motion.p variants={itemVariants} className="text-sm md:text-base text-immoo-navy/60 dark:text-immoo-pearl/60 mb-6 sm:mb-8 md:mb-12 max-w-2xl mx-auto px-4">
             Une solution complète pour simplifier la gestion immobilière
           </motion.p>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {features.map((feature, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="group p-4 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300"
+                className="group p-3 sm:p-4 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg sm:rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300"
               >
                 <div className="flex flex-col h-full text-left">
-                  <div className="w-8 h-8 mb-3 rounded-lg bg-gradient-to-r from-immoo-gold/10 to-immoo-gold-light/5 flex items-center justify-center text-immoo-gold group-hover:scale-105 transition-transform duration-200">
+                  <div className="w-7 sm:w-8 h-7 sm:h-8 mb-2 sm:mb-3 rounded-lg bg-gradient-to-r from-immoo-gold/10 to-immoo-gold-light/5 flex items-center justify-center text-immoo-gold group-hover:scale-105 transition-transform duration-200">
                     {getIconComponent(feature.icon)}
                   </div>
-                  <h3 className="text-sm font-semibold mb-2 text-immoo-navy dark:text-immoo-pearl">{feature.title}</h3>
+                  <h3 className="text-sm font-semibold mb-1.5 sm:mb-2 text-immoo-navy dark:text-immoo-pearl">{feature.title}</h3>
                   <p className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 leading-relaxed flex-grow">{feature.description}</p>
                 </div>
               </motion.div>

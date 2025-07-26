@@ -279,22 +279,22 @@ export default function HeroSection() {
       
       <motion.div 
         style={{ opacity }}
-        className="container mx-auto px-4 py-12 relative z-10"
+        className="container mx-auto px-3 sm:px-4 md:px-6 py-6 sm:py-8 md:py-12 relative z-10"
       >
         <motion.div 
-          className="max-w-4xl mx-auto text-center"
+          className="max-w-4xl mx-auto text-center px-2 sm:px-0"
           initial="hidden"
           animate={isLoaded ? "visible" : "hidden"}
           variants={containerVariants}
         >
-          <motion.div variants={itemVariants} className="inline-block mb-4">
-            <span className="inline-flex items-center px-4 py-2 text-xs font-medium rounded-full bg-immoo-gold/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/20">
-              <Sparkles className="mr-2 h-3 w-3 text-immoo-gold" />
-              Plateforme immobilière moderne
+          <motion.div variants={itemVariants} className="inline-block mb-3 sm:mb-4">
+            <span className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-medium rounded-full bg-immoo-gold/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/20">
+              <Sparkles className="mr-1.5 sm:mr-2 h-3 w-3 text-immoo-gold" />
+              <span className="text-xs sm:text-sm">Plateforme immobilière moderne</span>
             </span>
           </motion.div>
           
-          <motion.h1 variants={itemVariants} className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-tight">
+          <motion.h1 variants={itemVariants} className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 sm:mb-4 leading-tight px-2">
             <span className="text-immoo-navy dark:text-immoo-pearl">
               Trouvez votre{" "}
             </span>
@@ -303,7 +303,7 @@ export default function HeroSection() {
             </span>
           </motion.h1>
           
-          <motion.p variants={itemVariants} className="text-base md:text-lg text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-2xl mx-auto mb-12 leading-relaxed font-normal">
+          <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-2xl mx-auto mb-8 sm:mb-10 md:mb-12 leading-relaxed font-normal px-4">
             Trouvez votre propriété idéale avec nos filtres avancés.{" "}
             <span className="font-medium text-immoo-gold">
               Recherche intelligente et moderne.
@@ -311,68 +311,72 @@ export default function HeroSection() {
           </motion.p>
           
           {/* Simplified Smart Search */}
-          <motion.div variants={itemVariants} className="max-w-4xl mx-auto mb-16">
-            <div className="bg-white/95 dark:bg-immoo-navy-light/95 backdrop-blur-xl rounded-2xl border border-immoo-gold/20 shadow-2xl p-6 md:p-8">
+          <motion.div variants={itemVariants} className="max-w-4xl mx-auto mb-8 sm:mb-12 md:mb-16">
+            <div className="bg-white/95 dark:bg-immoo-navy-light/95 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-immoo-gold/20 shadow-2xl p-4 sm:p-6 md:p-8">
               {/* Search Type Toggle */}
-              <div className="flex justify-center mb-6">
-                <div className="inline-flex rounded-xl p-1 bg-immoo-gold/10 backdrop-blur-sm">
+              <div className="flex justify-center mb-4 sm:mb-6">
+                <div className="inline-flex rounded-lg sm:rounded-xl p-0.5 sm:p-1 bg-immoo-gold/10 backdrop-blur-sm">
                   <button
                     onClick={() => setSearchType("properties")}
-                    className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
                       searchType === "properties"
                         ? "bg-immoo-gold text-immoo-navy shadow-sm"
                         : "text-immoo-navy/70 dark:text-immoo-pearl/70 hover:text-immoo-gold"
                     }`}
                   >
-                    <Home className="inline h-4 w-4 mr-2" />
-                    Propriétés
+                    <Home className="inline h-3 sm:h-4 w-3 sm:w-4 mr-1 sm:mr-2" />
+                    <span className="hidden xs:inline">Propriétés</span>
+                    <span className="xs:hidden">Props</span>
                   </button>
                   <button
                     onClick={() => setSearchType("agencies")}
-                    className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                    className={`px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
                       searchType === "agencies"
                         ? "bg-immoo-navy text-immoo-pearl shadow-sm"
                         : "text-immoo-navy/70 dark:text-immoo-pearl/70 hover:text-immoo-gold"
                     }`}
                   >
-                    <Building className="inline h-4 w-4 mr-2" />
+                    <Building className="inline h-3 sm:h-4 w-3 sm:w-4 mr-1 sm:mr-2" />
                     Agences
                   </button>
                 </div>
               </div>
 
               {/* Main Search Bar */}
-              <div className="relative mb-6">
-                <div className="flex items-center bg-white dark:bg-immoo-navy-light rounded-xl border border-immoo-gold/30 shadow-lg hover:shadow-xl transition-all duration-300 p-4">
-                  <Search className="h-5 w-5 text-immoo-gold mr-3" />
-                  <input
-                    type="text"
-                    placeholder={searchType === "properties" ? "Rechercher une propriété..." : "Rechercher une agence (@username, nom, mots-clés...)"}
-                    className="flex-1 bg-transparent border-none focus:outline-none text-immoo-navy dark:text-immoo-pearl placeholder-immoo-navy/50 dark:placeholder-immoo-pearl/50 text-base"
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                  />
+              <div className="relative mb-4 sm:mb-6">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white dark:bg-immoo-navy-light rounded-lg sm:rounded-xl border border-immoo-gold/30 shadow-lg hover:shadow-xl transition-all duration-300 p-3 sm:p-4 gap-3 sm:gap-0">
+                  <div className="flex items-center flex-1">
+                    <Search className="h-4 sm:h-5 w-4 sm:w-5 text-immoo-gold mr-2 sm:mr-3 flex-shrink-0" />
+                    <input
+                      type="text"
+                      placeholder={searchType === "properties" ? "Rechercher une propriété..." : "Rechercher une agence..."}
+                      className="flex-1 bg-transparent border-none focus:outline-none text-immoo-navy dark:text-immoo-pearl placeholder-immoo-navy/50 dark:placeholder-immoo-pearl/50 text-sm sm:text-base"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    />
+                  </div>
                   <button 
                     onClick={handleSearch}
-                    className="ml-4 bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="sm:ml-4 bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg text-sm sm:text-base"
                   >
-                    Rechercher
+                    <span className="sm:hidden">Rechercher</span>
+                    <span className="hidden sm:inline">Rechercher</span>
                   </button>
                 </div>
               </div>
 
               {/* Smart Filters - Properties */}
               {searchType === "properties" && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
                   {/* Location - Based on real data */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                      <MapPin className="h-4 w-4 mr-2 text-immoo-gold" />
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <label className="text-xs sm:text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
+                      <MapPin className="h-3 sm:h-4 w-3 sm:w-4 mr-1.5 sm:mr-2 text-immoo-gold" />
                       Localisation
                     </label>
                     <select 
-                      className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
+                      className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                     >
@@ -383,13 +387,13 @@ export default function HeroSection() {
                   </div>
 
                   {/* Property Type - Based on real data */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                      <Home className="h-4 w-4 mr-2 text-immoo-gold" />
+                  <div className="space-y-1.5 sm:space-y-2">
+                    <label className="text-xs sm:text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
+                      <Home className="h-3 sm:h-4 w-3 sm:w-4 mr-1.5 sm:mr-2 text-immoo-gold" />
                       Type
                     </label>
                     <select 
-                      className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
+                      className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
                       value={propertyType}
                       onChange={(e) => setPropertyType(e.target.value)}
                     >
