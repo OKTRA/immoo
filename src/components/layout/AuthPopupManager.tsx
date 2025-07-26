@@ -20,6 +20,8 @@ export default function AuthPopupManager({ isOpen, onClose, type }: AuthPopupMan
   const handleSuccess = () => {
     onClose();
     setCurrentView('login');
+    // Rediriger vers le dashboard après connexion réussie
+    window.location.reload(); // Pour recharger et obtenir les nouvelles données utilisateur
   };
 
   const renderAgencyContent = () => {

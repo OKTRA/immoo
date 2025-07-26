@@ -49,11 +49,21 @@ export default function MobileBottomNav() {
       return;
     }
 
-    // Pour l'espace agence
+    // Pour l'espace agence - dashboard d'administration
     if (item.path === '/agencies') {
-      if (user && profile?.role === 'agency') {
-        navigate('/agencies');
+      console.log('🏢 Navigation Espace Agence:', {
+        user: !!user,
+        role: profile?.role,
+        agency_id: profile?.agency_id
+      });
+      
+      if (user && profile?.role === 'agency' && profile?.agency_id) {
+        // Rediriger vers le dashboard de l'agence connectée
+        console.log(`🎯 Redirection vers: /agencies/${profile.agency_id}`);
+        navigate(`/agencies/${profile.agency_id}`);
       } else {
+        // Ouvrir popup de connexion agence
+        console.log('🔐 Ouverture popup de connexion agence');
         setAuthPopup({ isOpen: true, type: 'agency' });
       }
       return;
