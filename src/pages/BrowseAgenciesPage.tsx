@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth, useAuthStatus } from '@/hooks/useAuth';
-import { useUserSubscription } from '@/hooks/useUserSubscription';
+import { useAuth } from '@/hooks/useAuth';
 import { getAllAgencies } from '@/services/agency/agencyBasicService';
 import { toast } from 'sonner';
 
-import { BrowseAgenciesHeader } from '@/components/browse-agencies/BrowseAgenciesHeader';
-import { SubscriptionStatus } from '@/components/browse-agencies/SubscriptionStatus';
+
 import { AgencySearch } from '@/components/browse-agencies/AgencySearch';
 import { AgencyList } from '@/components/browse-agencies/AgencyList';
 import { NoAgenciesFound } from '@/components/browse-agencies/NoAgenciesFound';
 import { Building2, Loader2 } from 'lucide-react';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 
 interface AgencyWithSubscription {
   id: string;
@@ -25,15 +24,13 @@ interface AgencyWithSubscription {
 
 export default function BrowseAgenciesPage() {
   const { user, profile, initialized } = useAuth();
-  const { isAuthenticated, isReady } = useAuthStatus();
-  const { subscription, checkLimit } = useUserSubscription();
   const [agencies, setAgencies] = useState<AgencyWithSubscription[]>([]);
   const [searchTerm, setSearchTerm] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('search') || '';
   });
   const [loading, setLoading] = useState(true);
-  const [agencyLimit, setAgencyLimit] = useState<any>(null);
+
 
   useEffect(() => {
     // Charger les agences dès que possible (pas besoin d'attendre l'auth pour cette page publique)
@@ -41,13 +38,7 @@ export default function BrowseAgenciesPage() {
     // If URL search param changes (e.g., via navigation), update search term
   }, [window.location.search]);
 
-  useEffect(() => {
-    // Vérifier les limites seulement si l'utilisateur est authentifié et que l'auth est prête
-    if (isReady && isAuthenticated && user?.id) {
-      console.log('🔍 BrowseAgenciesPage: Checking agency limits for user:', user.id);
-      checkAgencyLimits();
-    }
-  }, [isReady, isAuthenticated, user?.id]);
+
 
   const loadAgencies = async () => {
     setLoading(true);
@@ -84,22 +75,18 @@ export default function BrowseAgenciesPage() {
     }
   };
 
-  const checkAgencyLimits = async () => {
-    if (!user?.id) return;
-    
-    const limit = await checkLimit('agencies');
-    setAgencyLimit(limit);
-  };
+
 
   const filteredAgencies = agencies.filter(agency =>
     agency.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const canCreateAgency = agencyLimit ? agencyLimit.allowed : true;
+
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl via-white to-immoo-gold/10">
+      <ResponsiveLayout>
+        <div className="bg-gradient-to-br from-immoo-pearl via-white to-immoo-gold/10 min-h-screen">
         <div className="container mx-auto px-4 py-8">
           {/* Loading Header Skeleton */}
           <div className="relative mb-8">
@@ -134,23 +121,24 @@ export default function BrowseAgenciesPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </ResponsiveLayout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-immoo-pearl via-white to-immoo-gold/10">
+    <ResponsiveLayout>
+      <div className="bg-gradient-to-br from-immoo-pearl via-white to-immoo-gold/10 min-h-screen">
       <div className="container mx-auto px-4 py-8">
-        <BrowseAgenciesHeader 
-          user={user}
-          canCreateAgency={canCreateAgency}
-        />
-        
-        <SubscriptionStatus 
-          user={user}
-          subscription={subscription}
-          agencyLimit={agencyLimit}
-        />
+        {/* Page Title */}
+        <div className="text-center mb-8 mt-8 md:mt-16">
+          <h1 className="text-3xl md:text-4xl font-bold text-immoo-navy mb-4">
+            Parcourir les Agences
+          </h1>
+          <p className="text-lg text-immoo-navy/70 max-w-2xl mx-auto">
+            Découvrez notre réseau d'agences immobilières partenaires
+          </p>
+        </div>
 
         <AgencySearch 
           searchTerm={searchTerm}
@@ -182,10 +170,10 @@ export default function BrowseAgenciesPage() {
           <NoAgenciesFound
             searchTerm={searchTerm}
             user={user}
-            canCreateAgency={canCreateAgency}
           />
         )}
       </div>
-    </div>
+      </div>
+    </ResponsiveLayout>
   );
 }
