@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getAgencyById, getPropertiesByAgencyId, getAgencyStatistics } from "@/services/agency";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -214,18 +214,22 @@ export default function AgencyDetailPage() {
 
         {/* Navigation sobre */}
         <Tabs defaultValue="overview" value={activeTab} onValueChange={handleTabChange} className="mb-6">
-          <TabsList className="bg-white">
-            <TabsTrigger value="overview" className="data-[state=active]:bg-immoo-gold">
-              Vue d'ensemble
+          <TabsList className="bg-white grid grid-cols-4 w-full">
+            <TabsTrigger value="overview" className="data-[state=active]:bg-immoo-gold flex items-center justify-center px-2 sm:px-4">
+              <Eye className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Vue d'ensemble</span>
             </TabsTrigger>
-            <TabsTrigger value="properties" className="data-[state=active]:bg-immoo-gold">
-              Propriétés
+            <TabsTrigger value="properties" className="data-[state=active]:bg-immoo-gold flex items-center justify-center px-2 sm:px-4">
+              <Home className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Propriétés</span>
             </TabsTrigger>
-            <TabsTrigger value="tenants" className="data-[state=active]:bg-immoo-gold">
-              Locataires
+            <TabsTrigger value="tenants" className="data-[state=active]:bg-immoo-gold flex items-center justify-center px-2 sm:px-4">
+              <Users className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Locataires</span>
             </TabsTrigger>
-            <TabsTrigger value="statistics" className="data-[state=active]:bg-immoo-gold">
-              Analytics
+            <TabsTrigger value="statistics" className="data-[state=active]:bg-immoo-gold flex items-center justify-center px-2 sm:px-4">
+              <BarChart3 className="w-4 h-4 sm:mr-2" />
+              <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
           </TabsList>
 

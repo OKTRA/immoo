@@ -348,41 +348,41 @@ export default function AgencyDetailPage() {
 
         {/* Navigation élégante */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="mb-8">
-          <TabsList className="bg-white border border-slate-200 shadow-sm p-1">
+          <TabsList className="bg-white border border-slate-200 shadow-sm p-1 grid grid-cols-5 w-full">
             <TabsTrigger 
               value="overview" 
-              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm flex items-center justify-center px-2 sm:px-4"
             >
-              <Sparkles className="h-4 w-4 mr-2" />
-              Vue d'ensemble
+              <Sparkles className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Vue d'ensemble</span>
             </TabsTrigger>
             <TabsTrigger 
               value="properties" 
-              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm flex items-center justify-center px-2 sm:px-4"
             >
-              <Building2 className="h-4 w-4 mr-2" />
-              Propriétés
+              <Building2 className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Propriétés</span>
             </TabsTrigger>
             <TabsTrigger 
               value="tenants" 
-              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm flex items-center justify-center px-2 sm:px-4"
             >
-              <Users className="h-4 w-4 mr-2" />
-              Locataires
+              <Users className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Locataires</span>
             </TabsTrigger>
             <TabsTrigger 
               value="leases" 
-              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm flex items-center justify-center px-2 sm:px-4"
             >
-              <Receipt className="h-4 w-4 mr-2" />
-              Baux
+              <Receipt className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Baux</span>
             </TabsTrigger>
             <TabsTrigger 
               value="statistics" 
-              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm"
+              className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm flex items-center justify-center px-2 sm:px-4"
             >
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Analytics
+              <BarChart3 className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
           </TabsList>
 
