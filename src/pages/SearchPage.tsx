@@ -4,8 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search } from 'lucide-react';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState(() => {
@@ -26,9 +25,8 @@ export default function SearchPage() {
   };
 
   return (
-    <>
-      <Navbar />
-      <div className="container mx-auto px-4 py-16">
+    <ResponsiveLayout>
+      <div className="container mx-auto px-4 py-8 md:py-16">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-8">Recherche de propriétés</h1>
           
@@ -90,7 +88,6 @@ export default function SearchPage() {
           </div>
         </div>
       </div>
-      <Footer />
-    </>
+    </ResponsiveLayout>
   );
 }

@@ -30,7 +30,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import BecomeAgencyForm from '@/components/auth/BecomeAgencyForm';
-import Navbar from '@/components/Navbar';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 
 const ImmoAgencyPage: React.FC = () => {
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
@@ -153,8 +153,8 @@ Message: ${contactForm.message}
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50">
-      <Navbar />
+    <ResponsiveLayout>
+      <div className="bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 min-h-screen">
       {/* Hero Section */}
       <section className="relative pt-20 pb-16 overflow-hidden">
         <div className="absolute inset-0 overflow-hidden">
@@ -530,8 +530,9 @@ Message: ${contactForm.message}
           />
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </ResponsiveLayout>
   );
 };
 
-export default ImmoAgencyPage; 
+export default ImmoAgencyPage;

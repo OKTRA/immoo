@@ -7,8 +7,7 @@ import { Property } from "@/assets/types";
 import { Home, Building2, User, LogIn, ArrowRight } from "lucide-react";
 import HeroSection from '@/components/HeroSection';
 import FeatureSection from '@/components/FeatureSection';
-import Navbar from '@/components/Navbar';
-import Footer from '@/components/Footer';
+import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import PropertyList from '@/components/properties/PropertyList';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, useAuthStatus } from '@/hooks/useAuth';
@@ -80,10 +79,8 @@ export default function HomePage() {
   }, [initialized, user?.id]); // Se déclenche quand l'auth est prête ET quand l'user change
   
   return (
-    <div className="flex flex-col min-h-screen immoo-hero-bg">
-      <Navbar />
-      
-      <main className="flex-grow">
+    <ResponsiveLayout>
+      <div className="immoo-hero-bg">
         <HeroSection />
         
         {/* Only show properties section if there are properties or while loading */}
@@ -137,9 +134,7 @@ export default function HomePage() {
         )}
         
         <FeatureSection />
-      </main>
-      
-      <Footer />
-    </div>
+      </div>
+    </ResponsiveLayout>
   );
 }

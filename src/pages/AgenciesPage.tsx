@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { useAuth, useAuthStatus } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Navbar from "@/components/Navbar";
+import ResponsiveLayout from "@/components/layout/ResponsiveLayout";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -86,8 +86,8 @@ export default function AgenciesPage() {
   if (!initialized) {
     console.log('🔍 Showing loading state - initialized:', initialized);
     return (
-      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50">
-        <Navbar />
+      <ResponsiveLayout>
+        <div className="bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 min-h-screen">
         <div className="container mx-auto px-4 py-8 pt-24">
           <div className="animate-pulse">
             <div className="h-8 bg-muted/50 rounded w-1/4 mb-4"></div>
@@ -98,15 +98,16 @@ export default function AgenciesPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </ResponsiveLayout>
     );
   }
 
   if (isLoading) {
     console.log('🔍 Query is loading...');
     return (
-      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50">
-        <Navbar />
+      <ResponsiveLayout>
+        <div className="bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 min-h-screen">
         <div className="container mx-auto px-4 py-8 pt-24">
           <div className="animate-pulse">
             <div className="h-8 bg-muted/50 rounded w-1/4 mb-4"></div>
@@ -117,15 +118,16 @@ export default function AgenciesPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </ResponsiveLayout>
     );
   }
 
   if (error) {
     console.error('🔍 Query error:', error);
     return (
-      <div className="min-h-screen bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50">
-        <Navbar />
+      <ResponsiveLayout>
+        <div className="bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 min-h-screen">
         <div className="container mx-auto px-4 py-8 pt-24">
           <div className="text-center">
             <h2 className="text-2xl font-bold mb-4">Erreur</h2>
@@ -140,15 +142,16 @@ export default function AgenciesPage() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
+      </ResponsiveLayout>
     );
   }
 
   console.log('🔍 Rendering agencies page with', agencies.length, 'agencies');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50">
-      <Navbar />
+    <ResponsiveLayout>
+      <div className="bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 min-h-screen">
       
       {/* Hero Section */}
       <section className="pt-24 pb-8">
@@ -240,6 +243,7 @@ export default function AgenciesPage() {
           )}
         </div>
       </section>
-    </div>
+      </div>
+    </ResponsiveLayout>
   );
 }
