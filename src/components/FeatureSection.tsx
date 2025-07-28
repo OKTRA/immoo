@@ -1,39 +1,69 @@
 import { useRef } from "react";
 import { useInView, motion } from "framer-motion";
-import { BarChart3, Building2, Briefcase, Shield, Users2, FileText } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { 
+  BarChart3, 
+  Building2, 
+  Briefcase, 
+  Shield, 
+  Users2, 
+  FileText, 
+  Calculator,
+  Calendar,
+  Smartphone,
+  ArrowRight
+} from "lucide-react";
 import { Feature } from "@/assets/types";
+import { Button } from "@/components/ui/button";
 
 export default function FeatureSection() {
+  const navigate = useNavigate();
+  
   const features: Feature[] = [
     {
-      title: "Gestion des Biens",
-      description: "Portefeuille immobilier centralisé et outils de gestion intelligents.",
+      title: "Gestion des Propriétés",
+      description: "Créez et gérez votre portefeuille immobilier : ajout de biens, galeries photos, statuts de location, informations détaillées et suivi des performances.",
       icon: "Building2"
     },
     {
-      title: "Gestion Locative",
-      description: "Relations locataires simplifiées et processus automatisés.",
+      title: "Gestion des Locataires",
+      description: "Centralisez vos relations locatives : dossiers locataires, historique des baux, suivi des paiements et communication directe.",
       icon: "Users2"
     },
     {
-      title: "Finances & Comptabilité",
-      description: "Suivi financier en temps réel et rapports détaillés.",
-      icon: "Briefcase"
+      title: "Suivi des Paiements",
+      description: "Gérez tous vos encaissements : loyers, charges, dépôts de garantie avec statuts détaillés et historique complet des transactions.",
+      icon: "Calculator"
     },
     {
-      title: "Analytics",
-      description: "Tableaux de bord et analyses de performances avancées.",
-      icon: "BarChart3"
-    },
-    {
-      title: "Documents",
-      description: "Gestion documentaire et signature électronique intégrée.",
+      title: "Génération de Contrats",
+      description: "Créez des contrats de location professionnels avec éditeur intégré, validation juridique et signature électronique.",
       icon: "FileText"
     },
     {
-      title: "Sécurité",
-      description: "Protection des données et conformité RGPD garantie.",
+      title: "Tableaux de Bord",
+      description: "Visualisez vos statistiques d'agence : nombre de propriétés, notes, vues, performance et activité récente en temps réel.",
+      icon: "BarChart3"
+    },
+    {
+      title: "Gestion des Baux",
+      description: "Administrez vos contrats de location : création, suivi des échéances, renouvellements et archivage automatique.",
+      icon: "Calendar"
+    },
+    {
+      title: "Profil d'Agence",
+      description: "Personnalisez votre présence : logo, description, zones de service, coordonnées et gestion de la visibilité publique.",
+      icon: "Briefcase"
+    },
+    {
+      title: "Recherche & Filtres",
+      description: "Trouvez rapidement vos biens et locataires avec des filtres avancés : prix, type, statut, localisation et critères personnalisés.",
       icon: "Shield"
+    },
+    {
+      title: "Interface Responsive",
+      description: "Accédez à votre dashboard depuis n'importe quel appareil avec une interface optimisée mobile et desktop.",
+      icon: "Smartphone"
     }
   ];
 
@@ -50,7 +80,10 @@ export default function FeatureSection() {
       Briefcase: <Briefcase className="h-full w-full" />,
       BarChart3: <BarChart3 className="h-full w-full" />,
       FileText: <FileText className="h-full w-full" />,
-      Shield: <Shield className="h-full w-full" />
+      Shield: <Shield className="h-full w-full" />,
+      Calculator: <Calculator className="h-full w-full" />,
+      Calendar: <Calendar className="h-full w-full" />,
+      Smartphone: <Smartphone className="h-full w-full" />
     };
     
     return iconMap[iconName] || null;
@@ -81,56 +114,70 @@ export default function FeatureSection() {
   };
 
   return (
-    <section className="py-8 sm:py-12 md:py-16 bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 relative overflow-hidden" id="features">
-      {/* Subtle Background */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-10 sm:top-20 right-10 sm:right-20 w-20 sm:w-32 h-20 sm:h-32 bg-gradient-to-r from-immoo-gold/5 to-immoo-gold-light/3 rounded-full filter blur-3xl" />
-        <div className="absolute bottom-10 sm:bottom-20 left-10 sm:left-20 w-16 sm:w-24 h-16 sm:h-24 bg-gradient-to-r from-immoo-navy/5 to-immoo-navy-light/3 rounded-full filter blur-3xl" />
-      </div>
+    <section className="py-16 sm:py-20 md:py-24 bg-white" id="features">
 
-      <div className="container mx-auto px-3 sm:px-4 md:px-6 relative z-10">
-        {/* Features Section */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
         <motion.div 
           ref={featureRef}
-          className="max-w-5xl mx-auto text-center mb-8 sm:mb-12 md:mb-16 px-2 sm:px-0"
+          className="max-w-4xl mx-auto text-center mb-16"
           initial="hidden"
           animate={isFeatureInView ? "visible" : "hidden"}
           variants={containerVariants}
         >
-          <motion.div variants={itemVariants} className="mb-2 sm:mb-3">
-            <span className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded-full bg-immoo-gold/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/20">
-              Fonctionnalités
-            </span>
-          </motion.div>
-          
-          <motion.h2 variants={itemVariants} className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-immoo-navy dark:text-immoo-pearl px-2">
+          <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl lg:text-5xl font-light mb-6 text-gray-900 tracking-tight">
             Tout ce dont vous avez besoin
           </motion.h2>
           
-          <motion.p variants={itemVariants} className="text-sm md:text-base text-immoo-navy/60 dark:text-immoo-pearl/60 mb-6 sm:mb-8 md:mb-12 max-w-2xl mx-auto px-4">
-            Une solution complète pour simplifier la gestion immobilière
+          <motion.p variants={itemVariants} className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Une plateforme moderne pour simplifier la gestion de votre agence immobilière
           </motion.p>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            {features.map((feature, index) => (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                className="group p-3 sm:p-4 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-lg sm:rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300"
-              >
-                <div className="flex flex-col h-full text-left">
-                  <div className="w-7 sm:w-8 h-7 sm:h-8 mb-2 sm:mb-3 rounded-lg bg-gradient-to-r from-immoo-gold/10 to-immoo-gold-light/5 flex items-center justify-center text-immoo-gold group-hover:scale-105 transition-transform duration-200">
-                    {getIconComponent(feature.icon)}
-                  </div>
-                  <h3 className="text-sm font-semibold mb-1.5 sm:mb-2 text-immoo-navy dark:text-immoo-pearl">{feature.title}</h3>
-                  <p className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 leading-relaxed flex-grow">{feature.description}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
         </motion.div>
 
+        {/* Features Grid */}
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          initial="hidden"
+          animate={isFeatureInView ? "visible" : "hidden"}
+          variants={containerVariants}
+        >
+          {features.map((feature, index) => (
+            <motion.div
+              key={index}
+              variants={itemVariants}
+              className="group text-center"
+            >
+              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
+                {getIconComponent(feature.icon)}
+              </div>
+              <h3 className="text-xl font-semibold mb-4 text-gray-900">{feature.title}</h3>
+              <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+            </motion.div>
+          ))}
+        </motion.div>
 
+        {/* CTA Section */}
+        <motion.div 
+          className="text-center mt-16"
+          initial="hidden"
+          animate={isFeatureInView ? "visible" : "hidden"}
+          variants={itemVariants}
+        >
+          <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+            Prêt à commencer votre gestion avec IMMOO ?
+          </h3>
+          <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            Créez votre agence en quelques minutes et découvrez tous les outils pour optimiser votre activité
+          </p>
+          <Button 
+            onClick={() => navigate('/create-agency')}
+            className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 inline-flex items-center"
+          >
+            Commencer ma gestion
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button>
+        </motion.div>
       </div>
     </section>
   );

@@ -369,57 +369,39 @@ export default function HeroSection() {
               {/* Smart Filters - Properties */}
               {searchType === "properties" && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                  {/* Location - Based on real data */}
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <label className="text-xs sm:text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                      <MapPin className="h-3 sm:h-4 w-3 sm:w-4 mr-1.5 sm:mr-2 text-immoo-gold" />
-                      Localisation
-                    </label>
-                    <select 
-                      className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                      value={location}
-                      onChange={(e) => setLocation(e.target.value)}
-                    >
-                      <option value="">Toutes</option>
-                      <option value="Kabala">Kabala</option>
-                      <option value="Kati Fouga">Kati Fouga</option>
-                    </select>
-                  </div>
+                  {/* Location */}
+                  <select 
+                    className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                  >
+                    <option value="">📍 Localisation</option>
+                    <option value="Kabala">Kabala</option>
+                    <option value="Kati Fouga">Kati Fouga</option>
+                  </select>
 
-                  {/* Property Type - Based on real data */}
-                  <div className="space-y-1.5 sm:space-y-2">
-                    <label className="text-xs sm:text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                      <Home className="h-3 sm:h-4 w-3 sm:w-4 mr-1.5 sm:mr-2 text-immoo-gold" />
-                      Type
-                    </label>
-                    <select 
-                      className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                      value={propertyType}
-                      onChange={(e) => setPropertyType(e.target.value)}
-                    >
-                      <option value="">Tous types</option>
-                      <option value="apartment">Appartement</option>
-                      <option value="house">Maison</option>
-                    </select>
-                  </div>
+                  {/* Property Type */}
+                  <select 
+                    className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
+                    value={propertyType}
+                    onChange={(e) => setPropertyType(e.target.value)}
+                  >
+                    <option value="">🏠 Type</option>
+                    <option value="apartment">Appartement</option>
+                    <option value="house">Maison</option>
+                  </select>
 
-                  {/* Price Range - Based on real data */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                      <span className="text-immoo-gold mr-2">€</span>
-                      Budget
-                    </label>
-                    <select 
-                      className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                      value={priceRange}
-                      onChange={(e) => setPriceRange(e.target.value)}
-                    >
-                      <option value="">Tous budgets</option>
-                      <option value="0-75000">Jusqu'à 75 000 FCFA</option>
-                      <option value="75000-100000">75 000 - 100 000 FCFA</option>
-                      <option value="100000-">Plus de 100 000 FCFA</option>
-                    </select>
-                  </div>
+                  {/* Price Range */}
+                  <select 
+                    className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
+                    value={priceRange}
+                    onChange={(e) => setPriceRange(e.target.value)}
+                  >
+                    <option value="">💰 Budget</option>
+                    <option value="0-75000">Jusqu'à 75 000 FCFA</option>
+                    <option value="75000-100000">75 000 - 100 000 FCFA</option>
+                    <option value="100000-">Plus de 100 000 FCFA</option>
+                  </select>
                 </div>
               )}
 
@@ -666,41 +648,49 @@ export default function HeroSection() {
             </motion.div>
           )}
           
-          {/* Compact Action Cards */}
-          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-12 max-w-3xl mx-auto">
-            <div className="group p-4 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="w-8 h-8 bg-gradient-to-r from-immoo-gold to-immoo-gold-light rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-200">
-                <Home className="h-4 w-4 text-immoo-navy" />
+          {/* Minimal Action Cards */}
+          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 max-w-4xl mx-auto">
+            <div className="group text-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
+                <Home className="h-5 w-5" />
               </div>
-              <h3 className="text-sm font-semibold text-immoo-navy dark:text-immoo-pearl mb-1">Propriétés exclusives</h3>
-              <p className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 mb-2">Biens sélectionnés par nos experts</p>
-              <button className="text-immoo-gold text-xs font-medium hover:text-immoo-gold-light transition-colors flex items-center">
-                Explorer <ArrowRight className="ml-1 h-3 w-3" />
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">Propriétés exclusives</h3>
+              <p className="text-gray-600 text-sm mb-4 leading-relaxed">Biens sélectionnés par nos experts</p>
+              <button className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto">
+                Explorer <ArrowRight className="ml-1 h-4 w-4" />
               </button>
             </div>
 
-            <div className="group p-4 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="w-8 h-8 bg-gradient-to-r from-immoo-navy to-immoo-navy-light rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-200">
-                <Building className="h-4 w-4 text-immoo-pearl" />
+            <div className="group text-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
+                <Building className="h-5 w-5" />
               </div>
-              <h3 className="text-sm font-semibold text-immoo-navy dark:text-immoo-pearl mb-1">Agences de confiance</h3>
-              <p className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 mb-2">Meilleures agences locales</p>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">Agences de confiance</h3>
+              <p className="text-gray-600 text-sm mb-4 leading-relaxed">Meilleures agences locales</p>
               <button 
                 onClick={() => navigate("/browse-agencies")}
-                className="text-immoo-gold text-xs font-medium hover:text-immoo-gold-light transition-colors flex items-center"
+                className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto"
               >
-                Voir les agences <ArrowRight className="ml-1 h-3 w-3" />
+                Voir les agences <ArrowRight className="ml-1 h-4 w-4" />
               </button>
             </div>
 
-            <div className="group p-4 bg-white/80 dark:bg-immoo-navy-light/80 backdrop-blur-sm rounded-xl border border-immoo-gold/10 hover:border-immoo-gold/30 shadow-sm hover:shadow-md transition-all duration-300">
-              <div className="w-8 h-8 bg-gradient-to-r from-immoo-gold to-immoo-gold-light rounded-lg flex items-center justify-center mb-3 group-hover:scale-105 transition-transform duration-200">
-                <Search className="h-4 w-4 text-immoo-navy" />
+            <div className="group text-center">
+              <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
+                <Search className="h-5 w-5" />
               </div>
-              <h3 className="text-sm font-semibold text-immoo-navy dark:text-immoo-pearl mb-1">Gestion simplifiée</h3>
-              <p className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 mb-2">Outils modernes et intuitifs</p>
-              <button className="text-immoo-gold text-xs font-medium hover:text-immoo-gold-light transition-colors flex items-center">
-                Commencer <ArrowRight className="ml-1 h-3 w-3" />
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">Gestion Immobilière Intégrée</h3>
+              <p className="text-gray-600 text-sm mb-4 leading-relaxed">Plateforme complète pour votre agence</p>
+              <button 
+                onClick={() => {
+                  const featuresSection = document.getElementById('features');
+                  if (featuresSection) {
+                    featuresSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+                className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto cursor-pointer"
+              >
+                Découvrir <ArrowRight className="ml-1 h-4 w-4" />
               </button>
             </div>
           </motion.div>
