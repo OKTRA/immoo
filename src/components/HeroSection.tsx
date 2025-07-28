@@ -293,7 +293,7 @@ export default function HeroSection() {
           <motion.div variants={itemVariants} className="inline-block mb-3 sm:mb-4">
             <span className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-medium rounded-full bg-immoo-gold/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/20">
               <Sparkles className="mr-1.5 sm:mr-2 h-3 w-3 text-immoo-gold" />
-              <span className="text-xs sm:text-sm">Plateforme immobilière moderne</span>
+              <span className="text-xs sm:text-sm">Gestion immobilière intégrée</span>
             </span>
           </motion.div>
           
@@ -306,103 +306,115 @@ export default function HeroSection() {
             </span>
           </motion.h1>
           
-          <motion.p variants={itemVariants} className="text-sm sm:text-base md:text-lg text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-2xl mx-auto mb-8 sm:mb-10 md:mb-12 leading-relaxed font-normal px-4">
-            Trouvez votre propriété idéale avec nos filtres avancés.{" "}
-            <span className="font-medium text-immoo-gold">
-              Recherche intelligente et moderne.
-            </span>
-          </motion.p>
+          {/* Description paragraph removed */}
           
-          {/* Simplified Smart Search */}
-          <motion.div variants={itemVariants} className="max-w-4xl mx-auto mb-8 sm:mb-12 md:mb-16">
-            <div className="bg-white/95 dark:bg-immoo-navy-light/95 backdrop-blur-xl rounded-xl sm:rounded-2xl border border-immoo-gold/20 shadow-2xl p-4 sm:p-6 md:p-8">
-              {/* Search Type Toggle */}
-              <div className="flex justify-center mb-4 sm:mb-6">
-                <div className="inline-flex rounded-lg sm:rounded-xl p-0.5 sm:p-1 bg-immoo-gold/10 backdrop-blur-sm">
+          {/* Ultra Modern Search Card */}
+          <motion.div variants={itemVariants} className="max-w-5xl mx-auto mb-12">
+            <div className="bg-white/70 backdrop-blur-2xl rounded-3xl border border-gray-200/50 shadow-lg p-6">
+              {/* Minimalist Toggle */}
+              <div className="flex justify-center mb-6">
+                <div className="inline-flex bg-gray-100 rounded-2xl p-1">
                   <button
                     onClick={() => setSearchType("properties")}
-                    className={`px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+                    className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                       searchType === "properties"
-                        ? "bg-immoo-gold text-immoo-navy shadow-sm"
-                        : "text-immoo-navy/70 dark:text-immoo-pearl/70 hover:text-immoo-gold"
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-600 hover:text-gray-900"
                     }`}
                   >
-                    <Home className="inline h-3 sm:h-4 w-3 sm:w-4 mr-1 sm:mr-2" />
-                    <span className="hidden xs:inline">Propriétés</span>
-                    <span className="xs:hidden">Props</span>
+                    <Home className="inline h-4 w-4 mr-2" />
+                    Props
                   </button>
                   <button
                     onClick={() => setSearchType("agencies")}
-                    className={`px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-md sm:rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+                    className={`px-6 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
                       searchType === "agencies"
-                        ? "bg-immoo-navy text-immoo-pearl shadow-sm"
-                        : "text-immoo-navy/70 dark:text-immoo-pearl/70 hover:text-immoo-gold"
+                        ? "bg-white text-gray-900 shadow-sm"
+                        : "text-gray-600 hover:text-gray-900"
                     }`}
                   >
-                    <Building className="inline h-3 sm:h-4 w-3 sm:w-4 mr-1 sm:mr-2" />
+                    <Building className="inline h-4 w-4 mr-2" />
                     Agences
                   </button>
                 </div>
               </div>
 
-              {/* Main Search Bar */}
-              <div className="relative mb-6 sm:mb-8">
-                <div className="flex items-center bg-white/80 dark:bg-immoo-navy-light/80 rounded-xl border border-immoo-gold/20 shadow-sm hover:shadow-md transition-shadow duration-300 p-3 gap-2 backdrop-blur-md">
+              {/* Modern Search Bar */}
+              <div className="relative mb-6">
+                <div className="flex items-center bg-gray-50 rounded-2xl border border-gray-200 hover:border-gray-300 transition-colors duration-200 p-4 gap-3">
+                  <Search className="h-5 w-5 text-gray-400" />
                   <input
                     type="text"
                     placeholder={searchType === "properties" ? "Rechercher une propriété..." : "Rechercher une agence..."}
-                    className="flex-1 bg-transparent border-none focus:outline-none text-immoo-navy dark:text-immoo-pearl placeholder-immoo-navy/40 dark:placeholder-immoo-pearl/40 text-base font-light"
+                    className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 placeholder-gray-500 text-base"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   />
                   <button 
                     onClick={handleSearch}
-                    className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg text-sm sm:text-base"
+                    className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2.5 rounded-xl font-medium transition-colors duration-200 text-sm"
                   >
-                    <span className="sm:hidden">Rechercher</span>
-                    <span className="hidden sm:inline">Rechercher</span>
+                    Rechercher
                   </button>
                 </div>
               </div>
 
-              {/* Smart Filters - Properties */}
+              {/* Compact Filters - Properties */}
               {searchType === "properties" && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6">
-                  {/* Location */}
-                  <select 
-                    className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                  >
-                    <option value="">📍 Localisation</option>
-                    <option value="Kabala">Kabala</option>
-                    <option value="Kati Fouga">Kati Fouga</option>
-                  </select>
+                <>
+                  <div className="grid grid-cols-3 gap-3 mb-6">
+                    {/* Location */}
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-gray-400 transition-colors"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    >
+                      <option value="">📍 Localisation</option>
+                      <option value="Kabala">Kabala</option>
+                      <option value="Kati Fouga">Kati Fouga</option>
+                    </select>
 
-                  {/* Property Type */}
-                  <select 
-                    className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                    value={propertyType}
-                    onChange={(e) => setPropertyType(e.target.value)}
-                  >
-                    <option value="">🏠 Type</option>
-                    <option value="apartment">Appartement</option>
-                    <option value="house">Maison</option>
-                  </select>
+                    {/* Property Type */}
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-gray-400 transition-colors"
+                      value={propertyType}
+                      onChange={(e) => setPropertyType(e.target.value)}
+                    >
+                      <option value="">🏠 Type</option>
+                      <option value="apartment">Appartement</option>
+                      <option value="house">Maison</option>
+                    </select>
 
-                  {/* Price Range */}
-                  <select 
-                    className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-3 sm:px-4 py-2.5 sm:py-3 text-sm sm:text-base text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                    value={priceRange}
-                    onChange={(e) => setPriceRange(e.target.value)}
-                  >
-                    <option value="">💰 Budget</option>
-                    <option value="0-75000">Jusqu'à 75 000 FCFA</option>
-                    <option value="75000-100000">75 000 - 100 000 FCFA</option>
-                    <option value="100000-">Plus de 100 000 FCFA</option>
-                  </select>
-                </div>
+                    {/* Price Range */}
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-gray-400 transition-colors"
+                      value={priceRange}
+                      onChange={(e) => setPriceRange(e.target.value)}
+                    >
+                      <option value="">💰 Budget</option>
+                      <option value="0-75000">Jusqu'à 75 000 FCFA</option>
+                      <option value="75000-100000">75 000 - 100 000 FCFA</option>
+                      <option value="100000-">Plus de 100 000 FCFA</option>
+                    </select>
+                  </div>
+                  
+                  {/* Clear Filters */}
+                  {(location || propertyType || priceRange) && (
+                    <div className="text-center mb-4">
+                      <button 
+                        onClick={() => {
+                          setLocation('');
+                          setPropertyType('');
+                          setPriceRange('');
+                        }}
+                        className="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors duration-200"
+                      >
+                        Effacer les filtres
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
 
               {/* Smart Filters - Agencies */}
@@ -656,7 +668,41 @@ export default function HeroSection() {
               </div>
               <h3 className="text-lg font-semibold mb-2 text-gray-900">Propriétés exclusives</h3>
               <p className="text-gray-600 text-sm mb-4 leading-relaxed">Biens sélectionnés par nos experts</p>
-              <button className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto">
+              <button 
+                onClick={() => {
+                  console.log('Button clicked - searching for properties section');
+                  
+                  const scrollToSection = () => {
+                    const featuredSection = document.getElementById('properties');
+                    console.log('Found section:', featuredSection);
+                    
+                    if (featuredSection) {
+                      featuredSection.scrollIntoView({ 
+                        behavior: 'smooth',
+                        block: 'start'
+                      });
+                    } else {
+                      // Fallback: try to find by class or other selector
+                      const sectionByClass = document.querySelector('[id="properties"]');
+                      if (sectionByClass) {
+                        sectionByClass.scrollIntoView({ 
+                          behavior: 'smooth',
+                          block: 'start'
+                        });
+                      } else {
+                        console.warn('Properties section not found');
+                      }
+                    }
+                  };
+                  
+                  // Try immediately
+                  scrollToSection();
+                  
+                  // If not found, try again after a short delay
+                  setTimeout(scrollToSection, 100);
+                }}
+                className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto cursor-pointer"
+              >
                 Explorer <ArrowRight className="ml-1 h-4 w-4" />
               </button>
             </div>
