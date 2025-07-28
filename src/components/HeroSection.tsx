@@ -245,7 +245,10 @@ export default function HeroSection() {
   };
 
   return (
-    <section className="relative pt-16 overflow-hidden bg-gradient-to-br from-white via-immoo-pearl/30 to-white dark:from-immoo-navy dark:via-immoo-navy-light/50 dark:to-immoo-navy min-h-[75vh] flex items-center">
+    <section className={
+      "relative pt-16 overflow-hidden bg-gradient-to-br from-white via-immoo-pearl/30 to-white " +
+      "dark:from-immoo-navy dark:via-immoo-navy-light/50 dark:to-immoo-navy min-h-[75vh] flex items-center"
+    }>
       {/* Subtle Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <motion.div 
@@ -343,22 +346,6 @@ export default function HeroSection() {
               </div>
 
               {/* Main Search Bar */}
-<<<<<<< HEAD
-              <div className="relative mb-4 sm:mb-6">
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-white dark:bg-immoo-navy-light rounded-lg sm:rounded-xl border border-immoo-gold/30 shadow-lg hover:shadow-xl transition-all duration-300 p-3 sm:p-4 gap-3 sm:gap-0">
-                  <div className="flex items-center flex-1">
-                    <Search className="h-4 sm:h-5 w-4 sm:w-5 text-immoo-gold mr-2 sm:mr-3 flex-shrink-0" />
-                    <input
-                      type="text"
-                      placeholder={searchType === "properties" ? "Rechercher une propriété..." : "Rechercher une agence..."}
-                      className="flex-1 bg-transparent border-none focus:outline-none text-immoo-navy dark:text-immoo-pearl placeholder-immoo-navy/50 dark:placeholder-immoo-pearl/50 text-sm sm:text-base"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                    />
-                  </div>
-                  <button 
-=======
               <div className="relative mb-6 sm:mb-8">
                 <div className="flex items-center bg-white/80 dark:bg-immoo-navy-light/80 rounded-xl border border-immoo-gold/20 shadow-sm hover:shadow-md transition-shadow duration-300 p-3 gap-2 backdrop-blur-md">
                   <input
@@ -370,10 +357,8 @@ export default function HeroSection() {
                     onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   />
                   <button 
-                    className="p-1.5 rounded-md bg-immoo-gold/10 hover:bg-immoo-gold/20 transition-colors duration-200"
->>>>>>> 8ff1fce (style(HeroSection): simplify search bar styling and improve readability)
                     onClick={handleSearch}
-                    className="sm:ml-4 bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg text-sm sm:text-base"
+                    className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg font-medium transition-all duration-200 shadow-md hover:shadow-lg text-sm sm:text-base"
                   >
                     <span className="sm:hidden">Rechercher</span>
                     <span className="hidden sm:inline">Rechercher</span>
