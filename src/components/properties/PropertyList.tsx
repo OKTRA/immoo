@@ -92,12 +92,7 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
 
   return (
     <div className="space-y-6">
-      {/* Results Count */}
-      <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600">
-          {properties.length} propriété{properties.length !== 1 ? 's' : ''} trouvée{properties.length !== 1 ? 's' : ''}
-        </p>
-      </div>
+      {/* Results Count removed for cleaner design */}
 
       {/* Properties Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

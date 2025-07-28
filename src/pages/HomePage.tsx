@@ -87,19 +87,7 @@ export default function HomePage() {
         {(hasProperties || loading) && (
           <section className="py-6 sm:py-8 md:py-12 bg-gradient-to-b from-immoo-pearl/20 to-white dark:from-immoo-navy-light/20 dark:to-immoo-navy">
             <div className="container mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
-              {/* Section Header */}
-              <div className="text-center mb-6 sm:mb-8 md:mb-12">
-                <div className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 bg-immoo-gold/10 text-immoo-gold rounded-full text-xs font-medium mb-3 sm:mb-4 border border-immoo-gold/20">
-                  <Building2 className="w-3 h-3 mr-1.5 sm:mr-2" />
-                  <span className="text-xs sm:text-sm">Sélection immobilière</span>
-                </div>
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold mb-3 sm:mb-4 text-immoo-navy dark:text-immoo-pearl px-2">
-                  Propriétés en vedette
-                </h2>
-                <p className="text-sm md:text-base text-immoo-navy/60 dark:text-immoo-pearl/60 max-w-2xl mx-auto px-4">
-                  Découvrez notre sélection de biens d'exception
-                </p>
-              </div>
+              {/* Section Header removed for cleaner design */}
 
               {/* Properties Grid */}
               {loading ? (

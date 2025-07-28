@@ -399,21 +399,7 @@ export default function HeroSection() {
                     </select>
                   </div>
                   
-                  {/* Clear Filters */}
-                  {(location || propertyType || priceRange) && (
-                    <div className="text-center mb-4">
-                      <button 
-                        onClick={() => {
-                          setLocation('');
-                          setPropertyType('');
-                          setPriceRange('');
-                        }}
-                        className="text-gray-500 hover:text-gray-700 text-sm font-medium transition-colors duration-200"
-                      >
-                        Effacer les filtres
-                      </button>
-                    </div>
-                  )}
+                  {/* Clear Filters removed - using global clear filters button */}
                 </>
               )}
 
@@ -486,15 +472,21 @@ export default function HeroSection() {
                 </div>
               )}
 
-              {/* Quick Action */}
-              <div className="flex justify-center">
-                <button 
-                  onClick={clearFilters}
-                  className="text-sm text-immoo-navy/60 dark:text-immoo-pearl/60 hover:text-immoo-gold transition-colors"
-                >
-                  Effacer les filtres
-                </button>
-              </div>
+              {/* Quick Action - Show only if filters are active based on search type */}
+              {(
+                searchTerm || 
+                (searchType === "properties" && (location || propertyType || priceRange || surface || selectedFeatures.length > 0)) ||
+                (searchType === "agencies" && (agencyStatus || agencyPropertiesCount || agencyContactType))
+              ) && (
+                <div className="flex justify-center">
+                  <button 
+                    onClick={clearFilters}
+                    className="text-sm text-immoo-navy/60 dark:text-immoo-pearl/60 hover:text-immoo-gold transition-colors"
+                  >
+                    Effacer les filtres
+                  </button>
+                </div>
+              )}
             </div>
           </motion.div>
           
