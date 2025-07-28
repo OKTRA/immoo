@@ -95,23 +95,32 @@ export function NavbarDesktopMenu({
   return (
     <>
       <div className="hidden md:flex items-center space-x-4">
-        <div className="hidden md:flex items-center">
-          {userTypes.map((type) => (
-            <ButtonEffects 
-              key={type.name}
-              variant="ghost" 
-              size="sm"
-              className={cn(
-                "mx-1",
-                (location.pathname.includes(type.path.split("?")[0].toLowerCase()) ||
-                 (user && userRole === type.role)) && 
-                "bg-primary/10 text-primary"
-              )}
-              onClick={() => handleUserTypeClick(type)}
-            >
-              {type.name}
-            </ButtonEffects>
-          ))}
+        <div className="hidden md:flex items-center space-x-1">
+          {userTypes.map((type) => {
+            const isActive = location.pathname.includes(type.path.split("?")[0].toLowerCase()) ||
+                           (user && userRole === type.role);
+            
+            return (
+              <button
+                key={type.name}
+                className={cn(
+                  "relative px-3 py-1.5 rounded-md font-medium text-xs transition-all duration-200",
+                  "hover:bg-gray-100 active:bg-gray-200",
+                  isActive
+                    ? "bg-gray-900 text-white shadow-sm"
+                    : "text-gray-700 hover:text-gray-900"
+                )}
+                onClick={() => handleUserTypeClick(type)}
+              >
+                <span className="relative z-10">
+                  {type.name}
+                </span>
+                {isActive && (
+                  <div className="absolute inset-0 bg-gray-800 rounded-md" />
+                )}
+              </button>
+            );
+          })}
 
           {/* Quick Visitor Indicator - only show if no user logged in */}
           {!user && (

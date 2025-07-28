@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useInView, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -15,9 +15,12 @@ import {
 } from "lucide-react";
 import { Feature } from "@/assets/types";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import BecomeAgencyForm from "@/components/auth/BecomeAgencyForm";
 
 export default function FeatureSection() {
   const navigate = useNavigate();
+  const [showAgencyDialog, setShowAgencyDialog] = useState(false);
   
   const features: Feature[] = [
     {
@@ -171,7 +174,7 @@ export default function FeatureSection() {
             Créez votre agence en quelques minutes et découvrez tous les outils pour optimiser votre activité
           </p>
           <Button 
-            onClick={() => navigate('/create-agency')}
+            onClick={() => setShowAgencyDialog(true)}
             className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 inline-flex items-center"
           >
             Commencer ma gestion
@@ -179,6 +182,24 @@ export default function FeatureSection() {
           </Button>
         </motion.div>
       </div>
+
+      {/* Dialog pour créer une agence */}
+      <Dialog open={showAgencyDialog} onOpenChange={setShowAgencyDialog}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold text-gray-900">
+              Créer votre agence
+            </DialogTitle>
+          </DialogHeader>
+          <BecomeAgencyForm 
+            onSuccess={() => {
+              setShowAgencyDialog(false);
+              // Optionnel: rediriger vers le dashboard de l'agence
+              // navigate('/agencies');
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

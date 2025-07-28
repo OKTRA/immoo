@@ -17,6 +17,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    confirmPassword: '',
     firstName: '',
     lastName: '',
     agencyName: '',
@@ -25,6 +26,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   const validateForm = () => {
     setError(null);
@@ -54,6 +56,12 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
       return false;
     }
     
+    if (formData.password !== formData.confirmPassword) {
+      setError("Les mots de passe ne correspondent pas");
+      setPasswordError("Les mots de passe ne correspondent pas");
+      return false;
+    }
+    
     return true;
   };
 
@@ -68,7 +76,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
     setError(null);
 
     try {
-      const { error: signUpError } = await signUp(formData.email, formData.password, { 
+      const result = await signUp(formData.email, formData.password, { 
         firstName: formData.firstName, 
         lastName: formData.lastName, 
         role: 'agency',
@@ -77,17 +85,9 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
         phone: formData.phone
       });
       
-      if (signUpError) {
-        setError(signUpError);
-        toast.error("Échec de l'inscription", { 
-          description: signUpError 
-        });
-        setIsLoading(false);
-        return;
-      }
-      
-      toast.success('Demande envoyée', { 
-        description: 'Votre demande pour devenir agence a été envoyée avec succès' 
+      // Si on arrive ici, l'inscription a réussi
+      toast.success('Agence créée avec succès', { 
+        description: 'Votre agence a été créée et vous pouvez maintenant vous connecter' 
       });
       onSuccess();
     } catch (error: any) {
@@ -102,86 +102,89 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Validation en temps réel pour les mots de passe
+    if (field === 'password' || field === 'confirmPassword') {
+      // Réinitialiser l'erreur de mot de passe
+      setPasswordError(null);
+      
+      // Vérifier la correspondance si les deux champs sont remplis
+      const newFormData = { ...formData, [field]: value };
+      if (newFormData.password && newFormData.confirmPassword) {
+        if (newFormData.password !== newFormData.confirmPassword) {
+          setPasswordError("Les mots de passe ne correspondent pas");
+        }
+      }
+    }
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      {/* Modern Header */}
-      <div className="text-center space-y-4 mb-8">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-immoo-gold to-immoo-gold-light rounded-2xl flex items-center justify-center shadow-lg">
-          <Building2 className="w-8 h-8 text-immoo-navy" />
+    <div className="w-full max-w-md mx-auto">
+      {/* Header élégant */}
+      <div className="text-center mb-6">
+        <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
+          <Building2 className="w-6 h-6 text-white" />
         </div>
-        <div className="space-y-2">
-          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-immoo-navy to-immoo-navy-light bg-clip-text text-transparent">
-            Devenir Agence
-          </h2>
-          <p className="text-lg text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-md mx-auto">
-            Rejoignez notre réseau d'agences immobilières
-          </p>
-        </div>
+        <p className="text-sm text-gray-600 font-medium">
+          Créez votre agence immobilière
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-8">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 p-4 rounded-xl flex items-start space-x-3 text-sm text-red-700 dark:text-red-300">
-            <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
-            <span>{error}</span>
+          <div className="bg-red-50 border-l-4 border-red-400 p-3 rounded-r-lg flex items-start space-x-2 text-sm text-red-700 animate-in slide-in-from-left-2">
+            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+            <span className="font-medium">{error}</span>
           </div>
         )}
 
         {/* Informations personnelles */}
-        <div className="bg-white/50 dark:bg-immoo-navy-light/30 backdrop-blur-sm rounded-2xl p-6 border border-immoo-gold/10">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-r from-immoo-gold/20 to-immoo-gold-light/20 rounded-xl flex items-center justify-center">
-              <User className="w-5 h-5 text-immoo-gold" />
+        <div className="bg-gradient-to-r from-gray-50 to-white p-4 rounded-xl border border-gray-200 shadow-sm">
+          <h3 className="text-sm font-semibold text-gray-800 flex items-center mb-4">
+            <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
+              <User className="w-3 h-3 text-blue-600" />
             </div>
-            <h3 className="text-xl font-bold text-immoo-navy dark:text-immoo-pearl">
-              Informations personnelles
-            </h3>
-          </div>
+            Vos informations
+          </h3>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div className="space-y-2">
-              <Label htmlFor="firstName" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label htmlFor="firstName" className="text-xs font-semibold text-gray-700">
                 Prénom
               </Label>
-              <div className="relative">
-                <Input
-                  id="firstName"
-                  type="text"
-                  value={formData.firstName}
-                  onChange={(e) => handleInputChange('firstName', e.target.value)}
-                  placeholder="Votre prénom"
-                  className="h-12 px-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
-                  required
-                />
-              </div>
+              <Input
+                id="firstName"
+                type="text"
+                value={formData.firstName}
+                onChange={(e) => handleInputChange('firstName', e.target.value)}
+                placeholder="Votre prénom"
+                className="h-10 px-3 text-sm border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all duration-200"
+                required
+              />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="lastName" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+            <div className="space-y-1">
+              <Label htmlFor="lastName" className="text-xs font-semibold text-gray-700">
                 Nom
               </Label>
-              <div className="relative">
-                <Input
-                  id="lastName"
-                  type="text"
-                  value={formData.lastName}
-                  onChange={(e) => handleInputChange('lastName', e.target.value)}
-                  placeholder="Votre nom"
-                  className="h-12 px-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
-                  required
-                />
-              </div>
+              <Input
+                id="lastName"
+                type="text"
+                value={formData.lastName}
+                onChange={(e) => handleInputChange('lastName', e.target.value)}
+                placeholder="Votre nom"
+                className="h-10 px-3 text-sm border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all duration-200"
+                required
+              />
             </div>
           </div>
 
-          <div className="space-y-2 mb-4">
-            <Label htmlFor="email" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+          <div className="space-y-1 col-span-2">
+            <Label htmlFor="email" className="text-xs font-semibold text-gray-700">
               Email professionnel
             </Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-immoo-navy/40 dark:text-immoo-pearl/40" />
+              <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 id="email"
                 type="email"
@@ -189,63 +192,90 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 placeholder="votre@email.com"
                 autoComplete="email"
-                className="h-12 pl-10 pr-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
+                className="h-10 pl-10 pr-3 text-sm border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all duration-200"
                 required
               />
             </div>
           </div>
           
-          <div className="space-y-2 mb-4">
-            <Label htmlFor="password" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+          <div className="space-y-1">
+            <Label htmlFor="password" className="text-xs font-semibold text-gray-700">
               Mot de passe
             </Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-immoo-navy/40 dark:text-immoo-pearl/40" />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 id="password"
                 type="password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                placeholder="Minimum 6 caractères"
+                placeholder="Min. 6 caractères"
                 autoComplete="new-password"
-                className="h-12 pl-10 pr-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
+                className="h-10 pl-10 pr-3 text-sm border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all duration-200"
                 required
               />
             </div>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
-              Téléphone
+          
+          <div className="space-y-1">
+            <Label htmlFor="confirmPassword" className="text-xs font-semibold text-gray-700">
+              Confirmer le mot de passe
             </Label>
             <div className="relative">
-              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-immoo-navy/40 dark:text-immoo-pearl/40" />
+              <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                id="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                placeholder="Répétez le mot de passe"
+                autoComplete="new-password"
+                className={`h-10 pl-10 pr-3 text-sm rounded-lg transition-all duration-200 ${
+                  passwordError 
+                    ? 'border-red-400 focus:border-red-500 focus:ring-2 focus:ring-red-500/20' 
+                    : 'border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20'
+                }`}
+                required
+              />
+            </div>
+            {passwordError && (
+              <p className="text-xs text-red-600 mt-1 flex items-center animate-in slide-in-from-left-2">
+                <AlertCircle className="w-3 h-3 mr-1" />
+                {passwordError}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-1 col-span-2">
+            <Label htmlFor="phone" className="text-xs font-semibold text-gray-700">
+              Téléphone (optionnel)
+            </Label>
+            <div className="relative">
+              <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <Input
                 id="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
                 placeholder="+223 X XX XX XX XX"
-                className="h-12 pl-10 pr-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
+                className="h-10 pl-10 pr-3 text-sm border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all duration-200"
               />
             </div>
           </div>
         </div>
 
         {/* Informations agence */}
-        <div className="bg-white/50 dark:bg-immoo-navy-light/30 backdrop-blur-sm rounded-2xl p-6 border border-immoo-gold/10">
-          <div className="flex items-center space-x-3 mb-6">
-            <div className="w-10 h-10 bg-gradient-to-r from-immoo-navy/20 to-immoo-navy-light/20 rounded-xl flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-immoo-navy dark:text-immoo-pearl" />
+        <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-xl border border-orange-200 shadow-sm">
+          <h3 className="text-sm font-semibold text-gray-800 flex items-center mb-4">
+            <div className="w-6 h-6 bg-orange-100 rounded-lg flex items-center justify-center mr-2">
+              <Building2 className="w-3 h-3 text-orange-600" />
             </div>
-            <h3 className="text-xl font-bold text-immoo-navy dark:text-immoo-pearl">
-              Informations agence
-            </h3>
-          </div>
+            Votre agence
+          </h3>
           
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="agencyName" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label htmlFor="agencyName" className="text-xs font-semibold text-gray-700">
                 Nom de l'agence
               </Label>
               <Input
@@ -253,60 +283,57 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
                 type="text"
                 value={formData.agencyName}
                 onChange={(e) => handleInputChange('agencyName', e.target.value)}
-                placeholder="Nom de votre agence"
-                className="h-12 px-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200"
+                placeholder="Ex: Immobilier Excellence"
+                className="h-10 px-3 text-sm border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 rounded-lg transition-all duration-200"
                 required
               />
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium text-immoo-navy/80 dark:text-immoo-pearl/80">
-                Description de l'agence
+            <div className="space-y-1">
+              <Label htmlFor="description" className="text-xs font-semibold text-gray-700">
+                Description (optionnel)
               </Label>
-              <div className="relative">
-                <FileText className="absolute left-3 top-3 w-5 h-5 text-immoo-navy/40 dark:text-immoo-pearl/40" />
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
-                  placeholder="Décrivez votre agence, vos services, votre expérience..."
-                  rows={4}
-                  className="pl-10 pr-4 bg-white/80 dark:bg-immoo-navy-light/80 border-immoo-gold/20 focus:border-immoo-gold focus:ring-immoo-gold/20 rounded-xl transition-all duration-200 resize-none"
-                />
-              </div>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder="Spécialisée dans la vente et location..."
+                rows={2}
+                className="px-3 py-2 text-sm resize-none border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 rounded-lg transition-all duration-200"
+              />
             </div>
           </div>
         </div>
         
         <Button 
           type="submit" 
-          className="w-full h-14 bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy font-semibold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02]" 
+          className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200" 
           disabled={isLoading}
         >
           {isLoading ? (
             <>
-              <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-              Envoi en cours...
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Création en cours...
             </>
           ) : (
             <>
-              <Building2 className="mr-3 h-5 w-5" />
-              Soumettre ma demande
+              <Building2 className="mr-2 h-4 w-4" />
+              🚀 Créer mon agence
             </>
           )}
         </Button>
       </form>
 
       {onSwitchToLogin && (
-        <div className="text-center space-y-2 mt-8">
-          <p className="text-sm text-immoo-navy/70 dark:text-immoo-pearl/70">
+        <div className="text-center mt-6">
+          <p className="text-xs text-gray-600">
             Déjà une agence?{' '}
             <button 
               type="button"
-              className="text-immoo-gold hover:text-immoo-gold-light font-semibold transition-colors duration-200"
+              className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline"
               onClick={onSwitchToLogin}
             >
-              Se connecter
+              Se connecter ici
             </button>
           </p>
         </div>
