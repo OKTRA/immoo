@@ -158,14 +158,6 @@ export function NavbarMobileMenu({
                 })}
               </div>
             </div>
-
-            {/* Language Switcher */}
-            <div className="mb-6">
-              <h4 className="text-sm font-semibold text-immoo-navy/60 mb-4 px-2">{t('common.language')}</h4>
-              <div className="px-2">
-                <LanguageSwitcher />
-              </div>
-            </div>
           </nav>
 
           {/* Footer du menu */}

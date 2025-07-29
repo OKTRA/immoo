@@ -7,6 +7,7 @@ import { NavbarMobileMenu } from "./navbar/NavbarMobileMenu";
 import { UserType } from "./navbar/types";
 import ImmooLogoAdaptive from "./ui/ImmooLogoAdaptive";
 import { useAuth } from "@/hooks/useAuth";
+import { LanguageSwitcher } from "./ui/LanguageSwitcher";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -82,8 +83,12 @@ export default function Navbar() {
             />
           </div>
 
-          {/* Bouton mobile - positionné à droite */}
-          <div className="md:hidden ml-auto">
+          {/* Boutons mobile - positionnés à droite */}
+          <div className="md:hidden ml-auto flex items-center space-x-2">
+            {/* Language Switcher ultra minimaliste - visible en permanence sur mobile */}
+            <div className="mr-2">
+              <LanguageSwitcher />
+            </div>
             <button
               className="relative w-10 h-10 flex items-center justify-center rounded-lg bg-white/80 backdrop-blur-sm border border-immoo-gray/20 shadow-sm hover:bg-white hover:shadow-md transition-all duration-200 group"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
