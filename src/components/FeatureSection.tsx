@@ -17,60 +17,60 @@ import { Feature } from "@/assets/types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import BecomeAgencyForm from "@/components/auth/BecomeAgencyForm";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function FeatureSection() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [showAgencyDialog, setShowAgencyDialog] = useState(false);
   
   const features: Feature[] = [
     {
-      title: "Gestion des Propriétés",
-      description: "Créez et gérez votre portefeuille immobilier : ajout de biens, galeries photos, statuts de location, informations détaillées et suivi des performances.",
+      title: t('features.propertyManagement'),
+      description: t('features.propertyManagementDesc'),
       icon: "Building2"
     },
     {
-      title: "Gestion des Locataires",
-      description: "Centralisez vos relations locatives : dossiers locataires, historique des baux, suivi des paiements et communication directe.",
+      title: t('features.tenantManagement'),
+      description: t('features.tenantManagementDesc'),
       icon: "Users2"
     },
     {
-      title: "Suivi des Paiements",
-      description: "Gérez tous vos encaissements : loyers, charges, dépôts de garantie avec statuts détaillés et historique complet des transactions.",
+      title: t('features.paymentTracking'),
+      description: t('features.paymentTrackingDesc'),
       icon: "Calculator"
     },
     {
-      title: "Génération de Contrats",
-      description: "Créez des contrats de location professionnels avec éditeur intégré, validation juridique et signature électronique.",
+      title: t('features.contractGeneration'),
+      description: t('features.contractGenerationDesc'),
       icon: "FileText"
     },
     {
-      title: "Tableaux de Bord",
-      description: "Visualisez vos statistiques d'agence : nombre de propriétés, notes, vues, performance et activité récente en temps réel.",
+      title: t('features.analytics'),
+      description: t('features.analyticsDesc'),
       icon: "BarChart3"
     },
     {
-      title: "Gestion des Baux",
-      description: "Administrez vos contrats de location : création, suivi des échéances, renouvellements et archivage automatique.",
+      title: t('features.leaseManagement'),
+      description: t('features.leaseManagementDesc'),
       icon: "Calendar"
     },
     {
-      title: "Profil d'Agence",
-      description: "Personnalisez votre présence : logo, description, zones de service, coordonnées et gestion de la visibilité publique.",
+      title: t('features.agencyProfile'),
+      description: t('features.agencyProfileDesc'),
       icon: "Briefcase"
     },
     {
-      title: "Recherche & Filtres",
-      description: "Trouvez rapidement vos biens et locataires avec des filtres avancés : prix, type, statut, localisation et critères personnalisés.",
+      title: t('features.searchFilters'),
+      description: t('features.searchFiltersDesc'),
       icon: "Shield"
     },
     {
-      title: "Interface Responsive",
-      description: "Accédez à votre dashboard depuis n'importe quel appareil avec une interface optimisée mobile et desktop.",
+      title: t('features.responsiveInterface'),
+      description: t('features.responsiveInterfaceDesc'),
       icon: "Smartphone"
     }
   ];
-
-
 
   const featureRef = useRef(null);
   const isFeatureInView = useInView(featureRef, { once: true, amount: 0.2 });
@@ -129,11 +129,11 @@ export default function FeatureSection() {
           variants={containerVariants}
         >
           <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl lg:text-5xl font-light mb-6 text-gray-900 tracking-tight">
-            Tout ce dont vous avez besoin
+            {t('features.sectionTitle')}
           </motion.h2>
           
           <motion.p variants={itemVariants} className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
-            Une plateforme moderne pour simplifier la gestion de votre agence immobilière
+            {t('features.sectionSubtitle')}
           </motion.p>
           
         </motion.div>
@@ -168,16 +168,16 @@ export default function FeatureSection() {
           variants={itemVariants}
         >
           <h3 className="text-2xl font-semibold mb-4 text-gray-900">
-            Prêt à commencer votre gestion avec IMMOO ?
+            {t('features.ctaTitle')}
           </h3>
           <p className="text-gray-600 mb-8 max-w-md mx-auto">
-            Créez votre agence en quelques minutes et découvrez tous les outils pour optimiser votre activité
+            {t('features.ctaSubtitle')}
           </p>
           <Button 
             onClick={() => setShowAgencyDialog(true)}
             className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 inline-flex items-center"
           >
-            Commencer ma gestion
+            {t('features.ctaButton')}
             <ArrowRight className="ml-2 h-4 w-4" />
           </Button>
         </motion.div>
@@ -188,7 +188,7 @@ export default function FeatureSection() {
         <DialogContent className="max-w-md mx-auto">
           <DialogHeader>
             <DialogTitle className="text-center text-xl font-bold text-gray-900">
-              Créer votre agence
+              {t('features.dialogTitle')}
             </DialogTitle>
           </DialogHeader>
           <BecomeAgencyForm 

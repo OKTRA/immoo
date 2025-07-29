@@ -11,9 +11,11 @@ import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import PropertyList from '@/components/properties/PropertyList';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth, useAuthStatus } from '@/hooks/useAuth';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function HomePage() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [featuredProperties, setFeaturedProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasProperties, setHasProperties] = useState(false);

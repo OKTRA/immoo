@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { AlertCircle, Loader2, Building2, User, Mail, Lock, Phone, FileText } from 'lucide-react';
 import { signUp } from '@/services/authService';
 import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface BecomeAgencyFormProps {
   onSuccess: () => void;
@@ -14,6 +15,7 @@ interface BecomeAgencyFormProps {
 }
 
 const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitchToLogin }) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -32,33 +34,33 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
     setError(null);
     
     if (!formData.email) {
-      setError("L'email est requis");
+      setError(t('auth.emailRequired'));
       return false;
     }
     
     if (!formData.password) {
-      setError("Le mot de passe est requis");
+      setError(t('auth.passwordRequired'));
       return false;
     }
     
     if (!formData.firstName || !formData.lastName) {
-      setError("Le prénom et le nom sont requis");
+      setError(t('auth.firstNameLastNameRequired'));
       return false;
     }
 
     if (!formData.agencyName) {
-      setError("Le nom de l'agence est requis");
+      setError(t('auth.agencyNameRequired'));
       return false;
     }
     
     if (formData.password.length < 6) {
-      setError("Le mot de passe doit contenir au moins 6 caractères");
+      setError(t('auth.weakPassword'));
       return false;
     }
     
     if (formData.password !== formData.confirmPassword) {
-      setError("Les mots de passe ne correspondent pas");
-      setPasswordError("Les mots de passe ne correspondent pas");
+      setError(t('auth.passwordMismatch'));
+      setPasswordError(t('auth.passwordMismatch'));
       return false;
     }
     
@@ -86,14 +88,14 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
       });
       
       // Si on arrive ici, l'inscription a réussi
-      toast.success('Agence créée avec succès', { 
-        description: 'Votre agence a été créée et vous pouvez maintenant vous connecter' 
+      toast.success(t('auth.agencyCreatedSuccess'), { 
+        description: t('auth.agencyCreatedDescription') 
       });
       onSuccess();
     } catch (error: any) {
-      setError(error.message || 'Une erreur s\'est produite');
-      toast.error("Erreur", { 
-        description: error.message || 'Une erreur s\'est produite' 
+      setError(error.message || t('auth.errorOccurred'));
+      toast.error(t('common.error'), { 
+        description: error.message || t('auth.errorOccurred') 
       });
     } finally {
       setIsLoading(false);
@@ -112,7 +114,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
       const newFormData = { ...formData, [field]: value };
       if (newFormData.password && newFormData.confirmPassword) {
         if (newFormData.password !== newFormData.confirmPassword) {
-          setPasswordError("Les mots de passe ne correspondent pas");
+          setPasswordError(t('auth.passwordMismatch'));
         }
       }
     }
@@ -126,7 +128,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
           <Building2 className="w-6 h-6 text-white" />
         </div>
         <p className="text-sm text-gray-600 font-medium">
-          Créez votre agence immobilière
+          {t('auth.createAgencyTitle')}
         </p>
       </div>
 
@@ -144,20 +146,20 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
             <div className="w-6 h-6 bg-blue-100 rounded-lg flex items-center justify-center mr-2">
               <User className="w-3 h-3 text-blue-600" />
             </div>
-            Vos informations
+            {t('auth.personalInfo')}
           </h3>
           
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label htmlFor="firstName" className="text-xs font-semibold text-gray-700">
-                Prénom
+                {t('auth.firstName')}
               </Label>
               <Input
                 id="firstName"
                 type="text"
                 value={formData.firstName}
                 onChange={(e) => handleInputChange('firstName', e.target.value)}
-                placeholder="Votre prénom"
+                placeholder={t('auth.firstName')}
                 className="h-10 px-3 text-sm border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all duration-200"
                 required
               />
@@ -165,14 +167,14 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
             
             <div className="space-y-1">
               <Label htmlFor="lastName" className="text-xs font-semibold text-gray-700">
-                Nom
+                {t('auth.lastName')}
               </Label>
               <Input
                 id="lastName"
                 type="text"
                 value={formData.lastName}
                 onChange={(e) => handleInputChange('lastName', e.target.value)}
-                placeholder="Votre nom"
+                placeholder={t('auth.lastName')}
                 className="h-10 px-3 text-sm border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all duration-200"
                 required
               />
@@ -181,7 +183,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
 
           <div className="space-y-1 col-span-2">
             <Label htmlFor="email" className="text-xs font-semibold text-gray-700">
-              Email professionnel
+              {t('auth.professionalEmail')}
             </Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -190,7 +192,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
                 type="email"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
-                placeholder="votre@email.com"
+                placeholder={t('auth.emailPlaceholder')}
                 autoComplete="email"
                 className="h-10 pl-10 pr-3 text-sm border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all duration-200"
                 required
@@ -200,7 +202,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
           
           <div className="space-y-1">
             <Label htmlFor="password" className="text-xs font-semibold text-gray-700">
-              Mot de passe
+              {t('common.password')}
             </Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -209,7 +211,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
                 type="password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
-                placeholder="Min. 6 caractères"
+                placeholder={t('auth.passwordPlaceholder')}
                 autoComplete="new-password"
                 className="h-10 pl-10 pr-3 text-sm border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all duration-200"
                 required
@@ -219,7 +221,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
           
           <div className="space-y-1">
             <Label htmlFor="confirmPassword" className="text-xs font-semibold text-gray-700">
-              Confirmer le mot de passe
+              {t('auth.confirmPassword')}
             </Label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -228,7 +230,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
                 type="password"
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                placeholder="Répétez le mot de passe"
+                placeholder={t('auth.confirmPasswordPlaceholder')}
                 autoComplete="new-password"
                 className={`h-10 pl-10 pr-3 text-sm rounded-lg transition-all duration-200 ${
                   passwordError 
@@ -248,7 +250,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
 
           <div className="space-y-1 col-span-2">
             <Label htmlFor="phone" className="text-xs font-semibold text-gray-700">
-              Téléphone (optionnel)
+              {t('auth.phoneOptional')}
             </Label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -257,7 +259,7 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => handleInputChange('phone', e.target.value)}
-                placeholder="+223 X XX XX XX XX"
+                placeholder={t('auth.phonePlaceholder')}
                 className="h-10 pl-10 pr-3 text-sm border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg transition-all duration-200"
               />
             </div>
@@ -270,20 +272,20 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
             <div className="w-6 h-6 bg-orange-100 rounded-lg flex items-center justify-center mr-2">
               <Building2 className="w-3 h-3 text-orange-600" />
             </div>
-            Votre agence
+            {t('auth.agencyInfo')}
           </h3>
           
           <div className="space-y-3">
             <div className="space-y-1">
               <Label htmlFor="agencyName" className="text-xs font-semibold text-gray-700">
-                Nom de l'agence
+                {t('auth.agencyName')}
               </Label>
               <Input
                 id="agencyName"
                 type="text"
                 value={formData.agencyName}
                 onChange={(e) => handleInputChange('agencyName', e.target.value)}
-                placeholder="Ex: Immobilier Excellence"
+                placeholder={t('auth.agencyNamePlaceholder')}
                 className="h-10 px-3 text-sm border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 rounded-lg transition-all duration-200"
                 required
               />
@@ -291,13 +293,13 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
             
             <div className="space-y-1">
               <Label htmlFor="description" className="text-xs font-semibold text-gray-700">
-                Description (optionnel)
+                {t('auth.descriptionOptional')}
               </Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => handleInputChange('description', e.target.value)}
-                placeholder="Spécialisée dans la vente et location..."
+                placeholder={t('auth.descriptionPlaceholder')}
                 rows={2}
                 className="px-3 py-2 text-sm resize-none border-gray-300 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 rounded-lg transition-all duration-200"
               />
@@ -313,12 +315,12 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Création en cours...
+              {t('auth.creatingAgency')}
             </>
           ) : (
             <>
               <Building2 className="mr-2 h-4 w-4" />
-              🚀 Créer mon agence
+              {t('auth.createMyAgency')}
             </>
           )}
         </Button>
@@ -327,13 +329,13 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
       {onSwitchToLogin && (
         <div className="text-center mt-6">
           <p className="text-xs text-gray-600">
-            Déjà une agence?{' '}
+            {t('auth.alreadyAgency')}{' '}
             <button 
               type="button"
               className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline"
               onClick={onSwitchToLogin}
             >
-              Se connecter ici
+              {t('auth.loginHere')}
             </button>
           </p>
         </div>

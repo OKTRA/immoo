@@ -31,8 +31,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import BecomeAgencyForm from '@/components/auth/BecomeAgencyForm';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
+import { useTranslation } from '@/hooks/useTranslation';
 
 const ImmoAgencyPage: React.FC = () => {
+  const { t } = useTranslation();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [becomePartnerDialogOpen, setBecomePartnerDialogOpen] = useState(false);
   const [contactForm, setContactForm] = useState({
@@ -73,84 +75,54 @@ Message: ${contactForm.message}
   const services = [
     {
       icon: <Home className="w-6 h-6" />,
-      title: "Gestion Locative Complète",
-      description: "Nous prenons en charge toute la gestion de vos biens locatifs : recherche de locataires, gestion administrative, maintenance et suivi.",
-      features: [
-        "Recherche et sélection de locataires qualifiés",
-        "Gestion des contrats de location",
-        "Suivi des paiements et relances",
-        "Coordination des interventions de maintenance",
-        "Rapports mensuels détaillés"
-      ]
+      title: t('immoAgency.services.propertyManagement.title'),
+      description: t('immoAgency.services.propertyManagement.description'),
+      features: t('immoAgency.services.propertyManagement.features', { returnObjects: true }) as string[]
     },
     {
       icon: <Key className="w-6 h-6" />,
-      title: "Location & Vente",
-      description: "Services complets de transaction immobilière avec notre expertise du marché malien et notre réseau d'acheteurs/locataires.",
-      features: [
-        "Évaluation précise de vos biens",
-        "Marketing et promotion ciblée",
-        "Accompagnement des visites",
-        "Négociation et finalisation des transactions",
-        "Suivi post-transaction"
-      ]
+      title: t('immoAgency.services.rentalSale.title'),
+      description: t('immoAgency.services.rentalSale.description'),
+      features: t('immoAgency.services.rentalSale.features', { returnObjects: true }) as string[]
     },
     {
       icon: <Calculator className="w-6 h-6" />,
-      title: "Optimisation Financière",
-      description: "Maximisez vos revenus locatifs et optimisez vos investissements immobiliers avec nos conseils d'experts.",
-      features: [
-        "Analyse de rentabilité",
-        "Optimisation des loyers",
-        "Gestion fiscale et comptable",
-        "Stratégies d'investissement",
-        "Suivi des performances"
-      ]
+      title: t('immoAgency.services.financialOptimization.title'),
+      description: t('immoAgency.services.financialOptimization.description'),
+      features: t('immoAgency.services.financialOptimization.features', { returnObjects: true }) as string[]
     },
     {
       icon: <Camera className="w-6 h-6" />,
-      title: "Services Marketing",
-      description: "Visites virtuelles, photos professionnelles et présence digitale pour valoriser vos biens sur le marché.",
-      features: [
-        "Photographie immobilière professionnelle",
-        "Visites virtuelles 360°",
-        "Création de contenus marketing",
-        "Gestion des réseaux sociaux",
-        "Publicité ciblée"
-      ]
+      title: t('immoAgency.services.marketingServices.title'),
+      description: t('immoAgency.services.marketingServices.description'),
+      features: t('immoAgency.services.marketingServices.features', { returnObjects: true }) as string[]
     }
   ];
 
   const advantages = [
     {
       icon: <Shield className="w-8 h-8 text-immoo-gold" />,
-      title: "Expertise Locale",
-      description: "Plus de 5 ans d'expérience sur le marché immobilier malien"
+      title: t('immoAgency.advantages.localExpertise.title'),
+      description: t('immoAgency.advantages.localExpertise.description')
     },
     {
       icon: <Users className="w-8 h-8 text-immoo-gold" />,
-      title: "Réseau Qualifié",
-      description: "Base de données de locataires et acheteurs vérifiés"
+      title: t('immoAgency.advantages.qualifiedNetwork.title'),
+      description: t('immoAgency.advantages.qualifiedNetwork.description')
     },
     {
       icon: <TrendingUp className="w-8 h-8 text-immoo-gold" />,
-      title: "Performance Garantie",
-      description: "Taux de location de 95% et délai moyen de 15 jours"
+      title: t('immoAgency.advantages.guaranteedPerformance.title'),
+      description: t('immoAgency.advantages.guaranteedPerformance.description')
     },
     {
       icon: <FileText className="w-8 h-8 text-immoo-gold" />,
-      title: "Transparence Totale",
-      description: "Rapports détaillés et suivi en temps réel de vos biens"
+      title: t('immoAgency.advantages.totalTransparency.title'),
+      description: t('immoAgency.advantages.totalTransparency.description')
     }
   ];
 
-  const partnershipBenefits = [
-    "Partage de propriétés avec le réseau IMMOO",
-    "Accès à une base de données nationale",
-    "Commission partagée équitable",
-    "Support technique et formation",
-    "Outils de gestion modernes"
-  ];
+  const partnershipBenefits = t('immoAgency.partnershipBenefits', { returnObjects: true }) as string[];
 
   return (
     <ResponsiveLayout>
@@ -181,7 +153,7 @@ Message: ${contactForm.message}
               className="mb-6"
             >
               <Badge className="bg-immoo-gold/10 text-immoo-gold border-immoo-gold/20 px-4 py-2 text-sm font-medium">
-                IMMOO Agency
+                {t('immoAgency.badge')}
               </Badge>
             </motion.div>
             
@@ -192,10 +164,10 @@ Message: ${contactForm.message}
               className="text-4xl md:text-6xl font-bold mb-6"
             >
               <span className="text-immoo-navy dark:text-immoo-pearl">
-                Gestion Immobilière{" "}
+                {t('immoAgency.heroTitle')}{" "}
               </span>
               <span className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light bg-clip-text text-transparent">
-                Professionnelle
+                {t('immoAgency.heroSubtitle')}
               </span>
             </motion.h1>
             
@@ -205,8 +177,7 @@ Message: ${contactForm.message}
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-xl text-immoo-navy/70 dark:text-immoo-pearl/70 mb-8 max-w-2xl mx-auto"
             >
-              Confiez-nous la gestion de vos biens immobiliers. Nous maximisons vos revenus 
-              tout en vous libérant des contraintes administratives.
+              {t('immoAgency.heroDescription')}
             </motion.p>
             
             <motion.div
@@ -220,7 +191,7 @@ Message: ${contactForm.message}
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <MessageCircle className="mr-2 w-5 h-5" />
-                Discuter avec nous
+                {t('immoAgency.chatWithUs')}
               </Button>
               <Button 
                 onClick={() => setContactDialogOpen(true)}
@@ -228,7 +199,7 @@ Message: ${contactForm.message}
                 className="border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy px-8 py-3 text-lg font-semibold rounded-xl transition-all duration-300"
               >
                 <Mail className="mr-2 w-5 h-5" />
-                Nous contacter
+                {t('immoAgency.contactUs')}
               </Button>
             </motion.div>
           </div>
@@ -246,10 +217,10 @@ Message: ${contactForm.message}
             className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-immoo-navy dark:text-immoo-pearl mb-4">
-              Nos Services Spécialisés
+              {t('immoAgency.servicesTitle')}
             </h2>
             <p className="text-lg text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-2xl mx-auto">
-              Une gamme complète de services pour optimiser votre investissement immobilier
+              {t('immoAgency.servicesSubtitle')}
             </p>
           </motion.div>
 
@@ -304,10 +275,10 @@ Message: ${contactForm.message}
             className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-immoo-navy dark:text-immoo-pearl mb-4">
-              Pourquoi Choisir IMMOO Agency ?
+              {t('immoAgency.advantagesTitle')}
             </h2>
             <p className="text-lg text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-2xl mx-auto">
-              Notre expertise et notre engagement font la différence
+              {t('immoAgency.advantagesSubtitle')}
             </p>
           </motion.div>
 
@@ -348,10 +319,10 @@ Message: ${contactForm.message}
               className="text-center mb-12"
             >
               <h2 className="text-3xl md:text-4xl font-bold text-immoo-navy dark:text-immoo-pearl mb-4">
-                Partenariat avec le Réseau IMMOO
+                {t('immoAgency.partnershipTitle')}
               </h2>
               <p className="text-lg text-immoo-navy/70 dark:text-immoo-pearl/70">
-                Rejoignez notre réseau d'agences partenaires et bénéficiez de notre plateforme
+                {t('immoAgency.partnershipSubtitle')}
               </p>
             </motion.div>
 
@@ -365,7 +336,7 @@ Message: ${contactForm.message}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
                 <div>
                   <h3 className="text-2xl font-bold text-immoo-navy dark:text-immoo-pearl mb-4">
-                    Avantages du Partenariat
+                    {t('immoAgency.partnershipBenefitsTitle')}
                   </h3>
                   <ul className="space-y-3">
                     {partnershipBenefits.map((benefit, index) => (
@@ -383,16 +354,16 @@ Message: ${contactForm.message}
                     <Globe className="w-12 h-12 text-immoo-navy" />
                   </div>
                   <h4 className="text-xl font-semibold text-immoo-navy dark:text-immoo-pearl mb-2">
-                    Réseau National
+                    {t('immoAgency.nationalNetwork')}
                   </h4>
                   <p className="text-immoo-navy/70 dark:text-immoo-pearl/70 mb-4">
-                    Accédez à des propriétés dans tout le Mali
+                    {t('immoAgency.nationalNetworkDesc')}
                   </p>
                   <Button 
                     onClick={() => setBecomePartnerDialogOpen(true)}
                     className="bg-immoo-navy hover:bg-immoo-navy-light text-immoo-pearl px-6 py-2 rounded-xl"
                   >
-                    Devenir Partenaire
+                    {t('immoAgency.becomePartner')}
                     <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </div>
@@ -413,11 +384,10 @@ Message: ${contactForm.message}
             className="text-center max-w-3xl mx-auto"
           >
             <h2 className="text-3xl md:text-4xl font-bold text-immoo-navy mb-4">
-              Prêt à Optimiser Vos Revenus Immobiliers ?
+              {t('immoAgency.ctaTitle')}
             </h2>
             <p className="text-lg text-immoo-navy/80 mb-8">
-              Contactez-nous pour une consultation gratuite et découvrez comment nous pouvons 
-              maximiser la rentabilité de vos biens.
+              {t('immoAgency.ctaDescription')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
@@ -425,7 +395,7 @@ Message: ${contactForm.message}
                 className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-8 py-3 text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 <MessageCircle className="mr-2 w-5 h-5" />
-                WhatsApp
+                {t('immoAgency.whatsapp')}
               </Button>
               <Button 
                 onClick={() => setContactDialogOpen(true)}
@@ -433,7 +403,7 @@ Message: ${contactForm.message}
                 className="border-immoo-navy text-immoo-navy hover:bg-immoo-navy hover:text-immoo-pearl px-8 py-3 text-lg font-semibold rounded-xl"
               >
                 <Mail className="mr-2 w-5 h-5" />
-                Nous contacter
+                {t('immoAgency.contactUs')}
               </Button>
             </div>
           </motion.div>
@@ -445,52 +415,52 @@ Message: ${contactForm.message}
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-immoo-navy dark:text-immoo-pearl">
-              Nous contacter
+              {t('immoAgency.contactForm.title')}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleContactSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Nom complet</Label>
+              <Label htmlFor="name">{t('immoAgency.contactForm.fullName')}</Label>
               <Input
                 id="name"
                 type="text"
                 value={contactForm.name}
                 onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Votre nom"
+                placeholder={t('immoAgency.contactForm.fullNamePlaceholder')}
                 required
                 className="h-11"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t('immoAgency.contactForm.email')}</Label>
               <Input
                 id="email"
                 type="email"
                 value={contactForm.email}
                 onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="votre@email.com"
+                placeholder={t('immoAgency.contactForm.emailPlaceholder')}
                 required
                 className="h-11"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Téléphone</Label>
+              <Label htmlFor="phone">{t('immoAgency.contactForm.phone')}</Label>
               <Input
                 id="phone"
                 type="tel"
                 value={contactForm.phone}
                 onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
-                placeholder="+223 XX XX XX XX"
+                placeholder={t('immoAgency.contactForm.phonePlaceholder')}
                 className="h-11"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="message">Message</Label>
+              <Label htmlFor="message">{t('immoAgency.contactForm.message')}</Label>
               <Textarea
                 id="message"
                 value={contactForm.message}
                 onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
-                placeholder="Décrivez votre demande..."
+                placeholder={t('immoAgency.contactForm.messagePlaceholder')}
                 rows={4}
                 required
                 className="resize-none"
@@ -502,7 +472,7 @@ Message: ${contactForm.message}
                 className="flex-1 bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy"
               >
                 <Mail className="mr-2 w-4 h-4" />
-                Envoyer
+                {t('immoAgency.contactForm.send')}
               </Button>
               <Button 
                 type="button" 
@@ -510,7 +480,7 @@ Message: ${contactForm.message}
                 onClick={() => setContactDialogOpen(false)}
                 className="px-6"
               >
-                Annuler
+                {t('immoAgency.contactForm.cancel')}
               </Button>
             </div>
           </form>
@@ -522,7 +492,7 @@ Message: ${contactForm.message}
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-xl font-bold text-immoo-navy dark:text-immoo-pearl">
-              Devenir Partenaire IMMOO
+              {t('immoAgency.becomePartnerTitle')}
             </DialogTitle>
           </DialogHeader>
           <BecomeAgencyForm 

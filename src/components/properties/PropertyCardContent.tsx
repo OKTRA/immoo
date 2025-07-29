@@ -3,12 +3,15 @@ import React from 'react';
 import { CardContent } from '@/components/ui/card';
 import { Property } from '@/assets/types';
 import { formatCurrency } from '@/lib/utils';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface PropertyCardContentProps {
   property: Property;
 }
 
 export default function PropertyCardContent({ property }: PropertyCardContentProps) {
+  const { t } = useTranslation();
+
   return (
     <CardContent className="pt-4">
       <div className="mb-2">
@@ -22,8 +25,8 @@ export default function PropertyCardContent({ property }: PropertyCardContentPro
       </div>
 
       <div className="flex space-x-4 text-sm text-muted-foreground">
-        <div>{property.bedrooms} chambres</div>
-        <div>{property.bathrooms} SdB</div>
+        <div>{property.bedrooms} {t('propertyCard.bedrooms')}</div>
+        <div>{property.bathrooms} {t('propertyCard.bathrooms')}</div>
         {property.propertyCategory && <div>{property.propertyCategory}</div>}
       </div>
     </CardContent>

@@ -4,7 +4,9 @@ import { Property } from "@/assets/types";
 import { Badge } from "@/components/ui/badge";
 import { Home, MapPin } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { useTranslation } from '@/hooks/useTranslation';
 import PropertyImageGallery from './PropertyImageGallery';
+import { getPropertyStatusLabel, getPropertyStatusVariant } from '@/utils/translationUtils';
 
 interface PropertyDetailsHeaderProps {
   property: Property;
@@ -12,6 +14,8 @@ interface PropertyDetailsHeaderProps {
 }
 
 export default function PropertyDetailsHeader({ property, getPaymentFrequencyLabel }: PropertyDetailsHeaderProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="relative">
       {/* Image de la propriété */}
@@ -29,17 +33,10 @@ export default function PropertyDetailsHeader({ property, getPaymentFrequencyLab
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
             <div className="absolute top-4 right-4 z-30">
               <Badge 
-                variant={
-                  property.status === "available" ? "default" :
-                  property.status === "sold" ? "destructive" :
-                  "secondary"
-                }
+                variant={getPropertyStatusVariant(property.status)}
                 className="text-sm font-medium"
               >
-                {property.status === "available" ? "Disponible" :
-                 property.status === "sold" ? "Vendu" :
-                 property.status === "pending" ? "En attente" :
-                 property.status}
+                {getPropertyStatusLabel(property.status, t)}
               </Badge>
             </div>
           </>
@@ -54,17 +51,10 @@ export default function PropertyDetailsHeader({ property, getPaymentFrequencyLab
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
             <div className="absolute top-4 right-4">
               <Badge 
-                variant={
-                  property.status === "available" ? "default" :
-                  property.status === "sold" ? "destructive" :
-                  "secondary"
-                }
+                variant={getPropertyStatusVariant(property.status)}
                 className="text-sm font-medium"
               >
-                {property.status === "available" ? "Disponible" :
-                 property.status === "sold" ? "Vendu" :
-                 property.status === "pending" ? "En attente" :
-                 property.status}
+                {getPropertyStatusLabel(property.status, t)}
               </Badge>
             </div>
           </>
@@ -75,17 +65,10 @@ export default function PropertyDetailsHeader({ property, getPaymentFrequencyLab
             </div>
             <div className="absolute top-4 right-4">
               <Badge 
-                variant={
-                  property.status === "available" ? "default" :
-                  property.status === "sold" ? "destructive" :
-                  "secondary"
-                }
+                variant={getPropertyStatusVariant(property.status)}
                 className="text-sm font-medium"
               >
-                {property.status === "available" ? "Disponible" :
-                 property.status === "sold" ? "Vendu" :
-                 property.status === "pending" ? "En attente" :
-                 property.status}
+                {getPropertyStatusLabel(property.status, t)}
               </Badge>
             </div>
           </>

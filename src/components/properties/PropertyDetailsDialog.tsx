@@ -3,6 +3,7 @@ import React from 'react';
 import { Property } from "@/assets/types";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from '@/hooks/useTranslation';
 import PropertyDetailsHeader from './PropertyDetailsHeader';
 import PropertyCharacteristics from './PropertyCharacteristics';
 import PropertyDescription from './PropertyDescription';
@@ -17,18 +18,12 @@ interface PropertyDetailsDialogProps {
 }
 
 export default function PropertyDetailsDialog({ property, isOpen, onClose }: PropertyDetailsDialogProps) {
+  const { t } = useTranslation();
+  
   if (!property) return null;
 
   const getPaymentFrequencyLabel = (frequency: string): string => {
-    const labels: Record<string, string> = {
-      daily: "Journalier",
-      weekly: "Hebdomadaire", 
-      monthly: "Mensuel",
-      quarterly: "Trimestriel",
-      biannual: "Semestriel",
-      annual: "Annuel"
-    };
-    return labels[frequency] || "Mensuel";
+    return t(`propertyDetails.paymentFrequency.${frequency}`) || t('propertyDetails.paymentFrequency.monthly');
   };
   
   return (
@@ -65,7 +60,7 @@ export default function PropertyDetailsDialog({ property, isOpen, onClose }: Pro
           {/* Footer avec bouton de fermeture */}
           <div className="border-t bg-background p-4 sm:p-6">
             <Button onClick={onClose} className="w-full text-base py-3">
-              Fermer
+              {t('propertyDetails.actions.close')}
             </Button>
           </div>
         </div>

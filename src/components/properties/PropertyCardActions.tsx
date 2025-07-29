@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Mail, Calendar, Phone } from 'lucide-react';
 import { Property } from '@/assets/types';
 import AuthRequired from '@/components/AuthRequired';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface PropertyCardActionsProps {
   showActions: boolean;
@@ -25,6 +26,8 @@ export default function PropertyCardActions({
   agencyContactInfo, 
   hasContactAccess 
 }: PropertyCardActionsProps) {
+  const { t } = useTranslation();
+
   if (!showActions) return null;
 
   return (
@@ -52,15 +55,17 @@ const PublicPropertyActions = ({
   };
   hasContactAccess?: boolean;
 }) => {
+  const { t } = useTranslation();
+
   if (!hasContactAccess || !agencyContactInfo) {
     return (
       <div className="flex space-x-2 mt-4">
         <Button size="sm" variant="outline" className="flex-1" disabled>
-          <span className="mr-1">Contact</span>
+          <span className="mr-1">{t('propertyCard.contact')}</span>
           <Phone className="h-3.5 w-3.5" />
         </Button>
         <div className="text-xs text-muted-foreground flex-1 text-center py-2">
-          Remplissez le formulaire pour contacter l'agence
+          {t('propertyCard.fillFormToContact')}
         </div>
       </div>
     );
@@ -97,15 +102,17 @@ const PublicPropertyActions = ({
 };
 
 const PrivatePropertyActions = ({ property }: { property: Property }) => {
+  const { t } = useTranslation();
+
   return (
     <AuthRequired redirectTo="/auth">
       <div className="flex space-x-2 mt-4">
         <Button size="sm" variant="outline" className="flex-1">
-          <span className="mr-1">Contact</span>
+          <span className="mr-1">{t('propertyCard.contact')}</span>
           <Mail className="h-3.5 w-3.5" />
         </Button>
         <Button size="sm" variant="outline" className="flex-1">
-          <span className="mr-1">Book</span>
+          <span className="mr-1">{t('propertyCard.book')}</span>
           <Calendar className="h-3.5 w-3.5" />
         </Button>
       </div>

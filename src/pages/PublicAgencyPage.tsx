@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { getAgencyById } from '@/services/agency';
 import { getPublicPropertiesByAgencyId } from '@/services/agency/agencyPropertiesService';
+import { useTranslation } from '@/hooks/useTranslation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +14,7 @@ import { formatCurrency } from '@/lib/utils';
 import { Agency } from '@/assets/types';
 
 export default function PublicAgencyPage() {
+  const { t } = useTranslation();
   const { agencyId } = useParams<{ agencyId: string }>();
   
   console.log('PublicAgencyPage - Agency ID from params:', agencyId);
@@ -49,8 +51,8 @@ export default function PublicAgencyPage() {
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-blue-900">
           <div className="text-center">
             <Building className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-            <h1 className="text-2xl font-bold mb-2">Agence introuvable</h1>
-            <p className="text-muted-foreground">Cette agence n'existe pas ou n'est plus disponible.</p>
+            <h1 className="text-2xl font-bold mb-2">{t('publicAgency.notFound.title')}</h1>
+            <p className="text-muted-foreground">{t('publicAgency.notFound.description')}</p>
           </div>
         </div>
         <Footer />
@@ -119,7 +121,7 @@ export default function PublicAgencyPage() {
                           {agency.verified && (
                             <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white border-0 shadow-lg">
                               <CheckCircle className="w-3 h-3 mr-1" />
-                              Agence certifiée
+                              {t('publicAgency.certified')}
                             </Badge>
                           )}
                         </div>
@@ -154,7 +156,7 @@ export default function PublicAgencyPage() {
                           {agency.rating.toFixed(1)}
                           <span className="text-lg text-gray-500 ml-1">/5</span>
                         </div>
-                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Note moyenne</p>
+                        <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{t('publicAgency.stats.rating')}</p>
                       </div>
                     </div>
                   </div>
@@ -170,7 +172,7 @@ export default function PublicAgencyPage() {
                           {agency.properties}
                         </div>
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                          Propriété{agency.properties > 1 ? 's' : ''}
+                          {agency.properties > 1 ? t('publicAgency.stats.propertiesPlural') : t('publicAgency.stats.properties')}
                         </p>
                       </div>
                     </div>
@@ -187,7 +189,7 @@ export default function PublicAgencyPage() {
                           {yearsActive}
                         </div>
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                          An{yearsActive > 1 ? 's' : ''} d'expérience
+                          {yearsActive > 1 ? t('publicAgency.stats.experiencePlural') : t('publicAgency.stats.experience')}
                         </p>
                       </div>
                     </div>
@@ -207,10 +209,10 @@ export default function PublicAgencyPage() {
                   <Phone className="w-8 h-8 text-white" />
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-bold text-immoo-navy dark:text-immoo-pearl mb-2">
-                  Informations de contact
+                  {t('publicAgency.contact.title')}
                 </h2>
                 <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
-                  Contactez notre équipe pour plus d'informations
+                  {t('publicAgency.contact.description')}
                 </p>
               </div>
 
@@ -224,7 +226,7 @@ export default function PublicAgencyPage() {
                       <Phone className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Téléphone</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">{t('publicAgency.contact.phone')}</p>
                       <p className="text-blue-600 dark:text-blue-400 font-medium text-sm sm:text-base truncate">
                         {agency.phone}
                       </p>
@@ -241,7 +243,7 @@ export default function PublicAgencyPage() {
                       <Mail className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Email</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">{t('publicAgency.contact.email')}</p>
                       <p className="text-green-600 dark:text-green-400 font-medium text-sm sm:text-base truncate">
                         {agency.email}
                       </p>
@@ -257,10 +259,10 @@ export default function PublicAgencyPage() {
                     className="group flex items-center p-4 sm:p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30 hover:from-purple-100 hover:to-purple-200 dark:hover:from-purple-800/40 dark:hover:to-purple-700/40 transition-all duration-300 hover:scale-105 hover:shadow-xl border border-purple-200/50 dark:border-purple-700/50"
                   >
                     <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-purple-500 shadow-lg mr-4 group-hover:scale-110 transition-transform duration-300">
-                      <Globe className="w-6 h-6 text-white" />
+                      <Globe className="h-6 h-6 text-white" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">Site web</p>
+                      <p className="font-semibold text-gray-900 dark:text-white text-sm mb-1">{t('publicAgency.contact.website')}</p>
                       <p className="text-purple-600 dark:text-purple-400 font-medium text-sm sm:text-base truncate flex items-center">
                         {agency.website}
                         <ExternalLink className="w-3 h-3 ml-1 flex-shrink-0" />
@@ -276,7 +278,7 @@ export default function PublicAgencyPage() {
                     <Phone className="w-8 h-8 text-gray-400" />
                   </div>
                   <p className="text-gray-500 dark:text-gray-400 text-lg">
-                    Informations de contact non disponibles
+                    {t('publicAgency.contact.noContact')}
                   </p>
                 </div>
               )}
@@ -290,10 +292,10 @@ export default function PublicAgencyPage() {
                     <Award className="w-8 h-8 text-white" />
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-immoo-navy dark:text-immoo-pearl mb-2">
-                    Spécialités
+                    {t('publicAgency.specialties.title')}
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
-                    Domaines d'expertise de l'agence
+                    {t('publicAgency.specialties.description')}
                   </p>
                 </div>
                 
@@ -321,13 +323,13 @@ export default function PublicAgencyPage() {
                     <Home className="w-8 h-8 text-white" />
                   </div>
                   <h2 className="text-2xl sm:text-3xl font-bold text-immoo-navy dark:text-immoo-pearl mb-2">
-                    Propriétés disponibles
+                    {t('publicAgency.properties.title')}
                     <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-immoo-gold text-immoo-navy text-sm font-bold ml-3">
                       {properties.length}
                     </span>
                   </h2>
                   <p className="text-gray-600 dark:text-gray-400 text-base sm:text-lg">
-                    Découvrez les biens immobiliers proposés par {agency.name}
+                    {t('publicAgency.properties.description')} {agency.name}
                   </p>
                 </div>
               </div>
@@ -351,11 +353,10 @@ export default function PublicAgencyPage() {
                       <Home className="w-10 h-10 text-gray-400" />
                     </div>
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
-                      Aucune propriété disponible
+                      {t('publicAgency.properties.noProperties.title')}
                     </h3>
                     <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto leading-relaxed">
-                      Cette agence n'a actuellement aucune propriété disponible à la location.
-                      Contactez-les directement pour connaître les futures disponibilités.
+                      {t('publicAgency.properties.noProperties.description')}
                     </p>
                   </div>
                 )}

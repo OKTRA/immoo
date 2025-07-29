@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { getPropertyImages } from '@/services/property/propertyMedia';
-import { ChevronLeft, ChevronRight, Image as ImageIcon, Expand, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Image as ImageIcon, Expand, X, Home } from 'lucide-react';
 
 interface PropertyImageGalleryProps {
   propertyId: string;
@@ -124,10 +124,16 @@ export default function PropertyImageGallery({
 
   if (loading) {
     return (
-      <div className={`w-full ${height} bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center rounded-lg ${className}`}>
-        <div className="flex flex-col items-center gap-2">
-          <ImageIcon className="h-8 w-8 text-gray-400 animate-pulse" />
-          <div className="h-2 w-16 bg-gray-300 rounded animate-pulse"></div>
+      <div className={`w-full ${height} bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center rounded-lg ${className} animate-pulse`}>
+        <div className="flex flex-col items-center gap-3">
+          <div className="relative">
+            <Home className="h-12 w-12 text-gray-300 dark:text-gray-600 animate-pulse" />
+            <div className="absolute inset-0 bg-blue-500/5 rounded-full blur-lg"></div>
+          </div>
+          <div className="space-y-2">
+            <div className="h-2 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+            <div className="h-2 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
+          </div>
         </div>
       </div>
     );
@@ -135,10 +141,16 @@ export default function PropertyImageGallery({
 
   if (images.length === 0) {
     return (
-      <div className={`w-full ${height} bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center rounded-lg ${className}`}>
-        <div className="flex flex-col items-center gap-2 text-gray-500">
-          <ImageIcon className="h-8 w-8" />
-          <span className="text-sm font-medium">Aucune image</span>
+      <div className={`w-full ${height} bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-800 dark:to-gray-900 flex items-center justify-center rounded-lg ${className}`}>
+        <div className="flex flex-col items-center gap-3 text-gray-500 dark:text-gray-400">
+          <div className="relative">
+            <Home className="h-16 w-16 opacity-60" />
+            <div className="absolute inset-0 bg-blue-500/10 rounded-full blur-xl"></div>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-medium">Aucune image disponible</p>
+            <p className="text-xs opacity-75">Image de la propriété</p>
+          </div>
         </div>
       </div>
     );

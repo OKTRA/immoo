@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { getAllAgencies } from '@/services/agency/agencyBasicService';
+import { useTranslation } from '@/hooks/useTranslation';
 import { toast } from 'sonner';
-
 
 import { AgencySearch } from '@/components/browse-agencies/AgencySearch';
 import { AgencyList } from '@/components/browse-agencies/AgencyList';
@@ -23,6 +23,7 @@ interface AgencyWithSubscription {
 }
 
 export default function BrowseAgenciesPage() {
+  const { t } = useTranslation();
   const { user, profile, initialized } = useAuth();
   const [agencies, setAgencies] = useState<AgencyWithSubscription[]>([]);
   const [searchTerm, setSearchTerm] = useState(() => {
@@ -31,14 +32,11 @@ export default function BrowseAgenciesPage() {
   });
   const [loading, setLoading] = useState(true);
 
-
   useEffect(() => {
     // Charger les agences dès que possible (pas besoin d'attendre l'auth pour cette page publique)
     loadAgencies();
     // If URL search param changes (e.g., via navigation), update search term
   }, [window.location.search]);
-
-
 
   const loadAgencies = async () => {
     setLoading(true);
@@ -75,13 +73,9 @@ export default function BrowseAgenciesPage() {
     }
   };
 
-
-
   const filteredAgencies = agencies.filter(agency =>
     agency.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-
 
   if (loading) {
     return (
@@ -113,10 +107,10 @@ export default function BrowseAgenciesPage() {
                 <Loader2 className="h-8 w-8 text-immoo-gold animate-spin" />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                Chargement des agences...
+                {t('browseAgencies.loading.title')}
               </h3>
               <p className="text-gray-600">
-                Nous récupérons les meilleures agences pour vous
+                {t('browseAgencies.loading.description')}
               </p>
             </div>
           </div>
@@ -133,10 +127,10 @@ export default function BrowseAgenciesPage() {
         {/* Page Title */}
         <div className="text-center mb-8 mt-8 md:mt-16">
           <h1 className="text-3xl md:text-4xl font-bold text-immoo-navy mb-4">
-            Parcourir les Agences
+            {t('browseAgencies.title')}
           </h1>
           <p className="text-lg text-immoo-navy/70 max-w-2xl mx-auto">
-            Découvrez notre réseau d'agences immobilières partenaires
+            {t('browseAgencies.subtitle')}
           </p>
         </div>
 
@@ -152,11 +146,11 @@ export default function BrowseAgenciesPage() {
               <div className="flex items-center gap-2">
                 <Building2 className="h-5 w-5 text-immoo-gold" />
                 <span className="text-lg font-semibold text-gray-900">
-                  {filteredAgencies.length} agence{filteredAgencies.length > 1 ? 's' : ''} trouvée{filteredAgencies.length > 1 ? 's' : ''}
+                  {filteredAgencies.length} {filteredAgencies.length > 1 ? t('browseAgencies.results.foundPlural') : t('browseAgencies.results.found')}
                 </span>
                 {searchTerm && (
                   <span className="text-sm text-gray-600">
-                    pour "{searchTerm}"
+                    {t('browseAgencies.results.for')} "{searchTerm}"
                   </span>
                 )}
               </div>
@@ -170,6 +164,7 @@ export default function BrowseAgenciesPage() {
           <NoAgenciesFound
             searchTerm={searchTerm}
             user={user}
+            canCreateAgency={true}
           />
         )}
       </div>

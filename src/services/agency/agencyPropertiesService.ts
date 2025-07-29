@@ -34,6 +34,13 @@ export const getPublicPropertiesByAgencyId = async (agencyId: string, limit?: nu
           properties_count,
           rating,
           created_at
+        ),
+        property_images(
+          id,
+          image_url,
+          description,
+          is_primary,
+          position
         )
       `, { count: 'exact' })
       .eq('agency_id', agencyId)
@@ -50,6 +57,17 @@ export const getPublicPropertiesByAgencyId = async (agencyId: string, limit?: nu
     
     const properties = data?.map(property => {
       const formatted = formatPropertyFromDb(property);
+      
+      // Add images to the property
+      if (property.property_images && property.property_images.length > 0) {
+        formatted.images = property.property_images.map((img: any) => ({
+          id: img.id,
+          image_url: img.image_url,
+          description: img.description,
+          is_primary: img.is_primary,
+          position: img.position
+        }));
+      }
       
       // Add complete agency information to each property
       if (property.agency) {
@@ -77,7 +95,7 @@ export const getPublicPropertiesByAgencyId = async (agencyId: string, limit?: nu
       }
       
       return formatted;
-    }) || [];
+    });
     
     return { properties, count: count || 0, error: null };
   } catch (error: any) {
@@ -117,6 +135,13 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
           properties_count,
           rating,
           created_at
+        ),
+        property_images(
+          id,
+          image_url,
+          description,
+          is_primary,
+          position
         )
       `, { count: 'exact' })
       .eq('agency_id', agencyId);
@@ -132,6 +157,17 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
     
     const properties = data?.map(property => {
       const formatted = formatPropertyFromDb(property);
+      
+      // Add images to the property
+      if (property.property_images && property.property_images.length > 0) {
+        formatted.images = property.property_images.map((img: any) => ({
+          id: img.id,
+          image_url: img.image_url,
+          description: img.description,
+          is_primary: img.is_primary,
+          position: img.position
+        }));
+      }
       
       // Add complete agency information to each property
       if (property.agency) {
@@ -159,7 +195,7 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
       }
       
       return formatted;
-    }) || [];
+    });
     
     return { properties, count: count || 0, error: null };
   } catch (error: any) {

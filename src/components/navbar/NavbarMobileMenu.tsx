@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { UserType } from "./types";
 import LoginDialog from "@/components/auth/LoginDialog";
 import { ChevronRight, User, Shield, LogOut, Home } from "lucide-react";
+import { useTranslation } from "@/hooks/useTranslation";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 interface NavbarMobileMenuProps {
   mobileMenuOpen: boolean;
@@ -23,6 +25,7 @@ export function NavbarMobileMenu({
   user,
 }: NavbarMobileMenuProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState<'agency' | 'admin'>('agency');
 
@@ -85,12 +88,12 @@ export function NavbarMobileMenu({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-xl font-bold text-immoo-pearl">IMMOO</h3>
-              <p className="text-sm text-immoo-pearl/70 mt-1">Menu Navigation</p>
+              <p className="text-sm text-immoo-pearl/70 mt-1">{t('navbar.navigationMenu')}</p>
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-immoo-pearl hover:bg-white/20 transition-colors duration-200"
-              aria-label="Fermer le menu"
+              aria-label={t('navbar.closeMenu')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -113,8 +116,8 @@ export function NavbarMobileMenu({
                     <Home className="w-5 h-5 text-immoo-gold" />
                   </div>
                   <div className="text-left">
-                    <div className="font-semibold text-immoo-navy">Accueil</div>
-                    <div className="text-xs text-immoo-navy/60">Page principale</div>
+                    <div className="font-semibold text-immoo-navy">{t('navbar.home')}</div>
+                    <div className="text-xs text-immoo-navy/60">{t('navbar.mainPage')}</div>
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-immoo-navy/40 group-hover:text-immoo-gold group-hover:translate-x-1 transition-all duration-200" />
@@ -123,7 +126,7 @@ export function NavbarMobileMenu({
 
             {/* Espaces */}
             <div className="mb-6">
-              <h4 className="text-sm font-semibold text-immoo-navy/60 mb-4 px-2">ESPACES</h4>
+              <h4 className="text-sm font-semibold text-immoo-navy/60 mb-4 px-2">{t('navbar.spaces')}</h4>
               <div className="space-y-3">
                 {userTypes.map((type) => {
                   const IconComponent = getIcon(type);
@@ -145,7 +148,7 @@ export function NavbarMobileMenu({
                         <div className="text-left">
                           <div className="font-medium text-immoo-navy">{type.name}</div>
                           <div className="text-xs text-immoo-navy/60">
-                            {type.role === 'admin' ? 'Administration' : 'Gestion immobilière'}
+                            {type.role === 'admin' ? t('navbar.administration') : t('navbar.propertyManagement')}
                           </div>
                         </div>
                       </div>
@@ -153,6 +156,14 @@ export function NavbarMobileMenu({
                     </button>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Language Switcher */}
+            <div className="mb-6">
+              <h4 className="text-sm font-semibold text-immoo-navy/60 mb-4 px-2">{t('common.language')}</h4>
+              <div className="px-2">
+                <LanguageSwitcher />
               </div>
             </div>
           </nav>
@@ -169,8 +180,8 @@ export function NavbarMobileMenu({
                     <LogOut className="w-5 h-5 text-red-600" />
                   </div>
                   <div className="text-left">
-                    <div className="font-medium text-red-700">Déconnexion</div>
-                    <div className="text-xs text-red-600/60">Quitter la session</div>
+                    <div className="font-medium text-red-700">{t('navbar.logout')}</div>
+                    <div className="text-xs text-red-600/60">{t('navbar.leaveSession')}</div>
                   </div>
                 </div>
                 <ChevronRight className="w-5 h-5 text-red-400 group-hover:text-red-600 group-hover:translate-x-1 transition-all duration-200" />
@@ -182,7 +193,7 @@ export function NavbarMobileMenu({
           <div className="px-6 py-4 bg-immoo-pearl/50">
             <div className="text-center">
               <p className="text-xs text-immoo-navy/50">
-                © 2024 IMMOO • Plateforme immobilière
+                © 2024 IMMOO • {t('navbar.platform')}
               </p>
             </div>
           </div>

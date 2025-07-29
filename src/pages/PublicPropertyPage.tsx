@@ -29,11 +29,13 @@ import {
 import { formatCurrency } from '@/lib/utils';
 import PropertyImageGallery from '@/components/properties/PropertyImageGallery';
 import { useState } from 'react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function PublicPropertyPage() {
   const { propertyId } = useParams<{ propertyId: string }>();
   const navigate = useNavigate();
   const [isFavorite, setIsFavorite] = useState(false);
+  const { t } = useTranslation();
 
   // Fetch property data
   const { data: propertyResult, isLoading: propertyLoading, error: propertyError } = useQuery({
@@ -267,11 +269,10 @@ export default function PublicPropertyPage() {
                         ? 'bg-red-500 hover:bg-red-600'
                         : 'bg-yellow-500 hover:bg-yellow-600'
                     } text-white`}>
-                      {property.status === 'available' ? 'Disponible' : 
-                       property.status === 'rented' ? 'Loué' : 'Réservé'}
+                      {t(`propertyDetails.status.${property.status}`) || property.status}
                     </Badge>
                     {property.furnished && (
-                      <Badge variant="secondary">Meublé</Badge>
+                      <Badge variant="secondary">{t('property.furnished')}</Badge>
                     )}
                   </div>
                 </div>

@@ -3,19 +3,21 @@ import React from 'react';
 import { Property } from "@/assets/types";
 import { Building, Phone, Mail, Globe, MapPin, ShieldCheck, Star, Users, Calendar, Award } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface PropertyAgencyInfoProps {
   property: Property;
 }
 
 export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps) {
+  const { t } = useTranslation();
   const safeRating = typeof property.agencyRating === 'number' ? property.agencyRating : 0;
 
   return (
     <div className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/50 dark:to-slate-900/50 rounded-xl p-4 sm:p-6 border">
       <h3 className="font-semibold text-lg mb-6 flex items-center">
         <Building className="h-5 w-5 mr-2 text-primary" />
-        Informations complètes sur l'agence
+        {t('propertyDetails.agency.title')}
       </h3>
       
       <div className="space-y-6">
@@ -39,7 +41,7 @@ export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps
           {/* Informations principales */}
           <div className="flex-1">
             <div className="flex items-center mb-2">
-              <h4 className="font-semibold text-xl">{property.agencyName || "Agence immobilière"}</h4>
+              <h4 className="font-semibold text-xl">{property.agencyName || t('propertyDetails.agency.realEstateAgency')}</h4>
               {property.agencyVerified && (
                 <ShieldCheck className="h-5 w-5 ml-2 text-green-500" />
               )}
@@ -64,7 +66,7 @@ export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps
               {property.agencyVerified && (
                 <Badge variant="default" className="bg-green-500">
                   <ShieldCheck className="h-3 w-3 mr-1" />
-                  Certifiée
+                  {t('propertyDetails.agency.certified')}
                 </Badge>
               )}
             </div>
@@ -76,7 +78,7 @@ export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps
           <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg p-4">
             <h5 className="font-medium mb-2 flex items-center">
               <Award className="h-4 w-4 mr-2 text-primary" />
-              À propos de l'agence
+              {t('propertyDetails.agency.aboutAgency')}
             </h5>
             <p className="text-sm text-muted-foreground leading-relaxed">
               {property.agencyDescription}
@@ -89,7 +91,7 @@ export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps
           <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg p-4">
             <h5 className="font-medium mb-3 flex items-center">
               <Users className="h-4 w-4 mr-2 text-primary" />
-              Spécialités
+              {t('propertyDetails.agency.specialties')}
             </h5>
             <div className="flex flex-wrap gap-2">
               {property.agencySpecialties.map((specialty, index) => (
@@ -106,7 +108,7 @@ export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps
           <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg p-4">
             <h5 className="font-medium mb-3 flex items-center">
               <MapPin className="h-4 w-4 mr-2 text-primary" />
-              Zones d'intervention
+              {t('propertyDetails.agency.serviceAreas')}
             </h5>
             <div className="flex flex-wrap gap-2">
               {property.agencyServiceAreas.map((area, index) => (
@@ -123,7 +125,7 @@ export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps
         <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg p-4">
           <h5 className="font-medium mb-3 flex items-center">
             <Phone className="h-4 w-4 mr-2 text-primary" />
-            Coordonnées
+            {t('propertyDetails.agency.contact')}
           </h5>
           <div className="grid grid-cols-1 gap-3">
             {property.agencyPhone && (
@@ -154,7 +156,7 @@ export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps
                 className="flex items-center space-x-3 p-3 bg-white/60 dark:bg-gray-700/40 rounded-lg hover:bg-white/80 dark:hover:bg-gray-700/60 transition-colors"
               >
                 <Globe className="h-4 w-4 text-purple-600" />
-                <span className="text-sm font-medium">Visiter le site web</span>
+                <span className="text-sm font-medium">{t('propertyDetails.agency.visitWebsite')}</span>
               </a>
             )}
           </div>
@@ -164,25 +166,25 @@ export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps
         <div className="bg-white/60 dark:bg-gray-800/40 rounded-lg p-4">
           <h5 className="font-medium mb-3 flex items-center">
             <Award className="h-4 w-4 mr-2 text-primary" />
-            Statistiques
+            {t('propertyDetails.agency.statistics')}
           </h5>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {property.agencyPropertiesCount && (
               <div className="text-center">
                 <div className="text-lg font-bold text-primary">{property.agencyPropertiesCount}</div>
-                <div className="text-xs text-muted-foreground">Propriétés</div>
+                <div className="text-xs text-muted-foreground">{t('propertyDetails.agency.properties')}</div>
               </div>
             )}
             {safeRating > 0 && (
               <div className="text-center">
                 <div className="text-lg font-bold text-primary">{safeRating.toFixed(1)}</div>
-                <div className="text-xs text-muted-foreground">Note moyenne</div>
+                <div className="text-xs text-muted-foreground">{t('propertyDetails.agency.averageRating')}</div>
               </div>
             )}
             {property.agencyYearsActive && (
               <div className="text-center">
                 <div className="text-lg font-bold text-primary">{property.agencyYearsActive}</div>
-                <div className="text-xs text-muted-foreground">Années d'expérience</div>
+                <div className="text-xs text-muted-foreground">{t('propertyDetails.agency.yearsExperience')}</div>
               </div>
             )}
           </div>
@@ -194,9 +196,9 @@ export default function PropertyAgencyInfo({ property }: PropertyAgencyInfoProps
             <div className="flex items-center space-x-2 text-sm">
               <Calendar className="h-4 w-4 text-primary" />
               <span className="text-muted-foreground">
-                Membre depuis : 
+                {t('propertyDetails.agency.memberSince')}: 
                 <span className="font-medium ml-1">
-                  {new Date(property.agencyJoinDate).toLocaleDateString('fr-FR', {
+                  {new Date(property.agencyJoinDate).toLocaleDateString('en-US', {
                     year: 'numeric',
                     month: 'long'
                   })}

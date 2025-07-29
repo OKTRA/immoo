@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Receipt } from "lucide-react";
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface DisplayStatus {
   label: string;
@@ -28,13 +29,14 @@ export default function PropertyStatusCard({ statusInfo, hasActiveLeases, proper
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { agencyId } = useParams();
+  const { t } = useTranslation();
 
   const availableStatuses = [
-    { value: "available", label: "Disponible" },
-    { value: "pending", label: "En attente" },
-    { value: "sold", label: "Vendu" },
-    { value: "rented", label: "Loué" },
-    { value: "occupied", label: "Occupé" }
+    { value: "available", label: t('propertyDetails.status.available') },
+    { value: "pending", label: t('propertyDetails.status.pending') },
+    { value: "sold", label: t('propertyDetails.status.sold') },
+    { value: "rented", label: t('propertyDetails.status.rented') },
+    { value: "occupied", label: t('propertyDetails.status.occupied') }
   ];
 
   // Filter available statuses based on lease status
@@ -54,14 +56,14 @@ export default function PropertyStatusCard({ statusInfo, hasActiveLeases, proper
         
       if (error) throw error;
       
-      toast.success("Statut de la propriété mis à jour avec succès");
+      toast.success(t('propertyDetails.status.statusUpdated'));
       setOpen(false);
       
       // Force page refresh to update UI
       window.location.reload();
     } catch (error: any) {
       console.error("Error updating property status:", error);
-      toast.error(`Erreur lors de la mise à jour du statut: ${error.message}`);
+      toast.error(`${t('propertyDetails.status.updateError')}: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
@@ -85,11 +87,11 @@ export default function PropertyStatusCard({ statusInfo, hasActiveLeases, proper
         const leaseId = data[0].id;
         navigate(`/agencies/${agencyId}/properties/${propertyId}/leases/${leaseId}/payments`);
       } else {
-        toast.error("Aucun bail actif trouvé pour cette propriété");
+        toast.error(t('propertyDetails.status.noActiveLease'));
       }
     } catch (error: any) {
       console.error("Error fetching lease:", error);
-      toast.error(`Erreur: ${error.message}`);
+      toast.error(`${t('propertyDetails.status.error')}: ${error.message}`);
     }
   };
 
@@ -97,19 +99,19 @@ export default function PropertyStatusCard({ statusInfo, hasActiveLeases, proper
     <>
       <Card>
         <CardHeader>
-          <CardTitle>Statut de la propriété</CardTitle>
+          <CardTitle>{t('propertyDetails.status.title')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Statut actuel</span>
+              <span className="text-muted-foreground">{t('propertyDetails.status.currentStatus')}</span>
               <Badge variant={statusInfo.variant}>{statusInfo.label}</Badge>
             </div>
             
             {hasActiveLeases && (
               <div className="flex justify-between items-center">
-                <span className="text-muted-foreground">Bail</span>
-                <Badge variant="success">Actif</Badge>
+                <span className="text-muted-foreground">{t('propertyDetails.status.lease')}</span>
+                <Badge variant="success">{t('propertyDetails.status.active')}</Badge>
               </div>
             )}
             
@@ -120,7 +122,7 @@ export default function PropertyStatusCard({ statusInfo, hasActiveLeases, proper
                 className="w-full"
                 onClick={() => setOpen(true)}
               >
-                Changer le statut
+                {t('propertyDetails.status.changeStatus')}
               </Button>
               
               {hasActiveLeases && (
@@ -130,7 +132,7 @@ export default function PropertyStatusCard({ statusInfo, hasActiveLeases, proper
                   onClick={handleNavigateToPayments}
                 >
                   <Receipt className="h-4 w-4 mr-2" />
-                  Gestion des paiements
+                  {t('propertyDetails.status.paymentManagement')}
                 </Button>
               )}
             </div>
@@ -141,17 +143,17 @@ export default function PropertyStatusCard({ statusInfo, hasActiveLeases, proper
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Changer le statut de la propriété</DialogTitle>
+            <DialogTitle>{t('propertyDetails.status.changeStatusTitle')}</DialogTitle>
             <DialogDescription>
-              Sélectionnez le nouveau statut pour cette propriété
-              {hasActiveLeases && " (Options limitées car un bail est actif)"}
+              {t('propertyDetails.status.changeStatusDescription')}
+              {hasActiveLeases && t('propertyDetails.status.limitedOptions')}
             </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
             <Select value={selectedStatus} onValueChange={setSelectedStatus}>
               <SelectTrigger>
-                <SelectValue placeholder="Sélectionnez un statut" />
+                <SelectValue placeholder={t('propertyDetails.status.selectStatus')} />
               </SelectTrigger>
               <SelectContent>
                 {filteredStatuses.map(status => (
@@ -165,13 +167,13 @@ export default function PropertyStatusCard({ statusInfo, hasActiveLeases, proper
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
-              Annuler
+              {t('propertyDetails.status.cancel')}
             </Button>
             <Button 
               onClick={handleChangeStatus} 
               disabled={!selectedStatus || isLoading}
             >
-              {isLoading ? "Mise à jour..." : "Confirmer"}
+              {isLoading ? t('propertyDetails.status.updating') : t('propertyDetails.status.confirm')}
             </Button>
           </DialogFooter>
         </DialogContent>

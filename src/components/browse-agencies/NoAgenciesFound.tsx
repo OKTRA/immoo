@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Building2, Plus, Search, MapPin, Star, Users } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface NoAgenciesFoundProps {
   searchTerm: string;
@@ -11,6 +12,8 @@ interface NoAgenciesFoundProps {
 }
 
 export const NoAgenciesFound: React.FC<NoAgenciesFoundProps> = ({ searchTerm, user, canCreateAgency }) => {
+  const { t } = useTranslation();
+
   return (
     <div className="text-center py-16">
       {/* Main Empty State */}
@@ -20,13 +23,13 @@ export const NoAgenciesFound: React.FC<NoAgenciesFoundProps> = ({ searchTerm, us
         </div>
         
         <h3 className="text-2xl font-bold text-gray-900 mb-3">
-          {searchTerm ? 'Aucun résultat trouvé' : 'Aucune agence disponible'}
+          {searchTerm ? t('browseAgencies.noResults.title') : t('browseAgencies.noResults.noAgencies')}
         </h3>
         
         <p className="text-gray-600 leading-relaxed">
           {searchTerm 
-            ? `Nous n'avons trouvé aucune agence correspondant à "${searchTerm}". Essayez avec d'autres mots-clés.`
-            : 'Aucune agence n\'est encore disponible sur la plateforme. Soyez le premier à créer votre agence !'
+            ? `${t('browseAgencies.noResults.searchDescription')} "${searchTerm}". Essayez avec d'autres mots-clés.`
+            : t('browseAgencies.noResults.noAgenciesDescription')
           }
         </p>
       </div>
@@ -34,7 +37,7 @@ export const NoAgenciesFound: React.FC<NoAgenciesFoundProps> = ({ searchTerm, us
       {/* Suggestions */}
       {searchTerm && (
         <div className="mb-8">
-          <h4 className="text-lg font-semibold text-gray-900 mb-4">Suggestions de recherche :</h4>
+          <h4 className="text-lg font-semibold text-gray-900 mb-4">{t('browseAgencies.noResults.suggestions')}</h4>
           <div className="flex flex-wrap justify-center gap-2">
             {['Bamako', 'Vente', 'Location', 'Appartement', 'Villa'].map((suggestion) => (
               <Button
@@ -62,11 +65,11 @@ export const NoAgenciesFound: React.FC<NoAgenciesFoundProps> = ({ searchTerm, us
                 </div>
                 
                 <h4 className="text-xl font-bold text-immoo-navy mb-2">
-                  Créez votre agence
+                  {t('browseAgencies.noResults.createAgency.title')}
                 </h4>
                 
                 <p className="text-gray-600 mb-6">
-                  Rejoignez notre plateforme et commencez à proposer vos services immobiliers dès aujourd'hui.
+                  {t('browseAgencies.noResults.createAgency.description')}
                 </p>
                 
                 <Button 
@@ -75,7 +78,7 @@ export const NoAgenciesFound: React.FC<NoAgenciesFoundProps> = ({ searchTerm, us
                 >
                   <Link to="/create-agency" className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
-                    Créer la première agence
+                    {t('browseAgencies.noResults.createAgency.button')}
                   </Link>
                 </Button>
               </div>
@@ -88,26 +91,26 @@ export const NoAgenciesFound: React.FC<NoAgenciesFoundProps> = ({ searchTerm, us
       {!user && (
         <div className="mt-12 max-w-4xl mx-auto">
           <h4 className="text-lg font-semibold text-gray-900 mb-6">
-            Découvrez ce que nos agences partenaires offrent :
+            {t('browseAgencies.noResults.features.title')}
           </h4>
           
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200">
               <MapPin className="h-8 w-8 text-immoo-gold mx-auto mb-3" />
-              <h5 className="font-semibold text-gray-900 mb-2">Localisation</h5>
-              <p className="text-sm text-gray-600">Agences dans toutes les régions du Mali</p>
+              <h5 className="font-semibold text-gray-900 mb-2">{t('browseAgencies.noResults.features.location.title')}</h5>
+              <p className="text-sm text-gray-600">{t('browseAgencies.noResults.features.location.description')}</p>
             </div>
             
             <div className="text-center p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200">
               <Star className="h-8 w-8 text-immoo-gold mx-auto mb-3" />
-              <h5 className="font-semibold text-gray-900 mb-2">Qualité</h5>
-              <p className="text-sm text-gray-600">Agences certifiées et évaluées</p>
+              <h5 className="font-semibold text-gray-900 mb-2">{t('browseAgencies.noResults.features.quality.title')}</h5>
+              <p className="text-sm text-gray-600">{t('browseAgencies.noResults.features.quality.description')}</p>
             </div>
             
             <div className="text-center p-6 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200">
               <Users className="h-8 w-8 text-immoo-gold mx-auto mb-3" />
-              <h5 className="font-semibold text-gray-900 mb-2">Expertise</h5>
-              <p className="text-sm text-gray-600">Équipes professionnelles expérimentées</p>
+              <h5 className="font-semibold text-gray-900 mb-2">{t('browseAgencies.noResults.features.expertise.title')}</h5>
+              <p className="text-sm text-gray-600">{t('browseAgencies.noResults.features.expertise.description')}</p>
             </div>
           </div>
         </div>

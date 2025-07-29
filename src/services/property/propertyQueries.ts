@@ -31,6 +31,13 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
           properties_count,
           rating,
           created_at
+        ),
+        property_images(
+          id,
+          image_url,
+          description,
+          is_primary,
+          position
         )
       `)
       .eq('is_visible', true); // Only show visible properties in public views
@@ -49,6 +56,17 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
     
     const properties = data.map(property => {
       const formatted = formatPropertyFromDb(property);
+      
+      // Add images to the property
+      if (property.property_images && property.property_images.length > 0) {
+        formatted.images = property.property_images.map((img: any) => ({
+          id: img.id,
+          image_url: img.image_url,
+          description: img.description,
+          is_primary: img.is_primary,
+          position: img.position
+        }));
+      }
       
       // Add complete agency information to each property
       if (property.agency) {
@@ -85,16 +103,7 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
   }
 };
 
-export interface Property {
-  id: string;
-  title: string;
-  location: string;
-  agency_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export const getPropertiesByAgencyId = async (agencyId: string): Promise<Property[]> => {
+export const getPropertiesByAgencyId = async (agencyId: string) => {
   try {
     const { data, error } = await supabase
       .from('properties')

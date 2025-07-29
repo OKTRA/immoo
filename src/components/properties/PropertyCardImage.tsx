@@ -4,6 +4,8 @@ import { Badge } from '@/components/ui/badge';
 import { Heart } from 'lucide-react';
 import { Property } from '@/assets/types';
 import PropertyImageGallery from './PropertyImageGallery';
+import { useTranslation } from '@/hooks/useTranslation';
+import { getPropertyStatusLabel, getPropertyStatusVariant } from '@/utils/translationUtils';
 
 interface PropertyCardImageProps {
   property: Property;
@@ -20,12 +22,15 @@ export default function PropertyCardImage({
   isFavorite, 
   onFavoriteClick 
 }: PropertyCardImageProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="relative h-48 overflow-hidden">
       {property.id ? (
         <PropertyImageGallery 
           propertyId={property.id} 
           mainImageUrl={property.imageUrl}
+          images={property.images}
           height="h-48"
           enableZoom={true}
           showThumbnails={false}
@@ -48,8 +53,8 @@ export default function PropertyCardImage({
         </button>
       )}
       <div className="absolute bottom-2 left-2 z-20">
-        <Badge variant={property.status === 'available' ? 'default' : 'secondary'}>
-          {property.status === 'available' ? 'Disponible' : 'Vendu'}
+        <Badge variant={getPropertyStatusVariant(property.status)}>
+          {getPropertyStatusLabel(property.status, t)}
         </Badge>
       </div>
     </div>

@@ -11,8 +11,10 @@ import { Card, CardContent } from "./ui/card";
 import { useAuth } from "@/contexts/auth/AuthContext";
 import QuickVisitorLogin from "./visitor/QuickVisitorLogin";
 import { useQuickVisitorAccess } from "@/hooks/useQuickVisitorAccess";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function HeroSection() {
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState("");
   const [searchType, setSearchType] = useState<"properties" | "agencies">("properties");
   const [location, setLocation] = useState("");
@@ -293,16 +295,13 @@ export default function HeroSection() {
           <motion.div variants={itemVariants} className="inline-block mb-3 sm:mb-4">
             <span className="inline-flex items-center px-3 sm:px-4 py-1.5 sm:py-2 text-xs font-medium rounded-full bg-immoo-gold/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/20">
               <Sparkles className="mr-1.5 sm:mr-2 h-3 w-3 text-immoo-gold" />
-              <span className="text-xs sm:text-sm">Gestion immobilière intégrée</span>
+              <span className="text-xs sm:text-sm">{t('hero.badge')}</span>
             </span>
           </motion.div>
           
           <motion.h1 variants={itemVariants} className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-3 sm:mb-4 leading-tight px-2">
             <span className="text-immoo-navy dark:text-immoo-pearl">
-              Trouvez votre{" "}
-            </span>
-            <span className="bg-gradient-to-r from-immoo-gold to-immoo-gold-light bg-clip-text text-transparent">
-              futur chez vous
+              {t('hero.title')}
             </span>
           </motion.h1>
           
@@ -323,7 +322,7 @@ export default function HeroSection() {
                     }`}
                   >
                     <Home className="inline h-4 w-4 mr-2" />
-                    Props
+                    {t('hero.toggleProperties')}
                   </button>
                   <button
                     onClick={() => setSearchType("agencies")}
@@ -334,7 +333,7 @@ export default function HeroSection() {
                     }`}
                   >
                     <Building className="inline h-4 w-4 mr-2" />
-                    Agences
+                    {t('hero.toggleAgencies')}
                   </button>
                 </div>
               </div>
@@ -345,7 +344,7 @@ export default function HeroSection() {
                   <Search className="h-5 w-5 text-gray-400" />
                   <input
                     type="text"
-                    placeholder={searchType === "properties" ? "Rechercher une propriété..." : "Rechercher une agence..."}
+                    placeholder={searchType === "properties" ? t('hero.searchPlaceholder') : t('hero.searchPlaceholder')}
                     className="flex-1 bg-transparent border-none focus:outline-none text-gray-900 placeholder-gray-500 text-base"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -355,7 +354,7 @@ export default function HeroSection() {
                     onClick={handleSearch}
                     className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2.5 rounded-xl font-medium transition-colors duration-200 text-sm"
                   >
-                    Rechercher
+                    {t('hero.search')}
                   </button>
                 </div>
               </div>
@@ -370,7 +369,7 @@ export default function HeroSection() {
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
                     >
-                      <option value="">📍 Localisation</option>
+                      <option value="">📍 {t('hero.location')}</option>
                       <option value="Kabala">Kabala</option>
                       <option value="Kati Fouga">Kati Fouga</option>
                     </select>
@@ -381,9 +380,9 @@ export default function HeroSection() {
                       value={propertyType}
                       onChange={(e) => setPropertyType(e.target.value)}
                     >
-                      <option value="">🏠 Type</option>
-                      <option value="apartment">Appartement</option>
-                      <option value="house">Maison</option>
+                      <option value="">🏠 {t('hero.propertyType')}</option>
+                      <option value="apartment">{t('hero.apartment')}</option>
+                      <option value="house">{t('hero.house')}</option>
                     </select>
 
                     {/* Price Range */}
@@ -392,10 +391,10 @@ export default function HeroSection() {
                       value={priceRange}
                       onChange={(e) => setPriceRange(e.target.value)}
                     >
-                      <option value="">💰 Budget</option>
-                      <option value="0-75000">Jusqu'à 75 000 FCFA</option>
-                      <option value="75000-100000">75 000 - 100 000 FCFA</option>
-                      <option value="100000-">Plus de 100 000 FCFA</option>
+                      <option value="">💰 {t('hero.budget')}</option>
+                      <option value="0-75000">{t('hero.budgetUpTo75000')}</option>
+                      <option value="75000-100000">{t('hero.budget75000To100000')}</option>
+                      <option value="100000-">{t('hero.budgetOver100000')}</option>
                     </select>
                   </div>
                   
@@ -409,7 +408,7 @@ export default function HeroSection() {
                   {/* Search Tips */}
                   <div className="bg-immoo-gold/5 border border-immoo-gold/20 rounded-lg p-3">
                     <p className="text-xs text-immoo-navy/70 dark:text-immoo-pearl/70">
-                      <strong>Conseils de recherche:</strong> Utilisez @username, nom d'agence, mots-clés, email ou téléphone
+                      <strong>{t('hero.searchTips')}:</strong> {t('hero.searchTipsText')}
                     </p>
                   </div>
                   
@@ -418,16 +417,16 @@ export default function HeroSection() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
                         <Building className="h-4 w-4 mr-2 text-immoo-gold" />
-                        Statut
+                        {t('hero.status')}
                       </label>
                       <select 
                         className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
                         value={agencyStatus}
                         onChange={(e) => setAgencyStatus(e.target.value)}
                       >
-                        <option value="">Toutes agences</option>
-                        <option value="verified">Agences vérifiées</option>
-                        <option value="non-verified">Agences non vérifiées</option>
+                        <option value="">{t('hero.allAgencies')}</option>
+                        <option value="verified">{t('hero.verifiedAgencies')}</option>
+                        <option value="non-verified">{t('hero.nonVerifiedAgencies')}</option>
                       </select>
                     </div>
 
@@ -435,14 +434,14 @@ export default function HeroSection() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
                         <MapPin className="h-4 w-4 mr-2 text-immoo-gold" />
-                        Pays
+                        {t('hero.country')}
                       </label>
                       <select 
                         className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
                         value={location}
                         onChange={(e) => setLocation(e.target.value)}
                       >
-                        <option value="">Tous pays</option>
+                        <option value="">{t('hero.allCountries')}</option>
                         <option value="mali">Mali</option>
                         <option value="senegal">Sénégal</option>
                         <option value="burkina">Burkina Faso</option>
@@ -455,17 +454,17 @@ export default function HeroSection() {
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
                         <Home className="h-4 w-4 mr-2 text-immoo-gold" />
-                        Propriétés
+                        {t('hero.properties')}
                       </label>
                       <select 
                         className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
                         value={agencyPropertiesCount}
                         onChange={(e) => setAgencyPropertiesCount(e.target.value)}
                       >
-                        <option value="">Toutes</option>
-                        <option value="0">Nouvelles agences</option>
-                        <option value="1-5">1-5 propriétés</option>
-                        <option value="5+">5+ propriétés</option>
+                        <option value="">{t('hero.all')}</option>
+                        <option value="0">{t('hero.newAgencies')}</option>
+                        <option value="1-5">{t('hero.oneToFiveProperties')}</option>
+                        <option value="5+">{t('hero.fivePlusProperties')}</option>
                       </select>
                     </div>
                   </div>
@@ -483,7 +482,7 @@ export default function HeroSection() {
                     onClick={clearFilters}
                     className="text-sm text-immoo-navy/60 dark:text-immoo-pearl/60 hover:text-immoo-gold transition-colors"
                   >
-                    Effacer les filtres
+                    {t('hero.clearFilters')}
                   </button>
                 </div>
               )}
@@ -501,13 +500,13 @@ export default function HeroSection() {
               <div className="bg-white/95 dark:bg-immoo-navy-light/95 backdrop-blur-xl rounded-2xl border border-immoo-gold/20 shadow-2xl p-6 md:p-8">
                 <div className="text-center mb-6">
                   <h3 className="text-xl font-semibold text-immoo-navy dark:text-immoo-pearl mb-2">
-                    Résultats de recherche
+                    {t('hero.searchResults')}
                   </h3>
                   <p className="text-sm text-immoo-navy/60 dark:text-immoo-pearl/60">
-                    {isSearching ? 'Recherche en cours...' : 
+                    {isSearching ? t('hero.searching') : 
                       searchType === "properties" 
-                        ? `${searchResults.length} propriété${searchResults.length !== 1 ? 's' : ''} trouvée${searchResults.length !== 1 ? 's' : ''}`
-                        : `${agencies.length} agence${agencies.length !== 1 ? 's' : ''} trouvée${agencies.length !== 1 ? 's' : ''}`
+                        ? t('hero.propertiesFound', { count: searchResults.length })
+                        : t('hero.agenciesFound', { count: agencies.length })
                     }
                   </p>
                 </div>
@@ -532,7 +531,7 @@ export default function HeroSection() {
                         <PropertyList properties={searchResults} />
                       ) : (
                         <div className="text-center py-12">
-                          <p className="text-gray-500">Aucune propriété trouvée avec ces critères</p>
+                          <p className="text-gray-500">{t('hero.noPropertiesFound')}</p>
                         </div>
                       )
                     ) : (
@@ -567,7 +566,7 @@ export default function HeroSection() {
                                       {agency.verified && (
                                         <div className="flex items-center bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
                                           <Shield className="h-3 w-3 text-green-600 mr-1" />
-                                          <span className="text-xs text-green-600 font-medium">Vérifiée</span>
+                                          <span className="text-xs text-green-600 font-medium">{t('hero.verified')}</span>
                                         </div>
                                       )}
                                     </div>
@@ -577,7 +576,7 @@ export default function HeroSection() {
                                   <div className="p-6 pt-4">
                                     {/* Description */}
                                     <p className="text-sm text-immoo-navy/70 dark:text-immoo-pearl/70 mb-4 line-clamp-2 leading-relaxed">
-                                      {agency.description || "Agence créée automatiquement lors de l'inscription"}
+                                      {agency.description || t('hero.defaultAgencyDescription')}
                                     </p>
 
                                     {/* Stats */}
@@ -589,13 +588,13 @@ export default function HeroSection() {
                                             {agency.properties_count}
                                           </span>
                                           <span className="text-xs text-immoo-navy/60 dark:text-immoo-pearl/60 ml-1">
-                                            propriété{agency.properties_count !== 1 ? 's' : ''}
+                                            {t('hero.property', { count: agency.properties_count })}
                                           </span>
                                         </div>
                                         <div className="flex items-center">
                                           <Star className="h-4 w-4 text-yellow-500 mr-1" />
                                           <span className="text-sm font-semibold text-immoo-navy dark:text-immoo-pearl">
-                                            {agency.calculated_rating || agency.rating || 'Nouveau'}
+                                            {agency.calculated_rating || agency.rating || t('hero.new')}
                                           </span>
                                           {agency.reviews_count > 0 && (
                                             <span className="text-xs text-immoo-navy/50 dark:text-immoo-pearl/50 ml-1">
@@ -625,7 +624,7 @@ export default function HeroSection() {
                                         {user && (
                                           <div className="ml-2 flex items-center text-xs text-immoo-navy/60 dark:text-immoo-pearl/60">
                                             <div className="w-2 h-2 bg-green-500 rounded-full mr-1"></div>
-                                            Connecté
+                                            {t('hero.connected')}
                                           </div>
                                         )}
                                       </div>
@@ -640,8 +639,8 @@ export default function HeroSection() {
                         <div className="text-center py-12">
                           <div className="bg-gradient-to-br from-immoo-pearl/20 to-immoo-gold/10 rounded-2xl p-8 max-w-md mx-auto">
                             <Building className="h-12 w-12 text-immoo-gold/60 mx-auto mb-4" />
-                            <p className="text-immoo-navy/70 dark:text-immoo-pearl/70 font-medium">Aucune agence trouvée avec ces critères</p>
-                            <p className="text-sm text-immoo-navy/50 dark:text-immoo-pearl/50 mt-2">Essayez de modifier vos filtres de recherche</p>
+                            <p className="text-immoo-navy/70 dark:text-immoo-pearl/70 font-medium">{t('hero.noAgenciesFound')}</p>
+                            <p className="text-sm text-immoo-navy/50 dark:text-immoo-pearl/50 mt-2">{t('hero.tryModifyingFilters')}</p>
                           </div>
                         </div>
                       )
@@ -658,8 +657,8 @@ export default function HeroSection() {
               <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
                 <Home className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900">Propriétés exclusives</h3>
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">Biens sélectionnés par nos experts</p>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">{t('hero.exclusiveProperties')}</h3>
+              <p className="text-gray-600 text-sm mb-4 leading-relaxed">{t('hero.exclusivePropertiesDesc')}</p>
               <button 
                 onClick={() => {
                   console.log('Button clicked - searching for properties section');
@@ -695,7 +694,7 @@ export default function HeroSection() {
                 }}
                 className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto cursor-pointer"
               >
-                Explorer <ArrowRight className="ml-1 h-4 w-4" />
+                {t('hero.explore')} <ArrowRight className="ml-1 h-4 w-4" />
               </button>
             </div>
 
@@ -703,13 +702,13 @@ export default function HeroSection() {
               <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
                 <Building className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900">Agences de confiance</h3>
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">Meilleures agences locales</p>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">{t('hero.trustedAgencies')}</h3>
+              <p className="text-gray-600 text-sm mb-4 leading-relaxed">{t('hero.trustedAgenciesDesc')}</p>
               <button 
                 onClick={() => navigate("/browse-agencies")}
                 className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto"
               >
-                Voir les agences <ArrowRight className="ml-1 h-4 w-4" />
+                {t('hero.viewAgencies')} <ArrowRight className="ml-1 h-4 w-4" />
               </button>
             </div>
 
@@ -717,8 +716,8 @@ export default function HeroSection() {
               <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
                 <Search className="h-5 w-5" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900">Gestion Immobilière Intégrée</h3>
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">Plateforme complète pour votre agence</p>
+              <h3 className="text-lg font-semibold mb-2 text-gray-900">{t('hero.integratedPropertyManagement')}</h3>
+              <p className="text-gray-600 text-sm mb-4 leading-relaxed">{t('hero.integratedPropertyManagementDesc')}</p>
               <button 
                 onClick={() => {
                   const featuresSection = document.getElementById('features');
@@ -728,7 +727,7 @@ export default function HeroSection() {
                 }}
                 className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto cursor-pointer"
               >
-                Découvrir <ArrowRight className="ml-1 h-4 w-4" />
+                {t('hero.discover')} <ArrowRight className="ml-1 h-4 w-4" />
               </button>
             </div>
           </motion.div>

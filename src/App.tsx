@@ -43,12 +43,18 @@ import { VisitorTracker } from "./components/analytics/VisitorTracker";
 import { useAutoVisitorSession } from "./hooks/useAutoVisitorSession";
 import routes from "tempo-routes";
 import AuthProvider from "@/contexts/auth/AuthContext";
+import { TranslationProvider } from "@/contexts/TranslationContext";
 import AgencyContractsPage from "./pages/agency/AgencyContractsPage";
 import AgencyCreateContractPage from "./pages/agency/AgencyCreateContractPage";
 import ContractEditorPage from "./pages/contracts/ContractEditorPage";
 import ContractsListPage from "./pages/contracts/ContractsListPage";
 import TestContractEditor from "./pages/TestContractEditor";
 import TestContractFormatting from "./pages/TestContractFormatting";
+import I18nTestPage from "./pages/I18nTestPage";
+import { LanguageRedirect } from "./components/LanguageRedirect";
+
+// Import i18n to ensure translations are initialized
+import "@/i18n";
 
 const queryClient = new QueryClient();
 
@@ -65,12 +71,14 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router>
-          <div className="min-h-screen flex flex-col">
-            <main className="flex-1">
-              <TempoRoutes />
-              <Routes>
+      <TranslationProvider>
+        <AuthProvider>
+          <Router>
+            <LanguageRedirect />
+            <div className="min-h-screen flex flex-col">
+              <main className="flex-1">
+                <TempoRoutes />
+                <Routes>
               {/* Routes publiques - AUCUNE authentification requise */}
               <Route path="/" element={<HomePage />} />
               <Route path="/browse-agencies" element={<BrowseAgenciesPage />} />
@@ -192,6 +200,121 @@ function App() {
               <Route path="/test-contract-editor" element={<TestContractEditor />} />
               <Route path="/test-contract-formatting" element={<TestContractFormatting />} />
 
+              {/* Route de test pour i18n */}
+              <Route path="/i18n-test" element={<I18nTestPage />} />
+
+              {/* Routes localisées pour l'anglais */}
+              <Route path="/en" element={<HomePage />} />
+              <Route path="/en/browse-agencies" element={<BrowseAgenciesPage />} />
+              <Route path="/en/agency-profile/:agencyId" element={<AgencyProfilePage />} />
+              <Route path="/en/public-agency/:agencyId" element={<PublicAgencyPage />} />
+              <Route path="/en/property/:propertyId" element={<PublicPropertyPage />} />
+              <Route path="/en/search" element={<SearchPage />} />
+              <Route path="/en/pricing" element={<PricingPage />} />
+              <Route path="/en/immo-agency" element={<ImmoAgencyPage />} />
+              <Route path="/en/logo-showcase" element={<LogoShowcasePage />} />
+              <Route path="/en/auth" element={<Auth />} />
+              <Route path="/en/admin-auth" element={<AdminAuth />} />
+              <Route path="/en/login" element={<Auth />} />
+              <Route path="/en/profile" element={<ProfilePage />} />
+              <Route path="/en/owner" element={<OwnerPage />} />
+              <Route path="/en/admin" element={<AdminPage />} />
+              <Route path="/en/agencies" element={<BrowseAgenciesPage />} />
+              <Route path="/en/agencies/all" element={<PublicAgenciesPage />} />
+              <Route path="/en/agency/:id" element={<PublicAgencyPage />} />
+              <Route path="/en/agencies/create" element={<CreateAgencyPage />} />
+              <Route path="/en/agencies/edit/:agencyId" element={<EditAgencyPage />} />
+              <Route path="/en/contracts" element={<ContractsListPage />} />
+              <Route path="/en/contracts/new" element={<ContractEditorPage />} />
+              <Route path="/en/contracts/:contractId" element={<ContractEditorPage />} />
+              <Route path="/en/test-contract-editor" element={<TestContractEditor />} />
+              <Route path="/en/test-contract-formatting" element={<TestContractFormatting />} />
+              <Route path="/en/i18n-test" element={<I18nTestPage />} />
+
+              {/* Routes localisées pour l'anglais avec layout d'agence */}
+              <Route element={<AgencyLayout />}>
+                <Route
+                  path="/en/agencies/:agencyId"
+                  element={<AgencyDetailPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/properties"
+                  element={<AgencyPropertiesPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/tenants"
+                  element={<ManageTenantsPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/leases"
+                  element={<AgencyLeasesPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/lease/create"
+                  element={<CreateLeasePage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/payments"
+                  element={<AgencyPaymentsPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/earnings"
+                  element={<AgencyEarningsPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/expenses"
+                  element={<AgencyExpensesPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/settings"
+                  element={<AgencySettingsPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/properties/create"
+                  element={<CreatePropertyPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/properties/:propertyId"
+                  element={<PropertyDetailPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/properties/:propertyId/edit"
+                  element={<CreatePropertyPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/properties/:propertyId/lease"
+                  element={<CreateLeasePage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/properties/:propertyId/lease/create"
+                  element={<CreateLeasePage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/properties/:propertyId/leases/:leaseId"
+                  element={<LeaseDetailsPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/properties/:propertyId/tenants"
+                  element={<ManageTenantsPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/properties/:propertyId/leases/:leaseId/payments"
+                  element={<PropertyLeasePaymentsPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/contracts"
+                  element={<AgencyContractsPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/contracts/create"
+                  element={<AgencyCreateContractPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/contracts/:contractId"
+                  element={<ContractEditorPage />}
+                />
+              </Route>
+
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
           </main>
@@ -199,7 +322,8 @@ function App() {
         <Toaster />
         <VisitorTracker />
       </Router>
-      </AuthProvider>
+        </AuthProvider>
+      </TranslationProvider>
     </QueryClientProvider>
   );
 }

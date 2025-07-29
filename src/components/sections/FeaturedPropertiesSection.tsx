@@ -8,8 +8,10 @@ import { ButtonEffects } from "../ui/ButtonEffects";
 import { Property } from "@/assets/types";
 import { getFeaturedProperties } from "@/services/propertyService";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function FeaturedPropertiesSection() {
+  const { t } = useTranslation();
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, amount: 0.3 });
 
@@ -34,10 +36,10 @@ export default function FeaturedPropertiesSection() {
     >
       <div className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto text-center mb-16">
-          <p className="text-sm font-medium text-primary mb-3">Sélection immobilière</p>
-          <h2 className="text-3xl font-bold mb-6">Découvrez nos propriétés en vedette</h2>
+          <p className="text-sm font-medium text-primary mb-3">{t('featuredPropertiesSection.subtitle')}</p>
+          <h2 className="text-3xl font-bold mb-6">{t('featuredPropertiesSection.title')}</h2>
           <p className="text-muted-foreground mb-12">
-            Des biens exceptionnels sélectionnés pour vous, combinant qualité, emplacement et potentiel
+            {t('featuredPropertiesSection.description')}
           </p>
         </div>
         
@@ -59,8 +61,8 @@ export default function FeaturedPropertiesSection() {
         ) : error ? (
           <AnimatedCard className="p-6 text-center">
             <Home className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-xl font-medium mb-2">Impossible de charger les propriétés</h3>
-            <p className="text-muted-foreground">Veuillez réessayer ultérieurement</p>
+            <h3 className="text-xl font-medium mb-2">{t('featuredPropertiesSection.loadingError')}</h3>
+            <p className="text-muted-foreground">{t('featuredPropertiesSection.loadingErrorDesc')}</p>
           </AnimatedCard>
         ) : (
           <>
@@ -77,7 +79,7 @@ export default function FeaturedPropertiesSection() {
             <div className="text-center mt-12">
               <ButtonEffects variant="outline">
                 <div className="flex items-center">
-                  Explorer toutes les propriétés
+                  {t('featuredPropertiesSection.exploreAll')}
                   <ArrowRight className="ml-2 w-4 h-4" />
                 </div>
               </ButtonEffects>

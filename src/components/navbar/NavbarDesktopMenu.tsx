@@ -8,6 +8,8 @@ import LoginDialog from "@/components/auth/LoginDialog";
 import QuickVisitorIndicator from "@/components/visitor/QuickVisitorIndicator";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { useTranslation } from "@/hooks/useTranslation";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 
 interface NavbarDesktopMenuProps {
   navLinks: { name: string; path: string }[];
@@ -26,6 +28,7 @@ export function NavbarDesktopMenu({
   handleLogout
 }: NavbarDesktopMenuProps) {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState<'agency' | 'admin'>('agency');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -86,7 +89,7 @@ export function NavbarDesktopMenu({
       
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error("Erreur lors de la déconnexion");
+      toast.error(t('auth.logoutError'));
     } finally {
       setIsLoggingOut(false);
     }
@@ -129,6 +132,11 @@ export function NavbarDesktopMenu({
             </div>
           )}
 
+          {/* Language Switcher */}
+          <div className="mx-2">
+            <LanguageSwitcher />
+          </div>
+
           {user && (
             <ButtonEffects
               variant="ghost"
@@ -138,7 +146,7 @@ export function NavbarDesktopMenu({
               disabled={isLoggingOut}
             >
               <LogOut className="h-4 w-4 mr-1" />
-              {isLoggingOut ? "Déconnexion..." : "Déconnexion"}
+              {isLoggingOut ? t('auth.loggingOut') : t('auth.logout')}
             </ButtonEffects>
           )}
         </div>

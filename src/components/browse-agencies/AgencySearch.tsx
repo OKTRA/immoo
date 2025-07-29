@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, Filter, MapPin, Star, Building2 } from 'lucide-react';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface AgencySearchProps {
   searchTerm: string;
@@ -10,6 +11,7 @@ interface AgencySearchProps {
 }
 
 export const AgencySearch: React.FC<AgencySearchProps> = ({ searchTerm, setSearchTerm }) => {
+  const { t } = useTranslation();
   const [showFilters, setShowFilters] = useState(false);
   const [sortBy, setSortBy] = useState('name');
   const [filterLocation, setFilterLocation] = useState('all');
@@ -22,7 +24,7 @@ export const AgencySearch: React.FC<AgencySearchProps> = ({ searchTerm, setSearc
         <div className="relative flex-1">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
           <Input
-            placeholder="Rechercher une agence par nom, spécialité..."
+            placeholder={t('browseAgencies.search.placeholder')}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-12 pr-4 py-3 text-base bg-white/80 backdrop-blur-sm border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 focus:ring-2 focus:ring-immoo-gold/20 focus:border-immoo-gold"
@@ -36,7 +38,7 @@ export const AgencySearch: React.FC<AgencySearchProps> = ({ searchTerm, setSearc
             className="px-6 py-3 bg-white/80 backdrop-blur-sm border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 hover:bg-gray-50"
           >
             <Filter className="h-4 w-4 mr-2" />
-            Filtres
+            {t('browseAgencies.search.filters')}
             {showFilters && <span className="ml-2 text-immoo-gold">•</span>}
           </Button>
         </div>
@@ -49,17 +51,17 @@ export const AgencySearch: React.FC<AgencySearchProps> = ({ searchTerm, setSearc
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                 <Building2 className="h-4 w-4" />
-                Trier par
+                {t('browseAgencies.search.sortBy')}
               </label>
               <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="bg-white border-gray-200 rounded-lg">
-                  <SelectValue placeholder="Choisir un tri" />
+                  <SelectValue placeholder={t('browseAgencies.search.sortBy')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="name">Nom (A-Z)</SelectItem>
-                  <SelectItem value="rating">Note</SelectItem>
-                  <SelectItem value="recent">Plus récent</SelectItem>
-                  <SelectItem value="properties">Nb de propriétés</SelectItem>
+                  <SelectItem value="name">{t('browseAgencies.search.sortByName')}</SelectItem>
+                  <SelectItem value="rating">{t('browseAgencies.search.sortByRating')}</SelectItem>
+                  <SelectItem value="recent">{t('browseAgencies.search.sortByRecent')}</SelectItem>
+                  <SelectItem value="properties">{t('browseAgencies.search.sortByProperties')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -67,18 +69,18 @@ export const AgencySearch: React.FC<AgencySearchProps> = ({ searchTerm, setSearc
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Localisation
+                {t('browseAgencies.search.location')}
               </label>
               <Select value={filterLocation} onValueChange={setFilterLocation}>
                 <SelectTrigger className="bg-white border-gray-200 rounded-lg">
-                  <SelectValue placeholder="Toutes les régions" />
+                  <SelectValue placeholder={t('browseAgencies.search.allRegions')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toutes les régions</SelectItem>
-                  <SelectItem value="bamako">Bamako</SelectItem>
-                  <SelectItem value="sikasso">Sikasso</SelectItem>
-                  <SelectItem value="segou">Ségou</SelectItem>
-                  <SelectItem value="mopti">Mopti</SelectItem>
+                  <SelectItem value="all">{t('browseAgencies.search.allRegions')}</SelectItem>
+                  <SelectItem value="bamako">{t('browseAgencies.search.bamako')}</SelectItem>
+                  <SelectItem value="sikasso">{t('browseAgencies.search.sikasso')}</SelectItem>
+                  <SelectItem value="segou">{t('browseAgencies.search.segou')}</SelectItem>
+                  <SelectItem value="mopti">{t('browseAgencies.search.mopti')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -86,17 +88,17 @@ export const AgencySearch: React.FC<AgencySearchProps> = ({ searchTerm, setSearc
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                 <Star className="h-4 w-4" />
-                Note minimum
+                {t('browseAgencies.search.minRating')}
               </label>
               <Select value={filterRating} onValueChange={setFilterRating}>
                 <SelectTrigger className="bg-white border-gray-200 rounded-lg">
-                  <SelectValue placeholder="Toutes les notes" />
+                  <SelectValue placeholder={t('browseAgencies.search.allRatings')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Toutes les notes</SelectItem>
-                  <SelectItem value="4">4+ étoiles</SelectItem>
-                  <SelectItem value="3">3+ étoiles</SelectItem>
-                  <SelectItem value="2">2+ étoiles</SelectItem>
+                  <SelectItem value="all">{t('browseAgencies.search.allRatings')}</SelectItem>
+                  <SelectItem value="4">{t('browseAgencies.search.stars4')}</SelectItem>
+                  <SelectItem value="3">{t('browseAgencies.search.stars3')}</SelectItem>
+                  <SelectItem value="2">{t('browseAgencies.search.stars2')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -114,7 +116,7 @@ export const AgencySearch: React.FC<AgencySearchProps> = ({ searchTerm, setSearc
               }}
               className="text-gray-600 hover:text-gray-800"
             >
-              Réinitialiser les filtres
+              {t('browseAgencies.search.resetFilters')}
             </Button>
           </div>
         </div>

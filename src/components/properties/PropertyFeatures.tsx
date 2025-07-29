@@ -2,12 +2,15 @@
 import React from 'react';
 import { Property } from "@/assets/types";
 import { Car, Wifi, Droplets, Zap, Shield, Mountain, CheckCircle } from "lucide-react";
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface PropertyFeaturesProps {
   property: Property;
 }
 
 export default function PropertyFeatures({ property }: PropertyFeaturesProps) {
+  const { t } = useTranslation();
+  
   if (!property.features || property.features.length === 0) return null;
 
   const getFeatureIcon = (feature: string) => {
@@ -23,7 +26,7 @@ export default function PropertyFeatures({ property }: PropertyFeaturesProps) {
 
   return (
     <div className="bg-blue-50/50 dark:bg-blue-950/20 rounded-xl p-4 sm:p-6">
-      <h3 className="font-semibold text-lg mb-4">✨ Caractéristiques et équipements</h3>
+      <h3 className="font-semibold text-lg mb-4">{t('propertyDetails.features.title')}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         {property.features.map((feature, index) => (
           <div key={index} className="flex items-center space-x-3 bg-white/60 dark:bg-gray-800/40 rounded-lg p-3">

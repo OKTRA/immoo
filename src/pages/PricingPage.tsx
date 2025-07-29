@@ -15,6 +15,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface PlanData {
   id: string;
@@ -33,6 +34,7 @@ interface PlanData {
 }
 
 export default function PricingPage() {
+  const { t } = useTranslation();
   const [showWhatsAppDialog, setShowWhatsAppDialog] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<PlanData | null>(null);
   const [plans, setPlans] = useState<PlanData[]>([]);
@@ -146,10 +148,10 @@ export default function PricingPage() {
         {/* Header compact pour mobile */}
         <div className="text-center mb-8 md:mb-16 mt-6 md:mt-8">
           <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-gray-900 mb-2 md:mb-4">
-            Choisissez votre plan
+            {t('pricing.title')}
           </h1>
           <p className="text-sm md:text-xl text-gray-600 max-w-2xl mx-auto px-4">
-            Commencez gratuitement, évoluez selon vos besoins
+            {t('pricing.subtitle')}
           </p>
         </div>
         
@@ -157,28 +159,28 @@ export default function PricingPage() {
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-gold" />
-            <span className="ml-2 text-gray-600">Chargement des plans...</span>
+            <span className="ml-2 text-gray-600">{t('pricing.loadingPlans')}</span>
           </div>
         ) : error ? (
           <div className="text-center py-20">
             <div className="text-red-600 mb-4">
               <MessageCircle className="w-12 h-12 mx-auto mb-2" />
-              <h3 className="text-xl font-semibold">Erreur de chargement</h3>
+              <h3 className="text-xl font-semibold">{t('errors.somethingWentWrong')}</h3>
               <p className="text-gray-600 mt-2">{error}</p>
             </div>
             <Button onClick={loadPlans} variant="outline">
-              Réessayer
+              {t('pricing.retryLoading')}
             </Button>
           </div>
         ) : plans.length === 0 ? (
           <div className="text-center py-20">
             <div className="text-gray-600 mb-4">
               <MessageCircle className="w-12 h-12 mx-auto mb-2" />
-              <h3 className="text-xl font-semibold">Aucun plan disponible</h3>
-              <p className="mt-2">Les plans d'abonnement ne sont pas encore configurés</p>
+              <h3 className="text-xl font-semibold">{t('pricing.noPlansAvailable')}</h3>
+              <p className="mt-2">{t('pricing.noPlansAvailable')}</p>
             </div>
             <Button onClick={loadPlans} variant="outline">
-              Actualiser
+              {t('pricing.refreshPlans')}
             </Button>
           </div>
         ) : (
@@ -343,7 +345,7 @@ export default function PricingPage() {
         {/* Footer compact pour mobile */}
         <div className="text-center mt-8 md:mt-16 pb-6 md:pb-12 px-4">
           <p className="text-gray-600 mb-3 md:mb-4 text-sm md:text-base">
-            Besoin d'aide pour choisir ? Contactez notre équipe
+            {t('pricing.needHelp')}
           </p>
           <Button 
             variant="outline" 
@@ -351,7 +353,7 @@ export default function PricingPage() {
             className="flex items-center gap-2 mx-auto text-sm md:text-base py-2 md:py-3 px-4 md:px-6"
           >
             <MessageCircle className="w-4 h-4" />
-            Contacter le support
+            {t('pricing.contactTeam')}
           </Button>
         </div>
       </div>
@@ -367,10 +369,10 @@ export default function PricingPage() {
                 <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                   <MessageCircle className="w-5 h-5" />
                 </div>
-                Activation IMMOO PRO
+                {t('pricing.whatsAppActivationTitle')}
               </DialogTitle>
               <DialogDescription className="text-green-100">
-                Contactez notre équipe pour activer votre plan premium
+                {t('pricing.whatsAppActivationDescription')}
               </DialogDescription>
             </div>
           </div>
@@ -385,17 +387,17 @@ export default function PricingPage() {
                   <div className="w-8 h-8 bg-gradient-to-br from-amber-400 to-orange-500 rounded-full flex items-center justify-center">
                     <span className="text-lg">👑</span>
                   </div>
-                  <h4 className="font-bold text-gray-900">Plan sélectionné</h4>
+                  <h4 className="font-bold text-gray-900">{t('pricing.selectedPlan')}</h4>
                 </div>
                 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Plan :</span>
+                    <span className="text-gray-600">{t('pricing.plan')}:</span>
                     <span className="font-semibold text-gray-900">{selectedPlan?.name}</span>
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Prix :</span>
+                    <span className="text-gray-600">{t('pricing.price')}:</span>
                     <div className="flex items-baseline gap-1">
                       <span className="text-2xl font-black bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
                         {selectedPlan?.price?.toLocaleString()}
@@ -405,7 +407,7 @@ export default function PricingPage() {
                   </div>
                   
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Période :</span>
+                    <span className="text-gray-600">{t('pricing.period')}:</span>
                     <div className="inline-flex items-center px-3 py-1 rounded-full bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 text-sm font-semibold border border-amber-300">
                       📅 {selectedPlan?.period}
                     </div>
@@ -421,8 +423,8 @@ export default function PricingPage() {
                   <span className="text-white text-sm">ℹ️</span>
                 </div>
                 <div className="text-sm text-blue-800">
-                  <p className="font-medium mb-1">Activation rapide par WhatsApp</p>
-                  <p>Notre équipe vous guidera pour l'activation de votre plan et les modalités de paiement.</p>
+                  <p className="font-medium mb-1">{t('pricing.quickActivation')}</p>
+                  <p>{t('pricing.activationGuidance')}</p>
                 </div>
               </div>
             </div>
@@ -435,7 +437,7 @@ export default function PricingPage() {
                 className="flex-1 border-gray-300 hover:border-gray-400 hover:bg-gray-50"
               >
                 <X className="w-4 h-4 mr-2" />
-                Annuler
+                {t('pricing.cancel')}
               </Button>
               
               <Button 
@@ -454,7 +456,7 @@ export default function PricingPage() {
                   >
                     <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
                   </svg>
-                  Contacter sur WhatsApp
+                  {t('pricing.contactWhatsApp')}
                 </div>
               </Button>
             </div>
