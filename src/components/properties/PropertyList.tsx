@@ -18,6 +18,7 @@ import PropertyDetailsDialog from './PropertyDetailsDialog';
 import QuickVisitorLogin from '@/components/visitor/QuickVisitorLogin';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useTranslation } from '@/hooks/useTranslation';
+import { useFavorites } from '@/hooks/useFavorites';
 import { getPropertyStatusLabel, getPropertyStatusVariant } from '@/utils/translationUtils';
 
 interface PropertyListProps {
@@ -32,8 +33,15 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [showMiniLogin, setShowMiniLogin] = useState(false);
+  const { favoritesSet, isFavorite, toggleFavorite } = useFavorites();
 
   const effectivelyLoggedIn = user || localStorage.getItem('visitorData');
+
+  // Handle favorite toggle with event stopping
+  const handleFavoriteToggle = (property: Property, e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleFavorite(property);
+  };
 
   const openPropertyDetails = (property: Property) => {
     setSelectedProperty(property);
@@ -122,13 +130,21 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
                 <Button
                   size="sm"
                   variant="ghost"
-                  className="h-8 w-8 p-0 bg-white/80 hover:bg-white rounded-full"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    // Handle favorite toggle
-                  }}
+                  className={`h-8 w-8 p-0 rounded-full transition-all duration-200 ${
+                    isFavorite(property.id)
+                      ? 'bg-red-50 hover:bg-red-100 border border-red-200'
+                      : 'bg-white/80 hover:bg-white'
+                  }`}
+                  onClick={(e) => handleFavoriteToggle(property, e)}
+                  title={isFavorite(property.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
                 >
-                  <Heart className="h-4 w-4 text-gray-600" />
+                  <Heart 
+                    className={`h-4 w-4 transition-all duration-200 ${
+                      isFavorite(property.id)
+                        ? 'text-red-500 fill-red-500'
+                        : 'text-gray-600 hover:text-red-400'
+                    }`} 
+                  />
                 </Button>
               </div>
             </div>

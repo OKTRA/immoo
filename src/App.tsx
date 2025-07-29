@@ -53,6 +53,7 @@ import TestContractEditor from "./pages/TestContractEditor";
 import TestContractFormatting from "./pages/TestContractFormatting";
 import I18nTestPage from "./pages/I18nTestPage";
 import TestPropertyImages from "./pages/TestPropertyImages";
+import FavoritesPage from "./pages/FavoritesPage";
 import { LanguageRedirect } from "./components/LanguageRedirect";
 
 // Import i18n to ensure translations are initialized
@@ -92,6 +93,7 @@ function App() {
               <Route path="/immo-agency" element={<ImmoAgencyPage />} />
               <Route path="/logo-showcase" element={<LogoShowcasePage />} />
               <Route path="/test-property-images" element={<TestPropertyImages />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
               
               {/* Routes d'authentification */}
               <Route path="/auth" element={<Auth />} />
