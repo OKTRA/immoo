@@ -8,6 +8,7 @@ import { Toaster } from "sonner";
 import HomePage from "@/pages/HomePage";
 import AgenciesPage from "@/pages/AgenciesPage";
 import BrowseAgenciesPage from "@/pages/BrowseAgenciesPage";
+import MyAgenciesPage from "@/pages/MyAgenciesPage";
 import AgencyProfilePage from "@/pages/AgencyProfilePage";
 import PublicAgencyPage from "@/pages/PublicAgencyPage";
 import PublicPropertyPage from "@/pages/PublicPropertyPage";
@@ -51,6 +52,7 @@ import ContractsListPage from "./pages/contracts/ContractsListPage";
 import TestContractEditor from "./pages/TestContractEditor";
 import TestContractFormatting from "./pages/TestContractFormatting";
 import I18nTestPage from "./pages/I18nTestPage";
+import TestPropertyImages from "./pages/TestPropertyImages";
 import { LanguageRedirect } from "./components/LanguageRedirect";
 
 // Import i18n to ensure translations are initialized
@@ -89,6 +91,7 @@ function App() {
               <Route path="/pricing" element={<PricingPage />} />
               <Route path="/immo-agency" element={<ImmoAgencyPage />} />
               <Route path="/logo-showcase" element={<LogoShowcasePage />} />
+              <Route path="/test-property-images" element={<TestPropertyImages />} />
               
               {/* Routes d'authentification */}
               <Route path="/auth" element={<Auth />} />
@@ -102,6 +105,7 @@ function App() {
               
               {/* Routes protégées pour les agences */}
               <Route path="/agencies" element={<BrowseAgenciesPage />} />
+              <Route path="/my-agencies" element={<MyAgenciesPage />} />
               <Route path="/agencies/all" element={<PublicAgenciesPage />} />
               <Route path="/agency/:id" element={<PublicAgencyPage />} />
               <Route path="/agencies/create" element={<CreateAgencyPage />} />

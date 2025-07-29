@@ -53,10 +53,10 @@ export function NavbarDesktopMenu({
         agency_id: profile?.agency_id
       });
       
-      if (user && profile?.role === 'agency' && profile?.agency_id) {
-        // Rediriger vers le dashboard de l'agence connectée
-        console.log(`🎯 Redirection desktop vers: /agencies/${profile.agency_id}`);
-        navigate(`/agencies/${profile.agency_id}`);
+      if (user && profile?.role === 'agency') {
+        // Rediriger vers la page de gestion des agences
+        console.log('🎯 Redirection desktop vers: /my-agencies');
+        navigate('/my-agencies');
       } else {
         // Ouvrir popup de connexion agence
         console.log('🔐 Ouverture popup de connexion agence (desktop)');
@@ -145,8 +145,7 @@ export function NavbarDesktopMenu({
               onClick={onLogoutClick}
               disabled={isLoggingOut}
             >
-              <LogOut className="h-4 w-4 mr-1" />
-              {isLoggingOut ? t('auth.loggingOut') : t('auth.logout')}
+              <LogOut className="h-4 w-4" />
             </ButtonEffects>
           )}
         </div>

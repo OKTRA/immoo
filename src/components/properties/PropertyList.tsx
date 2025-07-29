@@ -77,17 +77,33 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
           <Card key={property.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
             {/* Property Image */}
             <div className="relative h-48 bg-gray-200 overflow-hidden">
-              {property.images && property.images.length > 0 ? (
+              {/* Try to display image from images array first, then fallback to imageUrl */}
+              {(property.images && property.images.length > 0) || property.imageUrl ? (
                 <img
-                  src={typeof property.images[0] === 'string' ? property.images[0] : property.images[0].image_url}
+                  src={
+                    property.images && property.images.length > 0
+                      ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].image_url)
+                      : property.imageUrl
+                  }
                   alt={property.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  onError={(e) => {
+                    // If image fails to load, show placeholder
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const placeholder = target.nextElementSibling as HTMLElement;
+                    if (placeholder) placeholder.style.display = 'flex';
+                  }}
                 />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center bg-gray-100">
-                  <Hotel className="h-12 w-12 text-gray-400" />
-                </div>
-              )}
+              ) : null}
+              
+              {/* Placeholder - shown when no image or image fails to load */}
+              <div 
+                className="w-full h-full flex items-center justify-center bg-gray-100" 
+                style={{ display: (property.images && property.images.length > 0) || property.imageUrl ? 'none' : 'flex' }}
+              >
+                <Hotel className="h-12 w-12 text-gray-400" />
+              </div>
               
               {/* Status Badge */}
               {property.status && (

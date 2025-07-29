@@ -57,10 +57,10 @@ export default function MobileBottomNav() {
         agency_id: profile?.agency_id
       });
       
-      if (user && profile?.role === 'agency' && profile?.agency_id) {
-        // Rediriger vers le dashboard de l'agence connectée
-        console.log(`🎯 Redirection vers: /agencies/${profile.agency_id}`);
-        navigate(`/agencies/${profile.agency_id}`);
+      if (user && profile?.role === 'agency') {
+        // Rediriger vers la page de gestion des agences
+        console.log('🎯 Redirection mobile vers: /my-agencies');
+        navigate('/my-agencies');
       } else {
         // Ouvrir popup de connexion agence
         console.log('🔐 Ouverture popup de connexion agence');
@@ -97,12 +97,6 @@ export default function MobileBottomNav() {
                   : "text-immoo-gray hover:bg-immoo-gold/5 hover:text-immoo-navy"
               )}
               onClick={() => handleNavClick(item)}
-              className={cn(
-                "flex flex-col items-center justify-center gap-1 h-12 px-3 rounded-xl transition-all duration-200",
-                isActive 
-                  ? "bg-immoo-navy/10 text-immoo-navy" 
-                  : "text-immoo-gray hover:bg-immoo-gray/10 hover:text-immoo-navy"
-              )}
             >
               <div className={cn(
                 "transition-all duration-300",

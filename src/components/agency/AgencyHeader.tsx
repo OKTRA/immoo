@@ -44,7 +44,7 @@ export default function AgencyHeader() {
   };
 
   const handleExitAgencySpace = () => {
-    navigate("/agencies");
+    navigate("/my-agencies");
     toast.success("Vous avez quitté l'espace agence");
   };
 

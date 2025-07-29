@@ -8,6 +8,7 @@ const HomePage = lazy(() => import('@/pages/HomePage'));
 const LoginPage = lazy(() => import('@/pages/LoginPage'));
 const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const BrowseAgenciesPage = lazy(() => import('@/pages/BrowseAgenciesPage'));
+const MyAgenciesPage = lazy(() => import('@/pages/MyAgenciesPage'));
 const CreateAgencyPage = lazy(() => import('@/pages/CreateAgencyPage'));
 const EditAgencyPage = lazy(() => import('@/pages/EditAgencyPage'));
 const AdminDashboardPage = lazy(() => import('@/pages/AdminPage'));
@@ -47,6 +48,14 @@ export const router = createBrowserRouter([
         element: (
           <Suspense fallback={<Spinner />}>
             <BrowseAgenciesPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: '/my-agencies',
+        element: (
+          <Suspense fallback={<Spinner />}>
+            <MyAgenciesPage />
           </Suspense>
         ),
       },
