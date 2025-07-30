@@ -708,7 +708,7 @@ export default function LogoShowcasePage() {
               <CardContent>
                 <div className="space-y-4">
                   <p className="text-sm text-muted-foreground">
-                    Image optimisée pour les réseaux sociaux et le partage de liens
+                    Image de votre page d'accueil optimisée pour les réseaux sociaux et le partage de liens
                   </p>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -735,42 +735,69 @@ export default function LogoShowcasePage() {
                       <div className="text-xs text-muted-foreground space-y-1">
                         <p>• Format: PNG 1200×630px</p>
                         <p>• Optimisé pour Facebook, Twitter, LinkedIn</p>
-                        <p>• Logo IMMOO avec design professionnel</p>
+                        <p>• Page d'accueil IMMOO avec interface de recherche</p>
+                        <p>• Design moderne et professionnel</p>
                       </div>
                     </div>
                     
                     <div className="space-y-4">
                       <h4 className="font-semibold text-immoo-navy">Aperçu OG Image</h4>
                       <div className="p-4 bg-immoo-pearl rounded-lg">
-                        <div className="aspect-[1200/630] bg-gradient-to-br from-immoo-navy to-gray-700 rounded-lg flex items-center justify-center relative overflow-hidden">
-                          {/* Motif de fond */}
-                          <div className="absolute inset-0 opacity-10">
-                            {[...Array(10)].map((_, i) => (
-                              <div
-                                key={i}
-                                className="absolute w-4 h-4 bg-immoo-gold rounded-full"
-                                style={{
-                                  left: `${20 + i * 8}%`,
-                                  top: `${15 + i * 3}%`,
-                                }}
-                              />
-                            ))}
-                          </div>
-                          
-                          {/* Logo simplifié */}
-                          <div className="flex items-center space-x-3">
-                            <div className="flex space-x-2">
-                              <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                                <div className="w-3 h-3 bg-immoo-gold rounded-full"></div>
-                              </div>
-                              <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
-                                <div className="w-3 h-3 bg-immoo-gold rounded-full"></div>
+                        <div className="aspect-[1200/630] bg-gradient-to-b from-blue-50 to-white rounded-lg relative overflow-hidden border border-gray-200">
+                          {/* Header */}
+                          <div className="absolute top-0 left-0 right-0 h-6 bg-white border-b border-gray-200 flex items-center px-3">
+                            <div className="flex items-center space-x-2">
+                              <span className="text-xs font-bold text-immoo-navy">IMM</span>
+                              <div className="flex space-x-1">
+                                <div className="w-1.5 h-1.5 bg-immoo-navy rounded-full"></div>
+                                <div className="w-1.5 h-1.5 bg-white border border-immoo-navy rounded-full"></div>
                               </div>
                             </div>
-                            <div className="text-white font-bold text-lg">IMMOO</div>
+                            <div className="ml-auto flex space-x-1">
+                              <div className="w-8 h-3 bg-gray-100 rounded text-[6px] text-gray-500 flex items-center justify-center">Espace</div>
+                              <div className="w-8 h-3 bg-immoo-navy rounded text-[6px] text-white flex items-center justify-center">Agency</div>
+                              <div className="w-4 h-3 bg-gray-100 rounded text-[6px] text-gray-500 flex items-center justify-center">EN</div>
+                            </div>
+                          </div>
+                          
+                          {/* Titre principal */}
+                          <div className="absolute top-8 left-0 right-0 text-center">
+                            <div className="text-[8px] font-bold text-immoo-navy">Trouve ton futur chez toi</div>
+                          </div>
+                          
+                          {/* Carte de recherche */}
+                          <div className="absolute top-16 left-2 right-2 bottom-2 bg-white rounded border border-gray-200">
+                            {/* Onglets */}
+                            <div className="flex space-x-1 p-1">
+                              <div className="w-8 h-2 bg-immoo-navy rounded text-[4px] text-white flex items-center justify-center">Prop</div>
+                              <div className="w-8 h-2 bg-gray-100 rounded text-[4px] text-gray-500 flex items-center justify-center">Agences</div>
+                            </div>
+                            
+                            {/* Barre de recherche */}
+                            <div className="mx-1 mt-1 h-3 bg-white border border-gray-300 rounded flex items-center px-1">
+                              <div className="w-1 h-1 border border-gray-400 rounded-full"></div>
+                              <div className="ml-1 text-[4px] text-gray-400">Rechercher...</div>
+                              <div className="ml-auto w-4 h-2 bg-immoo-navy rounded text-[4px] text-white flex items-center justify-center">Rechercher</div>
+                            </div>
+                            
+                            {/* Filtres */}
+                            <div className="flex space-x-1 mx-1 mt-1">
+                              <div className="flex-1 h-2 bg-white border border-gray-300 rounded flex items-center px-1">
+                                <div className="w-1 h-1 bg-pink-400 rounded-full"></div>
+                                <span className="ml-1 text-[4px] text-gray-500">Localisation</span>
+                              </div>
+                              <div className="flex-1 h-2 bg-white border border-gray-300 rounded flex items-center px-1">
+                                <div className="w-1 h-1 bg-gray-500"></div>
+                                <span className="ml-1 text-[4px] text-gray-500">Type</span>
+                              </div>
+                              <div className="flex-1 h-2 bg-white border border-gray-300 rounded flex items-center px-1">
+                                <div className="w-1 h-1 bg-gray-500 rounded-full"></div>
+                                <span className="ml-1 text-[4px] text-gray-500">Budget</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                        <p className="text-xs text-immoo-gray mt-2 text-center">Aperçu de l'image OG</p>
+                        <p className="text-xs text-immoo-gray mt-2 text-center">Aperçu de la page d'accueil IMMOO</p>
                       </div>
                     </div>
                   </div>

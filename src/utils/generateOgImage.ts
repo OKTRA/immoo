@@ -6,94 +6,194 @@ export const generateOgImageCanvas = (): HTMLCanvasElement => {
   
   if (!ctx) throw new Error('Canvas context not available');
   
-  // Fond dégradé IMMOO
-  const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
-  gradient.addColorStop(0, '#1F2937'); // IMMOO Navy
-  gradient.addColorStop(1, '#374151'); // Gris foncé
+  // Fond dégradé (bleu clair vers blanc)
+  const gradient = ctx.createLinearGradient(0, 0, 0, 630);
+  gradient.addColorStop(0, '#E0F2FE'); // Bleu très clair
+  gradient.addColorStop(1, '#FFFFFF'); // Blanc
   ctx.fillStyle = gradient;
   ctx.fillRect(0, 0, 1200, 630);
   
-  // Ajouter un motif subtil
-  ctx.fillStyle = 'rgba(217, 119, 6, 0.1)'; // Or IMMOO avec transparence
-  for (let i = 0; i < 10; i++) {
-    ctx.beginPath();
-    ctx.arc(200 + i * 100, 150 + i * 30, 50, 0, 2 * Math.PI);
-    ctx.fill();
-  }
-  
-  // Logo IMMOO (yeux)
-  const logoSize = 200;
-  const logoX = 600;
-  const logoY = 250;
-  
-  // Calculer les proportions pour les yeux
-  const eyeRadius = logoSize * 0.25;
-  const eyeSpacing = logoSize * 0.15;
-  const leftEyeX = logoX - eyeSpacing;
-  const rightEyeX = logoX + eyeSpacing;
-  
-  // Contour blanc des yeux
-  ctx.strokeStyle = '#FFFFFF';
-  ctx.lineWidth = 8;
+  // Header
   ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, 1200, 80);
+  ctx.strokeStyle = '#E2E8F0';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(0, 0, 1200, 80);
   
-  // Oeil gauche - contour
+  // Logo IMMOO dans le header
+  ctx.fillStyle = '#1F2937';
+  ctx.font = 'bold 24px Arial, sans-serif';
+  ctx.fillText('IMM', 60, 50);
+  
+  // Icônes des yeux
   ctx.beginPath();
-  ctx.arc(leftEyeX, logoY, eyeRadius, 0, 2 * Math.PI);
+  ctx.arc(140, 35, 8, 0, 2 * Math.PI);
   ctx.fill();
+  
+  ctx.beginPath();
+  ctx.arc(160, 35, 8, 0, 2 * Math.PI);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fill();
+  ctx.strokeStyle = '#1F2937';
+  ctx.lineWidth = 2;
   ctx.stroke();
   
-  // Oeil droit - contour
-  ctx.beginPath();
-  ctx.arc(rightEyeX, logoY, eyeRadius, 0, 2 * Math.PI);
-  ctx.fill();
-  ctx.stroke();
+  // Boutons du header
+  // Espace Agence
+  ctx.fillStyle = '#F1F5F9';
+  ctx.fillRect(860, 20, 120, 40);
+  ctx.strokeStyle = '#E2E8F0';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(860, 20, 120, 40);
+  ctx.fillStyle = '#64748B';
+  ctx.font = '14px Arial, sans-serif';
+  ctx.fillText('Espace Agence', 920, 45);
   
-  // Pupilles dorées
-  ctx.fillStyle = '#D97706'; // Couleur or IMMOO
-  const pupilRadius = eyeRadius * 0.4;
-  
-  // Pupille gauche
-  ctx.beginPath();
-  ctx.arc(leftEyeX, logoY, pupilRadius, 0, 2 * Math.PI);
-  ctx.fill();
-  
-  // Pupille droite
-  ctx.beginPath();
-  ctx.arc(rightEyeX, logoY, pupilRadius, 0, 2 * Math.PI);
-  ctx.fill();
-  
-  // Reflets sur les pupilles
-  ctx.fillStyle = '#FED7AA';
-  const reflectRadius = pupilRadius * 0.3;
-  const reflectOffsetX = pupilRadius * 0.2;
-  const reflectOffsetY = -pupilRadius * 0.2;
-  
-  // Reflet pupille gauche
-  ctx.beginPath();
-  ctx.arc(leftEyeX + reflectOffsetX, logoY + reflectOffsetY, reflectRadius, 0, 2 * Math.PI);
-  ctx.fill();
-  
-  // Reflet pupille droite
-  ctx.beginPath();
-  ctx.arc(rightEyeX + reflectOffsetX, logoY + reflectOffsetY, reflectRadius, 0, 2 * Math.PI);
-  ctx.fill();
-  
-  // Texte "IMMOO"
+  // IMMOO Agency
+  ctx.fillStyle = '#1F2937';
+  ctx.fillRect(1000, 20, 120, 40);
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 72px Inter, sans-serif';
+  ctx.fillText('IMMOO Agency', 1060, 45);
+  
+  // EN
+  ctx.fillStyle = '#F1F5F9';
+  ctx.fillRect(1140, 20, 60, 40);
+  ctx.strokeStyle = '#E2E8F0';
+  ctx.strokeRect(1140, 20, 60, 40);
+  ctx.fillStyle = '#64748B';
+  ctx.fillText('EN', 1170, 45);
+  
+  // Titre principal
+  ctx.fillStyle = '#1F2937';
+  ctx.font = 'bold 48px Arial, sans-serif';
   ctx.textAlign = 'center';
-  ctx.fillText('IMMOO', logoX, logoY + 200);
+  ctx.fillText('Trouve ton futur chez toi', 600, 180);
   
-  // Sous-titre
-  ctx.fillStyle = '#D97706';
-  ctx.font = '32px Inter, sans-serif';
-  ctx.fillText('Plateforme Immobilière', logoX, logoY + 250);
+  // Carte de recherche principale
+  const cardX = 100;
+  const cardY = 220;
+  const cardWidth = 1000;
+  const cardHeight = 280;
   
-  // Tagline
+  // Ombre de la carte
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.1)';
+  ctx.shadowBlur = 8;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 4;
+  
+  // Fond de la carte
+  const cardGradient = ctx.createLinearGradient(0, cardY, 0, cardY + cardHeight);
+  cardGradient.addColorStop(0, '#FFFFFF');
+  cardGradient.addColorStop(1, '#F8FAFC');
+  ctx.fillStyle = cardGradient;
+  ctx.fillRect(cardX, cardY, cardWidth, cardHeight);
+  
+  // Bordure de la carte
+  ctx.shadowColor = 'transparent';
+  ctx.strokeStyle = '#E2E8F0';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(cardX, cardY, cardWidth, cardHeight);
+  
+  // Onglets
+  // Propriétés (actif)
+  ctx.fillStyle = '#1F2937';
+  ctx.fillRect(cardX + 40, cardY + 30, 120, 40);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '14px Arial, sans-serif';
+  ctx.fillText('Propriétés', cardX + 100, cardY + 55);
+  
+  // Agences (inactif)
+  ctx.fillStyle = '#F1F5F9';
+  ctx.fillRect(cardX + 180, cardY + 30, 120, 40);
+  ctx.fillStyle = '#64748B';
+  ctx.fillText('Agences', cardX + 240, cardY + 55);
+  
+  // Barre de recherche principale
+  const searchX = cardX + 40;
+  const searchY = cardY + 100;
+  const searchWidth = 800;
+  const searchHeight = 60;
+  
+  // Fond de la barre de recherche
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(searchX, searchY, searchWidth, searchHeight);
+  ctx.strokeStyle = '#E2E8F0';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(searchX, searchY, searchWidth, searchHeight);
+  
+  // Icône de recherche
+  ctx.strokeStyle = '#64748B';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(searchX + 30, searchY + 30, 8, 0, 2 * Math.PI);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(searchX + 35, searchY + 35);
+  ctx.lineTo(searchX + 40, searchY + 40);
+  ctx.stroke();
+  
+  // Texte de placeholder
   ctx.fillStyle = '#9CA3AF';
-  ctx.font = '24px Inter, sans-serif';
-  ctx.fillText('Votre partenaire de confiance pour l\'immobilier', logoX, logoY + 290);
+  ctx.font = '16px Arial, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Rechercher une propriété ou une agence...', searchX + 60, searchY + 35);
+  
+  // Bouton Rechercher
+  ctx.fillStyle = '#1F2937';
+  ctx.fillRect(searchX + 820, searchY, 120, searchHeight);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.font = '16px Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Rechercher', searchX + 880, searchY + 35);
+  
+  // Filtres
+  const filtersY = cardY + 180;
+  
+  // Localisation
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(searchX, filtersY, 300, 50);
+  ctx.strokeStyle = '#E2E8F0';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(searchX, filtersY, 300, 50);
+  
+  // Icône localisation (point rose)
+  ctx.fillStyle = '#EC4899';
+  ctx.beginPath();
+  ctx.arc(searchX + 25, filtersY + 25, 6, 0, 2 * Math.PI);
+  ctx.fill();
+  
+  ctx.fillStyle = '#64748B';
+  ctx.font = '14px Arial, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('Localisation', searchX + 45, filtersY + 30);
+  
+  // Type
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(searchX + 320, filtersY, 300, 50);
+  ctx.strokeRect(searchX + 320, filtersY, 300, 50);
+  
+  // Icône maison
+  ctx.fillStyle = '#64748B';
+  ctx.fillRect(searchX + 335, filtersY + 15, 12, 8);
+  ctx.fillText('Type', searchX + 355, filtersY + 30);
+  
+  // Budget
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(searchX + 640, filtersY, 300, 50);
+  ctx.strokeRect(searchX + 640, filtersY, 300, 50);
+  
+  // Icône budget (cercle)
+  ctx.fillStyle = '#64748B';
+  ctx.beginPath();
+  ctx.arc(searchX + 665, filtersY + 25, 8, 0, 2 * Math.PI);
+  ctx.fill();
+  ctx.fillText('Budget', searchX + 685, filtersY + 30);
+  
+  // Tagline en bas
+  ctx.fillStyle = '#64748B';
+  ctx.font = '18px Arial, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('Votre plateforme immobilière de confiance', 600, 580);
   
   return canvas;
 };
