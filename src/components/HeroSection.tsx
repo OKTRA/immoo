@@ -352,9 +352,10 @@ export default function HeroSection() {
                   />
                   <button 
                     onClick={handleSearch}
-                    className="bg-gray-900 hover:bg-gray-800 text-white px-6 py-2.5 rounded-xl font-medium transition-colors duration-200 text-sm"
+                    className="bg-gray-900 hover:bg-gray-800 text-white px-3 sm:px-6 py-2.5 rounded-xl font-medium transition-colors duration-200 text-sm flex items-center justify-center min-w-[44px] sm:min-w-auto"
                   >
-                    {t('hero.search')}
+                    <Search className="h-4 w-4 sm:hidden" />
+                    <span className="hidden sm:inline">{t('hero.search')}</span>
                   </button>
                 </div>
               </div>
@@ -402,73 +403,49 @@ export default function HeroSection() {
                 </>
               )}
 
-              {/* Smart Filters - Agencies */}
+              {/* Compact Filters - Agencies */}
               {searchType === "agencies" && (
-                <div className="space-y-4 mb-6">
-                  {/* Search Tips */}
-                  <div className="bg-immoo-gold/5 border border-immoo-gold/20 rounded-lg p-3">
-                    <p className="text-xs text-immoo-navy/70 dark:text-immoo-pearl/70">
-                      <strong>{t('hero.searchTips')}:</strong> {t('hero.searchTipsText')}
-                    </p>
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <>
+                  <div className="grid grid-cols-3 gap-3 mb-6">
                     {/* Verification Status */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                        <Building className="h-4 w-4 mr-2 text-immoo-gold" />
-                        {t('hero.status')}
-                      </label>
-                      <select 
-                        className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                        value={agencyStatus}
-                        onChange={(e) => setAgencyStatus(e.target.value)}
-                      >
-                        <option value="">{t('hero.allAgencies')}</option>
-                        <option value="verified">{t('hero.verifiedAgencies')}</option>
-                        <option value="non-verified">{t('hero.nonVerifiedAgencies')}</option>
-                      </select>
-                    </div>
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-gray-400 transition-colors"
+                      value={agencyStatus}
+                      onChange={(e) => setAgencyStatus(e.target.value)}
+                    >
+                      <option value="">✅ {t('hero.status')}</option>
+                      <option value="verified">{t('hero.verifiedAgencies')}</option>
+                      <option value="non-verified">{t('hero.nonVerifiedAgencies')}</option>
+                    </select>
 
-                    {/* Country/Location */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                        <MapPin className="h-4 w-4 mr-2 text-immoo-gold" />
-                        {t('hero.country')}
-                      </label>
-                      <select 
-                        className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                        value={location}
-                        onChange={(e) => setLocation(e.target.value)}
-                      >
-                        <option value="">{t('hero.allCountries')}</option>
-                        <option value="mali">Mali</option>
-                        <option value="senegal">Sénégal</option>
-                        <option value="burkina">Burkina Faso</option>
-                        <option value="cote-ivoire">Côte d'Ivoire</option>
-                        <option value="guinea">Guinée</option>
-                      </select>
-                    </div>
+                    {/* Location/Country */}
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-gray-400 transition-colors"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    >
+                      <option value="">🌍 {t('hero.country')}</option>
+                      <option value="mali">Mali</option>
+                      <option value="senegal">Sénégal</option>
+                      <option value="burkina">Burkina Faso</option>
+                      <option value="cote-ivoire">Côte d'Ivoire</option>
+                      <option value="guinea">Guinée</option>
+                    </select>
 
-                    {/* Properties Count */}
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium text-immoo-navy dark:text-immoo-pearl flex items-center">
-                        <Home className="h-4 w-4 mr-2 text-immoo-gold" />
-                        {t('hero.properties')}
-                      </label>
-                      <select 
-                        className="w-full bg-white dark:bg-immoo-navy-light border border-immoo-gold/20 rounded-lg px-4 py-3 text-immoo-navy dark:text-immoo-pearl focus:outline-none focus:border-immoo-gold transition-colors"
-                        value={agencyPropertiesCount}
-                        onChange={(e) => setAgencyPropertiesCount(e.target.value)}
-                      >
-                        <option value="">{t('hero.all')}</option>
-                        <option value="0">{t('hero.newAgencies')}</option>
-                        <option value="1-5">{t('hero.oneToFiveProperties')}</option>
-                        <option value="5+">{t('hero.fivePlusProperties')}</option>
-                      </select>
-                    </div>
+                    {/* Sector/Specialization */}
+                    <select 
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:outline-none focus:border-gray-400 transition-colors"
+                      value={agencyPropertiesCount}
+                      onChange={(e) => setAgencyPropertiesCount(e.target.value)}
+                    >
+                      <option value="">🏢 Secteur</option>
+                      <option value="residential">Résidentiel</option>
+                      <option value="commercial">Commercial</option>
+                      <option value="industrial">Industriel</option>
+                      <option value="mixed">Mixte</option>
+                    </select>
                   </div>
-                </div>
+                </>
               )}
 
               {/* Quick Action - Show only if filters are active based on search type */}
