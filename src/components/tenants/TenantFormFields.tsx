@@ -19,9 +19,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { User, Upload, X, Phone, UserCheck } from 'lucide-react';
 import { TenantFormValues } from './schemas/tenantFormSchema';
+import { useTranslation } from "@/hooks/useTranslation";
 
 const TenantFormFields = () => {
   const { control, setValue, watch } = useFormContext<TenantFormValues>();
+  const { t } = useTranslation();
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [identityFiles, setIdentityFiles] = useState<File[]>([]);
   const photoUrl = watch('photoUrl');
@@ -57,7 +59,7 @@ const TenantFormFields = () => {
         <div className="border-b pb-2">
           <h3 className="text-lg font-medium flex items-center">
             <User className="mr-2 h-5 w-5" />
-            Photo du locataire
+            {t('agencyDashboard.pages.tenants.tenantPhoto')}
           </h3>
         </div>
         
@@ -75,7 +77,7 @@ const TenantFormFields = () => {
               <div className="h-32 w-32 border-2 border-dashed border-gray-300 rounded-full overflow-hidden">
                 <img 
                   src={photoUrl} 
-                  alt="Photo du locataire" 
+                  alt={t('agencyDashboard.pages.tenants.tenantPhoto')} 
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -96,7 +98,7 @@ const TenantFormFields = () => {
             >
               <User className="h-8 w-8 text-muted-foreground mb-2" />
               <p className="text-xs text-muted-foreground text-center px-2">
-                Ajouter une photo
+                {t('agencyDashboard.pages.tenants.addPhoto')}
               </p>
             </label>
           )}
@@ -106,7 +108,7 @@ const TenantFormFields = () => {
       {/* Personal Information */}
       <div className="space-y-4">
         <div className="border-b pb-2">
-          <h3 className="text-lg font-medium">Informations personnelles</h3>
+          <h3 className="text-lg font-medium">{t('agencyDashboard.pages.tenants.personalInformation')}</h3>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -115,9 +117,9 @@ const TenantFormFields = () => {
             name="firstName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Prénom <span className="text-destructive">*</span></FormLabel>
+                <FormLabel>{t('agencyDashboard.pages.tenants.firstName')} <span className="text-destructive">*</span></FormLabel>
                 <FormControl>
-                  <Input placeholder="Prénom" {...field} />
+                  <Input placeholder={t('agencyDashboard.pages.tenants.firstName')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -128,9 +130,9 @@ const TenantFormFields = () => {
             name="lastName"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Nom <span className="text-destructive">*</span></FormLabel>
+                <FormLabel>{t('agencyDashboard.pages.tenants.lastName')} <span className="text-destructive">*</span></FormLabel>
                 <FormControl>
-                  <Input placeholder="Nom" {...field} />
+                  <Input placeholder={t('agencyDashboard.pages.tenants.lastName')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -141,7 +143,7 @@ const TenantFormFields = () => {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email <span className="text-destructive">*</span></FormLabel>
+                <FormLabel>{t('agencyDashboard.pages.tenants.email')} <span className="text-destructive">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="email@example.com" {...field} />
                 </FormControl>
@@ -154,7 +156,7 @@ const TenantFormFields = () => {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Téléphone <span className="text-destructive">*</span></FormLabel>
+                <FormLabel>{t('agencyDashboard.pages.tenants.phone')} <span className="text-destructive">*</span></FormLabel>
                 <FormControl>
                   <Input placeholder="+223 XX XX XX XX" {...field} />
                 </FormControl>
@@ -167,9 +169,9 @@ const TenantFormFields = () => {
             name="profession"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Profession</FormLabel>
+                <FormLabel>{t('agencyDashboard.pages.tenants.profession')}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Profession (optionnel)" {...field} />
+                  <Input placeholder={t('agencyDashboard.pages.tenants.professionOptional')} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -180,19 +182,19 @@ const TenantFormFields = () => {
             name="employmentStatus"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Statut professionnel</FormLabel>
+                <FormLabel>{t('agencyDashboard.pages.tenants.employmentStatus')}</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Sélectionnez un statut" />
+                      <SelectValue placeholder={t('agencyDashboard.pages.tenants.selectStatus')} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="employed">Salarié</SelectItem>
-                    <SelectItem value="self-employed">Travailleur indépendant</SelectItem>
-                    <SelectItem value="student">Étudiant</SelectItem>
-                    <SelectItem value="retired">Retraité</SelectItem>
-                    <SelectItem value="unemployed">Sans emploi</SelectItem>
+                    <SelectItem value="employed">{t('agencyDashboard.pages.tenants.employed')}</SelectItem>
+                    <SelectItem value="self-employed">{t('agencyDashboard.pages.tenants.selfEmployed')}</SelectItem>
+                    <SelectItem value="student">{t('agencyDashboard.pages.tenants.student')}</SelectItem>
+                    <SelectItem value="retired">{t('agencyDashboard.pages.tenants.retired')}</SelectItem>
+                    <SelectItem value="unemployed">{t('agencyDashboard.pages.tenants.unemployed')}</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -207,52 +209,52 @@ const TenantFormFields = () => {
         <div className="border-b pb-2">
           <h3 className="text-lg font-medium flex items-center">
             <UserCheck className="mr-2 h-5 w-5" />
-            Contact d'urgence
+            {t('agencyDashboard.pages.tenants.emergencyContact')}
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Personne à contacter en cas d'urgence
+            {t('agencyDashboard.pages.tenants.emergencyContactDescription')}
           </p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="emergencyName">Nom complet</Label>
+            <Label htmlFor="emergencyName">{t('agencyDashboard.pages.tenants.fullName')}</Label>
             <Input
               id="emergencyName"
-              placeholder="Nom de la personne à contacter"
+              placeholder={t('agencyDashboard.pages.tenants.emergencyContactName')}
               value={emergencyContact?.name || ''}
               onChange={(e) => handleEmergencyContactChange('name', e.target.value)}
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="emergencyPhone">Téléphone</Label>
+            <Label htmlFor="emergencyPhone">{t('agencyDashboard.pages.tenants.phone')}</Label>
             <Input
               id="emergencyPhone"
               type="tel"
-              placeholder="Numéro de téléphone d'urgence"
+              placeholder={t('agencyDashboard.pages.tenants.emergencyPhoneNumber')}
               value={emergencyContact?.phone || ''}
               onChange={(e) => handleEmergencyContactChange('phone', e.target.value)}
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="emergencyRelationship">Relation</Label>
+            <Label htmlFor="emergencyRelationship">{t('agencyDashboard.pages.tenants.relationship')}</Label>
             <Select 
               value={emergencyContact?.relationship || ''} 
               onValueChange={(value) => handleEmergencyContactChange('relationship', value)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Relation avec le locataire" />
+                <SelectValue placeholder={t('agencyDashboard.pages.tenants.relationshipWithTenant')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="family">Famille</SelectItem>
-                <SelectItem value="parent">Parent</SelectItem>
-                <SelectItem value="spouse">Conjoint(e)</SelectItem>
-                <SelectItem value="sibling">Frère/Sœur</SelectItem>
-                <SelectItem value="friend">Ami(e)</SelectItem>
-                <SelectItem value="colleague">Collègue</SelectItem>
-                <SelectItem value="other">Autre</SelectItem>
+                <SelectItem value="family">{t('agencyDashboard.pages.tenants.family')}</SelectItem>
+                <SelectItem value="parent">{t('agencyDashboard.pages.tenants.parent')}</SelectItem>
+                <SelectItem value="spouse">{t('agencyDashboard.pages.tenants.spouse')}</SelectItem>
+                <SelectItem value="sibling">{t('agencyDashboard.pages.tenants.sibling')}</SelectItem>
+                <SelectItem value="friend">{t('agencyDashboard.pages.tenants.friend')}</SelectItem>
+                <SelectItem value="colleague">{t('agencyDashboard.pages.tenants.colleague')}</SelectItem>
+                <SelectItem value="other">{t('agencyDashboard.pages.tenants.other')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -262,9 +264,9 @@ const TenantFormFields = () => {
       {/* Identity Photos */}
       <div className="space-y-4">
         <div className="border-b pb-2">
-          <h3 className="text-lg font-medium">Photos d'identité (multiples)</h3>
+          <h3 className="text-lg font-medium">{t('agencyDashboard.pages.tenants.identityPhotos')}</h3>
           <p className="text-sm text-muted-foreground mt-1">
-            Téléchargez une ou plusieurs photos d'identité (CNI, passeport…)
+            {t('agencyDashboard.pages.tenants.identityPhotosDescription')}
           </p>
         </div>
 
@@ -293,7 +295,7 @@ const TenantFormFields = () => {
           className="flex flex-col items-center justify-center w-full md:w-1/2 border-2 border-dashed border-gray-300 py-6 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
         >
           <Upload className="h-6 w-6 text-muted-foreground mb-2" />
-          <span className="text-sm text-muted-foreground">Cliquer ou glisser-déposer pour ajouter des photos</span>
+          <span className="text-sm text-muted-foreground">{t('agencyDashboard.pages.tenants.clickOrDragToAddPhotos')}</span>
         </label>
 
         {/* Previews grid */}

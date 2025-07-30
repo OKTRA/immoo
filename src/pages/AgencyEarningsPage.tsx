@@ -34,9 +34,11 @@ import { formatCurrency } from "@/lib/utils";
 import { getAgencyEarnings, getEarningsByProperty, PropertyEarning } from "@/services/agency/agencyEarningsService";
 import EarningsAnalytics from "@/components/analytics/EarningsAnalytics";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useTranslation } from '@/hooks/useTranslation';
 
 export default function AgencyEarningsPage() {
   const { agencyId } = useParams();
+  const { t } = useTranslation();
   const [selectedPeriod, setSelectedPeriod] = useState<'month' | 'quarter' | 'year'>('month');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -86,7 +88,7 @@ export default function AgencyEarningsPage() {
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-immoo-gold mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Chargement de vos gains...</p>
+            <p className="text-muted-foreground">{t('agencyDashboard.pages.earnings.loadingEarnings')}</p>
           </div>
         </div>
       </div>
@@ -99,7 +101,7 @@ export default function AgencyEarningsPage() {
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Erreur lors du chargement des gains. Veuillez réessayer.
+            {t('agencyDashboard.pages.earnings.loadError')}
           </AlertDescription>
         </Alert>
       </div>
@@ -117,10 +119,10 @@ export default function AgencyEarningsPage() {
             </div>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-immoo-navy to-immoo-gold bg-clip-text text-transparent">
-                Centre de Gains
+                {t('agencyDashboard.pages.earnings.title')}
               </h1>
               <p className="text-muted-foreground">
-                Suivi en temps réel de vos commissions et revenus d'agence
+                {t('agencyDashboard.pages.earnings.description')}
               </p>
             </div>
           </div>
@@ -128,11 +130,11 @@ export default function AgencyEarningsPage() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="hidden sm:flex">
             <BarChart3 className="h-4 w-4 mr-2" />
-            Analytics
+            {t('agencyDashboard.pages.earnings.analytics')}
           </Button>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
-            Exporter
+            {t('agencyDashboard.pages.earnings.export')}
           </Button>
         </div>
       </div>
@@ -143,9 +145,9 @@ export default function AgencyEarningsPage() {
           <div className="flex flex-wrap gap-4 items-center">
             <div className="flex gap-2">
               {[
-                { value: 'month', label: 'Ce mois', icon: Calendar },
-                { value: 'quarter', label: 'Trimestre', icon: BarChart3 },
-                { value: 'year', label: 'Année', icon: Target }
+                { value: 'month', label: t('agencyDashboard.pages.earnings.thisMonth'), icon: Calendar },
+                { value: 'quarter', label: t('agencyDashboard.pages.earnings.quarter'), icon: BarChart3 },
+                { value: 'year', label: t('agencyDashboard.pages.earnings.year'), icon: Target }
               ].map((period) => (
                 <Button
                   key={period.value}
@@ -178,10 +180,10 @@ export default function AgencyEarningsPage() {
               className="px-1 py-1 bg-white/80 backdrop-blur-sm border rounded-lg"
             >
               <ToggleGroupItem value="month" className="px-2 py-1 text-sm">
-                Mensuel
+                {t('agencyDashboard.pages.earnings.monthly')}
               </ToggleGroupItem>
               <ToggleGroupItem value="year" className="px-2 py-1 text-sm">
-                Annuel
+                {t('agencyDashboard.pages.earnings.yearly')}
               </ToggleGroupItem>
             </ToggleGroup>
 
@@ -190,7 +192,7 @@ export default function AgencyEarningsPage() {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Rechercher par propriété ou locataire..."
+                  placeholder={t('agencyDashboard.pages.earnings.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg bg-white/80 backdrop-blur-sm"
@@ -203,9 +205,9 @@ export default function AgencyEarningsPage() {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="px-3 py-2 border rounded-lg bg-white/80 backdrop-blur-sm"
             >
-              <option value="all">Tous les statuts</option>
-              <option value="paid">Perçus</option>
-              <option value="pending">En attente</option>
+              <option value="all">{t('agencyDashboard.pages.earnings.allStatuses')}</option>
+              <option value="paid">{t('agencyDashboard.pages.earnings.received')}</option>
+              <option value="pending">{t('agencyDashboard.pages.earnings.pending')}</option>
             </select>
           </div>
         </CardContent>
@@ -218,7 +220,7 @@ export default function AgencyEarningsPage() {
             <CardTitle className="text-sm font-medium text-green-700 flex items-center justify-between">
               <div className="flex items-center">
                 <DollarSign className="h-4 w-4 mr-2" />
-                Total des gains
+                {t('agencyDashboard.pages.earnings.totalEarnings')}
               </div>
               <div className="p-1 bg-green-100 rounded-full">
                 <TrendingUp className="h-3 w-3 text-green-600" />
@@ -230,10 +232,10 @@ export default function AgencyEarningsPage() {
               {formatCurrency(summary.totalEarnings, "FCFA")}
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-green-600">{summary.transactionCount} transactions</span>
+              <span className="text-green-600">{summary.transactionCount} {t('agencyDashboard.pages.earnings.transactions')}</span>
               <div className="flex items-center gap-1">
                 <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-green-600">Actif</span>
+                <span className="text-green-600">{t('agencyDashboard.pages.earnings.active')}</span>
               </div>
             </div>
             <Progress value={100} className="mt-2 h-2" />
@@ -245,7 +247,7 @@ export default function AgencyEarningsPage() {
             <CardTitle className="text-sm font-medium text-blue-700 flex items-center justify-between">
               <div className="flex items-center">
                 <Percent className="h-4 w-4 mr-2" />
-                Commissions loyers
+                {t('agencyDashboard.pages.earnings.rentCommissions')}
               </div>
               <div className="p-1 bg-blue-100 rounded-full">
                 <BarChart3 className="h-3 w-3 text-blue-600" />
@@ -257,9 +259,9 @@ export default function AgencyEarningsPage() {
               {formatCurrency(summary.commissionEarnings, "FCFA")}
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-blue-600">Taux moyen: {summary.averageCommissionRate.toFixed(1)}%</span>
+              <span className="text-blue-600">{t('agencyDashboard.pages.earnings.averageRate')}: {summary.averageCommissionRate.toFixed(1)}%</span>
               <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
-                Récurrent
+                {t('agencyDashboard.pages.earnings.recurring')}
               </Badge>
             </div>
             <Progress 
@@ -274,7 +276,7 @@ export default function AgencyEarningsPage() {
             <CardTitle className="text-sm font-medium text-purple-700 flex items-center justify-between">
               <div className="flex items-center">
                 <Building2 className="h-4 w-4 mr-2" />
-                Frais d'agence
+                {t('agencyDashboard.pages.earnings.agencyFees')}
               </div>
               <div className="p-1 bg-purple-100 rounded-full">
                 <Wallet className="h-3 w-3 text-purple-600" />
@@ -286,9 +288,9 @@ export default function AgencyEarningsPage() {
               {formatCurrency(summary.agencyFeeEarnings, "FCFA")}
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-purple-600">Nouveaux baux</span>
+              <span className="text-purple-600">{t('agencyDashboard.pages.earnings.newLeases')}</span>
               <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                Unique
+                {t('agencyDashboard.pages.earnings.unique')}
               </Badge>
             </div>
             <Progress 
@@ -303,7 +305,7 @@ export default function AgencyEarningsPage() {
             <CardTitle className="text-sm font-medium text-orange-700 flex items-center justify-between">
               <div className="flex items-center">
                 <Clock className="h-4 w-4 mr-2" />
-                Statut paiements
+                {t('agencyDashboard.pages.earnings.paymentStatus')}
               </div>
               <div className="p-1 bg-orange-100 rounded-full">
                 <PieChart className="h-3 w-3 text-orange-600" />
@@ -315,7 +317,7 @@ export default function AgencyEarningsPage() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <CheckCircle className="h-3 w-3 text-green-500" />
-                  <span className="text-xs text-muted-foreground">Perçus</span>
+                  <span className="text-xs text-muted-foreground">{t('agencyDashboard.pages.earnings.received')}</span>
                 </div>
                 <span className="text-sm font-medium">{formatCurrency(summary.paidEarnings, "FCFA")}</span>
               </div>
@@ -324,7 +326,7 @@ export default function AgencyEarningsPage() {
               <div className="flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="h-3 w-3 text-amber-500" />
-                  <span className="text-xs text-muted-foreground">En attente</span>
+                  <span className="text-xs text-muted-foreground">{t('agencyDashboard.pages.earnings.pending')}</span>
                 </div>
                 <span className="text-sm font-medium">{formatCurrency(summary.pendingEarnings, "FCFA")}</span>
               </div>
@@ -339,15 +341,15 @@ export default function AgencyEarningsPage() {
         <TabsList className="bg-white/80 backdrop-blur-sm border shadow-lg">
           <TabsTrigger value="list" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
-            Historique détaillé
+            {t('agencyDashboard.pages.earnings.detailedHistory')}
           </TabsTrigger>
           <TabsTrigger value="by-property" className="flex items-center gap-2">
             <Home className="h-4 w-4" />
-            Par propriété
+            {t('agencyDashboard.pages.earnings.byProperty')}
           </TabsTrigger>
           <TabsTrigger value="analytics" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
-            Analytics
+            {t('agencyDashboard.pages.earnings.analytics')}
           </TabsTrigger>
         </TabsList>
 
@@ -357,11 +359,11 @@ export default function AgencyEarningsPage() {
               <CardTitle className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-immoo-navy" />
-                  Historique des gains
+                  {t('agencyDashboard.pages.earnings.earningsHistory')}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <ArrowUpDown className="h-4 w-4" />
-                  {filteredEarnings.length} résultats
+                  {filteredEarnings.length} {t('agencyDashboard.pages.earnings.results')}
                 </div>
               </CardTitle>
             </CardHeader>
@@ -369,11 +371,11 @@ export default function AgencyEarningsPage() {
               {filteredEarnings.length === 0 ? (
                 <div className="text-center py-12">
                   <DollarSign className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <p className="text-lg font-medium text-muted-foreground mb-2">Aucun gain trouvé</p>
+                  <p className="text-lg font-medium text-muted-foreground mb-2">{t('agencyDashboard.pages.earnings.noEarningsFound')}</p>
                   <p className="text-sm text-muted-foreground">
                     {searchTerm || selectedStatus !== 'all' 
-                      ? 'Essayez de modifier vos filtres de recherche'
-                      : 'Commencez à générer des revenus en créant des baux et en gérant des paiements'
+                      ? t('agencyDashboard.pages.earnings.tryModifyingFilters')
+                      : t('agencyDashboard.pages.earnings.startGeneratingRevenue')
                     }
                   </p>
                 </div>
@@ -399,7 +401,7 @@ export default function AgencyEarningsPage() {
                           <div className="space-y-1">
                             <div className="flex items-center gap-3">
                               <span className="font-semibold text-gray-900">
-                                {earning.type === 'commission' ? 'Commission sur loyer' : 'Frais d\'agence'}
+                                {earning.type === 'commission' ? t('agencyDashboard.pages.earnings.rentCommission') : t('agencyDashboard.pages.earnings.agencyFee')}
                               </span>
                               <Badge 
                                 variant={earning.status === 'paid' ? 'default' : 'secondary'} 
@@ -409,7 +411,7 @@ export default function AgencyEarningsPage() {
                                     : 'bg-amber-100 text-amber-700 border-amber-200'
                                 }`}
                               >
-                                {earning.status === 'paid' ? '✓ Perçu' : '⏳ En attente'}
+                                {earning.status === 'paid' ? `✓ ${t('agencyDashboard.pages.earnings.received')}` : `⏳ ${t('agencyDashboard.pages.earnings.pending')}`}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -438,13 +440,13 @@ export default function AgencyEarningsPage() {
                           </div>
                           {earning.type === 'commission' && earning.rate && earning.baseAmount && (
                             <div className="text-xs text-muted-foreground">
-                              {earning.rate}% de {formatCurrency(earning.baseAmount, "FCFA")}
+                              {earning.rate}% {t('agencyDashboard.pages.earnings.of')} {formatCurrency(earning.baseAmount, "FCFA")}
                             </div>
                           )}
                           {earning.processedAt && (
                             <div className="text-xs text-green-600 flex items-center gap-1">
                               <CheckCircle className="h-3 w-3" />
-                              Traité le {new Date(earning.processedAt).toLocaleDateString('fr-FR')}
+                              {t('agencyDashboard.pages.earnings.processedOn')} {new Date(earning.processedAt).toLocaleDateString('fr-FR')}
                             </div>
                           )}
                         </div>
@@ -462,19 +464,19 @@ export default function AgencyEarningsPage() {
             <CardHeader className="bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5">
               <CardTitle className="flex items-center gap-2">
                 <Home className="h-5 w-5 text-immoo-navy" />
-                Performance par propriété
+                {t('agencyDashboard.pages.earnings.performanceByProperty')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               {isLoadingByProperty ? (
                 <div className="text-center py-8">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-immoo-gold mx-auto mb-2"></div>
-                  <p className="text-sm text-muted-foreground">Analyse en cours...</p>
+                  <p className="text-sm text-muted-foreground">{t('agencyDashboard.pages.earnings.analysisInProgress')}</p>
                 </div>
               ) : !propertyEarnings || propertyEarnings.length === 0 ? (
                 <div className="text-center py-8">
                   <Home className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
-                  <p className="text-muted-foreground">Aucune donnée de performance disponible pour cette période</p>
+                  <p className="text-muted-foreground">{t('agencyDashboard.pages.earnings.noPerformanceData')}</p>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -491,7 +493,7 @@ export default function AgencyEarningsPage() {
                         <div className="flex items-center gap-2">
                           <Percent className="h-4 w-4 text-blue-600" />
                           <div>
-                            <div className="text-muted-foreground">Commissions</div>
+                            <div className="text-muted-foreground">{t('agencyDashboard.pages.earnings.commissions')}</div>
                             <div className="font-medium">{formatCurrency(property.commissionEarnings, "FCFA")}</div>
                           </div>
                         </div>
@@ -499,7 +501,7 @@ export default function AgencyEarningsPage() {
                         <div className="flex items-center gap-2">
                           <Building2 className="h-4 w-4 text-purple-600" />
                           <div>
-                            <div className="text-muted-foreground">Frais agence</div>
+                            <div className="text-muted-foreground">{t('agencyDashboard.pages.earnings.agencyFees')}</div>
                             <div className="font-medium">{formatCurrency(property.agencyFeeEarnings, "FCFA")}</div>
                           </div>
                         </div>
@@ -507,7 +509,7 @@ export default function AgencyEarningsPage() {
                         <div className="flex items-center gap-2">
                           <FileText className="h-4 w-4 text-orange-600" />
                           <div>
-                            <div className="text-muted-foreground">Transactions</div>
+                            <div className="text-muted-foreground">{t('agencyDashboard.pages.earnings.transactions')}</div>
                             <div className="font-medium">{property.transactionCount}</div>
                           </div>
                         </div>
@@ -515,7 +517,7 @@ export default function AgencyEarningsPage() {
                         <div className="flex items-center gap-2">
                           <Target className="h-4 w-4 text-green-600" />
                           <div>
-                            <div className="text-muted-foreground">Taux moyen</div>
+                            <div className="text-muted-foreground">{t('agencyDashboard.pages.earnings.averageRate')}</div>
                             <div className="font-medium">{property.averageCommissionRate.toFixed(1)}%</div>
                           </div>
                         </div>
@@ -540,7 +542,7 @@ export default function AgencyEarningsPage() {
             <CardHeader className="bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5">
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-immoo-navy" />
-                Analytics et tendances
+                {t('agencyDashboard.pages.earnings.analyticsAndTrends')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">

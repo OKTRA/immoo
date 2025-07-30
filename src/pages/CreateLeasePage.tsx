@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import LeaseDetailsForm from "@/components/leases/LeaseDetailsForm";
 import { createLease } from "@/services/tenant/leaseService";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface LeaseFormData {
   propertyId?: string;
@@ -39,6 +40,7 @@ export default function CreateLeasePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const queryParams = new URLSearchParams(location.search);
   const tenantId = queryParams.get('tenantId');
@@ -88,8 +90,8 @@ export default function CreateLeasePage() {
         
       } catch (error: any) {
         toast({
-          title: "Erreur",
-          description: `Impossible de récupérer les données de l'agence: ${error.message}`,
+          title: t('agencyDashboard.pages.createLease.error'),
+          description: `${t('agencyDashboard.pages.createLease.cannotRetrieveAgencyData')}: ${error.message}`,
           variant: "destructive"
         });
       } finally {
@@ -98,7 +100,7 @@ export default function CreateLeasePage() {
     };
     
     fetchAgencyData();
-  }, [agencyId, toast]);
+  }, [agencyId, toast, t]);
 
   useEffect(() => {
     const fetchSelectedEntities = async () => {
@@ -115,8 +117,8 @@ export default function CreateLeasePage() {
           
           if (selectedProperty && selectedProperty.status !== "available") {
             toast({
-              title: "Propriété non disponible",
-              description: `Cette propriété n'est pas disponible pour la location (statut actuel: ${selectedProperty.status}).`,
+              title: t('agencyDashboard.pages.createLease.propertyNotAvailable'),
+              description: `${t('agencyDashboard.pages.createLease.propertyNotAvailableDescription')} ${selectedProperty.status}).`,
               variant: "destructive"
             });
             setSelectedPropertyId(undefined);
@@ -163,8 +165,8 @@ export default function CreateLeasePage() {
         }
       } catch (error: any) {
         toast({
-          title: "Erreur",
-          description: `Impossible de récupérer les données: ${error.message}`,
+          title: t('agencyDashboard.pages.createLease.error'),
+          description: `${t('agencyDashboard.pages.createLease.cannotRetrieveData')}: ${error.message}`,
           variant: "destructive"
         });
       } finally {
@@ -173,7 +175,7 @@ export default function CreateLeasePage() {
     };
 
     fetchSelectedEntities();
-  }, [selectedPropertyId, selectedTenantId, quickAssign, toast]);
+  }, [selectedPropertyId, selectedTenantId, quickAssign, toast, t]);
 
   const filteredProperties = availableProperties.filter(prop => 
     prop.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -202,8 +204,8 @@ export default function CreateLeasePage() {
     const targetPropertyId = (propertyId && propertyId !== 'undefined') ? propertyId : selectedPropertyId;
     if (!targetPropertyId) {
       toast({
-        title: "Erreur",
-        description: "Aucune propriété sélectionnée pour la navigation",
+        title: t('agencyDashboard.pages.createLease.error'),
+        description: t('agencyDashboard.pages.createLease.noPropertySelectedForNavigation'),
         variant: "destructive"
       });
       return;
@@ -215,8 +217,8 @@ export default function CreateLeasePage() {
     if ((!selectedPropertyId || selectedPropertyId === 'undefined') && 
         (!propertyId || propertyId === 'undefined')) {
       toast({
-        title: "Erreur",
-        description: "Veuillez sélectionner une propriété pour ce bail",
+        title: t('agencyDashboard.pages.createLease.error'),
+        description: t('agencyDashboard.pages.createLease.pleaseSelectProperty'),
         variant: "destructive"
       });
       return;
@@ -225,8 +227,8 @@ export default function CreateLeasePage() {
     if ((!selectedTenantId || selectedTenantId === 'undefined') && 
         (!tenantId || tenantId === 'undefined')) {
       toast({
-        title: "Erreur",
-        description: "Veuillez sélectionner un locataire pour ce bail",
+        title: t('agencyDashboard.pages.createLease.error'),
+        description: t('agencyDashboard.pages.createLease.pleaseSelectTenant'),
         variant: "destructive"
       });
       return;
@@ -243,27 +245,27 @@ export default function CreateLeasePage() {
                           (tenantId && tenantId !== 'undefined' ? tenantId : '');
       
       if (!finalPropertyId) {
-        throw new Error("Propriété non trouvée ou non valide");
+        throw new Error(t('agencyDashboard.pages.createLease.propertyNotFoundOrInvalid'));
       }
       
       if (!finalTenantId) {
-        throw new Error("Locataire non trouvé ou non valide");
+        throw new Error(t('agencyDashboard.pages.createLease.tenantNotFoundOrInvalid'));
       }
       
       const finalProperty = property || availableProperties.find(p => p.id === finalPropertyId);
       
       if (!finalProperty) {
-        throw new Error("Propriété non trouvée");
+        throw new Error(t('agencyDashboard.pages.createLease.propertyNotFound'));
       }
       
       const { property: currentProperty, error: propertyError } = await getPropertyById(finalPropertyId);
       
       if (propertyError) {
-        throw new Error(`Erreur lors de la vérification de la propriété: ${propertyError}`);
+        throw new Error(`${t('agencyDashboard.pages.createLease.errorCheckingProperty')}: ${propertyError}`);
       }
       
       if (currentProperty && currentProperty.status !== "available") {
-        throw new Error(`Cette propriété n'est plus disponible (statut actuel: ${currentProperty.status})`);
+        throw new Error(`${t('agencyDashboard.pages.createLease.propertyNoLongerAvailable')} ${currentProperty.status})`);
       }
       
       const completeLeaseData: any = {
@@ -293,8 +295,8 @@ export default function CreateLeasePage() {
       if (error) throw new Error(error);
       
       toast({
-        title: "Locataire attribué avec succès",
-        description: "Vous allez être redirigé vers la page de gestion des locataires."
+        title: t('agencyDashboard.pages.createLease.tenantAssignedSuccessfully'),
+        description: t('agencyDashboard.pages.createLease.redirectingToTenantManagement')
       });
       
       setTimeout(() => {
@@ -302,7 +304,7 @@ export default function CreateLeasePage() {
       }, 1500);
     } catch (error: any) {
       toast({
-        title: "Erreur lors de l'attribution du locataire",
+        title: t('agencyDashboard.pages.createLease.errorAssigningTenant'),
         description: error.message,
         variant: "destructive"
       });
@@ -317,7 +319,7 @@ export default function CreateLeasePage() {
       <div className="container mx-auto py-10 px-4">
         <Card className="max-w-4xl mx-auto">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold">Chargement...</CardTitle>
+            <CardTitle className="text-2xl font-bold">{t('agencyDashboard.pages.createLease.loading')}</CardTitle>
           </CardHeader>
         </Card>
       </div>
@@ -333,12 +335,12 @@ export default function CreateLeasePage() {
           <div className="flex justify-between items-start">
             <div>
               <CardTitle className="text-2xl font-bold">
-                {quickAssign ? "Attribution rapide à la propriété" : "Configuration du bail"}
+                {quickAssign ? t('agencyDashboard.pages.createLease.quickAssignmentToProperty') : t('agencyDashboard.pages.createLease.leaseConfiguration')}
               </CardTitle>
               <CardDescription>
                 {quickAssign 
-                  ? `Attribution du locataire à une propriété` 
-                  : `Définissez les termes du bail`}
+                  ? t('agencyDashboard.pages.createLease.tenantAssignmentToProperty') 
+                  : t('agencyDashboard.pages.createLease.defineLeaseTerms')}
               </CardDescription>
             </div>
             <div className="rounded-full bg-blue-100 p-2 text-blue-700">
@@ -349,9 +351,9 @@ export default function CreateLeasePage() {
         <CardContent>
           {noAvailableProperties && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-md p-4 mb-6">
-              <p className="text-yellow-800 font-medium">Aucune propriété disponible</p>
+              <p className="text-yellow-800 font-medium">{t('agencyDashboard.pages.createLease.noAvailableProperties')}</p>
               <p className="text-yellow-700 text-sm mt-1">
-                Toutes les propriétés sont actuellement occupées. Veuillez ajouter de nouvelles propriétés ou libérer des propriétés existantes avant de créer un nouveau bail.
+                {t('agencyDashboard.pages.createLease.allPropertiesOccupied')}
               </p>
             </div>
           )}
@@ -362,7 +364,7 @@ export default function CreateLeasePage() {
                 <div className="flex items-center">
                   <Search className="h-5 w-5 text-muted-foreground mr-2" />
                   <Input
-                    placeholder="Rechercher une propriété ou un locataire..."
+                    placeholder={t('agencyDashboard.pages.createLease.searchPropertyOrTenant')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="bg-white"
@@ -371,14 +373,14 @@ export default function CreateLeasePage() {
                 
                 {(!propertyId || propertyId === 'undefined') && (
                   <div className="space-y-2">
-                    <Label htmlFor="propertySelect">Sélectionner une propriété</Label>
+                    <Label htmlFor="propertySelect">{t('agencyDashboard.pages.createLease.selectProperty')}</Label>
                     <Select
                       value={selectedPropertyId}
                       onValueChange={handlePropertyChange}
                       disabled={noAvailableProperties}
                     >
                       <SelectTrigger id="propertySelect">
-                        <SelectValue placeholder={noAvailableProperties ? "Aucune propriété disponible" : "Choisir une propriété"} />
+                        <SelectValue placeholder={noAvailableProperties ? t('agencyDashboard.pages.createLease.noPropertiesAvailable') : t('agencyDashboard.pages.createLease.chooseProperty')} />
                       </SelectTrigger>
                       <SelectContent>
                         {filteredProperties.map((prop) => (
@@ -393,13 +395,13 @@ export default function CreateLeasePage() {
                 
                 {(!tenantId || tenantId === 'undefined') && (
                   <div className="space-y-2">
-                    <Label htmlFor="tenantSelect">Sélectionner un locataire</Label>
+                    <Label htmlFor="tenantSelect">{t('agencyDashboard.pages.createLease.selectTenant')}</Label>
                     <Select
                       value={selectedTenantId}
                       onValueChange={handleTenantChange}
                     >
                       <SelectTrigger id="tenantSelect">
-                        <SelectValue placeholder="Choisir un locataire" />
+                        <SelectValue placeholder={t('agencyDashboard.pages.createLease.chooseTenant')} />
                       </SelectTrigger>
                       <SelectContent>
                         {filteredTenants.map((tenant) => (
@@ -468,7 +470,7 @@ export default function CreateLeasePage() {
             />
           ) : (
             <div className="text-center p-4 bg-yellow-50 text-yellow-700 rounded-md">
-              Veuillez sélectionner une propriété et un locataire pour continuer.
+              {t('agencyDashboard.pages.createLease.pleaseSelectPropertyAndTenant')}
             </div>
           )}
         </CardContent>
@@ -485,7 +487,7 @@ export default function CreateLeasePage() {
             }}
             disabled={submitting}
           >
-            <ArrowLeft className="h-4 w-4 mr-2" /> Retour
+            <ArrowLeft className="h-4 w-4 mr-2" /> {t('agencyDashboard.pages.createLease.back')}
           </Button>
           <div className="flex gap-2">
             {!quickAssign && (
@@ -494,7 +496,7 @@ export default function CreateLeasePage() {
                 onClick={handleSkip}
                 disabled={submitting}
               >
-                Ignorer cette étape
+                {t('agencyDashboard.pages.createLease.skipThisStep')}
               </Button>
             )}
             <Button 
@@ -502,8 +504,8 @@ export default function CreateLeasePage() {
               disabled={submitting || !property || !tenant || noAvailableProperties}
             >
               {submitting 
-                ? "Création..." 
-                : "Créer le bail"} 
+                ? t('agencyDashboard.pages.createLease.creating') 
+                : t('agencyDashboard.pages.createLease.createLease')} 
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
           </div>

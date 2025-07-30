@@ -3,10 +3,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Property } from "@/assets/types";
-import { Upload, X, Image as ImageIcon, Star, StarIcon, Plus, PlusCircle, Trash2 } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Star, StarIcon, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { uploadPropertyImage } from "@/services/property/propertyMediaService";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface PropertyMediaFormProps {
   initialData: Partial<Property>;
@@ -16,152 +17,116 @@ interface PropertyMediaFormProps {
   propertyId?: string;
 }
 
+interface ImageItem {
+  id: string;
+  url: string;
+  file: File | null;
+  isPrimary: boolean;
+  uploading: boolean;
+  description: string;
+}
+
 export default function PropertyMediaForm({ initialData, onChange, onNext, onBack, propertyId }: PropertyMediaFormProps) {
-  const [formData, setFormData] = useState({
-    imageUrl: initialData.imageUrl || "",
-    virtualTourUrl: initialData.virtualTourUrl || "",
-  });
-  const [uploading, setUploading] = useState(false);
-  
-  // Nouvel état pour gérer plusieurs images
-  const [additionalImages, setAdditionalImages] = useState<Array<{
-    id: string,
-    url: string, 
-    file: File | null,
-    isPrimary: boolean,
-    uploading: boolean,
-    description: string
-  }>>([]);
-  
-  // Pour suivre si l'image principale a changé
-  const [mainImageChanged, setMainImageChanged] = useState(false);
+  const { t } = useTranslation();
+  const [images, setImages] = useState<ImageItem[]>([]);
+  const [virtualTourUrl, setVirtualTourUrl] = useState(initialData.virtualTourUrl || "");
 
-  // Initialize existing additional images when editing
+  // Initialize existing images when editing
   useEffect(() => {
-    if (initialData.additionalImages && initialData.additionalImages.length > 0) {
-      const existingImages = initialData.additionalImages.map((img, index) => ({
-        id: `existing-${index}`,
-        url: img.url,
+    const existingImages: ImageItem[] = [];
+    
+    // Add main image if exists
+    if (initialData.imageUrl) {
+      existingImages.push({
+        id: 'main-image',
+        url: initialData.imageUrl,
         file: null,
-        isPrimary: img.isPrimary,
+        isPrimary: true,
         uploading: false,
-        description: img.description || ''
-      }));
-      setAdditionalImages(existingImages);
+        description: ''
+      });
     }
-  }, [initialData.additionalImages]);
+    
+    // Add additional images if exist
+    if (initialData.additionalImages && initialData.additionalImages.length > 0) {
+      initialData.additionalImages.forEach((img, index) => {
+        existingImages.push({
+          id: `additional-${index}`,
+          url: img.url,
+          file: null,
+          isPrimary: img.isPrimary || false,
+          uploading: false,
+          description: img.description || ''
+        });
+      });
+    }
+    
+    setImages(existingImages);
+  }, [initialData.imageUrl, initialData.additionalImages]);
 
   useEffect(() => {
+    // Find primary image
+    const primaryImage = images.find(img => img.isPrimary);
+    
     onChange({
-      imageUrl: formData.imageUrl,
-      virtualTourUrl: formData.virtualTourUrl,
-      // Ajouter les images additionnelles aux données du formulaire
-      additionalImages: additionalImages.filter(img => !img.file).map(img => ({
-        url: img.url,
-        isPrimary: img.isPrimary,
-        description: img.description
-      }))
+      imageUrl: primaryImage?.url || "",
+      virtualTourUrl,
+      additionalImages: images
+        .filter(img => !img.isPrimary && !img.file) // Only non-primary, uploaded images
+        .map(img => ({
+          url: img.url,
+          isPrimary: img.isPrimary,
+          description: img.description
+        }))
     });
-  }, [formData.imageUrl, formData.virtualTourUrl, additionalImages]);
+  }, [images, virtualTourUrl, onChange]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleMainFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      const file = e.target.files[0];
-      
-      // Create a preview
-      const imageUrl = URL.createObjectURL(file);
-      setFormData(prev => ({ ...prev, imageUrl }));
-      
-      // Upload immediately
-      handleUploadMainImage(file);
-    }
-  };
-  
-  const handleAdditionalFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files);
+      
+      // Check if we're not exceeding the limit (10 images total)
+      if (images.length + filesArray.length > 10) {
+        toast.error(t('agencyDashboard.pages.createProperty.maxImagesReached'));
+        return;
+      }
 
-      // Préparer les nouvelles images à ajouter dans le state
-      const newImages = filesArray.map(file => ({
+      // Create new image items
+      const newImages: ImageItem[] = filesArray.map(file => ({
         id: Math.random().toString(36).substring(2, 9),
         url: URL.createObjectURL(file),
         file,
-        isPrimary: false,
-        uploading: true, // On démarre l'upload immédiatement
+        isPrimary: images.length === 0, // First image becomes primary if no images exist
+        uploading: false,
         description: ""
       }));
 
-      // Index de départ des nouvelles images dans le tableau final
-      const startIndex = additionalImages.length;
-
-      // 1) Ajouter les images au state pour affichage immédiat du preview
-      setAdditionalImages(prev => [...prev, ...newImages]);
-
-      // 2) Lancer l'upload pour chaque nouveau fichier
-      newImages.forEach(async (img, idx) => {
-        const globalIndex = startIndex + idx; // position réelle dans le tableau après ajout
-        try {
-          const tempId = propertyId || "temp-" + Date.now();
-          const { imageUrl, error } = await uploadPropertyImage(tempId, img.file!, false, img.description);
-          if (error) throw new Error(error);
-
-          // Mettre à jour l'URL et l'état uploading
-          setAdditionalImages(prev => {
-            const updated = [...prev];
-            updated[globalIndex] = {
-              ...updated[globalIndex],
-              url: imageUrl,
-              uploading: false,
-              file: null // libérer le fichier
-            };
-            return updated;
-          });
-        } catch (err: any) {
-          toast.error(`Erreur lors du téléchargement: ${err.message}`);
-          // Échec -> réinitialiser uploading
-          setAdditionalImages(prev => {
-            const updated = [...prev];
-            if (updated[globalIndex]) {
-              updated[globalIndex] = { ...updated[globalIndex], uploading: false };
-            }
-            return updated;
-          });
+      // Add new images to state
+      setImages(prev => {
+        const updated = [...prev, ...newImages];
+        
+        // If this is the first image, make it primary
+        if (prev.length === 0 && newImages.length > 0) {
+          updated[0].isPrimary = true;
         }
+        
+        return updated;
+      });
+
+      // Upload images immediately
+      newImages.forEach((img, index) => {
+        const globalIndex = images.length + index;
+        handleUploadImage(globalIndex);
       });
     }
   };
 
-  const handleUploadMainImage = async (file: File) => {
-    setUploading(true);
-    setMainImageChanged(true);
-    
-    try {
-      // ID temporaire si on n'a pas encore de propertyId
-      const tempId = propertyId || "temp-" + Date.now();
-      const { imageUrl, error } = await uploadPropertyImage(tempId, file, true);
-      
-      if (error) throw new Error(error);
-      
-      setFormData(prev => ({ ...prev, imageUrl }));
-      toast.success("Image principale téléchargée");
-    } catch (error: any) {
-      toast.error(`Erreur lors du téléchargement: ${error.message}`);
-    } finally {
-      setUploading(false);
-    }
-  };
-  
-  const handleUploadAdditionalImage = async (index: number) => {
-    const image = additionalImages[index];
+  const handleUploadImage = async (index: number) => {
+    const image = images[index];
     if (!image.file) return;
     
-    // Mettre à jour le statut de téléchargement
-    setAdditionalImages(prev => {
+    // Update uploading status
+    setImages(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], uploading: true };
       return updated;
@@ -169,28 +134,28 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
     
     try {
       const tempId = propertyId || "temp-" + Date.now();
-      const { imageUrl, error } = await uploadPropertyImage(tempId, image.file, false, image.description);
+      const { imageUrl, error } = await uploadPropertyImage(tempId, image.file!, image.isPrimary, image.description);
       
       if (error) throw new Error(error);
       
-      // Mettre à jour l'URL avec celle du serveur
-      setAdditionalImages(prev => {
+      // Update URL and uploading status
+      setImages(prev => {
         const updated = [...prev];
         updated[index] = { 
           ...updated[index], 
           url: imageUrl, 
           uploading: false,
-          file: null // Le fichier a été téléchargé, on peut le supprimer
+          file: null // File uploaded, can be cleared
         };
         return updated;
       });
       
-      toast.success("Image additionnelle téléchargée");
+      toast.success(t('agencyDashboard.pages.createProperty.imageUploadedSuccessfully'));
     } catch (error: any) {
-      toast.error(`Erreur lors du téléchargement: ${error.message}`);
+      toast.error(`${t('agencyDashboard.pages.createProperty.uploadError')}: ${error.message}`);
       
-      // Réinitialiser le statut de téléchargement
-      setAdditionalImages(prev => {
+      // Reset uploading status
+      setImages(prev => {
         const updated = [...prev];
         updated[index] = { ...updated[index], uploading: false };
         return updated;
@@ -198,200 +163,215 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
     }
   };
 
-  const clearMainImage = () => {
-    setFormData(prev => ({ ...prev, imageUrl: "" }));
-    setMainImageChanged(true);
+  const removeImage = (index: number) => {
+    const imageToRemove = images[index];
+    
+    setImages(prev => {
+      const updated = prev.filter((_, i) => i !== index);
+      
+      // If we removed the primary image and there are other images, make the first one primary
+      if (imageToRemove.isPrimary && updated.length > 0) {
+        updated[0].isPrimary = true;
+      }
+      
+      return updated;
+    });
+    
+    toast.success(t('agencyDashboard.pages.createProperty.imageRemoved'));
   };
-  
-  const removeAdditionalImage = (index: number) => {
-    setAdditionalImages(prev => prev.filter((_, i) => i !== index));
-  };
-  
+
   const setImageAsPrimary = (index: number) => {
-    // Si l'image est déjà principale, ne rien faire
-    if (additionalImages[index].isPrimary) return;
+    // If image is already primary, do nothing
+    if (images[index].isPrimary) return;
     
-    // Définir cette image comme principale
-    const imageUrl = additionalImages[index].url;
-    
-    // Mettre à jour l'URL principale
-    setFormData(prev => ({ ...prev, imageUrl }));
-    setMainImageChanged(true);
-    
-    // Mettre à jour les drapeaux isPrimary
-    setAdditionalImages(prev => {
+    setImages(prev => {
       return prev.map((img, i) => ({
         ...img,
         isPrimary: i === index
       }));
     });
     
-    toast.success("Image principale mise à jour");
+    toast.success(t('agencyDashboard.pages.createProperty.primaryImageUpdated'));
   };
-  
+
   const handleDescriptionChange = (index: number, description: string) => {
-    setAdditionalImages(prev => {
+    setImages(prev => {
       const updated = [...prev];
       updated[index] = { ...updated[index], description };
       return updated;
     });
   };
 
+  const handleVirtualTourChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setVirtualTourUrl(e.target.value);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="mainImage">Image principale</Label>
-        <div className="flex items-center gap-4">
-          <Input
-            id="mainImage"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleMainFileChange}
-          />
-          <div className="flex-1">
-            {formData.imageUrl ? (
-              <div className="relative h-40 w-full border rounded-md overflow-hidden">
-                <img 
-                  src={formData.imageUrl} 
-                  alt="Aperçu de la propriété" 
-                  className="h-full w-full object-cover"
-                />
-                <Button 
-                  variant="destructive" 
-                  size="icon" 
-                  className="absolute top-2 right-2 h-7 w-7"
-                  onClick={clearMainImage}
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <label 
-                htmlFor="mainImage"
-                className="flex flex-col items-center justify-center h-40 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted/50"
-              >
-                <ImageIcon className="h-10 w-10 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  Cliquez pour sélectionner une image principale
-                </p>
-              </label>
-            )}
-          </div>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label className="text-lg font-medium">{t('agencyDashboard.pages.createProperty.propertyPhotos')}</Label>
+          <span className="text-sm text-muted-foreground">
+            {images.length}/10 {t('agencyDashboard.pages.createProperty.images')}
+          </span>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
-          L'image principale sera affichée comme aperçu de la propriété. Format recommandé: JPEG ou PNG, max 5MB.
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="additionalImages">Images additionnelles</Label>
-        <div className="mb-2">
+        
+        {/* Upload Area */}
+        <div className="mb-4">
           <Input
-            id="additionalImages"
+            id="propertyImages"
             type="file"
             accept="image/*"
             multiple
             className="hidden"
-            onChange={handleAdditionalFileChange}
+            onChange={handleFileChange}
           />
           <label 
-            htmlFor="additionalImages"
-            className="flex items-center justify-center py-2 px-4 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted/50 w-full"
+            htmlFor="propertyImages"
+            className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors"
           >
-            <PlusCircle className="h-5 w-5 text-muted-foreground mr-2" />
-            <span className="text-sm text-muted-foreground">Ajouter des images</span>
+            <Upload className="h-8 w-8 text-blue-500 mb-2" />
+            <span className="text-sm text-blue-600 font-medium">
+              {t('agencyDashboard.pages.createProperty.clickOrDragToSelectPhotos')}
+            </span>
+            <span className="text-xs text-blue-500 mt-1">
+              {t('agencyDashboard.pages.createProperty.recommendedFormat')}
+            </span>
           </label>
         </div>
         
-        {additionalImages.length > 0 && (
-          <ScrollArea className="h-80 border rounded-md p-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-2">
-              {additionalImages.map((image, index) => (
-                <div key={image.id} className="relative border rounded-md overflow-hidden">
-                  <img 
-                    src={image.url} 
-                    alt={`Image ${index + 1}`} 
-                    className="h-40 w-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity flex flex-col justify-between p-2">
-                    <div className="flex justify-between">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-7 w-7 bg-white/10 backdrop-blur-sm hover:bg-white/20"
-                        onClick={() => setImageAsPrimary(index)}
-                        title="Définir comme image principale"
-                      >
-                        {image.isPrimary ? (
-                          <StarIcon className="h-4 w-4 text-yellow-400" />
-                        ) : (
+        {/* Images Grid */}
+        {images.length > 0 && (
+          <ScrollArea className="h-96 border rounded-lg p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {images.map((image, index) => (
+                <div key={image.id} className="relative group border rounded-lg overflow-hidden bg-white shadow-sm">
+                  {/* Image */}
+                  <div className="relative h-48 w-full">
+                    <img 
+                      src={image.url} 
+                      alt={`${t('agencyDashboard.pages.createProperty.propertyImage')} ${index + 1}`} 
+                      className="h-full w-full object-cover"
+                    />
+                    
+                    {/* Primary Badge */}
+                    {image.isPrimary && (
+                      <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center">
+                        <StarIcon className="h-3 w-3 mr-1" />
+                        {t('agencyDashboard.pages.createProperty.primary')}
+                      </div>
+                    )}
+                    
+                    {/* Uploading Overlay */}
+                    {image.uploading && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <div className="text-white text-sm">{t('agencyDashboard.pages.createProperty.uploading')}</div>
+                      </div>
+                    )}
+                    
+                    {/* Action Buttons */}
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3">
+                      <div className="flex justify-between">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 bg-white/20 backdrop-blur-sm hover:bg-white/30"
+                          onClick={() => setImageAsPrimary(index)}
+                          title={t('agencyDashboard.pages.createProperty.setAsPrimary')}
+                          disabled={image.isPrimary}
+                        >
                           <Star className="h-4 w-4 text-white" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 bg-white/20 backdrop-blur-sm hover:bg-white/30"
+                          onClick={() => removeImage(index)}
+                          title={t('agencyDashboard.pages.createProperty.removeImage')}
+                        >
+                          <Trash2 className="h-4 w-4 text-white" />
+                        </Button>
+                      </div>
+                      
+                      {/* Description Input */}
+                      <div className="space-y-2">
+                        <Input
+                          value={image.description}
+                          onChange={(e) => handleDescriptionChange(index, e.target.value)}
+                          placeholder={t('agencyDashboard.pages.createProperty.imageDescription')}
+                          className="text-xs bg-white/90 border-white/20 placeholder:text-gray-500"
+                        />
+                        {image.file && (
+                          <Button 
+                            size="sm" 
+                            variant="secondary" 
+                            className="w-full text-xs"
+                            onClick={() => handleUploadImage(index)}
+                            disabled={image.uploading}
+                          >
+                            {image.uploading ? t('agencyDashboard.pages.createProperty.uploading') : t('agencyDashboard.pages.createProperty.upload')}
+                          </Button>
                         )}
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-7 w-7 bg-white/10 backdrop-blur-sm hover:bg-white/20"
-                        onClick={() => removeAdditionalImage(index)}
-                        title="Supprimer l'image"
-                      >
-                        <Trash2 className="h-4 w-4 text-white" />
-                      </Button>
+                      </div>
                     </div>
-                    <div className="flex flex-col space-y-2">
-                      <Input
-                        value={image.description}
-                        onChange={(e) => handleDescriptionChange(index, e.target.value)}
-                        placeholder="Description (optionnelle)"
-                        className="text-xs bg-white/10 border-white/20 placeholder:text-white/50 text-white"
-                      />
-                      <Button 
-                        size="sm" 
-                        variant="secondary" 
-                        className="w-full text-xs"
-                        onClick={() => handleUploadAdditionalImage(index)}
-                        disabled={image.uploading || !image.file}
-                      >
-                        {image.uploading ? "Téléchargement..." : image.file ? "Télécharger" : "Téléchargé"}
-                      </Button>
+                  </div>
+                  
+                  {/* Image Info */}
+                  <div className="p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">
+                        {t('agencyDashboard.pages.createProperty.image')} {index + 1}
+                      </span>
+                      {image.isPrimary && (
+                        <span className="text-xs text-yellow-600 font-medium">
+                          {t('agencyDashboard.pages.createProperty.primary')}
+                        </span>
+                      )}
                     </div>
+                    {image.description && (
+                      <p className="text-xs text-gray-600 truncate">
+                        {image.description}
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
           </ScrollArea>
         )}
-        <p className="text-xs text-muted-foreground mt-1">
-          Ajoutez jusqu'à 10 images supplémentaires pour montrer plus de détails de la propriété.
+        
+        <p className="text-xs text-muted-foreground">
+          {t('agencyDashboard.pages.createProperty.photosDescription')}
         </p>
       </div>
 
+      {/* Virtual Tour URL */}
       <div className="space-y-2">
-        <Label htmlFor="virtualTourUrl">URL de visite virtuelle (optionnel)</Label>
+        <Label htmlFor="virtualTourUrl">{t('agencyDashboard.pages.createProperty.virtualTourUrl')}</Label>
         <Input
           id="virtualTourUrl"
           name="virtualTourUrl"
           type="url"
           placeholder="https://exemple.com/visite-virtuelle"
-          value={formData.virtualTourUrl}
-          onChange={handleChange}
+          value={virtualTourUrl}
+          onChange={handleVirtualTourChange}
         />
-        <p className="text-xs text-muted-foreground mt-1">
-          Ajoutez un lien vers une visite virtuelle (Matterport, YouTube 360, etc.)
+        <p className="text-xs text-muted-foreground">
+          {t('agencyDashboard.pages.createProperty.virtualTourDescription')}
         </p>
       </div>
 
+      {/* Navigation Buttons */}
       {(onNext || onBack) && (
         <div className="flex justify-between pt-4">
           {onBack && (
             <Button type="button" variant="outline" onClick={onBack}>
-              Retour
+              {t('agencyDashboard.pages.createProperty.back')}
             </Button>
           )}
           {onNext && (
             <Button type="button" onClick={onNext} className="ml-auto">
-              Suivant
+              {t('agencyDashboard.pages.createProperty.next')}
             </Button>
           )}
         </div>

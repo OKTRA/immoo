@@ -43,6 +43,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import PropertyImageGallery from '@/components/properties/PropertyImageGallery';
+import { useTranslation } from '@/hooks/useTranslation';
 
 interface PropertyImage {
   id: string;
@@ -73,6 +74,7 @@ export default function AgencyPropertiesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
+  const { t } = useTranslation();
 
   const { data: properties = [], isLoading, error, refetch } = useQuery({
     queryKey: ['agency-properties-with-images', agencyId],
@@ -238,10 +240,10 @@ export default function AgencyPropertiesPage() {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-immoo-navy to-immoo-gold bg-clip-text text-transparent">
-                Portfolio Immobilier
+                {t('agencyDashboard.pages.properties.title')}
               </h1>
               <p className="text-sm sm:text-base text-muted-foreground">
-                Gestion complète de vos biens immobiliers
+                {t('agencyDashboard.pages.properties.description')}
               </p>
             </div>
           </div>
@@ -249,14 +251,14 @@ export default function AgencyPropertiesPage() {
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <Button variant="outline" size="sm" className="hidden sm:flex">
             <Download className="h-4 w-4 mr-2" />
-            Exporter
+            {t('agencyDashboard.pages.properties.export')}
           </Button>
           <Button 
             onClick={handleCreateProperty}
             className="bg-gradient-to-r from-immoo-gold to-immoo-navy w-full sm:w-auto"
           >
             <Plus className="h-4 w-4 mr-2" />
-            Nouvelle propriété
+            {t('agencyDashboard.pages.properties.newProperty')}
           </Button>
         </div>
       </div>
@@ -294,14 +296,14 @@ export default function AgencyPropertiesPage() {
                 onChange={(e) => setSelectedType(e.target.value)}
                 className="px-3 py-2 border rounded-lg bg-white/80 backdrop-blur-sm w-full sm:w-auto"
               >
-                <option value="all">Tous les types</option>
-                <option value="apartment">Appartements</option>
-                <option value="house">Maisons</option>
-                <option value="villa">Villas</option>
-                <option value="studio">Studios</option>
-                <option value="office">Bureaux</option>
-                <option value="commercial">Commercial</option>
-                <option value="land">Terrains</option>
+                <option value="all">{t('agencyDashboard.pages.properties.allTypes')}</option>
+                <option value="apartment">{t('agencyDashboard.pages.properties.apartment')}</option>
+                <option value="house">{t('agencyDashboard.pages.properties.house')}</option>
+                <option value="villa">{t('agencyDashboard.pages.properties.villa')}</option>
+                <option value="studio">{t('agencyDashboard.pages.properties.studio')}</option>
+                <option value="office">{t('agencyDashboard.pages.properties.office')}</option>
+                <option value="commercial">{t('agencyDashboard.pages.properties.commercial')}</option>
+                <option value="land">{t('agencyDashboard.pages.properties.land')}</option>
               </select>
 
               <div className="flex-1">
@@ -309,7 +311,7 @@ export default function AgencyPropertiesPage() {
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <input
                     type="text"
-                    placeholder="Rechercher..."
+                    placeholder={t('agencyDashboard.pages.properties.searchPlaceholder')}
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border rounded-lg bg-white/80 backdrop-blur-sm"
@@ -328,7 +330,7 @@ export default function AgencyPropertiesPage() {
             <CardTitle className="text-sm font-medium text-blue-700 flex items-center justify-between">
               <div className="flex items-center">
                 <Building2 className="h-4 w-4 mr-2" />
-                Total propriétés
+                {t('agencyDashboard.pages.properties.totalProperties')}
               </div>
               <div className="p-1 bg-blue-100 rounded-full">
                 <TrendingUp className="h-3 w-3 text-blue-600" />
@@ -340,9 +342,9 @@ export default function AgencyPropertiesPage() {
               {totalProperties}
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-blue-600">Biens gérés</span>
+              <span className="text-blue-600">{t('agencyDashboard.pages.properties.managedProperties')}</span>
               <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
-                Portfolio
+                {t('agencyDashboard.pages.properties.portfolio')}
               </Badge>
             </div>
             <Progress value={100} className="mt-2 h-2" />
@@ -354,7 +356,7 @@ export default function AgencyPropertiesPage() {
             <CardTitle className="text-sm font-medium text-green-700 flex items-center justify-between">
               <div className="flex items-center">
                 <CheckCircle className="h-4 w-4 mr-2" />
-                Disponibles
+                {t('agencyDashboard.pages.properties.available')}
               </div>
               <div className="p-1 bg-green-100 rounded-full">
                 <Target className="h-3 w-3 text-green-600" />
@@ -366,7 +368,7 @@ export default function AgencyPropertiesPage() {
               {availableProperties}
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-green-600">Prêtes à louer</span>
+              <span className="text-green-600">{t('agencyDashboard.pages.properties.readyToRent')}</span>
               <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
                 {totalProperties > 0 ? ((availableProperties / totalProperties) * 100).toFixed(0) : 0}%
               </Badge>
@@ -380,7 +382,7 @@ export default function AgencyPropertiesPage() {
             <CardTitle className="text-sm font-medium text-purple-700 flex items-center justify-between">
               <div className="flex items-center">
                 <DollarSign className="h-4 w-4 mr-2" />
-                Valeur totale
+                {t('agencyDashboard.pages.properties.totalValue')}
               </div>
               <div className="p-1 bg-purple-100 rounded-full">
                 <Star className="h-3 w-3 text-purple-600" />
@@ -392,9 +394,9 @@ export default function AgencyPropertiesPage() {
               {formatCurrency(totalValue, "FCFA")}
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-purple-600">Patrimoine</span>
+              <span className="text-purple-600">{t('agencyDashboard.pages.properties.totalAssets')}</span>
               <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
-                Estimé
+                {t('agencyDashboard.pages.properties.estimated')}
               </Badge>
             </div>
             <Progress value={100} className="mt-2 h-2" />
@@ -406,7 +408,7 @@ export default function AgencyPropertiesPage() {
             <CardTitle className="text-sm font-medium text-orange-700 flex items-center justify-between">
               <div className="flex items-center">
                 <Activity className="h-4 w-4 mr-2" />
-                Taux d'occupation
+                {t('agencyDashboard.pages.properties.occupancyRate')}
               </div>
               <div className="p-1 bg-orange-100 rounded-full">
                 <Home className="h-3 w-3 text-orange-600" />
@@ -418,14 +420,14 @@ export default function AgencyPropertiesPage() {
               {occupancyRate.toFixed(0)}%
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-orange-600">Performance</span>
+              <span className="text-orange-600">{t('agencyDashboard.pages.properties.performance')}</span>
               <Badge variant="secondary" className={`text-xs ${
                 occupancyRate >= 90 ? 'bg-green-100 text-green-700' :
                 occupancyRate >= 70 ? 'bg-orange-100 text-orange-700' :
                 'bg-red-100 text-red-700'
               }`}>
-                {occupancyRate >= 90 ? 'Excellent' :
-                 occupancyRate >= 70 ? 'Bon' : 'À améliorer'}
+                {occupancyRate >= 90 ? t('agencyDashboard.pages.properties.excellent') :
+                 occupancyRate >= 70 ? t('agencyDashboard.pages.properties.good') : t('agencyDashboard.pages.properties.toImprove')}
               </Badge>
             </div>
             <Progress value={occupancyRate} className="mt-2 h-2" />
@@ -439,11 +441,11 @@ export default function AgencyPropertiesPage() {
           <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="flex items-center gap-2">
               <Building2 className="h-5 w-5 text-immoo-navy" />
-              <span>Mes propriétés</span>
+              <span>{t('agencyDashboard.pages.properties.myProperties')}</span>
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Home className="h-4 w-4" />
-              <span>{filteredProperties.length} propriétés</span>
+              <span>{filteredProperties.length} {t('agencyDashboard.pages.properties.properties')}</span>
             </div>
           </CardTitle>
         </CardHeader>
@@ -453,14 +455,14 @@ export default function AgencyPropertiesPage() {
               <Building2 className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium text-muted-foreground mb-2">
                 {searchTerm || selectedStatus !== 'all' || selectedType !== 'all'
-                  ? 'Aucune propriété trouvée'
-                  : 'Aucune propriété enregistrée'
+                  ? t('agencyDashboard.pages.properties.noPropertiesFound')
+                  : t('agencyDashboard.pages.properties.noPropertiesRegistered')
                 }
               </p>
               <p className="text-sm text-muted-foreground mb-4">
                 {searchTerm || selectedStatus !== 'all' || selectedType !== 'all'
-                  ? 'Essayez de modifier vos filtres de recherche'
-                  : 'Commencez par ajouter des propriétés à votre portfolio'
+                  ? t('agencyDashboard.pages.properties.tryModifyingFilters')
+                  : t('agencyDashboard.pages.properties.startAddingProperties')
                 }
               </p>
               {(!searchTerm && selectedStatus === 'all' && selectedType === 'all') && (
@@ -469,7 +471,7 @@ export default function AgencyPropertiesPage() {
                   className="bg-gradient-to-r from-immoo-gold to-immoo-navy w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Ajouter une propriété
+                  {t('agencyDashboard.pages.properties.addProperty')}
                 </Button>
               )}
             </div>
@@ -536,7 +538,7 @@ export default function AgencyPropertiesPage() {
                           className="flex-1 hover:bg-immoo-navy hover:text-white text-xs sm:text-sm"
                         >
                           <Eye className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                          Voir
+                          {t('agencyDashboard.pages.properties.view')}
                         </Button>
                         <Button
                           size="sm"
@@ -545,7 +547,7 @@ export default function AgencyPropertiesPage() {
                           className="flex-1 hover:bg-immoo-gold hover:text-white text-xs sm:text-sm"
                         >
                           <Edit className="h-3 w-3 sm:h-4 sm:w-4 mr-1" />
-                          Modifier
+                          {t('agencyDashboard.pages.properties.edit')}
                         </Button>
                         </div>
                       </div>

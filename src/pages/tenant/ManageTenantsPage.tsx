@@ -38,6 +38,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import EditTenantForm from '@/components/tenants/EditTenantForm';
 import { deleteTenant } from '@/services/tenant/tenantService';
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface ManageTenantsPageProps {
   leaseView?: boolean;
@@ -46,6 +47,7 @@ interface ManageTenantsPageProps {
 export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPageProps) {
   const { agencyId, propertyId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [isAddingTenant, setIsAddingTenant] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
@@ -78,7 +80,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
       <div className="container mx-auto p-6">
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Accès refusé. Identifiant d'agence manquant.</AlertDescription>
+          <AlertDescription>{t('agencyDashboard.pages.tenants.accessDenied')}</AlertDescription>
         </Alert>
       </div>
     );
@@ -110,7 +112,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
     if (targetPropertyId) {
       navigate(`/agencies/${agencyId}/properties/${targetPropertyId}/lease/create?tenantId=${tenantId}`);
     } else {
-      toast.info("Veuillez sélectionner une propriété pour créer un bail");
+      toast.info(t('agencyDashboard.pages.tenants.selectPropertyForLease'));
       navigate(`/agencies/${agencyId}`);
     }
   };
@@ -118,7 +120,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
   const handleAddTenantSuccess = () => {
     setIsAddingTenant(false);
     refetch();
-    toast.success("Locataire ajouté avec succès!");
+    toast.success(t('agencyDashboard.pages.tenants.tenantAddedSuccess'));
   };
 
   // Gestion vue / édition / suppression
@@ -141,16 +143,16 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
     if (!deleteTenantTarget) return;
 
     if (deleteTenantTarget.hasLease) {
-      toast.error("Impossible de supprimer un locataire ayant un bail actif");
+      toast.error(t('agencyDashboard.pages.tenants.cannotDeleteWithLease'));
       setIsDeleteOpen(false);
       return;
     }
 
     const { error } = await deleteTenant(deleteTenantTarget.id || '');
     if (error) {
-      toast.error(`Erreur lors de la suppression: ${error}`);
+      toast.error(`${t('agencyDashboard.pages.tenants.deleteError')}: ${error}`);
     } else {
-      toast.success("Locataire supprimé");
+      toast.success(t('agencyDashboard.pages.tenants.tenantDeleted'));
       refetch();
     }
     setIsDeleteOpen(false);
@@ -162,7 +164,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-immoo-gold mx-auto mb-4"></div>
-            <p className="text-muted-foreground">Chargement des locataires...</p>
+            <p className="text-muted-foreground">{t('agencyDashboard.pages.tenants.loadingTenants')}</p>
           </div>
         </div>
       </div>
@@ -175,7 +177,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
         <Alert className="border-red-200 bg-red-50">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Erreur lors du chargement des locataires. Veuillez réessayer.
+            {t('agencyDashboard.pages.tenants.loadError')}
           </AlertDescription>
         </Alert>
       </div>
@@ -193,12 +195,12 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
             </div>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-immoo-navy to-immoo-gold bg-clip-text text-transparent">
-        {leaseView ? "Gestion des Baux" : "Gestion des Locataires"}
-      </h1>
+                {leaseView ? t('agencyDashboard.pages.tenants.leaseManagement') : t('agencyDashboard.pages.tenants.tenantManagement')}
+              </h1>
               <p className="text-muted-foreground">
                 {propertyId 
-                  ? "Locataires de cette propriété"
-                  : "Tous les locataires de votre agence"
+                  ? t('agencyDashboard.pages.tenants.propertyTenants')
+                  : t('agencyDashboard.pages.tenants.allAgencyTenants')
                 }
               </p>
             </div>
@@ -207,14 +209,14 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="hidden sm:flex">
             <Download className="h-4 w-4 mr-2" />
-            Exporter
+            {t('agencyDashboard.pages.tenants.export')}
           </Button>
           <Button 
             onClick={() => setIsAddingTenant(true)}
             className="bg-gradient-to-r from-immoo-gold to-immoo-navy"
           >
             <UserPlus className="h-4 w-4 mr-2" />
-            Nouveau locataire
+            {t('agencyDashboard.pages.tenants.newTenant')}
           </Button>
         </div>
       </div>
@@ -225,9 +227,9 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
           <div className="flex flex-wrap gap-4 items-center">
             <div className="flex gap-2">
               {[
-                { value: 'all', label: 'Tous', icon: Users },
-                { value: 'active', label: 'Actifs', icon: UserCheck },
-                { value: 'inactive', label: 'Inactifs', icon: UserX }
+                { value: 'all', label: t('agencyDashboard.pages.tenants.all'), icon: Users },
+                { value: 'active', label: t('agencyDashboard.pages.tenants.active'), icon: UserCheck },
+                { value: 'inactive', label: t('agencyDashboard.pages.tenants.inactive'), icon: UserX }
               ].map((status) => (
                 <Button
                   key={status.value}
@@ -247,7 +249,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   type="text"
-                  placeholder="Rechercher par nom, email ou téléphone..."
+                  placeholder={t('agencyDashboard.pages.tenants.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full pl-10 pr-4 py-2 border rounded-lg bg-white/80 backdrop-blur-sm"
@@ -265,7 +267,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
             <CardTitle className="text-sm font-medium text-blue-700 flex items-center justify-between">
               <div className="flex items-center">
                 <Users className="h-4 w-4 mr-2" />
-                Total locataires
+                {t('agencyDashboard.pages.tenants.totalTenants')}
               </div>
               <div className="p-1 bg-blue-100 rounded-full">
                 <TrendingUp className="h-3 w-3 text-blue-600" />
@@ -277,9 +279,9 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
               {totalTenants}
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-blue-600">Base de données</span>
+              <span className="text-blue-600">{t('agencyDashboard.pages.tenants.database')}</span>
               <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">
-                Total
+                {t('agencyDashboard.pages.tenants.total')}
               </Badge>
             </div>
             <Progress value={100} className="mt-2 h-2" />
@@ -291,7 +293,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
             <CardTitle className="text-sm font-medium text-green-700 flex items-center justify-between">
               <div className="flex items-center">
                 <UserCheck className="h-4 w-4 mr-2" />
-                Locataires actifs
+                {t('agencyDashboard.pages.tenants.activeTenants')}
               </div>
               <div className="p-1 bg-green-100 rounded-full">
                 <CheckCircle className="h-3 w-3 text-green-600" />
@@ -303,7 +305,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
               {activeTenants}
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-green-600">Avec bail actif</span>
+              <span className="text-green-600">{t('agencyDashboard.pages.tenants.withActiveLease')}</span>
               <Badge variant="secondary" className="text-xs bg-green-100 text-green-700">
                 {activePercentage.toFixed(0)}%
               </Badge>
@@ -317,7 +319,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
             <CardTitle className="text-sm font-medium text-orange-700 flex items-center justify-between">
               <div className="flex items-center">
                 <UserX className="h-4 w-4 mr-2" />
-                Sans bail
+                {t('agencyDashboard.pages.tenants.withoutLease')}
               </div>
               <div className="p-1 bg-orange-100 rounded-full">
                 <Clock className="h-3 w-3 text-orange-600" />
@@ -329,9 +331,9 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
               {inactiveTenants}
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-orange-600">Disponibles</span>
+              <span className="text-orange-600">{t('agencyDashboard.pages.tenants.available')}</span>
               <Badge variant="secondary" className="text-xs bg-orange-100 text-orange-700">
-                En attente
+                {t('agencyDashboard.pages.tenants.waiting')}
               </Badge>
             </div>
             <Progress value={100 - activePercentage} className="mt-2 h-2" />
@@ -343,7 +345,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
             <CardTitle className="text-sm font-medium text-purple-700 flex items-center justify-between">
               <div className="flex items-center">
                 <Activity className="h-4 w-4 mr-2" />
-                Taux d'occupation
+                {t('agencyDashboard.pages.tenants.occupancyRate')}
               </div>
               <div className="p-1 bg-purple-100 rounded-full">
                 <Target className="h-3 w-3 text-purple-600" />
@@ -355,14 +357,14 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
               {activePercentage.toFixed(0)}%
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-purple-600">Performance</span>
+              <span className="text-purple-600">{t('agencyDashboard.pages.tenants.performance')}</span>
               <Badge variant="secondary" className={`text-xs ${
                 activePercentage >= 80 ? 'bg-green-100 text-green-700' :
                 activePercentage >= 60 ? 'bg-orange-100 text-orange-700' :
                 'bg-red-100 text-red-700'
               }`}>
-                {activePercentage >= 80 ? 'Excellent' :
-                 activePercentage >= 60 ? 'Bon' : 'À améliorer'}
+                {activePercentage >= 80 ? t('agencyDashboard.pages.tenants.excellent') :
+                 activePercentage >= 60 ? t('agencyDashboard.pages.tenants.good') : t('agencyDashboard.pages.tenants.needsImprovement')}
               </Badge>
             </div>
             <Progress value={activePercentage} className="mt-2 h-2" />
@@ -376,11 +378,11 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <FileText className="h-5 w-5 text-immoo-navy" />
-              Liste des locataires
+              {t('agencyDashboard.pages.tenants.tenantList')}
             </div>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <Users className="h-4 w-4" />
-              {filteredTenants.length} résultats
+              {filteredTenants.length} {t('agencyDashboard.pages.tenants.results')}
             </div>
           </CardTitle>
         </CardHeader>
@@ -390,14 +392,14 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
               <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
               <p className="text-lg font-medium text-muted-foreground mb-2">
                 {searchTerm || selectedStatus !== 'all' 
-                  ? 'Aucun locataire trouvé'
-                  : 'Aucun locataire enregistré'
+                  ? t('agencyDashboard.pages.tenants.noTenantsFound')
+                  : t('agencyDashboard.pages.tenants.noTenantsRegistered')
                 }
               </p>
               <p className="text-sm text-muted-foreground mb-4">
                 {searchTerm || selectedStatus !== 'all' 
-                  ? 'Essayez de modifier vos filtres de recherche'
-                  : 'Commencez par ajouter des locataires à votre base de données'
+                  ? t('agencyDashboard.pages.tenants.tryModifyingFilters')
+                  : t('agencyDashboard.pages.tenants.startAddingTenants')
                 }
               </p>
               {(!searchTerm && selectedStatus === 'all') && (
@@ -406,7 +408,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
                   className="bg-gradient-to-r from-immoo-gold to-immoo-navy"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
-                  Ajouter un locataire
+                  {t('agencyDashboard.pages.tenants.addTenant')}
                 </Button>
               )}
             </div>
@@ -442,7 +444,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
                                 : 'bg-orange-100 text-orange-700 border-orange-200'
                             }`}
                           >
-                            {tenant.hasLease ? '🏠 Locataire actif' : '⏳ Disponible'}
+                            {tenant.hasLease ? t('agencyDashboard.pages.tenants.activeTenant') : t('agencyDashboard.pages.tenants.available')}
                           </Badge>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -460,7 +462,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
                           )}
                           <div className="flex items-center gap-1">
                             <Calendar className="h-3 w-3" />
-                            Ajouté le {new Date(tenant.createdAt || '').toLocaleDateString('fr-FR')}
+                            {t('agencyDashboard.pages.tenants.addedOn')} {new Date(tenant.createdAt || '').toLocaleDateString('fr-FR')}
                           </div>
                         </div>
                       </div>
@@ -474,7 +476,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
                           className="hover:bg-immoo-gold hover:text-white"
                         >
                           <Home className="h-4 w-4 mr-1" />
-                          Créer bail
+                          {t('agencyDashboard.pages.tenants.createLease')}
                         </Button>
                       )}
                       <Button
@@ -524,7 +526,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
         <Dialog open={isViewOpen} onOpenChange={setIsViewOpen}>
           <DialogContent className="max-w-lg">
             <DialogHeader>
-              <DialogTitle>Détails du locataire</DialogTitle>
+              <DialogTitle>{t('agencyDashboard.pages.tenants.tenantDetails')}</DialogTitle>
             </DialogHeader>
             <div className="space-y-2">
               <div className="flex flex-col items-center gap-3">
@@ -541,10 +543,10 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
               </div>
               <div className="space-y-2 mt-4">
                 <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" /> {viewTenant.email || 'Email non renseigné'}
+                  <Mail className="h-4 w-4" /> {viewTenant.email || t('agencyDashboard.pages.tenants.emailNotProvided')}
                 </div>
                 <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" /> {viewTenant.phone || 'Téléphone non renseigné'}
+                  <Phone className="h-4 w-4" /> {viewTenant.phone || t('agencyDashboard.pages.tenants.phoneNotProvided')}
                 </div>
                 {viewTenant.employmentStatus && (
                   <div className="flex items-center gap-2">
@@ -558,13 +560,13 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
                 )}
                 {viewTenant.emergencyContact && (
                   <div>
-                    <p className="font-medium">Contact d'urgence :</p>
+                    <p className="font-medium">{t('agencyDashboard.pages.tenants.emergencyContact')} :</p>
                     <p>{viewTenant.emergencyContact.name} - {viewTenant.emergencyContact.phone} ({viewTenant.emergencyContact.relationship})</p>
                   </div>
                 )}
                 {viewTenant.identityPhotos && viewTenant.identityPhotos.length > 0 && (
                   <div>
-                    <p className="font-medium mb-2">Photos d'identité :</p>
+                    <p className="font-medium mb-2">{t('agencyDashboard.pages.tenants.identityPhotos')} :</p>
                     <div className="grid grid-cols-3 gap-2">
                       {viewTenant.identityPhotos.map((photo: any, idx: number) => {
                         const url = typeof photo === 'string' ? photo : (photo.url || '');
@@ -582,7 +584,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
                 )}
                 {viewTenant.createdAt && (
                   <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                    <Calendar className="h-3 w-3" /> Ajouté le {new Date(viewTenant.createdAt).toLocaleDateString('fr-FR')}
+                    <Calendar className="h-3 w-3" /> {t('agencyDashboard.pages.tenants.addedOn')} {new Date(viewTenant.createdAt).toLocaleDateString('fr-FR')}
                   </div>
                 )}
               </div>
@@ -609,14 +611,17 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
         <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
+              <AlertDialogTitle>{t('agencyDashboard.pages.tenants.confirmDeletion')}</AlertDialogTitle>
               <AlertDialogDescription>
-                Êtes-vous sûr de vouloir supprimer {deleteTenantTarget.firstName} {deleteTenantTarget.lastName} ? Cette action est irréversible.
+                {t('agencyDashboard.pages.tenants.confirmDeletionMessage', { 
+                  firstName: deleteTenantTarget.firstName, 
+                  lastName: deleteTenantTarget.lastName 
+                })}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Annuler</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDeleteTenant}>Supprimer</AlertDialogAction>
+              <AlertDialogCancel>{t('agencyDashboard.pages.tenants.cancel')}</AlertDialogCancel>
+              <AlertDialogAction onClick={confirmDeleteTenant}>{t('agencyDashboard.pages.tenants.delete')}</AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>

@@ -5,10 +5,12 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 import { ArrowLeft } from "lucide-react";
 import CreatePropertyForm from "./CreatePropertyForm";
 import usePropertyData from "./usePropertyData";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function CreatePropertyPage() {
   const { agencyId, propertyId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { formData, setFormData, isLoading, isEditMode } = usePropertyData(propertyId);
 
   const handleNavigateBack = () => {
@@ -24,16 +26,16 @@ export default function CreatePropertyPage() {
         className="mb-6"
       >
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Retour à l'agence
+        {t('agencyDashboard.pages.createProperty.backToAgency')}
       </Button>
 
       <Card className="mb-8">
         <CardHeader>
-          <CardTitle>{isEditMode ? "Modifier une propriété" : "Créer une nouvelle propriété"}</CardTitle>
+          <CardTitle>{isEditMode ? t('agencyDashboard.pages.createProperty.editProperty') : t('agencyDashboard.pages.createProperty.createNewProperty')}</CardTitle>
           <CardDescription>
             {isEditMode 
-              ? "Mettez à jour les informations de cette propriété" 
-              : "Ajouter une nouvelle propriété à votre portefeuille immobilier"}
+              ? t('agencyDashboard.pages.createProperty.updatePropertyInfo') 
+              : t('agencyDashboard.pages.createProperty.addNewPropertyToPortfolio')}
           </CardDescription>
         </CardHeader>
       </Card>

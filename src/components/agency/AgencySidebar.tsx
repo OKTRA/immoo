@@ -18,11 +18,13 @@ import { useQuery } from "@tanstack/react-query";
 import { getAgencyById } from "@/services/agency";
 import ImmooLogoAdaptive from "@/components/ui/ImmooLogoAdaptive";
 import ImmooFavicon from "@/components/ui/ImmooFavicon";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function AgencySidebar() {
   const { agencyId } = useParams();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const { t } = useTranslation();
   
   // Fetch agency details
   const { data: agencyData, isLoading } = useQuery({
@@ -49,55 +51,62 @@ export default function AgencySidebar() {
   
   const navigationItems = [
     {
-      title: "Vue d'ensemble",
-      icon: Building2,
-      path: `/agencies/${agencyId}`,
-      exact: true
-    },
-    {
-      title: "Propriétés",
+      title: t('agencyDashboard.sidebar.overview'),
+      href: `/agencies/${agencyId}`,
       icon: Home,
-      path: `/agencies/${agencyId}/properties`,
+      description: "Vue d'ensemble de votre agence"
     },
     {
-      title: "Locataires",
+      title: t('agencyDashboard.sidebar.properties'),
+      href: `/agencies/${agencyId}/properties`,
+      icon: Building2,
+      description: "Gestion des propriétés"
+    },
+    {
+      title: t('agencyDashboard.sidebar.tenants'),
+      href: `/agencies/${agencyId}/tenants`,
       icon: Users,
-      path: `/agencies/${agencyId}/tenants`,
+      description: "Gestion des locataires"
     },
     {
-      title: "Baux",
+      title: t('agencyDashboard.sidebar.contracts'),
+      href: `/agencies/${agencyId}/contracts`,
       icon: FileText,
-      path: `/agencies/${agencyId}/leases`,
+      description: "Gestion des contrats"
     },
     {
-      title: "Contrats",
+      title: t('agencyDashboard.sidebar.leases'),
+      href: `/agencies/${agencyId}/leases`,
       icon: FileText,
-      path: `/agencies/${agencyId}/contracts`,
+      description: "Gestion des baux"
     },
     {
-      title: "Paiements",
+      title: t('agencyDashboard.sidebar.payments'),
+      href: `/agencies/${agencyId}/payments`,
       icon: CreditCard,
-      path: `/agencies/${agencyId}/payments`,
+      description: "Gestion des paiements"
     },
     {
-      title: "Gains",
+      title: t('agencyDashboard.sidebar.earnings'),
+      href: `/agencies/${agencyId}/earnings`,
       icon: DollarSign,
-      path: `/agencies/${agencyId}/earnings`,
+      description: "Suivi des gains"
     },
     {
-      title: "Dépenses",
+      title: t('agencyDashboard.sidebar.analytics'),
+      href: `/agencies/${agencyId}/analytics`,
       icon: Receipt,
-      path: `/agencies/${agencyId}/expenses`,
+      description: "Analytics et rapports"
     },
     {
-      title: "Paramètres",
+      title: t('agencyDashboard.sidebar.settings'),
+      href: `/agencies/${agencyId}/settings`,
       icon: Settings,
-      path: `/agencies/${agencyId}/settings`,
-    },
+      description: "Paramètres de l'agence"
+    }
   ];
 
-  const isActive = (path: string, exact = false) => {
-    if (exact) return location.pathname === path;
+  const isActive = (path: string) => {
     return location.pathname.startsWith(path);
   };
 
@@ -140,82 +149,64 @@ export default function AgencySidebar() {
       {/* Navigation items */}
       <div className="flex-1 py-6 overflow-y-auto">
         <nav className="space-y-1 px-2">
-          {navigationItems.map((item) => (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={cn(
-                "flex items-center py-2 px-3 rounded-md transition-all duration-200 group relative overflow-hidden",
-                isActive(item.path, item.exact) 
-                  ? "bg-gradient-to-r from-[hsl(var(--accent))] to-[hsl(var(--primary))] text-white shadow-lg" 
-                  : "text-[hsl(var(--foreground))] hover:bg-[hsl(var(--accent)/0.15)] hover:text-[hsl(var(--primary))] group-hover:translate-x-1 group-hover:scale-[1.02]",
-                collapsed ? "justify-center" : "justify-start"
-              )}
-            >
-              <item.icon className={cn(
-                "h-6 w-6 transition-colors group-hover:scale-[1.1]", 
-                collapsed ? "mr-0" : "mr-3",
-                isActive(item.path, item.exact) 
-                  ? "text-white" 
-                  : "text-[hsl(var(--foreground))] group-hover:text-[hsl(var(--primary))]"
-              )} />
-              {!collapsed && (
-                <span className="font-medium text-sm">
-                  {item.title}
-                </span>
-              )}
-            </Link>
-          ))}
+          {navigationItems.map((item) => {
+            const Icon = item.icon;
+            const isActiveRoute = isActive(item.href);
+            
+            return (
+              <Link
+                key={item.href}
+                to={item.href}
+                className={cn(
+                  "group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200",
+                  "hover:bg-immoo-pearl/50 hover:text-immoo-navy",
+                  isActiveRoute
+                    ? "bg-immoo-gold/20 text-immoo-navy border-r-2 border-immoo-gold"
+                    : "text-immoo-gray hover:text-immoo-navy"
+                )}
+                title={collapsed ? item.title : undefined}
+              >
+                <Icon 
+                  className={cn(
+                    "mr-3 h-5 w-5 flex-shrink-0 transition-colors",
+                    isActiveRoute ? "text-immoo-gold" : "text-immoo-gray group-hover:text-immoo-navy"
+                  )} 
+                />
+                {!collapsed && (
+                  <span className="truncate">{item.title}</span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
       </div>
 
-      {/* Footer avec informations de l'agence */}
+      {/* Agency info section */}
       {!collapsed && agency && (
-        <div className="p-4 border-t border-immoo-gray/20 bg-gradient-to-r from-immoo-pearl/30 to-immoo-gold/10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg overflow-hidden bg-gradient-to-br from-immoo-gold to-immoo-navy flex items-center justify-center relative">
-              {agency.logoUrl ? (
-                <>
-                  <img 
-                    key={agency.logoUrl} // Force re-render when logoUrl changes
-                    src={`${agency.logoUrl}?t=${Date.now()}`} 
-                    alt={agency.name} 
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      console.error('Error loading agency logo in sidebar footer:', e);
-                      console.error('Failed URL:', agency.logoUrl);
-                      // Hide the image and show the fallback icon
-                      const target = e.currentTarget as HTMLImageElement;
-                      target.style.display = 'none';
-                      const fallback = target.nextElementSibling as HTMLElement;
-                      if (fallback) fallback.style.display = 'flex';
-                    }}
-                    onLoad={() => {
-                      console.log('Agency logo loaded successfully in sidebar footer');
-                      console.log('Loaded URL:', agency.logoUrl);
-                    }}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center" style={{ display: 'none' }}>
-                    <Building2 className="w-5 h-5 text-white" />
-                  </div>
-                </>
-              ) : (
-                <Building2 className="w-5 h-5 text-white" />
-              )}
-            </div>
+        <div className="p-4 border-t border-immoo-gray/20 bg-gradient-to-r from-immoo-navy/5 to-immoo-gold/5">
+          <div className="flex items-center space-x-3">
+            {agency.logoUrl ? (
+              <img 
+                src={`${agency.logoUrl}?t=${Date.now()}`} 
+                alt={agency.name || "Agency logo"} 
+                className="h-8 w-8 rounded-lg object-cover border border-immoo-gray/20"
+                onError={(e) => {
+                  console.error('Error loading agency logo in sidebar:', e);
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            ) : (
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-immoo-gold to-immoo-navy flex items-center justify-center">
+                <Building2 className="h-4 w-4 text-white" />
+              </div>
+            )}
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-immoo-navy truncate">
                 {agency.name}
               </p>
               <p className="text-xs text-immoo-gray truncate">
-                {agency.location}
+                {agency.location || "Agence immobilière"}
               </p>
-              {/* Debug info - à supprimer après test */}
-              {process.env.NODE_ENV === 'development' && (
-                <p className="text-xs text-immoo-gold">
-                  Logo: {agency.logoUrl ? '✓' : '✗'}
-                </p>
-              )}
             </div>
           </div>
         </div>

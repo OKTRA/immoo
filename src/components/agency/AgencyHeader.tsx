@@ -6,10 +6,13 @@ import { getAgencyById } from "@/services/agency";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
+import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function AgencyHeader() {
   const { agencyId } = useParams();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   const { data: agencyData } = useQuery({
     queryKey: ['agency', agencyId],
@@ -69,10 +72,10 @@ export default function AgencyHeader() {
         )}
         <div>
           <h1 className="text-xl font-bold text-immoo-navy">
-            {agency?.name || "Administration de l'agence"}
+            {agency?.name || t('agencyDashboard.header.title')}
           </h1>
           <p className="text-sm text-immoo-gray">
-            Tableau de bord
+            {t('agencyDashboard.header.subtitle')}
           </p>
         </div>
       </div>
@@ -84,10 +87,13 @@ export default function AgencyHeader() {
           size="icon" 
           onClick={handleExitAgencySpace}
           className="border-immoo-gray/30 text-immoo-navy hover:bg-immoo-pearl hover:border-immoo-gold transition-all duration-300 w-11 h-11"
-          title="Quitter l'espace agence"
+          title={t('agencyDashboard.header.leaveAgencySpace')}
         >
           <DoorOpen className="h-5 w-5" />
         </Button>
+        
+        {/* Bouton de traduction EN/FR */}
+        <LanguageSwitcher variant="agency" />
         
         {/* Bouton Se déconnecter */}
         <Button 
@@ -95,7 +101,7 @@ export default function AgencyHeader() {
           size="icon" 
           onClick={handleSignOut}
           className="border-immoo-gray/30 text-immoo-navy hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-all duration-300 w-11 h-11"
-          title="Se déconnecter"
+          title={t('agencyDashboard.header.logout')}
         >
           <LogOut className="h-5 w-5" />
         </Button>

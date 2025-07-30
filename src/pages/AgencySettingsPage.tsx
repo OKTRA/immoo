@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { getAgencyById } from "@/services/agency";
 import { updateAgency } from "@/services/agency/agencyManagementService";
 import { uploadAgencyLogo } from "@/services/agency/agencyMediaService";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface AgencyFormData {
   name: string;
@@ -29,6 +30,7 @@ interface AgencyFormData {
 
 export default function AgencySettingsPage() {
   const { agencyId } = useParams();
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -199,8 +201,8 @@ export default function AgencySettingsPage() {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-immoo-navy mb-2">Paramètres de l'agence</h1>
-          <p className="text-immoo-gray">Gérez les informations générales de votre agence</p>
+          <h1 className="text-3xl font-bold text-immoo-navy mb-2">{t('agencyDashboard.pages.settings.title')}</h1>
+          <p className="text-immoo-gray">{t('agencyDashboard.pages.settings.description')}</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -210,10 +212,10 @@ export default function AgencySettingsPage() {
               <CardHeader className="text-center">
                 <CardTitle className="text-immoo-navy flex items-center justify-center gap-2">
                   <Camera className="h-5 w-5" />
-                  Logo de l'agence
+                  {t('agencyDashboard.pages.settings.agencyLogo')}
                 </CardTitle>
                 <CardDescription>
-                  Téléchargez ou modifiez le logo de votre agence
+                  {t('agencyDashboard.pages.settings.logoDescription')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
@@ -253,7 +255,7 @@ export default function AgencySettingsPage() {
                 {/* Logo Upload */}
                 <div className="space-y-4">
                   <Label htmlFor="logo-upload" className="text-sm font-medium text-immoo-navy">
-                    Choisir un nouveau logo
+                    {t('agencyDashboard.pages.settings.chooseNewLogo')}
                   </Label>
                   <Input
                     ref={fileInputRef}
@@ -264,7 +266,7 @@ export default function AgencySettingsPage() {
                     className="border-immoo-gray/30 focus:border-immoo-gold"
                   />
                   <p className="text-xs text-immoo-gray">
-                    Format recommandé : JPG, PNG ou SVG. Taille maximale : 5MB
+                    {t('agencyDashboard.pages.settings.recommendedFormatSize')}
                   </p>
                   
                   {logoFile && !isLogoUploaded && (
@@ -276,12 +278,12 @@ export default function AgencySettingsPage() {
                       {uploadLogoMutation.isPending ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Téléchargement en cours...
+                          {t('agencyDashboard.pages.settings.uploadingInProgress')}
                         </>
                       ) : (
                         <>
                           <Upload className="h-4 w-4 mr-2" />
-                          Télécharger et sauvegarder le logo
+                          {t('agencyDashboard.pages.settings.uploadAndSaveLogo')}
                         </>
                       )}
                     </Button>
@@ -291,7 +293,7 @@ export default function AgencySettingsPage() {
                     <div className="w-full p-3 bg-green-50 border border-green-200 rounded-lg">
                       <div className="flex items-center gap-2 text-green-700">
                         <CheckCircle className="h-4 w-4" />
-                        <span className="text-sm font-medium">Logo téléchargé avec succès</span>
+                        <span className="text-sm font-medium">{t('agencyDashboard.pages.settings.logoUploadedSuccessfully')}</span>
                       </div>
                     </div>
                   )}
@@ -306,24 +308,24 @@ export default function AgencySettingsPage() {
               <CardHeader>
                 <CardTitle className="text-immoo-navy flex items-center gap-2">
                   <Building2 className="h-5 w-5" />
-                  Informations de l'agence
+                  {t('agencyDashboard.pages.settings.agencyInformation')}
                 </CardTitle>
                 <CardDescription>
-                  Modifiez les informations générales de votre agence
+                  {t('agencyDashboard.pages.settings.modifyGeneralInformation')}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* Nom de l'agence */}
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium text-immoo-navy">
-                    Nom de l'agence *
+                    {t('agencyDashboard.pages.settings.agencyName')} *
                   </Label>
                   <Input
                     id="name"
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="Nom de votre agence"
+                    placeholder={t('agencyDashboard.pages.settings.agencyNamePlaceholder')}
                     className="border-immoo-gray/30 focus:border-immoo-gold"
                     required
                   />
@@ -333,14 +335,14 @@ export default function AgencySettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="location" className="text-sm font-medium text-immoo-navy flex items-center gap-2">
                     <MapPin className="h-4 w-4" />
-                    Adresse
+                    {t('agencyDashboard.pages.settings.address')}
                   </Label>
                   <Input
                     id="location"
                     name="location"
                     value={formData.location}
                     onChange={handleInputChange}
-                    placeholder="Adresse complète de l'agence"
+                    placeholder={t('agencyDashboard.pages.settings.agencyAddressPlaceholder')}
                     className="border-immoo-gray/30 focus:border-immoo-gold"
                   />
                 </div>
@@ -349,7 +351,7 @@ export default function AgencySettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="email" className="text-sm font-medium text-immoo-navy flex items-center gap-2">
                     <Mail className="h-4 w-4" />
-                    Email
+                    {t('agencyDashboard.pages.settings.email')}
                   </Label>
                   <Input
                     id="email"
@@ -357,7 +359,7 @@ export default function AgencySettingsPage() {
                     type="email"
                     value={formData.email}
                     onChange={handleInputChange}
-                    placeholder="contact@votre-agence.com"
+                    placeholder={t('agencyDashboard.pages.settings.agencyEmailPlaceholder')}
                     className="border-immoo-gray/30 focus:border-immoo-gold"
                   />
                 </div>
@@ -366,14 +368,14 @@ export default function AgencySettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="text-sm font-medium text-immoo-navy flex items-center gap-2">
                     <Phone className="h-4 w-4" />
-                    Téléphone
+                    {t('agencyDashboard.pages.settings.phone')}
                   </Label>
                   <Input
                     id="phone"
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    placeholder="+33 1 23 45 67 89"
+                    placeholder={t('agencyDashboard.pages.settings.agencyPhonePlaceholder')}
                     className="border-immoo-gray/30 focus:border-immoo-gold"
                   />
                 </div>
@@ -382,14 +384,14 @@ export default function AgencySettingsPage() {
                 <div className="space-y-2">
                   <Label htmlFor="website" className="text-sm font-medium text-immoo-navy flex items-center gap-2">
                     <Globe className="h-4 w-4" />
-                    Site web
+                    {t('agencyDashboard.pages.settings.website')}
                   </Label>
                   <Input
                     id="website"
                     name="website"
                     value={formData.website}
                     onChange={handleInputChange}
-                    placeholder="https://www.votre-agence.com"
+                    placeholder={t('agencyDashboard.pages.settings.agencyWebsitePlaceholder')}
                     className="border-immoo-gray/30 focus:border-immoo-gold"
                   />
                 </div>
@@ -397,14 +399,14 @@ export default function AgencySettingsPage() {
                 {/* Description */}
                 <div className="space-y-2">
                   <Label htmlFor="description" className="text-sm font-medium text-immoo-navy">
-                    Description
+                    {t('agencyDashboard.pages.settings.description')}
                   </Label>
                   <Textarea
                     id="description"
                     name="description"
                     value={formData.description}
                     onChange={handleInputChange}
-                    placeholder="Décrivez votre agence, vos services et votre expertise..."
+                    placeholder={t('agencyDashboard.pages.settings.agencyDescriptionPlaceholder')}
                     rows={4}
                     className="border-immoo-gray/30 focus:border-immoo-gold resize-none"
                   />
@@ -420,12 +422,12 @@ export default function AgencySettingsPage() {
                     {updateAgencyMutation.isPending ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        Enregistrement...
+                        {t('agencyDashboard.pages.settings.saving')}
                       </>
                     ) : (
                       <>
                         <Save className="h-4 w-4 mr-2" />
-                        Enregistrer les modifications
+                        {t('agencyDashboard.pages.settings.saveChanges')}
                       </>
                     )}
                   </Button>

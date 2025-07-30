@@ -51,6 +51,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { Agency } from "@/assets/types";
 import PropertyList from "@/components/properties/PropertyList";
 import { formatCurrency } from "@/lib/utils";
+import { useTranslation } from "@/hooks/useTranslation";
 // Import des pages
 import AgencyPropertiesPage from "@/pages/AgencyPropertiesPage";
 import AgencyLeasesPage from "@/pages/AgencyLeasesPage";
@@ -59,6 +60,7 @@ export default function AgencyDetailPage() {
   const { agencyId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   
   // Déterminer l'onglet actif basé sur l'URL
   const getCurrentTab = () => {
@@ -121,7 +123,7 @@ export default function AgencyDetailPage() {
   const agency: Agency | null = agencyData?.agency || null;
   const properties = propertiesData?.properties || [];
   const propertiesCount = propertiesData?.count || 0;
-  const stats = statsData?.statistics || { propertiesCount: 0, avgRating: 0, recentListings: [] };
+  const stats = statsData?.statistics || {};
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -168,74 +170,61 @@ export default function AgencyDetailPage() {
   if (!agency) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <Card className="text-center p-8 max-w-md mx-auto shadow-lg">
-          <CardHeader>
-            <div className="mx-auto bg-red-50 rounded-full p-4 w-16 h-16 flex items-center justify-center mb-4">
-              <Building2 className="h-8 w-8 text-red-500" />
-            </div>
-            <CardTitle className="text-xl">Agence introuvable</CardTitle>
-            <CardDescription>Cette agence n'existe pas ou a été supprimée</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button 
-              onClick={() => navigate("/agencies")}
-              className="bg-immoo-navy hover:bg-immoo-navy/90"
-            >
-              <ArrowUpRight className="h-4 w-4 mr-2" />
-              Retour aux agences
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-slate-900 mb-4">Agence non trouvée</h1>
+          <p className="text-slate-600 mb-6">L'agence que vous recherchez n'existe pas ou a été supprimée.</p>
+          <Button onClick={() => navigate("/agencies")}>
+            Retour aux agences
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header moderne avec subtilité */}
-      <div className="bg-white border-b border-slate-200 shadow-sm">
+      {/* Header avec design moderne */}
+      <div className="bg-white border-b border-slate-200">
         <div className="container mx-auto py-6 px-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-            <div className="flex items-center gap-4">
-              {/* Logo avec effet subtil */}
-              <div className="relative">
-                <div className="w-16 h-16 rounded-xl border-2 border-slate-100 overflow-hidden bg-slate-50 shadow-md">
-                  {agency.logoUrl ? (
-                    <img 
-                      src={agency.logoUrl} 
-                      alt={agency.name} 
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-immoo-gold to-amber-400">
-                      <Building2 className="w-8 h-8 text-white" />
-                    </div>
-                  )}
-                </div>
-                {agency.verified && (
-                  <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1.5 shadow-lg">
-                    <Shield className="w-3 h-3 text-white" />
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+            {/* Logo avec effet subtil */}
+            <div className="relative">
+              <div className="w-16 h-16 rounded-xl border-2 border-slate-100 overflow-hidden bg-slate-50 shadow-md">
+                {agency.logoUrl ? (
+                  <img 
+                    src={agency.logoUrl} 
+                    alt={agency.name} 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-immoo-gold to-amber-400">
+                    <Building2 className="w-8 h-8 text-white" />
                   </div>
                 )}
               </div>
-              
-              {/* Infos élégantes */}
-              <div>
-                <div className="flex items-center gap-3">
-                  <h1 className="text-2xl font-bold text-slate-900">
-                    {agency.name}
-                  </h1>
-                  {agency.verified && (
-                    <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                      <Crown className="w-3 h-3 mr-1" />
-                      Certifiée
-                    </Badge>
-                  )}
+              {agency.verified && (
+                <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1.5 shadow-lg">
+                  <Shield className="w-3 h-3 text-white" />
                 </div>
-                <div className="flex items-center text-slate-600 mt-1">
-                  <MapPin className="h-4 w-4 mr-2 text-immoo-gold" />
-                  <span>{agency.location}</span>
-                </div>
+              )}
+            </div>
+            
+            {/* Infos élégantes */}
+            <div>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-slate-900">
+                  {agency.name}
+                </h1>
+                {agency.verified && (
+                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
+                    <Crown className="w-3 h-3 mr-1" />
+                    {t('agencyDashboard.pages.overview.certified')}
+                  </Badge>
+                )}
+              </div>
+              <div className="flex items-center text-slate-600 mt-1">
+                <MapPin className="h-4 w-4 mr-2 text-immoo-gold" />
+                <span>{agency.location}</span>
               </div>
             </div>
             
@@ -247,7 +236,7 @@ export default function AgencyDetailPage() {
               >
                 <RouterLink to={`/agencies/${agencyId}/properties/create`}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Nouvelle propriété
+                  {t('agencyDashboard.pages.overview.newProperty')}
                 </RouterLink>
               </Button>
               <Button 
@@ -257,7 +246,7 @@ export default function AgencyDetailPage() {
               >
                 <RouterLink to={`/agencies/${agencyId}/tenants`}>
                   <Users className="h-4 w-4 mr-2" />
-                  Locataires
+                  {t('agencyDashboard.pages.overview.tenants')}
                 </RouterLink>
               </Button>
             </div>
@@ -273,11 +262,11 @@ export default function AgencyDetailPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Propriétés</p>
+                  <p className="text-sm font-medium text-slate-600">{t('agencyDashboard.pages.overview.properties')}</p>
                   <p className="text-2xl font-bold text-slate-900 mt-1">{propertiesCount}</p>
                   <div className="flex items-center mt-2 text-emerald-600">
                     <TrendingUp className="h-3 w-3 mr-1" />
-                    <span className="text-xs">+8% ce mois</span>
+                    <span className="text-xs">+8% {t('agencyDashboard.pages.overview.thisMonth')}</span>
                   </div>
                 </div>
                 <div className="bg-blue-50 p-3 rounded-lg">
@@ -292,7 +281,7 @@ export default function AgencyDetailPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Note moyenne</p>
+                  <p className="text-sm font-medium text-slate-600">{t('agencyDashboard.pages.overview.averageRating')}</p>
                   <p className="text-2xl font-bold text-slate-900 mt-1">{agency.rating?.toFixed(1) || '4.8'}</p>
                   <div className="flex items-center mt-2">
                     {[...Array(5)].map((_, i) => (
@@ -312,7 +301,7 @@ export default function AgencyDetailPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Vues ce mois</p>
+                  <p className="text-sm font-medium text-slate-600">{t('agencyDashboard.pages.overview.viewsThisMonth')}</p>
                   <p className="text-2xl font-bold text-slate-900 mt-1">2,847</p>
                   <div className="flex items-center mt-2 text-emerald-600">
                     <ArrowUp className="h-3 w-3 mr-1" />
@@ -331,11 +320,11 @@ export default function AgencyDetailPage() {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Performance</p>
+                  <p className="text-sm font-medium text-slate-600">{t('agencyDashboard.pages.overview.performance')}</p>
                   <p className="text-2xl font-bold text-slate-900 mt-1">98%</p>
                   <div className="flex items-center mt-2 text-purple-600">
                     <Zap className="h-3 w-3 mr-1" />
-                    <span className="text-xs">Excellent</span>
+                    <span className="text-xs">{t('agencyDashboard.pages.overview.excellent')}</span>
                   </div>
                 </div>
                 <div className="bg-purple-50 p-3 rounded-lg">
@@ -354,35 +343,35 @@ export default function AgencyDetailPage() {
               className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm flex items-center justify-center px-2 sm:px-4"
             >
               <Sparkles className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Vue d'ensemble</span>
+              <span className="hidden sm:inline">{t('agencyDashboard.pages.overview.title')}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="properties" 
               className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm flex items-center justify-center px-2 sm:px-4"
             >
               <Building2 className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Propriétés</span>
+              <span className="hidden sm:inline">{t('agencyDashboard.pages.overview.properties')}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="tenants" 
               className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm flex items-center justify-center px-2 sm:px-4"
             >
               <Users className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Locataires</span>
+              <span className="hidden sm:inline">{t('agencyDashboard.pages.overview.tenants')}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="leases" 
               className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm flex items-center justify-center px-2 sm:px-4"
             >
               <Receipt className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Baux</span>
+              <span className="hidden sm:inline">{t('agencyDashboard.sidebar.leases')}</span>
             </TabsTrigger>
             <TabsTrigger 
               value="statistics" 
               className="data-[state=active]:bg-immoo-gold data-[state=active]:text-black data-[state=active]:shadow-sm flex items-center justify-center px-2 sm:px-4"
             >
               <BarChart3 className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Analytics</span>
+              <span className="hidden sm:inline">{t('agencyDashboard.sidebar.analytics')}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -395,13 +384,13 @@ export default function AgencyDetailPage() {
                     <div className="bg-immoo-gold p-2 rounded-lg mr-3">
                       <Building className="h-5 w-5 text-black" />
                     </div>
-                    À propos de l'agence
+                    {t('agencyDashboard.pages.overview.aboutAgency')}
                   </CardTitle>
-                  <CardDescription>Informations détaillées et services proposés</CardDescription>
+                  <CardDescription>{t('agencyDashboard.pages.overview.detailedInfo')}</CardDescription>
                 </CardHeader>
                 <CardContent className="p-6">
                   <p className="text-slate-700 leading-relaxed mb-6">
-                    {agency.description || "Une agence immobilière de confiance, spécialisée dans la gestion et la location de biens immobiliers de qualité. Notre équipe expérimentée vous accompagne dans tous vos projets immobiliers."}
+                    {agency.description || t('agencyDashboard.pages.overview.trustedAgencyDescription')}
                   </p>
                   
                   <Separator className="my-6" />
@@ -414,7 +403,7 @@ export default function AgencyDetailPage() {
                           <Mail className="h-4 w-4 text-white" />
                         </div>
                         <div>
-                          <p className="text-xs text-slate-600">Email professionnel</p>
+                          <p className="text-xs text-slate-600">{t('agencyDashboard.pages.overview.professionalEmail')}</p>
                           <p className="font-medium text-slate-900">{agency.email}</p>
                         </div>
                       </div>
@@ -426,7 +415,7 @@ export default function AgencyDetailPage() {
                           <Globe className="h-4 w-4 text-white" />
                         </div>
                         <div className="flex-1">
-                          <p className="text-xs text-slate-600">Site web</p>
+                          <p className="text-xs text-slate-600">{t('agencyDashboard.pages.overview.website')}</p>
                           <a 
                             href={agency.website} 
                             target="_blank" 
@@ -446,7 +435,7 @@ export default function AgencyDetailPage() {
                           <div className="bg-amber-500 p-2 rounded-lg mr-3">
                             <MapPin className="h-4 w-4 text-white" />
                           </div>
-                          <p className="font-medium text-slate-900">Zones de service</p>
+                          <p className="font-medium text-slate-900">{t('agencyDashboard.pages.overview.serviceAreas')}</p>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {agency.serviceAreas.map((area, index) => (
@@ -467,7 +456,7 @@ export default function AgencyDetailPage() {
                           <div className="bg-purple-500 p-2 rounded-lg mr-3">
                             <Award className="h-4 w-4 text-white" />
                           </div>
-                          <p className="font-medium text-slate-900">Spécialités</p>
+                          <p className="font-medium text-slate-900">{t('agencyDashboard.pages.overview.specialties')}</p>
                         </div>
                         <div className="flex flex-wrap gap-2">
                           {agency.specialties.map((specialty, index) => (
@@ -492,29 +481,29 @@ export default function AgencyDetailPage() {
                   <CardHeader className="pb-4">
                     <CardTitle className="text-lg flex items-center">
                       <Activity className="h-4 w-4 mr-2 text-immoo-gold" />
-                      Activité récente
+                      {t('agencyDashboard.pages.overview.recentActivity')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
                       <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
                       <div>
-                        <p className="text-sm font-medium">Nouvelle propriété ajoutée</p>
-                        <p className="text-xs text-slate-500">Il y a 2 heures</p>
+                        <p className="text-sm font-medium">{t('agencyDashboard.pages.overview.newPropertyAdded')}</p>
+                        <p className="text-xs text-slate-500">{t('agencyDashboard.pages.overview.hoursAgo', { count: 2 })}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <div>
-                        <p className="text-sm font-medium">Bail signé</p>
-                        <p className="text-xs text-slate-500">Il y a 4 heures</p>
+                        <p className="text-sm font-medium">{t('agencyDashboard.pages.overview.leaseSigned')}</p>
+                        <p className="text-xs text-slate-500">{t('agencyDashboard.pages.overview.hoursAgo', { count: 4 })}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50">
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                       <div>
-                        <p className="text-sm font-medium">Paiement reçu</p>
-                        <p className="text-xs text-slate-500">Il y a 6 heures</p>
+                        <p className="text-sm font-medium">{t('agencyDashboard.pages.overview.paymentReceived')}</p>
+                        <p className="text-xs text-slate-500">{t('agencyDashboard.pages.overview.hoursAgo', { count: 6 })}</p>
                       </div>
                     </div>
                   </CardContent>
@@ -525,7 +514,7 @@ export default function AgencyDetailPage() {
                   <CardHeader className="pb-4">
                     <CardTitle className="text-lg flex items-center">
                       <Sparkles className="h-4 w-4 mr-2 text-immoo-gold" />
-                      Actions rapides
+                      {t('agencyDashboard.pages.overview.quickActions')}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
@@ -536,7 +525,7 @@ export default function AgencyDetailPage() {
                     >
                       <RouterLink to={`/agencies/${agencyId}/properties/create`}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Ajouter une propriété
+                        {t('agencyDashboard.pages.overview.addProperty')}
                       </RouterLink>
                     </Button>
                     <Button 
@@ -546,7 +535,7 @@ export default function AgencyDetailPage() {
                     >
                       <RouterLink to={`/agencies/${agencyId}/tenants`}>
                         <Users className="h-4 w-4 mr-2" />
-                        Gérer les locataires
+                        {t('agencyDashboard.pages.overview.manageTenants')}
                       </RouterLink>
                     </Button>
                     <Button 
@@ -556,7 +545,7 @@ export default function AgencyDetailPage() {
                     >
                       <RouterLink to={`/agencies/${agencyId}/payments`}>
                         <DollarSign className="h-4 w-4 mr-2" />
-                        Paiements
+                        {t('agencyDashboard.pages.overview.payments')}
                       </RouterLink>
                     </Button>
                   </CardContent>
@@ -571,10 +560,10 @@ export default function AgencyDetailPage() {
                 <div>
                   <CardTitle className="text-xl flex items-center">
                     <Home className="h-5 w-5 mr-2 text-immoo-gold" />
-                    Toutes les propriétés
+                    {t('agencyDashboard.pages.overview.allProperties')}
                   </CardTitle>
                   <CardDescription>
-                    Gérez les propriétés de l'agence {agency.name}
+                    {t('agencyDashboard.pages.overview.manageAgencyProperties')} {agency.name}
                   </CardDescription>
                 </div>
                 <Button 
@@ -583,7 +572,7 @@ export default function AgencyDetailPage() {
                 >
                   <RouterLink to={`/agencies/${agencyId}/properties/create`}>
                     <Plus className="h-4 w-4 mr-2" />
-                    Ajouter une propriété
+                    {t('agencyDashboard.pages.overview.addNewProperty')}
                   </RouterLink>
                 </Button>
               </CardHeader>
@@ -605,17 +594,17 @@ export default function AgencyDetailPage() {
                     <div className="bg-slate-50 p-6 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
                       <Home className="h-12 w-12 text-slate-400" />
                     </div>
-                    <h3 className="text-lg font-medium text-slate-900 mb-2">Aucune propriété</h3>
+                    <h3 className="text-lg font-medium text-slate-900 mb-2">{t('agencyDashboard.pages.overview.noProperties')}</h3>
                     <p className="text-slate-600 mb-6 max-w-md mx-auto">
-                      Cette agence n'a pas encore ajouté de propriétés.
+                      {t('agencyDashboard.pages.overview.noPropertiesDescription')}
                     </p>
                     <Button 
-                      className="bg-immoo-gold hover:bg-immoo-gold/90 text-black"
+                      className="bg-immoo-gold text-black hover:bg-immoo-gold/90"
                       asChild
                     >
                       <RouterLink to={`/agencies/${agencyId}/properties/create`}>
                         <Plus className="h-4 w-4 mr-2" />
-                        Ajouter une propriété
+                        {t('agencyDashboard.pages.overview.addProperty')}
                       </RouterLink>
                     </Button>
                   </div>

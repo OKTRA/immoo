@@ -41,12 +41,14 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import LeaseDetailsDialog from './LeaseDetailsDialog';
 import ContractViewDialog from '../contracts/ContractViewDialog';
 import { getContractByLeaseId, getAvailableContractsForAssignment, assignContractToLease } from '@/services/contracts/contractWysiwygService';
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface AgencyLeasesDisplayProps {
   agencyId: string;
 }
 
 export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayProps) {
+  const { t } = useTranslation();
   const [leases, setLeases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
@@ -83,8 +85,8 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
         
         if (error) {
           toast({
-            title: "Erreur",
-            description: `Impossible de récupérer les baux: ${error}`,
+            title: t('agencyDashboard.pages.leases.error'),
+            description: `${t('agencyDashboard.pages.leases.cannotRetrieveLeases')}: ${error}`,
             variant: "destructive"
           });
           return;
@@ -107,8 +109,8 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
       } catch (err: any) {
         console.error("Erreur lors de la récupération des baux:", err);
         toast({
-          title: "Erreur",
-          description: `Une erreur est survenue: ${err.message}`,
+          title: t('agencyDashboard.pages.leases.error'),
+          description: `${t('agencyDashboard.pages.leases.errorOccurred')}: ${err.message}`,
           variant: "destructive"
         });
       } finally {
@@ -117,7 +119,7 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
     };
     
     fetchLeases();
-  }, [agencyId, toast]);
+  }, [agencyId, toast, t]);
 
   const filteredLeases = leases.filter(lease => {
     const searchTerms = searchQuery.toLowerCase();
@@ -156,16 +158,16 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
         setIsContractDialogOpen(true);
       } else {
         toast({
-          title: "Aucun contrat",
-          description: "Aucun contrat n'est rattaché à ce bail",
+          title: t('agencyDashboard.pages.leases.noContract'),
+          description: t('agencyDashboard.pages.leases.noContractAttached'),
           variant: "destructive"
         });
       }
     } catch (error) {
       console.error('Error getting contract:', error);
       toast({
-        title: "Erreur",
-        description: "Erreur lors de la récupération du contrat",
+        title: t('agencyDashboard.pages.leases.error'),
+        description: t('agencyDashboard.pages.leases.errorRetrievingContract'),
         variant: "destructive"
       });
     } finally {
@@ -183,8 +185,8 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
     } catch (error) {
       console.error('Error loading contracts:', error);
       toast({
-        title: "Erreur",
-        description: "Erreur lors du chargement des contrats",
+        title: t('agencyDashboard.pages.leases.error'),
+        description: t('agencyDashboard.pages.leases.errorLoadingContracts'),
         variant: "destructive"
       });
     } finally {
@@ -199,8 +201,8 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
       const success = await assignContractToLease(selectedContractToAssign, leaseToAssignContract.id);
       if (success) {
         toast({
-          title: "Succès",
-          description: "Contrat assigné au bail avec succès"
+          title: t('agencyDashboard.pages.leases.success'),
+          description: t('agencyDashboard.pages.leases.contractAssignedSuccess')
         });
         setIsContractSelectionOpen(false);
         setSelectedContractToAssign('');
@@ -211,8 +213,8 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
     } catch (error) {
       console.error('Error assigning contract:', error);
       toast({
-        title: "Erreur",
-        description: "Erreur lors de l'assignation du contrat",
+        title: t('agencyDashboard.pages.leases.error'),
+        description: t('agencyDashboard.pages.leases.errorAssigningContract'),
         variant: "destructive"
       });
     }
@@ -252,10 +254,10 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
     }
     const { success, error } = result;
     if(success){
-      toast({title:'Succès',description: actionType === 'cancel' ? 'Bail annulé' : 'Bail résilié'});
+      toast({title: t('agencyDashboard.pages.leases.success'), description: actionType === 'cancel' ? t('agencyDashboard.pages.leases.leaseCancelled') : t('agencyDashboard.pages.leases.leaseTerminated')});
       setLeases(prev => prev.map(lease => lease.id === cancelTarget.id ? {...lease, status: actionType==='cancel' ? 'cancelled' : 'terminated'} : lease));
     } else {
-      toast({title:'Erreur',description:error,variant:'destructive'});
+      toast({title: t('agencyDashboard.pages.leases.error'), description: error, variant: 'destructive'});
     }
     setIsCancelOpen(false);
   };
@@ -265,14 +267,14 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle className="text-xl">Gestion des Baux</CardTitle>
+            <CardTitle className="text-xl">{t('agencyDashboard.pages.leases.leaseManagement')}</CardTitle>
             <CardDescription>
-              Liste des baux actifs dans votre agence
+              {t('agencyDashboard.pages.leases.activeLeasesList')}
             </CardDescription>
           </div>
           <Button onClick={handleCreateLease}>
             <PlusCircle className="h-4 w-4 mr-2" />
-            Créer un nouveau bail
+            {t('agencyDashboard.pages.leases.createNewLease')}
           </Button>
         </div>
       </CardHeader>
@@ -281,7 +283,7 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Rechercher par propriété ou locataire..."
+              placeholder={t('agencyDashboard.pages.leases.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -296,20 +298,20 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
         ) : filteredLeases.length === 0 ? (
           <div className="text-center py-10">
             <FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">Aucun bail trouvé</h3>
+            <h3 className="text-lg font-medium mb-2">{t('agencyDashboard.pages.leases.noLeasesFound')}</h3>
             {searchQuery ? (
               <p className="text-muted-foreground max-w-md mx-auto">
-                Aucun résultat ne correspond à votre recherche. Essayez avec d'autres termes.
+                {t('agencyDashboard.pages.leases.noSearchResults')}
               </p>
             ) : (
               <p className="text-muted-foreground max-w-md mx-auto">
-                Créez votre premier bail pour commencer à gérer vos locataires et vos propriétés.
+                {t('agencyDashboard.pages.leases.createFirstLease')}
               </p>
             )}
             {!searchQuery && (
               <Button onClick={handleCreateLease} className="mt-4">
                 <PlusCircle className="h-4 w-4 mr-2" />
-                Créer un bail
+                {t('agencyDashboard.pages.leases.createLease')}
               </Button>
             )}
           </div>
@@ -318,12 +320,12 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Propriété</TableHead>
-                  <TableHead>Locataire</TableHead>
-                  <TableHead>Période</TableHead>
-                  <TableHead>Loyer</TableHead>
-                  <TableHead>Statut</TableHead>
-                  <TableHead>Actions</TableHead>
+                  <TableHead>{t('agencyDashboard.pages.leases.property')}</TableHead>
+                  <TableHead>{t('agencyDashboard.pages.leases.tenant')}</TableHead>
+                  <TableHead>{t('agencyDashboard.pages.leases.period')}</TableHead>
+                  <TableHead>{t('agencyDashboard.pages.leases.rent')}</TableHead>
+                  <TableHead>{t('agencyDashboard.pages.leases.status')}</TableHead>
+                  <TableHead>{t('agencyDashboard.pages.leases.actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -352,7 +354,7 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                     <TableCell>
                       <span className="flex items-center">
                         <Calendar className="h-4 w-4 mr-1 text-muted-foreground" />
-                        {new Date(lease.start_date).toLocaleDateString()} au {new Date(lease.end_date).toLocaleDateString()}
+                        {new Date(lease.start_date).toLocaleDateString()} {t('agencyDashboard.pages.leases.to')} {new Date(lease.end_date).toLocaleDateString()}
                       </span>
                     </TableCell>
                     <TableCell className="font-medium">
@@ -362,7 +364,7 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                       <Badge variant={
                         lease.status === 'active' ? 'success' : lease.status === 'terminated' || lease.status==='cancelled' ? 'destructive' : 'default'
                       }>
-                        {lease.status === 'active' ? 'Actif' : lease.status === 'terminated' ? 'Résilié' : lease.status==='cancelled' ? 'Annulé' : 'Inactif'}
+                        {lease.status === 'active' ? t('agencyDashboard.pages.leases.active') : lease.status === 'terminated' ? t('agencyDashboard.pages.leases.terminated') : lease.status==='cancelled' ? t('agencyDashboard.pages.leases.cancelled') : t('agencyDashboard.pages.leases.inactive')}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -374,7 +376,7 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                             onClick={() => handleViewLeasePayments(lease.id, lease.property_id)}
                           >
                             <Receipt className="h-4 w-4 mr-1" />
-                            Paiements
+                            {t('agencyDashboard.pages.leases.payments')}
                           </Button>
                         </>
                       )}
@@ -383,10 +385,10 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                         variant="outline"
                         onClick={() => handleViewContract(lease)}
                         disabled={loadingContract}
-                        title="Voir le contrat"
+                        title={t('agencyDashboard.pages.leases.viewContract')}
                       >
                         <Eye className="h-4 w-4 mr-1" />
-                        {loadingContract ? 'Chargement...' : 'Contrat'}
+                        {loadingContract ? t('agencyDashboard.pages.leases.loading') : t('agencyDashboard.pages.leases.contract')}
                       </Button>
                       {!lease.hasContract && (
                         <Button 
@@ -394,10 +396,10 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                           variant="outline"
                           onClick={() => handleSelectContract(lease)}
                           disabled={loadingContracts}
-                          title="Sélectionner un contrat"
+                          title={t('agencyDashboard.pages.leases.selectContract')}
                         >
                           <FileText className="h-4 w-4 mr-1" />
-                          {loadingContracts ? 'Chargement...' : 'Sélectionner'}
+                          {loadingContracts ? t('agencyDashboard.pages.leases.loading') : t('agencyDashboard.pages.leases.select')}
                         </Button>
                       )}
                       <Button 
@@ -405,20 +407,20 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                         variant="default"
                         onClick={() => handleViewLeaseDetails(lease)}
                       >
-                        Détails
+                        {t('agencyDashboard.pages.leases.details')}
                       </Button>
                       {lease.status === 'active' && (() => {
                         const hasPaid = lease.payments?.some((p:any) => p.status === 'paid' && p.payment_type === 'rent');
                         if (!hasPaid) {
                           return (
                             <Button size="sm" variant="destructive" onClick={()=>handleCancelRequest(lease)}>
-                              <Trash2 className="h-4 w-4 mr-1"/> Annuler
+                              <Trash2 className="h-4 w-4 mr-1"/> {t('agencyDashboard.pages.leases.cancel')}
                             </Button>
                           );
                         } else {
                           return (
                             <Button size="sm" variant="destructive" onClick={()=>handleTerminateRequest(lease)}>
-                              <Trash2 className="h-4 w-4 mr-1"/> Résilier
+                              <Trash2 className="h-4 w-4 mr-1"/> {t('agencyDashboard.pages.leases.terminate')}
                             </Button>
                           );
                         }
@@ -436,9 +438,9 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
       <Dialog open={isContractSelectionOpen} onOpenChange={setIsContractSelectionOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Sélectionner un contrat</DialogTitle>
+            <DialogTitle>{t('agencyDashboard.pages.leases.selectContract')}</DialogTitle>
             <DialogDescription>
-              Choisissez un contrat parmi ceux disponibles pour l'assigner à ce bail.
+              {t('agencyDashboard.pages.leases.selectContractDescription')}
             </DialogDescription>
           </DialogHeader>
           
@@ -451,14 +453,14 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
               <div className="text-center py-8">
                 <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground mb-4">
-                  Aucun contrat disponible. Créez d'abord un contrat.
+                  {t('agencyDashboard.pages.leases.noContractsAvailable')}
                 </p>
                 <Button onClick={() => {
                   setIsContractSelectionOpen(false);
                   navigate(`/agencies/${agencyId}/contracts/create`);
                 }}>
                   <PlusCircle className="h-4 w-4 mr-2" />
-                  Créer un contrat
+                  {t('agencyDashboard.pages.leases.createContract')}
                 </Button>
               </div>
             ) : (
@@ -477,10 +479,10 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                       <div>
                         <h4 className="font-medium">{contract.title}</h4>
                         <p className="text-sm text-muted-foreground">
-                          Type: {contract.type} | Statut: {contract.status}
+                          {t('agencyDashboard.pages.leases.type')}: {contract.type} | {t('agencyDashboard.pages.leases.status')}: {contract.status}
                         </p>
                         <p className="text-xs text-muted-foreground">
-                          Créé le {new Date(contract.created_at).toLocaleDateString()}
+                          {t('agencyDashboard.pages.leases.createdOn')} {new Date(contract.created_at).toLocaleDateString()}
                         </p>
                       </div>
                       {selectedContractToAssign === contract.id && (
@@ -499,13 +501,13 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
           
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsContractSelectionOpen(false)}>
-              Annuler
+              {t('agencyDashboard.pages.leases.cancel')}
             </Button>
             <Button 
               onClick={handleAssignSelectedContract}
               disabled={!selectedContractToAssign || loadingContracts}
             >
-              Assigner le contrat
+              {t('agencyDashboard.pages.leases.assignContract')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -516,30 +518,30 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {actionType === 'cancel' ? "Confirmer l'annulation du bail" : "Confirmer la résiliation du bail"}
+              {actionType === 'cancel' ? t('agencyDashboard.pages.leases.confirmLeaseCancellation') : t('agencyDashboard.pages.leases.confirmLeaseTermination')}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {actionType === 'cancel' ?
-                "Cette action supprimera également les paiements générés automatiquement." :
-                "Veuillez remplir l'état des lieux et préciser le traitement de la caution."}
+                t('agencyDashboard.pages.leases.cancelLeaseDescription') :
+                t('agencyDashboard.pages.leases.terminateLeaseDescription')}
             </AlertDialogDescription>
             {actionType === 'terminate' && (
               <div className="space-y-3 mt-4">
                 <div>
-                  <label className="font-medium mb-1 block">Restitution de la caution</label>
+                  <label className="font-medium mb-1 block">{t('agencyDashboard.pages.leases.depositReturn')}</label>
                   <select
                     className="w-full border rounded px-2 py-1"
                     value={depositOption}
                     onChange={e => setDepositOption(e.target.value as any)}
                   >
-                    <option value="full">Totale</option>
-                    <option value="partial">Partielle</option>
-                    <option value="none">Aucune</option>
+                    <option value="full">{t('agencyDashboard.pages.leases.full')}</option>
+                    <option value="partial">{t('agencyDashboard.pages.leases.partial')}</option>
+                    <option value="none">{t('agencyDashboard.pages.leases.none')}</option>
                   </select>
                 </div>
                 {depositOption === 'partial' && (
                   <div>
-                    <label className="font-medium mb-1 block">Montant restitué (FCFA)</label>
+                    <label className="font-medium mb-1 block">{t('agencyDashboard.pages.leases.returnedAmount')} (FCFA)</label>
                     <input
                       type="number"
                       className="w-full border rounded px-2 py-1"
@@ -549,7 +551,7 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                   </div>
                 )}
                 <div>
-                  <label className="font-medium mb-1 block">Dégâts / Observations</label>
+                  <label className="font-medium mb-1 block">{t('agencyDashboard.pages.leases.damagesObservations')}</label>
                   <textarea
                     className="w-full border rounded px-2 py-1"
                     rows={3}
@@ -561,9 +563,9 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
             )}
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Retour</AlertDialogCancel>
+            <AlertDialogCancel>{t('agencyDashboard.pages.leases.back')}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmAction} disabled={actionType==='terminate' && depositOption==='partial' && !partialAmount}>
-              {actionType === 'cancel' ? 'Annuler le bail' : 'Résilier le bail'}
+              {actionType === 'cancel' ? t('agencyDashboard.pages.leases.cancelLease') : t('agencyDashboard.pages.leases.terminateLease')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

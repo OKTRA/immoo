@@ -13,6 +13,7 @@ import { checkUserResourceLimit } from '@/services/subscription/limit';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle, Lock, Crown } from "lucide-react";
 import UpgradeButton from "@/components/subscription/UpgradeButton";
+import { useTranslation } from "@/hooks/useTranslation";
 
 interface CreatePropertyFormProps {
   formData: any;
@@ -31,6 +32,7 @@ export default function CreatePropertyForm({
 }: CreatePropertyFormProps) {
   const [activeTab, setActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { t } = useTranslation();
   const [limitCheck, setLimitCheck] = useState<{
     allowed: boolean;
     currentCount: number;
@@ -68,7 +70,7 @@ export default function CreatePropertyForm({
 
           if (!limit.allowed) {
             toast.error(
-              `Limite atteinte : vous ne pouvez pas ajouter plus de ${limit.maxAllowed} propriétés avec votre plan ${limit.planName || 'actuel'}.`
+              `${t('agencyDashboard.pages.createProperty.limitReached')} ${limit.maxAllowed} ${t('agencyDashboard.pages.createProperty.propertiesWithPlan')} ${limit.planName || t('agencyDashboard.pages.createProperty.currentPlan')}.`
             );
           }
         } catch (error: any) {
@@ -92,7 +94,7 @@ export default function CreatePropertyForm({
     };
 
     checkLimits();
-  }, [isReady, isAuthenticated, user?.id, agencyId, isEditMode]);
+  }, [isReady, isAuthenticated, user?.id, agencyId, isEditMode, t]);
 
   // This function has the correct signature to match the child component props
   const handleFormDataChange = (data: Partial<any>) => {
@@ -117,7 +119,7 @@ export default function CreatePropertyForm({
     try {
       // Double vérification des limites avant soumission
       if (!isEditMode && !limitCheck.allowed) {
-        toast.error("Limite d'abonnement atteinte. Veuillez passer à un plan supérieur.");
+        toast.error(t('agencyDashboard.pages.createProperty.subscriptionLimitReached'));
         return;
       }
       
@@ -134,11 +136,11 @@ export default function CreatePropertyForm({
       if (isEditMode) {
         result = await updateProperty(propertyId!, propertyData);
         if (result.error) throw new Error(result.error);
-        toast.success("Propriété mise à jour avec succès");
+        toast.success(t('agencyDashboard.pages.createProperty.propertyUpdatedSuccessfully'));
       } else {
         result = await createProperty(propertyData);
         if (result.error) throw new Error(result.error);
-        toast.success("Propriété créée avec succès");
+        toast.success(t('agencyDashboard.pages.createProperty.propertyCreatedSuccessfully'));
       }
       
       console.log("Operation result:", result);
@@ -148,7 +150,7 @@ export default function CreatePropertyForm({
       }
     } catch (error: any) {
       console.error("Error saving property:", error);
-      toast.error(`Erreur: ${error.message}`);
+      toast.error(`${t('agencyDashboard.pages.createProperty.error')}: ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -159,7 +161,7 @@ export default function CreatePropertyForm({
     return (
       <div className="flex justify-center items-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mr-3"></div>
-        <span>Vérification des limites d'abonnement...</span>
+        <span>{t('agencyDashboard.pages.createProperty.checkingSubscriptionLimits')}</span>
       </div>
     );
   }
@@ -171,38 +173,38 @@ export default function CreatePropertyForm({
         <CardHeader>
           <CardTitle className="flex items-center text-destructive">
             <Lock className="h-5 w-5 mr-2" />
-            Limite d'abonnement atteinte
+            {t('agencyDashboard.pages.createProperty.subscriptionLimitReached')}
           </CardTitle>
           <CardDescription>
-            Vous ne pouvez pas créer de nouvelle propriété avec votre plan actuel.
+            {t('agencyDashboard.pages.createProperty.cannotCreateNewPropertyWithCurrentPlan')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <Alert>
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Plan {limitCheck.planName || 'gratuit'}</AlertTitle>
+            <AlertTitle>{t('agencyDashboard.pages.createProperty.plan')} {limitCheck.planName || t('agencyDashboard.pages.createProperty.free')}</AlertTitle>
             <AlertDescription>
-              Vous utilisez actuellement <strong>{limitCheck.currentCount}</strong> sur <strong>{limitCheck.maxAllowed}</strong> propriétés autorisées.
+              {t('agencyDashboard.pages.createProperty.usingProperties')} <strong>{limitCheck.currentCount}</strong> {t('agencyDashboard.pages.createProperty.outOf')} <strong>{limitCheck.maxAllowed}</strong> {t('agencyDashboard.pages.createProperty.propertiesAllowed')}.
             </AlertDescription>
           </Alert>
           
           <div className="bg-muted p-4 rounded-lg">
             <h4 className="font-semibold mb-2 flex items-center">
               <Crown className="h-4 w-4 mr-2 text-yellow-600" />
-              Passez à un plan supérieur pour :
+              {t('agencyDashboard.pages.createProperty.upgradeToHigherPlanFor')} :
             </h4>
             <ul className="text-sm space-y-1 ml-6">
-              <li>• Créer plus de propriétés</li>
-              <li>• Gérer plus de baux</li>
-              <li>• Accéder à des fonctionnalités avancées</li>
-              <li>• Support prioritaire</li>
+              <li>• {t('agencyDashboard.pages.createProperty.createMoreProperties')}</li>
+              <li>• {t('agencyDashboard.pages.createProperty.manageMoreLeases')}</li>
+              <li>• {t('agencyDashboard.pages.createProperty.accessAdvancedFeatures')}</li>
+              <li>• {t('agencyDashboard.pages.createProperty.prioritySupport')}</li>
             </ul>
           </div>
 
           <div className="flex gap-3">
             <UpgradeButton />
             <Button variant="outline" onClick={() => window.history.back()}>
-              Retour
+              {t('agencyDashboard.pages.createProperty.back')}
             </Button>
           </div>
         </CardContent>
@@ -217,9 +219,9 @@ export default function CreatePropertyForm({
       {!isEditMode && limitCheck.allowed && limitCheck.currentCount >= limitCheck.maxAllowed * 0.8 && (
         <Alert className="border-orange-200 bg-orange-50">
           <AlertTriangle className="h-4 w-4 text-orange-600" />
-          <AlertTitle className="text-orange-800">Attention : Limite bientôt atteinte</AlertTitle>
+          <AlertTitle className="text-orange-800">{t('agencyDashboard.pages.createProperty.warningLimitAlmostReached')}</AlertTitle>
           <AlertDescription className="text-orange-700">
-            Vous utilisez <strong>{limitCheck.currentCount}</strong> sur <strong>{limitCheck.maxAllowed}</strong> propriétés autorisées avec votre plan {limitCheck.planName || 'actuel'}.
+            {t('agencyDashboard.pages.createProperty.usingProperties')} <strong>{limitCheck.currentCount}</strong> {t('agencyDashboard.pages.createProperty.outOf')} <strong>{limitCheck.maxAllowed}</strong> {t('agencyDashboard.pages.createProperty.propertiesAllowedWithPlan')} {limitCheck.planName || t('agencyDashboard.pages.createProperty.currentPlan')}.
             <div className="mt-2">
               <UpgradeButton variant="outline" size="sm" />
             </div>
@@ -236,10 +238,10 @@ export default function CreatePropertyForm({
         >
           <Card>
             <TabsList className="grid grid-cols-4 w-full">
-              <TabsTrigger value="basic">Informations de base</TabsTrigger>
-              <TabsTrigger value="financial">Informations financières</TabsTrigger>
-              <TabsTrigger value="media">Médias</TabsTrigger>
-              <TabsTrigger value="ownership">Propriétaire</TabsTrigger>
+              <TabsTrigger value="basic">{t('agencyDashboard.pages.createProperty.basicInfo')}</TabsTrigger>
+              <TabsTrigger value="financial">{t('agencyDashboard.pages.createProperty.financialInfo')}</TabsTrigger>
+              <TabsTrigger value="media">{t('agencyDashboard.pages.createProperty.media')}</TabsTrigger>
+              <TabsTrigger value="ownership">{t('agencyDashboard.pages.createProperty.owner')}</TabsTrigger>
             </TabsList>
           </Card>
 
@@ -253,7 +255,7 @@ export default function CreatePropertyForm({
                 type="button" 
                 onClick={() => setActiveTab('financial')}
               >
-                Continuer
+                {t('agencyDashboard.pages.createProperty.continue')}
               </Button>
             </div>
           </TabsContent>
@@ -269,13 +271,13 @@ export default function CreatePropertyForm({
                 variant="outline" 
                 onClick={() => setActiveTab('basic')}
               >
-                Retour
+                {t('agencyDashboard.pages.createProperty.back')}
               </Button>
               <Button 
                 type="button" 
                 onClick={() => setActiveTab('media')}
               >
-                Continuer
+                {t('agencyDashboard.pages.createProperty.continue')}
               </Button>
             </div>
           </TabsContent>
@@ -292,13 +294,13 @@ export default function CreatePropertyForm({
                 variant="outline" 
                 onClick={() => setActiveTab('financial')}
               >
-                Retour
+                {t('agencyDashboard.pages.createProperty.back')}
               </Button>
               <Button 
                 type="button" 
                 onClick={() => setActiveTab('ownership')}
               >
-                Continuer
+                {t('agencyDashboard.pages.createProperty.continue')}
               </Button>
             </div>
           </TabsContent>
@@ -315,7 +317,7 @@ export default function CreatePropertyForm({
                 variant="outline" 
                 onClick={() => setActiveTab('media')}
               >
-                Retour
+                {t('agencyDashboard.pages.createProperty.back')}
               </Button>
               <Button 
                 type="submit" 
@@ -325,10 +327,10 @@ export default function CreatePropertyForm({
                 {isSubmitting ? (
                   <>
                     <span className="animate-spin mr-2">⏳</span>
-                    {isEditMode ? "Mise à jour..." : "Création..."}
+                    {isEditMode ? t('agencyDashboard.pages.createProperty.updating') : t('agencyDashboard.pages.createProperty.creating')}
                   </>
                 ) : (
-                  isEditMode ? "Mettre à jour la propriété" : "Créer la propriété"
+                  isEditMode ? t('agencyDashboard.pages.createProperty.updateProperty') : t('agencyDashboard.pages.createProperty.createProperty')
                 )}
               </Button>
             </div>
