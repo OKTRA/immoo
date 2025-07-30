@@ -122,16 +122,6 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
 
   return (
     <div className="w-full max-w-md mx-auto">
-      {/* Header élégant */}
-      <div className="text-center mb-6">
-        <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-xl flex items-center justify-center shadow-lg">
-          <Building2 className="w-6 h-6 text-white" />
-        </div>
-        <p className="text-sm text-gray-600 font-medium">
-          {t('auth.createAgencyTitle')}
-        </p>
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-5">
         {error && (
           <div className="bg-red-50 border-l-4 border-red-400 p-3 rounded-r-lg flex items-start space-x-2 text-sm text-red-700 animate-in slide-in-from-left-2">

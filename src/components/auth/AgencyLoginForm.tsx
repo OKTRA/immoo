@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, Loader2, Building2 } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/hooks/useTranslation';
 import { toast } from 'sonner';
@@ -79,15 +79,6 @@ const AgencyLoginForm: React.FC<AgencyLoginFormProps> = ({ onSuccess, onSwitchTo
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-          <Building2 className="w-6 h-6 text-primary" />
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900">{t('auth.agency.title')}</h2>
-        <p className="text-gray-600">{t('auth.agency.subtitle')}</p>
-      </div>
-
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="bg-destructive/15 p-3 rounded-md flex items-start space-x-2 text-sm text-destructive">
@@ -131,19 +122,6 @@ const AgencyLoginForm: React.FC<AgencyLoginFormProps> = ({ onSuccess, onSwitchTo
           ) : t('auth.agency.login')}
         </Button>
       </form>
-
-      <div className="text-center space-y-2">
-        <p className="text-sm text-gray-600">
-          {t('auth.agency.noAgencyYet')}{' '}
-          <button 
-            type="button"
-            className="text-primary hover:underline font-medium"
-            onClick={onSwitchToSignup}
-          >
-            {t('auth.agency.createAgency')}
-          </button>
-        </p>
-      </div>
     </div>
   );
 };

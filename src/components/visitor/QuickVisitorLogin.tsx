@@ -64,34 +64,42 @@ export default function QuickVisitorLogin({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-sm shadow-xl">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-lg">{t('auth.quickVisitor.title')}</h3>
-          <Button variant="ghost" size="sm" onClick={onClose}>
-            <X className="h-4 w-4" />
-          </Button>
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl rounded-2xl border border-gray-200/50 dark:border-gray-700/50 p-8 w-full max-w-md shadow-2xl">
+        {/* Header */}
+        <div className="text-center mb-6">
+          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            </div>
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            {t('auth.quickVisitor.title')}
+          </h3>
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            {t('auth.quickVisitor.description')}
+          </p>
         </div>
         
-        <p className="text-sm text-muted-foreground mb-4">
-          {t('auth.quickVisitor.description')}
-        </p>
-        
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            type="text"
-            placeholder={t('auth.quickVisitor.placeholder')}
-            value={contact}
-            onChange={(e) => setContact(e.target.value)}
-            className="w-full"
-            required
-          />
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="relative">
+            <Input
+              type="text"
+              placeholder={t('auth.quickVisitor.placeholder')}
+              value={contact}
+              onChange={(e) => setContact(e.target.value)}
+              className="w-full h-12 px-4 bg-gray-50/80 dark:bg-gray-800/50 border-gray-200/50 dark:border-gray-700/50 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-base"
+              required
+            />
+          </div>
           
-          <div className="flex gap-2">
+          {/* Action Buttons */}
+          <div className="flex gap-3">
             <Button 
               type="button"
-              variant="outline" 
-              className="flex-1"
+              variant="ghost" 
+              className="flex-1 h-12 rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
               onClick={onClose}
               disabled={isSubmitting}
             >
@@ -99,14 +107,31 @@ export default function QuickVisitorLogin({
             </Button>
             <Button 
               type="submit" 
-              className="flex-1"
+              className="flex-1 h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={isSubmitting || !contact.trim()}
             >
-              {isSubmitting ? t('auth.quickVisitor.connecting') : t('auth.quickVisitor.access')}
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  {t('auth.quickVisitor.connecting')}
+                </div>
+              ) : (
+                t('auth.quickVisitor.access')
+              )}
             </Button>
           </div>
         </form>
+        
+        {/* Close Button */}
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-200"
+        >
+          <X className="h-4 w-4 text-gray-500" />
+        </Button>
       </div>
     </div>
   );
-} 
+}
