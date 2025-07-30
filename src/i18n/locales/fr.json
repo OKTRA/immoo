@@ -3,6 +3,7 @@
     "loading": "Chargement...",
     "error": "Erreur",
     "success": "Succès",
+    "retry": "Réessayer",
     "cancel": "Annuler",
     "confirm": "Confirmer",
     "save": "Enregistrer",
@@ -76,7 +77,8 @@
     "immoAgency": "IMMOO Agency",
     "browseAgencies": "Parcourir les Agences",
     "documentGenerator": "Générateur de Documents",
-    "pricing": "Tarifs"
+    "pricing": "Tarifs",
+    "myAgencies": "Mes Agences"
   },
   "navbar": {
     "navigationMenu": "Menu Navigation",
@@ -166,6 +168,18 @@
     "integratedPropertyManagement": "Plateforme gestion intégrée",
     "integratedPropertyManagementDesc": "Plateforme complète pour votre agence",
     "discover": "Découvrir"
+  },
+  "agencies": {
+    "myAgencies": "Mes Agences",
+    "spaceTitle": "Espace Agence - Gestion",
+    "manageDescription": "Gérez vos agences immobilières et développez votre activité",
+    "newAgency": "Nouvelle Agence",
+    "upgradeToPremium": "Passer à Premium",
+    "noAgenciesFound": "Aucune agence trouvée",
+    "loadError": "Impossible de charger vos agences"
+  },
+  "errors": {
+    "accessDenied": "Accès refusé. Cette page est réservée aux agences."
   },
   "auth": {
     "login": "Connexion",
@@ -692,6 +706,39 @@
     "contact": "Contact",
     "book": "Réserver",
     "fillFormToContact": "Remplissez le formulaire pour contacter l'agence"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "pageTitle": "Analyses et rapports",
+    "loadError": "Impossible de charger les analyses",
+    "agencyNotFound": "Agence introuvable",
+    "agencyNotFoundDesc": "L'agence demandée n'existe pas ou n'est plus disponible",
+    "totalProperties": "Total propriétés",
+    "averageRating": "Note moyenne",
+    "totalViews": "Total vues",
+    "performance": "Performance",
+    "thisMonth": "ce mois",
+    "thisWeek": "cette semaine",
+    "outOfFive": "sur 5",
+    "excellent": "Excellent",
+    "viewsOverTime": "Évolution des vues",
+    "viewsOverTimeDesc": "Nombre de vues de vos propriétés au fil du temps",
+    "propertyDistribution": "Répartition des propriétés",
+    "propertyDistributionDesc": "Distribution de vos propriétés par type et statut",
+    "chartComingSoon": "Graphique bientôt disponible",
+    "recentListings": "Annonces récentes",
+    "recentListingsDesc": "Vos dernières propriétés ajoutées",
+    "untitledProperty": "Propriété sans titre",
+    "noLocation": "Emplacement non spécifié",
+    "priceNotSet": "Prix non défini",
+    "noDate": "Date non disponible",
+    "noRecentListings": "Aucune annonce récente",
+    "manageProperties": "Gérer les propriétés",
+    "managePropertiesDesc": "Ajouter, modifier et supprimer vos biens",
+    "manageTenants": "Gérer les locataires",
+    "manageTenantsDesc": "Suivre et gérer vos locataires",
+    "viewPayments": "Voir les paiements",
+    "viewPaymentsDesc": "Consulter l'historique des paiements"
   },
   "auth": {
     "quickVisitor": {

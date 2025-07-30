@@ -1,45 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { createProperty, updateProperty } from "@/services/property";
-import PropertyBasicInfoForm from "@/components/properties/PropertyBasicInfoForm";
-import PropertyFinancialInfoForm from "@/components/properties/PropertyFinancialInfoForm";
-import PropertyMediaForm from "@/components/properties/PropertyMediaForm";
-import PropertyOwnershipForm from "@/components/properties/PropertyOwnershipForm";
+import { createTenant, updateTenant } from "@/services/tenant/tenantService";
+import TenantBasicInfoForm from "@/components/tenants/TenantBasicInfoForm";
+import TenantContactInfoForm from "@/components/tenants/TenantContactInfoForm";
+import TenantDocumentsForm from "@/components/tenants/TenantDocumentsForm";
 import { useAuth, useAuthStatus } from '@/hooks/useAuth';
 import { checkUserResourceLimit } from '@/services/subscription/limit';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle, Lock, Crown, ArrowLeft, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
+import { AlertTriangle, Lock, Crown, ArrowLeft, ArrowRight, CheckCircle, Loader2, User } from "lucide-react";
 import UpgradeButton from "@/components/subscription/UpgradeButton";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
-interface CreatePropertyFormProps {
-  formData: any;
-  setFormData: React.Dispatch<React.SetStateAction<any>>;
-  propertyId?: string;
+interface CreateTenantFormProps {
+  formData?: any;
+  setFormData?: React.Dispatch<React.SetStateAction<any>>;
+  tenantId?: string;
   agencyId?: string;
   onSuccess?: () => void;
 }
 
 const STEPS = [
-  { id: "basic", label: "Informations de base", icon: "🏠" },
-  { id: "financial", label: "Informations financières", icon: "💰" },
-  { id: "media", label: "Médias", icon: "📸" },
-  { id: "ownership", label: "Propriétaire", icon: "👤" }
+  { id: "basic", label: "Informations de base", icon: "👤" },
+  { id: "contact", label: "Contact", icon: "📞" },
+  { id: "documents", label: "Documents", icon: "📄" },
 ];
 
-export default function CreatePropertyForm({ 
-  formData, 
-  setFormData, 
-  propertyId,
+export default function CreateTenantForm({ 
+  formData: externalFormData, 
+  setFormData: externalSetFormData, 
+  tenantId,
   agencyId,
   onSuccess 
-}: CreatePropertyFormProps) {
+}: CreateTenantFormProps) {
   const [activeTab, setActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useTranslation();
@@ -60,7 +58,29 @@ export default function CreatePropertyForm({
   
   const { user, profile, initialized } = useAuth();
   const { isAuthenticated, isReady } = useAuthStatus();
-  const isEditMode = !!propertyId;
+  const isEditMode = !!tenantId;
+
+  // Internal form state if not provided externally
+  const [internalFormData, setInternalFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    profession: "",
+    employmentStatus: "",
+    photoUrl: "",
+    emergencyContact: {
+      name: "",
+      phone: "",
+      relationship: "",
+    },
+    identityPhotos: [],
+    identityFiles: [],
+  });
+
+  // Use external or internal form data
+  const formData = externalFormData || internalFormData;
+  const setFormData = externalSetFormData || setInternalFormData;
 
   // Calculate progress
   const currentStepIndex = STEPS.findIndex(step => step.id === activeTab);
@@ -70,9 +90,9 @@ export default function CreatePropertyForm({
   useEffect(() => {
     const checkLimits = async () => {
       if (!isEditMode && isReady && isAuthenticated && user?.id) {
-        console.log('🏠 CreatePropertyForm: Checking limits for user:', user.id);
+        console.log('👤 CreateTenantForm: Checking limits for user:', user.id);
         try {
-          const limit = await checkUserResourceLimit(user.id, 'properties', agencyId);
+          const limit = await checkUserResourceLimit(user.id, 'tenants', agencyId);
           setLimitCheck({
             allowed: limit.allowed,
             currentCount: limit.currentCount,
@@ -84,7 +104,7 @@ export default function CreatePropertyForm({
 
           if (!limit.allowed) {
             toast.error(
-              `${t('agencyDashboard.pages.createProperty.limitReached')} ${limit.maxAllowed} ${t('agencyDashboard.pages.createProperty.propertiesWithPlan')} ${limit.planName || t('agencyDashboard.pages.createProperty.currentPlan')}.`
+              `Limite atteinte : ${limit.maxAllowed} locataires autorisés avec le plan ${limit.planName || 'actuel'}.`
             );
           }
         } catch (error: any) {
@@ -129,27 +149,36 @@ export default function CreatePropertyForm({
     
     try {
       if (!isEditMode && !limitCheck.allowed) {
-        toast.error(t('agencyDashboard.pages.createProperty.subscriptionLimitReached'));
+        toast.error("Limite d'abonnement atteinte");
         return;
       }
       
-      const propertyData = {
-        ...formData,
-        agencyId
+      const tenantData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+        profession: formData.profession || null,
+        employment_status: formData.employmentStatus || null,
+        photo_url: formData.photoUrl || null,
+        emergency_contact: formData.emergencyContact && (formData.emergencyContact.name || formData.emergencyContact.phone || formData.emergencyContact.relationship) 
+          ? formData.emergencyContact 
+          : null,
+        agency_id: agencyId
       };
       
-      console.log("Submitting property data:", propertyData);
+      console.log("Submitting tenant data:", tenantData);
       
       let result;
       
       if (isEditMode) {
-        result = await updateProperty(propertyId!, propertyData);
+        result = await updateTenant(tenantId!, tenantData);
         if (result.error) throw new Error(result.error);
-        toast.success(t('agencyDashboard.pages.createProperty.propertyUpdatedSuccessfully'));
+        toast.success("Locataire mis à jour avec succès");
       } else {
-        result = await createProperty(propertyData);
+        result = await createTenant(tenantData);
         if (result.error) throw new Error(result.error);
-        toast.success(t('agencyDashboard.pages.createProperty.propertyCreatedSuccessfully'));
+        toast.success("Locataire créé avec succès");
       }
       
       console.log("Operation result:", result);
@@ -158,8 +187,8 @@ export default function CreatePropertyForm({
         onSuccess();
       }
     } catch (error: any) {
-      console.error("Error saving property:", error);
-      toast.error(`${t('agencyDashboard.pages.createProperty.error')}: ${error.message}`);
+      console.error("Error saving tenant:", error);
+      toast.error(`Erreur lors de la sauvegarde : ${error.message}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -188,10 +217,10 @@ export default function CreatePropertyForm({
         </div>
         <div className="text-center space-y-2">
           <p className="text-lg font-medium text-foreground">
-            {t('agencyDashboard.pages.createProperty.checkingSubscriptionLimits')}
+            Vérification des limites d'abonnement...
           </p>
           <p className="text-sm text-muted-foreground">
-            Vérification de vos limites d'abonnement...
+            Vérification de vos limites d'abonnement
           </p>
         </div>
       </div>
@@ -203,25 +232,28 @@ export default function CreatePropertyForm({
     return (
       <div className="max-w-2xl mx-auto">
         <Card className="border-destructive/50 shadow-lg">
-          <CardHeader className="text-center pb-6">
-            <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
-              <Lock className="h-8 w-8 text-destructive" />
+          <CardContent className="p-6 space-y-6">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center">
+                <Lock className="h-8 w-8 text-destructive" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-destructive">
+                  Limite d'abonnement atteinte
+                </h2>
+                <p className="text-lg text-muted-foreground">
+                  Vous ne pouvez pas créer de nouveaux locataires avec votre plan actuel
+                </p>
+              </div>
             </div>
-            <CardTitle className="text-2xl font-bold text-destructive">
-              {t('agencyDashboard.pages.createProperty.subscriptionLimitReached')}
-            </CardTitle>
-            <CardDescription className="text-lg">
-              {t('agencyDashboard.pages.createProperty.cannotCreateNewPropertyWithCurrentPlan')}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
+
             <Alert className="border-orange-200 bg-orange-50">
               <AlertTriangle className="h-5 w-5 text-orange-600" />
               <AlertTitle className="text-orange-800">
-                Plan {limitCheck.planName || t('agencyDashboard.pages.createProperty.free')}
+                Plan {limitCheck.planName || 'Gratuit'}
               </AlertTitle>
               <AlertDescription className="text-orange-700">
-                Vous utilisez <strong>{limitCheck.currentCount}</strong> propriétés sur <strong>{limitCheck.maxAllowed}</strong> autorisées.
+                Vous utilisez <strong>{limitCheck.currentCount}</strong> locataires sur <strong>{limitCheck.maxAllowed}</strong> autorisés.
               </AlertDescription>
             </Alert>
             
@@ -233,7 +265,7 @@ export default function CreatePropertyForm({
               <ul className="space-y-2 text-sm">
                 <li className="flex items-center">
                   <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
-                  Créer plus de propriétés
+                  Créer plus de locataires
                 </li>
                 <li className="flex items-center">
                   <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
@@ -258,7 +290,7 @@ export default function CreatePropertyForm({
                 className="flex-1"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                {t('agencyDashboard.pages.createProperty.back')}
+                Retour
               </Button>
             </div>
           </CardContent>
@@ -273,10 +305,10 @@ export default function CreatePropertyForm({
       <div className="space-y-4">
         <div className="text-center space-y-2">
           <h1 className="text-3xl font-bold text-foreground">
-            {isEditMode ? 'Modifier la propriété' : 'Ajouter une nouvelle propriété'}
+            {isEditMode ? 'Modifier le locataire' : 'Ajouter un nouveau locataire'}
           </h1>
           <p className="text-muted-foreground">
-            {isEditMode ? 'Modifiez les informations de votre propriété' : 'Créez une nouvelle propriété en quelques étapes simples'}
+            {isEditMode ? 'Modifiez les informations du locataire' : 'Créez un nouveau locataire en quelques étapes simples'}
           </p>
         </div>
 
@@ -328,10 +360,10 @@ export default function CreatePropertyForm({
         <Alert className="border-orange-200 bg-orange-50">
           <AlertTriangle className="h-4 w-4 text-orange-600" />
           <AlertTitle className="text-orange-800">
-            {t('agencyDashboard.pages.createProperty.warningLimitAlmostReached')}
+            Attention : limite presque atteinte
           </AlertTitle>
           <AlertDescription className="text-orange-700">
-            Vous utilisez <strong>{limitCheck.currentCount}</strong> propriétés sur <strong>{limitCheck.maxAllowed}</strong> autorisées avec le plan {limitCheck.planName || t('agencyDashboard.pages.createProperty.currentPlan')}.
+            Vous utilisez <strong>{limitCheck.currentCount}</strong> locataires sur <strong>{limitCheck.maxAllowed}</strong> autorisés avec le plan {limitCheck.planName || 'actuel'}.
             <div className="mt-3">
               <UpgradeButton variant="outline" size="sm" />
             </div>
@@ -352,7 +384,7 @@ export default function CreatePropertyForm({
               {/* Mobile Tabs */}
               {isMobile && (
                 <div className="mb-6">
-                  <TabsList className="grid grid-cols-4 w-full h-auto p-1 bg-muted/50">
+                  <TabsList className="grid grid-cols-3 w-full h-auto p-1 bg-muted/50">
                     {STEPS.map((step) => (
                       <TabsTrigger 
                         key={step.id} 
@@ -370,7 +402,7 @@ export default function CreatePropertyForm({
               {/* Desktop Tabs */}
               {!isMobile && (
                 <div className="mb-6">
-                  <TabsList className="grid grid-cols-4 w-full h-auto p-1 bg-muted/50">
+                  <TabsList className="grid grid-cols-3 w-full h-auto p-1 bg-muted/50">
                     {STEPS.map((step) => (
                       <TabsTrigger 
                         key={step.id} 
@@ -388,66 +420,50 @@ export default function CreatePropertyForm({
               <TabsContent value="basic" className="space-y-6">
                 <div className="space-y-2">
                   <h3 className="text-xl font-semibold flex items-center">
-                    <span className="mr-2">🏠</span>
+                    <span className="mr-2">👤</span>
                     Informations de base
                   </h3>
                   <p className="text-muted-foreground">
-                    Commencez par les informations essentielles de votre propriété
+                    Commencez par les informations essentielles du locataire
                   </p>
                 </div>
-                <PropertyBasicInfoForm 
+                <TenantBasicInfoForm 
                   initialData={formData} 
                   onChange={handleFormDataChange} 
                 />
               </TabsContent>
 
-              <TabsContent value="financial" className="space-y-6">
+              <TabsContent value="contact" className="space-y-6">
                 <div className="space-y-2">
                   <h3 className="text-xl font-semibold flex items-center">
-                    <span className="mr-2">💰</span>
-                    Informations financières
+                    <span className="mr-2">📞</span>
+                    Informations de contact
                   </h3>
                   <p className="text-muted-foreground">
-                    Définissez les prix et conditions financières
+                    Renseignez les coordonnées et contacts d'urgence
                   </p>
                 </div>
-                <PropertyFinancialInfoForm 
-                  initialData={formData} 
-                  onChange={handleFormDataChange} 
-                />
-              </TabsContent>
-
-              <TabsContent value="media" className="space-y-6">
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold flex items-center">
-                    <span className="mr-2">📸</span>
-                    Médias
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Ajoutez des photos et vidéos pour présenter votre propriété
-                  </p>
-                </div>
-                <PropertyMediaForm 
-                  initialData={formData} 
-                  onChange={handleFormDataChange} 
-                  propertyId={propertyId}
-                />
-              </TabsContent>
-
-              <TabsContent value="ownership" className="space-y-6">
-                <div className="space-y-2">
-                  <h3 className="text-xl font-semibold flex items-center">
-                    <span className="mr-2">👤</span>
-                    Informations du propriétaire
-                  </h3>
-                  <p className="text-muted-foreground">
-                    Renseignez les informations du propriétaire
-                  </p>
-                </div>
-                <PropertyOwnershipForm 
+                <TenantContactInfoForm 
                   initialData={formData} 
                   onChange={handleFormDataChange}
                   onNestedChange={handleNestedChange} 
+                />
+              </TabsContent>
+
+              <TabsContent value="documents" className="space-y-6">
+                <div className="space-y-2">
+                  <h3 className="text-xl font-semibold flex items-center">
+                    <span className="mr-2">📄</span>
+                    Documents
+                  </h3>
+                  <p className="text-muted-foreground">
+                    Ajoutez une photo et les documents d'identité
+                  </p>
+                </div>
+                <TenantDocumentsForm 
+                  initialData={formData} 
+                  onChange={handleFormDataChange} 
+                  tenantId={tenantId}
                 />
               </TabsContent>
             </Tabs>
@@ -493,8 +509,8 @@ export default function CreatePropertyForm({
                     </>
                   ) : (
                     <>
-                      <CheckCircle className="h-4 w-4 mr-2" />
-                      {isEditMode ? 'Mettre à jour' : 'Créer la propriété'}
+                      <User className="h-4 w-4 mr-2" />
+                      {isEditMode ? 'Mettre à jour' : 'Créer le locataire'}
                     </>
                   )}
                 </Button>
@@ -505,4 +521,4 @@ export default function CreatePropertyForm({
       </form>
     </div>
   );
-}
+} 

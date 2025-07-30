@@ -14,6 +14,8 @@ import PublicAgencyPage from "@/pages/PublicAgencyPage";
 import PublicPropertyPage from "@/pages/PublicPropertyPage";
 import PublicAgenciesPage from "@/pages/PublicAgenciesPage";
 import AgencyDetailPage from "@/pages/AgencyDetailPage";
+import AgencyDetailPageNew from "@/pages/AgencyDetailPageNew";
+import AgencyAnalyticsPage from "@/pages/AgencyAnalyticsPage";
 import CreateAgencyPage from "@/pages/CreateAgencyPage";
 import EditAgencyPage from "@/pages/EditAgencyPage";
 import PropertyDetailPage from "@/pages/PropertyDetailPage";
@@ -21,6 +23,7 @@ import CreatePropertyPage from "@/pages/property/CreatePropertyPage";
 import CreateLeasePage from "@/pages/CreateLeasePage";
 import LeaseDetailsPage from "@/pages/LeaseDetailsPage";
 import ManageTenantsPage from "@/pages/ManageTenantsPage";
+import CreateTenantPage from "@/pages/tenant/CreateTenantPage";
 import PropertyLeasePaymentsPage from "@/pages/PropertyLeasePaymentsPage";
 import AgencyPaymentsPage from "@/pages/AgencyPaymentsPage";
 import AgencyEarningsPage from "@/pages/AgencyEarningsPage";
@@ -112,6 +115,31 @@ function App() {
               <Route path="/agency/:id" element={<PublicAgencyPage />} />
               <Route path="/agencies/create" element={<CreateAgencyPage />} />
               <Route path="/agencies/edit/:agencyId" element={<EditAgencyPage />} />
+              
+              {/* English routes - Routes anglaises avec préfixe /en/ */}
+              <Route path="/en" element={<HomePage />} />
+              <Route path="/en/browse-agencies" element={<BrowseAgenciesPage />} />
+              <Route path="/en/agency-profile/:agencyId" element={<AgencyProfilePage />} />
+              <Route path="/en/public-agency/:agencyId" element={<PublicAgencyPage />} />
+              <Route path="/en/property/:propertyId" element={<PublicPropertyPage />} />
+              <Route path="/en/search" element={<SearchPage />} />
+              <Route path="/en/pricing" element={<PricingPage />} />
+              <Route path="/en/immo-agency" element={<ImmoAgencyPage />} />
+              <Route path="/en/logo-showcase" element={<LogoShowcasePage />} />
+              <Route path="/en/test-property-images" element={<TestPropertyImages />} />
+              <Route path="/en/favorites" element={<FavoritesPage />} />
+              <Route path="/en/auth" element={<Auth />} />
+              <Route path="/en/admin-auth" element={<AdminAuth />} />
+              <Route path="/en/login" element={<Auth />} />
+              <Route path="/en/profile" element={<ProfilePage />} />
+              <Route path="/en/owner" element={<OwnerPage />} />
+              <Route path="/en/admin" element={<AdminPage />} />
+              <Route path="/en/agencies" element={<BrowseAgenciesPage />} />
+              <Route path="/en/my-agencies" element={<MyAgenciesPage />} />
+              <Route path="/en/agencies/all" element={<PublicAgenciesPage />} />
+              <Route path="/en/agency/:id" element={<PublicAgencyPage />} />
+              <Route path="/en/agencies/create" element={<CreateAgencyPage />} />
+              <Route path="/en/agencies/edit/:agencyId" element={<EditAgencyPage />} />
 
               <Route element={<AgencyLayout />}>
                 <Route
@@ -125,6 +153,14 @@ function App() {
                 <Route
                   path="/agencies/:agencyId/tenants"
                   element={<ManageTenantsPage />}
+                />
+                <Route
+                  path="/agencies/:agencyId/tenants/create"
+                  element={<CreateTenantPage />}
+                />
+                <Route
+                  path="/agencies/:agencyId/tenants/:tenantId/edit"
+                  element={<CreateTenantPage />}
                 />
                 <Route
                   path="/agencies/:agencyId/leases"
@@ -194,6 +230,18 @@ function App() {
                 <Route
                   path="/agencies/:agencyId/contracts/:contractId"
                   element={<ContractEditorPage />}
+                />
+                <Route
+                  path="/agencies/:agencyId/analytics"
+                  element={<AgencyDetailPageNew />}
+                />
+                <Route
+                  path="/agencies/:agencyId/statistics"
+                  element={<AgencyDetailPageNew />}
+                />
+                <Route
+                  path="/agencies/:agencyId/reports"
+                  element={<AgencyAnalyticsPage />}
                 />
               </Route>
 

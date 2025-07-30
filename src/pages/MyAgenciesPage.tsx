@@ -10,17 +10,19 @@ import ResponsiveLayout from "@/components/layout/ResponsiveLayout";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useTranslation } from "@/hooks/useTranslation";
 
 export default function MyAgenciesPage() {
   const { user, profile, initialized } = useAuth();
   const { isAuthenticated, isReady } = useAuthStatus();
   const [forceLoad, setForceLoad] = useState(false);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   
   // Vérifier que l'utilisateur a le rôle "agency"
   useEffect(() => {
     if (initialized && profile && profile.role !== 'agency') {
-      toast.error("Accès refusé. Cette page est réservée aux agences.");
+      toast.error(t('errors.accessDenied'));
       navigate('/');
       return;
     }
@@ -143,12 +145,12 @@ export default function MyAgenciesPage() {
         <div className="bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 min-h-screen">
         <div className="container mx-auto px-4 py-8 pt-24">
           <div className="text-center">
-            <h2 className="text-2xl font-bold mb-4">Erreur</h2>
+            <h2 className="text-2xl font-bold mb-4">{t('common.error')}</h2>
             <p className="text-muted-foreground mb-4">
-              Impossible de charger vos agences
+              {t('agencies.loadError')}
             </p>
             <div className="space-y-2">
-              <Button onClick={() => refetch()}>Réessayer</Button>
+              <Button onClick={() => refetch()}>{t('common.retry')}</Button>
               <div className="text-sm text-muted-foreground">
                 {error instanceof Error ? error.message : 'Erreur inconnue'}
               </div>
@@ -182,7 +184,7 @@ export default function MyAgenciesPage() {
               className="text-immoo-navy dark:text-immoo-pearl hover:bg-immoo-pearl/20"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Retour à l'accueil
+              {t('navigation.backToHome')}
             </Button>
           </motion.div>
 
@@ -194,13 +196,13 @@ export default function MyAgenciesPage() {
           >
             <div className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-full bg-immoo-gold/10 text-immoo-navy dark:text-immoo-pearl border border-immoo-gold/20 mb-4">
               <Building2 className="mr-2 h-4 w-4" />
-              Espace Agence - Gestion
+              {t('agencies.spaceTitle')}
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-immoo-navy dark:text-immoo-pearl mb-4">
-              Mes Agences
+              {t('agencies.myAgencies')}
             </h1>
             <p className="text-lg text-immoo-navy/70 dark:text-immoo-pearl/70 max-w-2xl mx-auto">
-              Gérez vos agences immobilières et développez votre activité
+              {t('agencies.manageDescription')}
             </p>
           </motion.div>
 
@@ -216,7 +218,7 @@ export default function MyAgenciesPage() {
               className="h-12 px-8 rounded-xl bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Plus className="h-5 w-5 mr-2" />
-              Nouvelle Agence
+              {t('agencies.newAgency')}
             </Button>
             
             <Button
@@ -225,7 +227,7 @@ export default function MyAgenciesPage() {
               className="h-12 px-8 rounded-xl border-2 border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy shadow-lg hover:shadow-xl transition-all duration-300"
             >
               <Crown className="h-5 w-5 mr-2" />
-              Passer à Premium
+              {t('agencies.upgradeToPremium')}
             </Button>
           </motion.div>
         </div>
@@ -245,7 +247,7 @@ export default function MyAgenciesPage() {
                 <Building2 className="h-12 w-12 text-immoo-gold" />
               </div>
               <h3 className="text-xl font-semibold text-immoo-navy dark:text-immoo-pearl mb-2">
-                Aucune agence trouvée
+                {t('agencies.noAgenciesFound')}
               </h3>
               <p className="text-immoo-navy/70 dark:text-immoo-pearl/70 mb-6 max-w-md mx-auto">
                 Commencez par créer votre première agence pour gérer vos biens immobiliers

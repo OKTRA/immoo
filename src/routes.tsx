@@ -22,6 +22,7 @@ import PricingPage from '@/pages/PricingPage';
 import ContractsPage from "./pages/ContractsPage";
 import AgencyContractsPage from "./pages/agency/AgencyContractsPage";
 import AgencyCreateContractPage from "./pages/agency/AgencyCreateContractPage";
+import CreateTenantPage from "./pages/tenant/CreateTenantPage";
 
 export const router = createBrowserRouter([
   {
@@ -69,6 +70,10 @@ export const router = createBrowserRouter([
           { path: 'contracts/create', element: <AgencyCreateContractPage /> },
           // ... autres sous-pages (properties, tenants, etc.)
         ]
+      },
+      {
+        path: '/agencies/:agencyId/tenants/create',
+        element: <CreateTenantPage />,
       },
       {
         path: '/public-agency/:agencyId',

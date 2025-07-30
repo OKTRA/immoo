@@ -3,6 +3,7 @@
     "loading": "Loading...",
     "error": "Error",
     "success": "Success",
+    "retry": "Retry",
     "cancel": "Cancel",
     "confirm": "Confirm",
     "save": "Save",
@@ -696,6 +697,54 @@
     "contact": "Contact",
     "book": "Book",
     "fillFormToContact": "Fill out the form to contact the agency"
+  },
+  "agencies": {
+    "myAgencies": "My Agencies",
+    "spaceTitle": "Agency Space - Management",
+    "manageDescription": "Manage your real estate agencies and grow your business",
+    "newAgency": "New Agency",
+    "upgradeToPremium": "Upgrade to Premium",
+    "noAgenciesFound": "No agencies found",
+    "loadError": "Unable to load your agencies"
+  },
+  "errors": {
+    "accessDenied": "Access denied. This page is reserved for agencies."
+  },
+  "navigation": {
+    "backToHome": "Back to home"
+  },
+  "analytics": {
+    "title": "Analytics",
+    "pageTitle": "Analytics and Reports",
+    "loadError": "Unable to load analytics",
+    "agencyNotFound": "Agency not found",
+    "agencyNotFoundDesc": "The requested agency does not exist or is no longer available",
+    "totalProperties": "Total Properties",
+    "averageRating": "Average Rating",
+    "totalViews": "Total Views",
+    "performance": "Performance",
+    "thisMonth": "this month",
+    "thisWeek": "this week",
+    "outOfFive": "out of 5",
+    "excellent": "Excellent",
+    "viewsOverTime": "Views Over Time",
+    "viewsOverTimeDesc": "Number of views of your properties over time",
+    "propertyDistribution": "Property Distribution",
+    "propertyDistributionDesc": "Distribution of your properties by type and status",
+    "chartComingSoon": "Chart coming soon",
+    "recentListings": "Recent Listings",
+    "recentListingsDesc": "Your latest added properties",
+    "untitledProperty": "Untitled Property",
+    "noLocation": "Location not specified",
+    "priceNotSet": "Price not set",
+    "noDate": "Date not available",
+    "noRecentListings": "No recent listings",
+    "manageProperties": "Manage Properties",
+    "managePropertiesDesc": "Add, edit and delete your properties",
+    "manageTenants": "Manage Tenants",
+    "manageTenantsDesc": "Track and manage your tenants",
+    "viewPayments": "View Payments",
+    "viewPaymentsDesc": "View payment history"
   },
   "auth": {
     "quickVisitor": {

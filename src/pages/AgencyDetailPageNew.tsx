@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getAgencyById, getPropertiesByAgencyId, getAgencyStatistics } from "@/services/agency";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -31,7 +31,24 @@ import PropertyList from "@/components/properties/PropertyList";
 export default function AgencyDetailPage() {
   const { agencyId } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState("overview");
+
+  // Détecter l'onglet actuel depuis l'URL
+  useEffect(() => {
+    const pathname = location.pathname;
+    if (pathname.includes('/analytics')) {
+      setActiveTab('analytics');
+    } else if (pathname.includes('/properties')) {
+      setActiveTab('properties');
+    } else if (pathname.includes('/tenants')) {
+      setActiveTab('tenants');
+    } else if (pathname.includes('/statistics')) {
+      setActiveTab('analytics'); // statistics -> analytics
+    } else {
+      setActiveTab('overview');
+    }
+  }, [location.pathname]);
 
   const { 
     data: agencyData, 
@@ -54,11 +71,19 @@ export default function AgencyDetailPage() {
 
   const { 
     data: statsData, 
-    isLoading: isLoadingStats
+    isLoading: isLoadingStats,
+    error: statsError
   } = useQuery({
     queryKey: ['agency-stats', agencyId],
     queryFn: () => getAgencyStatistics(agencyId || ''),
-    enabled: !!agencyId
+    enabled: !!agencyId,
+    retry: 1,
+    retryDelay: 1000,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    onError: (error) => {
+      console.warn('Error loading agency statistics:', error);
+      // Don't show toast error for statistics, just log it
+    }
   });
 
   useEffect(() => {
@@ -71,6 +96,13 @@ export default function AgencyDetailPage() {
   const agency: Agency | null = agencyData?.agency || null;
   const properties = propertiesData?.properties || [];
   const propertiesCount = propertiesData?.count || 0;
+  
+  // Statistiques avec fallback en cas d'erreur
+  const stats = statsData?.statistics || {
+    propertiesCount: propertiesCount,
+    avgRating: 0,
+    recentListings: []
+  };
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -227,7 +259,7 @@ export default function AgencyDetailPage() {
               <Users className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Locataires</span>
             </TabsTrigger>
-            <TabsTrigger value="statistics" className="data-[state=active]:bg-immoo-gold flex items-center justify-center px-2 sm:px-4">
+            <TabsTrigger value="analytics" className="data-[state=active]:bg-immoo-gold flex items-center justify-center px-2 sm:px-4">
               <BarChart3 className="w-4 h-4 sm:mr-2" />
               <span className="hidden sm:inline">Analytics</span>
             </TabsTrigger>
@@ -387,10 +419,10 @@ export default function AgencyDetailPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="statistics">
+          <TabsContent value="analytics">
             <Card>
               <CardHeader>
-                <CardTitle>Statistiques</CardTitle>
+                <CardTitle>Analytics</CardTitle>
                 <CardDescription>Analyses et rapports</CardDescription>
               </CardHeader>
               <CardContent className="text-center py-8">

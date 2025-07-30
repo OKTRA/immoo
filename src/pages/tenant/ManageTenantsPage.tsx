@@ -31,7 +31,7 @@ import {
   Briefcase
 } from "lucide-react";
 import { toast } from "sonner";
-import AddTenantForm from '@/components/tenants/AddTenantForm';
+
 import { getTenantsByPropertyId, getTenantsByAgencyId } from '@/services/tenant/tenantPropertyQueries';
 import { TenantWithLease } from '@/components/tenants/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -48,7 +48,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
   const { agencyId, propertyId } = useParams();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const [isAddingTenant, setIsAddingTenant] = useState(false);
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedStatus, setSelectedStatus] = useState('all');
 
@@ -117,11 +117,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
     }
   };
 
-  const handleAddTenantSuccess = () => {
-    setIsAddingTenant(false);
-    refetch();
-    toast.success(t('agencyDashboard.pages.tenants.tenantAddedSuccess'));
-  };
+  
 
   // Gestion vue / édition / suppression
   const handleViewTenant = (tenant: TenantWithLease) => {
@@ -212,7 +208,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
             {t('agencyDashboard.pages.tenants.export')}
           </Button>
           <Button 
-            onClick={() => setIsAddingTenant(true)}
+            onClick={() => navigate(`/agencies/${agencyId}/tenants/create`)}
             className="bg-gradient-to-r from-immoo-gold to-immoo-navy"
           >
             <UserPlus className="h-4 w-4 mr-2" />
@@ -404,7 +400,7 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
               </p>
               {(!searchTerm && selectedStatus === 'all') && (
                 <Button 
-                  onClick={() => setIsAddingTenant(true)}
+                  onClick={() => navigate(`/agencies/${agencyId}/tenants/create`)}
                   className="bg-gradient-to-r from-immoo-gold to-immoo-navy"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
@@ -511,15 +507,6 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
           )}
         </CardContent>
       </Card>
-
-      {/* Modal d'ajout de locataire */}
-      {isAddingTenant && (
-        <AddTenantForm 
-          onCancel={() => setIsAddingTenant(false)} 
-          onSuccess={handleAddTenantSuccess}
-          agencyId={agencyId}
-        />
-      )}
 
       {/* Dialog de visualisation du locataire */}
       {viewTenant && (
@@ -629,3 +616,8 @@ export default function ManageTenantsPage({ leaseView = false }: ManageTenantsPa
     </div>
   );
 }
+
+
+
+
+

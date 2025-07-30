@@ -105,10 +105,10 @@ export default function TenantListContainer({ agencyId, propertyId }: TenantList
     }
   };
 
-  // const handleAddTenantSuccess = (newTenant: TenantWithLease) => {
+  const handleAddTenantSuccess = (newTenant: TenantWithLease) => {
     setTenants([...tenants, newTenant]);
-    // setIsAddingTenant(false);
-    // toast.success("Locataire ajouté avec succès!");
+    setIsAddingTenant(false);
+    toast.success("Locataire ajouté avec succès!");
   };
 
   const filteredTenants = tenants
@@ -171,7 +171,7 @@ export default function TenantListContainer({ agencyId, propertyId }: TenantList
         />
       )}
 
-      {/* {isAddingTenant && (
+      {isAddingTenant && (
         <AddTenantForm 
           onCancel={() => setIsAddingTenant(false)} 
           onSuccess={handleAddTenantSuccess}
