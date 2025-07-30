@@ -1,0 +1,31 @@
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+console.log('🎨 Génération de l\'OG Image pour IMMOO');
+console.log('');
+console.log('📋 Instructions pour générer l\'og-image :');
+console.log('');
+console.log('1. Ouvrez votre navigateur et allez sur : http://localhost:8080/logo-showcase');
+console.log('2. Faites défiler jusqu\'à la section "Image Open Graph (OG)"');
+console.log('3. Cliquez sur "Télécharger OG Image (1200×630)"');
+console.log('4. Copiez le fichier téléchargé vers : public/og-image.png');
+console.log('');
+console.log('🔧 Alternative :');
+console.log('Si vous avez Node.js avec canvas installé, vous pouvez utiliser :');
+console.log('npm install canvas');
+console.log('npm run generate:og-image');
+console.log('');
+console.log('📁 Le fichier og-image.png sera utilisé pour :');
+console.log('• Facebook, Twitter, LinkedIn (partage de liens)');
+console.log('• WhatsApp, Telegram (aperçu des liens)');
+console.log('• Tous les réseaux sociaux');
+console.log('');
+console.log('✅ Une fois l\'image générée, elle remplacera automatiquement');
+console.log('   l\'ancienne image Lovable dans les partages sociaux.');
+console.log('');
+console.log('🚀 Pour démarrer le serveur de développement :');
+console.log('npm run dev'); 

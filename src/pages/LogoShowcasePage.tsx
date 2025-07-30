@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ImmooLogo from '@/components/ui/ImmooLogo';
 import ImmooLogoAnimated from '@/components/ui/ImmooLogoAnimated';
 import { generateAllFavicons, generateWebManifest, downloadFavicon } from '@/utils/generateFavicons';
+import { downloadOgImage } from '@/utils/generateOgImage';
 // @ts-ignore
 import GIF from 'gif.js';
 import html2canvas from 'html2canvas';
@@ -689,6 +690,87 @@ export default function LogoShowcasePage() {
                           </div>
                         </div>
                         <span className="text-sm text-immoo-gray">Favicon 32×32</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Section OG Image */}
+            <Card className="mt-8">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileImage className="w-5 h-5" />
+                  Image Open Graph (OG)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Image optimisée pour les réseaux sociaux et le partage de liens
+                  </p>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-immoo-navy">Génération OG Image</h4>
+                      <Button
+                        onClick={downloadOgImage}
+                        style={{ 
+                          backgroundColor: '#D97706',
+                          color: 'white'
+                        }}
+                        className="w-full hover:opacity-90 transition-opacity"
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'rgba(217, 119, 6, 0.9)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = '#D97706';
+                        }}
+                      >
+                        <Download className="w-4 h-4 mr-2" />
+                        Télécharger OG Image (1200×630)
+                      </Button>
+                      
+                      <div className="text-xs text-muted-foreground space-y-1">
+                        <p>• Format: PNG 1200×630px</p>
+                        <p>• Optimisé pour Facebook, Twitter, LinkedIn</p>
+                        <p>• Logo IMMOO avec design professionnel</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <h4 className="font-semibold text-immoo-navy">Aperçu OG Image</h4>
+                      <div className="p-4 bg-immoo-pearl rounded-lg">
+                        <div className="aspect-[1200/630] bg-gradient-to-br from-immoo-navy to-gray-700 rounded-lg flex items-center justify-center relative overflow-hidden">
+                          {/* Motif de fond */}
+                          <div className="absolute inset-0 opacity-10">
+                            {[...Array(10)].map((_, i) => (
+                              <div
+                                key={i}
+                                className="absolute w-4 h-4 bg-immoo-gold rounded-full"
+                                style={{
+                                  left: `${20 + i * 8}%`,
+                                  top: `${15 + i * 3}%`,
+                                }}
+                              />
+                            ))}
+                          </div>
+                          
+                          {/* Logo simplifié */}
+                          <div className="flex items-center space-x-3">
+                            <div className="flex space-x-2">
+                              <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                <div className="w-3 h-3 bg-immoo-gold rounded-full"></div>
+                              </div>
+                              <div className="w-6 h-6 bg-white rounded-full flex items-center justify-center">
+                                <div className="w-3 h-3 bg-immoo-gold rounded-full"></div>
+                              </div>
+                            </div>
+                            <div className="text-white font-bold text-lg">IMMOO</div>
+                          </div>
+                        </div>
+                        <p className="text-xs text-immoo-gray mt-2 text-center">Aperçu de l'image OG</p>
                       </div>
                     </div>
                   </div>

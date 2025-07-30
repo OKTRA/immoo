@@ -1,58 +1,52 @@
-# Welcome to your Lovable project
+# IMMOO - Plateforme Immobilière
 
-## Project info
+## À propos du projet
 
-**URL**: https://lovable.dev/projects/d38f6a53-6cf5-4982-bd25-1e228b913909
+IMMOO est une plateforme immobilière moderne qui connecte propriétaires, agences et locataires pour faciliter la location de propriétés.
 
-## How can I edit this code?
+## Comment modifier ce code ?
 
-There are several ways of editing your application.
+Il existe plusieurs façons de modifier votre application.
 
-**Use Lovable**
+**Utiliser votre IDE préféré**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d38f6a53-6cf5-4982-bd25-1e228b913909) and start prompting.
+Si vous voulez travailler localement avec votre propre IDE, clonez ce repo et poussez les modifications.
 
-Changes made via Lovable will be committed automatically to this repo.
+La seule exigence est d'avoir Node.js & npm installé - [installer avec nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Suivez ces étapes :
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Étape 1 : Cloner le repository en utilisant l'URL Git du projet.
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Étape 2 : Naviguer vers le répertoire du projet.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
+# Étape 3 : Installer les dépendances nécessaires.
 npm i
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Étape 4 : Démarrer le serveur de développement avec rechargement automatique et aperçu instantané.
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+**Modifier un fichier directement dans GitHub**
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Naviguez vers le(s) fichier(s) désiré(s).
+- Cliquez sur le bouton "Edit" (icône crayon) en haut à droite de la vue du fichier.
+- Faites vos modifications et committez les changements.
 
-**Use GitHub Codespaces**
+**Utiliser GitHub Codespaces**
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- Naviguez vers la page principale de votre repository.
+- Cliquez sur le bouton "Code" (bouton vert) près du haut à droite.
+- Sélectionnez l'onglet "Codespaces".
+- Cliquez sur "New codespace" pour lancer un nouvel environnement Codespace.
+- Modifiez les fichiers directement dans le Codespace et committez et poussez vos modifications une fois terminé.
 
-## What technologies are used for this project?
+## Quelles technologies sont utilisées pour ce projet ?
 
-This project is built with .
+Ce projet est construit avec :
 
 - Vite
 - TypeScript
@@ -60,10 +54,15 @@ This project is built with .
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Comment déployer ce projet ?
 
-Simply open [Lovable](https://lovable.dev/projects/d38f6a53-6cf5-4982-bd25-1e228b913909) and click on Share -> Publish.
+Pour déployer votre projet, vous pouvez utiliser des plateformes comme :
 
-## I want to use a custom domain - is that possible?
+- Netlify
+- Vercel
+- GitHub Pages
+- Firebase Hosting
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## Domaine personnalisé
+
+Pour utiliser un domaine personnalisé, nous recommandons d'utiliser Netlify ou Vercel qui offrent une configuration simple pour les domaines personnalisés.
