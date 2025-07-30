@@ -9,7 +9,8 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { DollarSign, Calendar, Shield, Building2, Percent } from "lucide-react";
+import { DollarSign, Calendar, Shield, Building2, Percent, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface PropertyFinancialInfoFormProps {
   initialData: Partial<Property>;
@@ -27,6 +28,13 @@ const PAYMENT_FREQUENCIES = [
   { value: "annual", label: "Annuel", icon: "📅" },
 ];
 
+interface FormErrors {
+  price?: string;
+  securityDeposit?: string;
+  agencyFees?: string;
+  commissionRate?: string;
+}
+
 export default function PropertyFinancialInfoForm({ initialData, onChange, onNext, onBack }: PropertyFinancialInfoFormProps) {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
@@ -37,8 +45,45 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
     agencyFees: initialData.agencyFees?.toString() || "",
     commissionRate: initialData.commissionRate?.toString() || "",
   });
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  // Validation function
+  const validateForm = (): boolean => {
+    const newErrors: FormErrors = {};
+
+    // Validate price
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      newErrors.price = "Le prix de location est requis et doit être supérieur à 0";
+    }
+
+    // Validate security deposit (optional but must be positive if provided)
+    if (formData.securityDeposit && parseFloat(formData.securityDeposit) < 0) {
+      newErrors.securityDeposit = "Le dépôt de garantie doit être positif";
+    }
+
+    // Validate agency fees (optional but must be positive if provided)
+    if (formData.agencyFees && parseFloat(formData.agencyFees) < 0) {
+      newErrors.agencyFees = "Les frais d'agence doivent être positifs";
+    }
+
+    // Validate commission rate (optional but must be between 0 and 100 if provided)
+    if (formData.commissionRate) {
+      const rate = parseFloat(formData.commissionRate);
+      if (rate < 0 || rate > 100) {
+        newErrors.commissionRate = "Le taux de commission doit être entre 0 et 100%";
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   useEffect(() => {
+    // Clear errors when form data changes
+    if (Object.keys(errors).length > 0) {
+      setErrors({});
+    }
+
     onChange({
       price: parseFloat(formData.price) || 0,
       paymentFrequency: formData.paymentFrequency as "daily" | "weekly" | "monthly" | "quarterly" | "biannual" | "annual",
@@ -68,6 +113,14 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
     return value.replace(/\s/g, '').replace(/[^\d.-]/g, '');
   };
 
+  const handleNext = () => {
+    if (validateForm() && onNext) {
+      onNext();
+    }
+  };
+
+  const hasErrors = Object.keys(errors).length > 0;
+
   return (
     <div className="space-y-8">
       {/* Price and Payment Frequency */}
@@ -94,18 +147,27 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
                   name="price"
                   type="text"
                   placeholder="Ex: 150 000"
-                  className="h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20 pl-16"
+                  className={`h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20 pl-16 ${
+                    errors.price ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
+                  }`}
                   value={formatCurrency(formData.price)}
                   onChange={(e) => {
                     const rawValue = parseCurrency(e.target.value);
                     setFormData(prev => ({ ...prev, price: rawValue }));
                   }}
                   required
+                  aria-describedby={errors.price ? "price-error" : undefined}
                 />
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
                   <span className="text-sm font-medium text-muted-foreground">FCFA</span>
                 </div>
               </div>
+              {errors.price && (
+                <div id="price-error" className="flex items-center gap-2 text-sm text-red-600">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.price}
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">
                 Prix par période de paiement
               </p>
@@ -165,17 +227,26 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
                 name="securityDeposit"
                 type="text"
                 placeholder="Ex: 100 000"
-                className="h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20 pl-16"
+                className={`h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20 pl-16 ${
+                  errors.securityDeposit ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
+                }`}
                 value={formatCurrency(formData.securityDeposit)}
                 onChange={(e) => {
                   const rawValue = parseCurrency(e.target.value);
                   setFormData(prev => ({ ...prev, securityDeposit: rawValue }));
                 }}
+                aria-describedby={errors.securityDeposit ? "securityDeposit-error" : undefined}
               />
               <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
                 <span className="text-sm font-medium text-muted-foreground">FCFA</span>
               </div>
             </div>
+            {errors.securityDeposit && (
+              <div id="securityDeposit-error" className="flex items-center gap-2 text-sm text-red-600">
+                <AlertCircle className="h-4 w-4" />
+                {errors.securityDeposit}
+              </div>
+            )}
             <p className="text-xs text-muted-foreground">
               Montant remboursable à la fin du bail
             </p>
@@ -207,17 +278,26 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
                   name="agencyFees"
                   type="text"
                   placeholder="Ex: 50 000"
-                  className="h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20 pl-16"
+                  className={`h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20 pl-16 ${
+                    errors.agencyFees ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
+                  }`}
                   value={formatCurrency(formData.agencyFees)}
                   onChange={(e) => {
                     const rawValue = parseCurrency(e.target.value);
                     setFormData(prev => ({ ...prev, agencyFees: rawValue }));
                   }}
+                  aria-describedby={errors.agencyFees ? "agencyFees-error" : undefined}
                 />
                 <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
                   <span className="text-sm font-medium text-muted-foreground">FCFA</span>
                 </div>
               </div>
+              {errors.agencyFees && (
+                <div id="agencyFees-error" className="flex items-center gap-2 text-sm text-red-600">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.agencyFees}
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">
                 Frais fixes de l'agence
               </p>
@@ -236,14 +316,23 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
                   max="100"
                   step="0.1"
                   placeholder="Ex: 10"
-                  className="h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20 pr-12"
+                  className={`h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20 pr-12 ${
+                    errors.commissionRate ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
+                  }`}
                   value={formData.commissionRate}
                   onChange={handleChange}
+                  aria-describedby={errors.commissionRate ? "commissionRate-error" : undefined}
                 />
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center">
                   <Percent className="h-4 w-4 text-muted-foreground" />
                 </div>
               </div>
+              {errors.commissionRate && (
+                <div id="commissionRate-error" className="flex items-center gap-2 text-sm text-red-600">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.commissionRate}
+                </div>
+              )}
               <p className="text-xs text-muted-foreground">
                 Pourcentage de commission sur le loyer
               </p>
@@ -251,6 +340,16 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
           </div>
         </CardContent>
       </Card>
+
+      {/* Error Summary */}
+      {hasErrors && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Veuillez corriger les erreurs ci-dessus avant de continuer.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Summary Card */}
       {formData.price && (
@@ -301,7 +400,12 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
             </Button>
           )}
           {onNext && (
-            <Button type="button" onClick={onNext} className="ml-auto">
+            <Button 
+              type="button" 
+              onClick={handleNext} 
+              className="ml-auto"
+              disabled={hasErrors}
+            >
               Continuer
             </Button>
           )}
