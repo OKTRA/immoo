@@ -209,8 +209,6 @@
     "descriptionPlaceholder": "Spécialisée dans la vente et location...",
     "createMyAgency": "🚀 Créer mon agence",
     "creatingAgency": "Création en cours...",
-    "alreadyAgency": "Déjà une agence?",
-    "loginHere": "Se connecter ici",
     "agencyCreatedSuccess": "Agence créée avec succès",
     "agencyCreatedDescription": "Votre agence a été créée et vous pouvez maintenant vous connecter",
     "errorOccurred": "Une erreur s'est produite",
@@ -710,6 +708,8 @@
     "agency": {
       "title": "Connexion Agence",
       "subtitle": "Connectez-vous à votre espace agence",
+      "loginTitle": "Connexion Agence",
+      "loginSubtitle": "Connectez-vous à votre espace agence",
       "email": "Email",
       "emailPlaceholder": "votre@email.com",
       "password": "Mot de passe",
@@ -722,7 +722,11 @@
       "unknownError": "Une erreur s'est produite",
       "loginFailed": "Échec de connexion",
       "noAgencyYet": "Pas encore d'agence?",
-      "createAgency": "Créer une agence"
+      "createAgency": "Créer une agence",
+      "noAccount": "Pas encore d'agence ? ",
+      "createAccount": "Créer un compte",
+      "alreadyAgency": "Déjà une agence?",
+      "loginHere": "Se connecter ici"
     },
     "personalInfo": "Informations personnelles",
     "firstName": "Prénom",

@@ -56,8 +56,10 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
-        {renderForm()}
+      <DialogContent className="sm:max-w-lg max-h-[95vh] overflow-y-auto p-0 bg-white rounded-2xl shadow-2xl border-0">
+        <div className="p-6 sm:p-8">
+          {renderForm()}
+        </div>
       </DialogContent>
     </Dialog>
   );

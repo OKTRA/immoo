@@ -79,26 +79,33 @@ const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onSuccess }) => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
-          <Shield className="w-6 h-6 text-red-600" />
+    <div className="w-full max-w-md mx-auto">
+      {/* Header avec icône et titre */}
+      <div className="text-center mb-8">
+        <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <Shield className="w-8 h-8 text-white" />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900">Administration</h2>
-        <p className="text-gray-600">Accès réservé aux administrateurs</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          Administration
+        </h2>
+        <p className="text-gray-600 text-sm">
+          Accès réservé aux administrateurs
+        </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Formulaire */}
+      <form onSubmit={handleSubmit} className="space-y-6">
         {error && (
-          <div className="bg-destructive/15 p-3 rounded-md flex items-start space-x-2 text-sm text-destructive">
-            <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
+          <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-start space-x-3 text-sm text-red-700">
+            <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
             <span>{error}</span>
           </div>
         )}
         
         <div className="space-y-2">
-          <Label htmlFor="admin-email">Email administrateur</Label>
+          <Label htmlFor="admin-email" className="text-sm font-medium text-gray-700">
+            Email administrateur
+          </Label>
           <Input
             id="admin-email"
             type="email"
@@ -107,11 +114,14 @@ const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onSuccess }) => {
             placeholder="admin@example.com"
             autoComplete="email"
             required
+            className="h-12 px-4 bg-gray-50 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 text-base"
           />
         </div>
         
         <div className="space-y-2">
-          <Label htmlFor="admin-password">Mot de passe</Label>
+          <Label htmlFor="admin-password" className="text-sm font-medium text-gray-700">
+            Mot de passe
+          </Label>
           <Input
             id="admin-password"
             type="password"
@@ -120,21 +130,31 @@ const AdminLoginForm: React.FC<AdminLoginFormProps> = ({ onSuccess }) => {
             placeholder="••••••••"
             autoComplete="current-password"
             required
+            className="h-12 px-4 bg-gray-50 border-gray-200 rounded-xl focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 text-base"
           />
         </div>
         
-        <Button type="submit" className="w-full bg-red-600 hover:bg-red-700" disabled={isLoading}>
+        <Button 
+          type="submit" 
+          className="w-full h-12 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed" 
+          disabled={isLoading}
+        >
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Connexion...
             </>
-          ) : 'Accéder à l\'administration'}
+          ) : (
+            'Accéder à l\'administration'
+          )}
         </Button>
       </form>
 
-      <div className="text-center text-sm text-gray-500">
-        <p>Accès strictement réservé aux administrateurs autorisés</p>
+      {/* Message de sécurité */}
+      <div className="mt-6 text-center">
+        <p className="text-xs text-gray-500">
+          Accès strictement réservé aux administrateurs autorisés
+        </p>
       </div>
     </div>
   );

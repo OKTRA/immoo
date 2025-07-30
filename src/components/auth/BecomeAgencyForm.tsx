@@ -319,13 +319,13 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
       {onSwitchToLogin && (
         <div className="text-center mt-6">
           <p className="text-xs text-gray-600">
-            {t('auth.alreadyAgency')}{' '}
+            {t('auth.agency.alreadyAgency')}{' '}
             <button 
               type="button"
               className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline"
               onClick={onSwitchToLogin}
             >
-              {t('auth.loginHere')}
+              {t('auth.agency.loginHere')}
             </button>
           </p>
         </div>

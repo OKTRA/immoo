@@ -197,8 +197,6 @@
     "descriptionPlaceholder": "Specialized in sales and rentals...",
     "createMyAgency": "🚀 Create my agency",
     "creatingAgency": "Creating...",
-    "alreadyAgency": "Already an agency?",
-    "loginHere": "Login here",
     "agencyCreatedSuccess": "Agency created successfully",
     "agencyCreatedDescription": "Your agency has been created and you can now login",
     "errorOccurred": "An error occurred",
@@ -714,6 +712,8 @@
     "agency": {
       "title": "Agency Login",
       "subtitle": "Connect to your agency space",
+      "loginTitle": "Agency Login",
+      "loginSubtitle": "Connect to your agency space",
       "email": "Email",
       "emailPlaceholder": "your@email.com",
       "password": "Password",
@@ -726,7 +726,11 @@
       "unknownError": "An error occurred",
       "loginFailed": "Login failed",
       "noAgencyYet": "Don't have an agency yet?",
-      "createAgency": "Create an agency"
+      "createAgency": "Create an agency",
+      "noAccount": "Don't have an agency yet? ",
+      "createAccount": "Create an account",
+      "alreadyAgency": "Already an agency?",
+      "loginHere": "Login here"
     },
     "personalInfo": "Personal Information",
     "firstName": "First Name",
