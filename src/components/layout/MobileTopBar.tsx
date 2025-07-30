@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ImmooLogoAdaptive from '@/components/ui/ImmooLogoAdaptive';
 import QuickVisitorIndicator from '@/components/visitor/QuickVisitorIndicator';
+import MobileActionButtons from './MobileActionButtons';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function MobileTopBar() {
@@ -25,8 +26,8 @@ export default function MobileTopBar() {
           />
         </div>
 
-        {/* Espace pour équilibrer */}
-        <div className="w-16"></div>
+        {/* Boutons d'action (logout, account, langue) */}
+        <MobileActionButtons />
       </div>
     </header>
   );

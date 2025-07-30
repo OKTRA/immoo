@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { getPropertyImages } from '@/services/property/propertyMedia';
 import { ChevronLeft, ChevronRight, Image as ImageIcon, Expand, X, Home } from 'lucide-react';
 
@@ -289,6 +290,9 @@ export default function PropertyImageGallery({
       {enableZoom && (
         <Dialog open={isZoomOpen} onOpenChange={setIsZoomOpen}>
           <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-black/95 border-0">
+            <VisuallyHidden>
+              <DialogTitle>Galerie d'images de la propriété</DialogTitle>
+            </VisuallyHidden>
             <MainImageDisplay inModal={true} />
             
             {/* Thumbnails en modal */}

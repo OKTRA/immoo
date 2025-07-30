@@ -569,6 +569,17 @@
     "loadingError": "Impossible de charger les propriétés",
     "loadingErrorDesc": "Veuillez réessayer ultérieurement"
   },
+  "propertyDetails": {
+    "status": {
+      "available": "Disponible",
+      "rented": "Loué",
+      "occupied": "Occupé",
+      "sold": "Vendu",
+      "pending": "En attente",
+      "maintenance": "En maintenance",
+      "reserved": "Réservé"
+    }
+  },
   "immoAgency": {
     "badge": "IMMOO Agency",
     "heroTitle": "Gestion Immobilière",

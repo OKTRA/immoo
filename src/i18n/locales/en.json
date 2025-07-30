@@ -573,6 +573,17 @@
     "loadingError": "Unable to load properties",
     "loadingErrorDesc": "Please try again later"
   },
+  "propertyDetails": {
+    "status": {
+      "available": "Available",
+      "rented": "Rented",
+      "occupied": "Occupied",
+      "sold": "Sold",
+      "pending": "Pending",
+      "maintenance": "Under Maintenance",
+      "reserved": "Reserved"
+    }
+  },
   "immoAgency": {
     "badge": "IMMOO Agency",
     "heroTitle": "Professional",
