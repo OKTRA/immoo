@@ -13,6 +13,12 @@ import {
   DialogFooter 
 } from "@/components/ui/dialog";
 import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { 
   FileText, 
   Plus, 
   Edit3, 
@@ -24,8 +30,14 @@ import {
   Archive,
   MoreHorizontal,
   Settings,
-  Link
+  Link,
+  Calendar,
+  MapPin,
+  Clock,
+  Filter,
+  Search
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { 
   deleteContract, 
@@ -303,42 +315,13 @@ export default function AgencyContractsPage() {
           availableLeases={availableLeases}
           isReadOnly={editingContract.status === 'closed' || editingContract.isViewMode}
           showToolbar={editingContract.status !== 'closed' && !editingContract.isViewMode}
-        />
-      </div>
-    );
-  }
 
-  return (
-    <div className="max-w-6xl mx-auto py-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
-            <FileText className="h-8 w-8 text-blue-600" /> 
-            {leaseIdFromUrl ? t('agencyDashboard.pages.contracts.leaseContracts') : t('agencyDashboard.pages.contracts.agencyContracts')}
-          </h1>
-          <p className="text-gray-600 mt-2">
-            {leaseIdFromUrl 
-              ? t('agencyDashboard.pages.contracts.leaseContractsDescription')
-              : t('agencyDashboard.pages.contracts.agencyContractsDescription')
-            }
-          </p>
-        </div>
-        
-        <Button 
-          onClick={() => navigate(`/agencies/${agencyId}/contracts/create`)}
-          className="flex items-center gap-2"
-        >
-          <Plus className="h-4 w-4" />
-          {t('agencyDashboard.pages.contracts.newContract')}
-        </Button>
-      </div>
-
-      {/* Error State */}
-      {error && (
-        <Card className="mb-6">
-          <CardContent className="pt-6">
-            <div className="text-red-600 flex items-center gap-2">
+      if (loading) {
+        return (
+          <div className="max-w-6xl mx-auto py-8">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-64 bg-gray-200 rounded"></div>
               <AlertTriangle className="h-5 w-5" />
               {error}
             </div>

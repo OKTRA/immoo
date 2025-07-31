@@ -48,7 +48,7 @@ import { useAutoVisitorSession } from "./hooks/useAutoVisitorSession";
 import routes from "tempo-routes";
 import AuthProvider from "@/contexts/auth/AuthContext";
 import { TranslationProvider } from "@/contexts/TranslationContext";
-import AgencyContractsPage from "./pages/agency/AgencyContractsPage";
+import AgencyContractsPageNew from "./pages/agency/AgencyContractsPageNew";
 import AgencyCreateContractPage from "./pages/agency/AgencyCreateContractPage";
 import ContractEditorPage from "./pages/contracts/ContractEditorPage";
 import ContractsListPage from "./pages/contracts/ContractsListPage";
@@ -58,6 +58,7 @@ import I18nTestPage from "./pages/I18nTestPage";
 import TestPropertyImages from "./pages/TestPropertyImages";
 import FavoritesPage from "./pages/FavoritesPage";
 import { LanguageRedirect } from "./components/LanguageRedirect";
+import { ElectronIntegration } from "./components/ElectronIntegration";
 
 // Import i18n to ensure translations are initialized
 import "@/i18n";
@@ -81,6 +82,7 @@ function App() {
         <AuthProvider>
           <Router>
             <LanguageRedirect />
+            <ElectronIntegration />
             <div className="min-h-screen flex flex-col">
               <main className="flex-1">
                 <TempoRoutes />
@@ -221,7 +223,7 @@ function App() {
                 {/* Ajout des routes contrats */}
                 <Route
                   path="/agencies/:agencyId/contracts"
-                  element={<AgencyContractsPage />}
+                  element={<AgencyContractsPageNew />}
                 />
                 <Route
                   path="/agencies/:agencyId/contracts/create"
@@ -357,7 +359,7 @@ function App() {
                 />
                 <Route
                   path="/en/agencies/:agencyId/contracts"
-                  element={<AgencyContractsPage />}
+                  element={<AgencyContractsPageNew />}
                 />
                 <Route
                   path="/en/agencies/:agencyId/contracts/create"
