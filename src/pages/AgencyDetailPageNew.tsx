@@ -27,6 +27,7 @@ import {
 import { Link } from "react-router-dom";
 import { Agency } from "@/assets/types";
 import PropertyList from "@/components/properties/PropertyList";
+import { formatWebsiteUrl } from "@/utils/urlUtils";
 
 export default function AgencyDetailPage() {
   const { agencyId } = useParams();
@@ -79,11 +80,7 @@ export default function AgencyDetailPage() {
     enabled: !!agencyId,
     retry: 1,
     retryDelay: 1000,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    onError: (error) => {
-      console.warn('Error loading agency statistics:', error);
-      // Don't show toast error for statistics, just log it
-    }
+    staleTime: 5 * 60 * 1000 // 5 minutes
   });
 
   useEffect(() => {
@@ -98,7 +95,7 @@ export default function AgencyDetailPage() {
   const propertiesCount = propertiesData?.count || 0;
   
   // Statistiques avec fallback en cas d'erreur
-  const stats = statsData?.statistics || {
+  const stats = (statsData as any)?.statistics || {
     propertiesCount: propertiesCount,
     avgRating: 0,
     recentListings: []
@@ -151,26 +148,29 @@ export default function AgencyDetailPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header compact et sobre */}
+      {/* Header avec photo d'agence mise en valeur */}
       <div className="bg-white border-b">
-        <div className="container mx-auto py-4 px-4">
+        <div className="container mx-auto py-6 px-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded border overflow-hidden bg-gray-100">
+            <div className="flex items-center gap-6">
+              <div className="w-20 h-20 rounded-xl border-2 border-gray-200 overflow-hidden bg-gray-100 shadow-md hover:shadow-lg transition-shadow">
                 {agency.logoUrl ? (
                   <img src={agency.logoUrl} alt={agency.name} className="w-full h-full object-cover" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-immoo-gold">
-                    <Building2 className="w-5 h-5 text-white" />
+                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-immoo-gold to-yellow-500">
+                    <Building2 className="w-10 h-10 text-white" />
                   </div>
                 )}
               </div>
               <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-lg font-semibold">{agency.name}</h1>
-                  {agency.verified && <Badge variant="secondary" className="text-xs">Vérifiée</Badge>}
+                <div className="flex items-center gap-3 mb-1">
+                  <h1 className="text-2xl font-bold text-gray-900">{agency.name}</h1>
+                  {agency.verified && <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">✓ Vérifiée</Badge>}
                 </div>
-                <p className="text-sm text-gray-600">{agency.location}</p>
+                <p className="text-gray-600 flex items-center gap-1">
+                  <MapPin className="w-4 h-4" />
+                  {agency.location}
+                </p>
               </div>
             </div>
             
@@ -292,7 +292,8 @@ export default function AgencyDetailPage() {
                     {agency.website && (
                       <div className="flex items-center gap-2 text-sm">
                         <Globe className="w-4 h-4 text-gray-500" />
-                        <a href={agency.website} target="_blank" rel="noopener noreferrer" 
+                        <a href={formatWebsiteUrl(agency.website)} 
+                           target="_blank" rel="noopener noreferrer" 
                            className="text-immoo-navy hover:underline flex items-center">
                           {agency.website}
                           <ArrowUpRight className="w-3 h-3 ml-1" />

@@ -158,7 +158,7 @@ export default function AgencyProfilePage() {
             <div className="flex items-center">
               <Globe className="h-4 w-4 mr-3 text-gray-400" />
               <a 
-                href={agency.website} 
+                href={agency.website.startsWith('http') ? agency.website : `https://${agency.website}`} 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-sm text-blue-600 hover:underline"

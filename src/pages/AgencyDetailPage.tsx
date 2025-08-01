@@ -417,7 +417,7 @@ export default function AgencyDetailPage() {
                         <div className="flex-1">
                           <p className="text-xs text-slate-600">{t('agencyDashboard.pages.overview.website')}</p>
                           <a 
-                            href={agency.website} 
+                            href={agency.website.startsWith('http') ? agency.website : `https://${agency.website}`} 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="font-medium text-slate-900 hover:text-emerald-600 transition-colors flex items-center"
