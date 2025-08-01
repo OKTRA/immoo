@@ -187,46 +187,7 @@ export default function AgencyDetailPage() {
       <div className="bg-white border-b border-slate-200">
         <div className="container mx-auto py-6 px-4">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            {/* Logo avec effet subtil */}
-            <div className="relative">
-              <div className="w-16 h-16 rounded-xl border-2 border-slate-100 overflow-hidden bg-slate-50 shadow-md">
-                {agency.logoUrl ? (
-                  <img 
-                    src={agency.logoUrl} 
-                    alt={agency.name} 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-immoo-gold to-amber-400">
-                    <Building2 className="w-8 h-8 text-white" />
-                  </div>
-                )}
-              </div>
-              {agency.verified && (
-                <div className="absolute -bottom-1 -right-1 bg-emerald-500 rounded-full p-1.5 shadow-lg">
-                  <Shield className="w-3 h-3 text-white" />
-                </div>
-              )}
-            </div>
-            
-            {/* Infos élégantes */}
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-slate-900">
-                  {agency.name}
-                </h1>
-                {agency.verified && (
-                  <Badge className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                    <Crown className="w-3 h-3 mr-1" />
-                    {t('agencyDashboard.pages.overview.certified')}
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center text-slate-600 mt-1">
-                <MapPin className="h-4 w-4 mr-2 text-immoo-gold" />
-                <span>{agency.location}</span>
-              </div>
-            </div>
+
             
             {/* Actions avec style */}
             <div className="flex gap-3">
