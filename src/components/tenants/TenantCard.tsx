@@ -44,9 +44,9 @@ const TenantCard: React.FC<TenantCardProps> = ({
 
   return (
     <Card>
-      <CardContent className="p-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-4">
+      <CardContent className="mobile-card">
+        <div className="mobile-card-content">
+          <div className="mobile-flex-start mobile-space-x">
             {tenant.photoUrl ? (
               <img 
                 src={tenant.photoUrl} 
@@ -59,22 +59,24 @@ const TenantCard: React.FC<TenantCardProps> = ({
               </div>
             )}
             <div>
-              <div className="flex items-center gap-2">
+              <div className="mobile-flex-start mobile-space-x-tight">
                 <h3 className="font-semibold">
                   {tenant.firstName} {tenant.lastName}
                 </h3>
                 {tenant.hasLease && (
-                  <Badge className="ml-2" variant="secondary">
-                    <Check className="h-3 w-3 mr-1" /> Attribué
+                  <Badge variant="secondary" className="mobile-flex-center mobile-space-x-tight">
+                    <Check className="h-3 w-3" /> Attribué
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center text-sm text-gray-600 mt-1">
-                <Phone className="h-3 w-3 mr-1" /> {tenant.phone}
+              <div className="mobile-flex-start text-sm text-gray-600 mt-1 mobile-space-x-tight">
+                <Phone className="h-3 w-3 flex-shrink-0" /> 
+                <span>{tenant.phone}</span>
               </div>
               {tenant.profession && (
-                <div className="flex items-center text-sm text-gray-600">
-                  <Briefcase className="h-3 w-3 mr-1" /> {tenant.profession}
+                <div className="mobile-flex-start text-sm text-gray-600 mobile-space-x-tight">
+                  <Briefcase className="h-3 w-3 flex-shrink-0" /> 
+                  <span>{tenant.profession}</span>
                 </div>
               )}
               {tenant.hasLease && tenant.propertyId && !propertyId && (

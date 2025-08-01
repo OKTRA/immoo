@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, Upload, Camera, Save, Loader2, MapPin, Mail, Phone, Globe, CheckCircle } from "lucide-react";
-import { toast } from "sonner";
+import { useMobileToast } from '@/hooks/useMobileToast';
 import { getAgencyById } from "@/services/agency";
 import { updateAgency } from "@/services/agency/agencyManagementService";
 import { uploadAgencyLogo } from "@/services/agency/agencyMediaService";
@@ -29,6 +29,7 @@ interface AgencyFormData {
 }
 
 export default function AgencySettingsPage() {
+  const mobileToast = useMobileToast();
   const { agencyId } = useParams();
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -104,7 +105,8 @@ export default function AgencySettingsPage() {
     onSuccess: (data) => {
       console.log('Logo upload successful:', data);
       if (data.logoUrl) {
-        toast.success("Logo téléchargé et sauvegardé avec succès");
+        // Toast de téléchargement de logo désactivé sur mobile (non essentiel)
+        mobileToast.success("Logo téléchargé et sauvegardé avec succès");
         setLogoPreview(data.logoUrl);
         setIsLogoUploaded(true);
         setLogoFile(null); // Clear the file input

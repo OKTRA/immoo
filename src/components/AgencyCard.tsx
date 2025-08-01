@@ -91,8 +91,8 @@ export default function AgencyCard({ agency, onDelete, isPublicView = false }: A
   
   return (
     <>
-      <AnimatedCard className="p-6 flex flex-col h-full overflow-hidden group">
-        <div className="flex items-center space-x-4 mb-4">
+      <AnimatedCard className="mobile-card overflow-hidden group">
+        <div className="mobile-card-header">
           <div className="relative flex-shrink-0">
             <div className="w-16 h-16 rounded-full border overflow-hidden bg-background">
               {agency.logoUrl ? (
@@ -114,7 +114,7 @@ export default function AgencyCard({ agency, onDelete, isPublicView = false }: A
             )}
           </div>
           
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 mobile-space-x-tight">
             {isPublicView ? (
               <button 
                 onClick={handleViewAgency}
@@ -132,8 +132,8 @@ export default function AgencyCard({ agency, onDelete, isPublicView = false }: A
                 </h3>
               </Link>
             )}
-            <div className="flex items-center text-muted-foreground text-sm">
-              <MapPin className="h-3 w-3 mr-1 inline-block" />
+            <div className="mobile-flex-start text-muted-foreground text-sm mobile-space-x-tight">
+              <MapPin className="h-3 w-3 flex-shrink-0" />
               <span className="truncate">{agency.location}</span>
             </div>
           </div>
@@ -145,12 +145,12 @@ export default function AgencyCard({ agency, onDelete, isPublicView = false }: A
           </p>
         )}
         
-        <div className="mt-auto space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="mobile-card-content mt-auto">
+          <div className="mobile-flex-between">
             <span className="text-sm font-medium">
               {actualPropertyCount} {actualPropertyCount > 1 ? 'propriétés' : 'propriété'}
             </span>
-            <div className="flex items-center space-x-1">
+            <div className="mobile-flex-center mobile-space-x-tight">
               <span className="text-sm font-medium">{safeRating.toFixed(1)}</span>
               <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
@@ -159,7 +159,7 @@ export default function AgencyCard({ agency, onDelete, isPublicView = false }: A
           </div>
           
           {(agency.specialties && agency.specialties.length > 0) && (
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-1 sm:gap-2">
               {agency.specialties.slice(0, 3).map((specialty, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
                   {specialty}
@@ -175,7 +175,7 @@ export default function AgencyCard({ agency, onDelete, isPublicView = false }: A
           
           {/* Only show management buttons in authenticated context */}
           {!isPublicView && (
-            <div className="grid grid-cols-3 gap-2">
+            <div className="mobile-grid-auto grid-cols-3">
               <Button variant="outline" size="sm" asChild>
                 <Link to={`/agencies/${agency.id}`}>
                   <Eye className="w-4 h-4 mr-2" />

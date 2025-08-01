@@ -81,7 +81,7 @@ export default function MobileBottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200/50 shadow-lg">
-      <div className="flex items-center justify-around px-2 py-2 h-14">
+      <div className="mobile-flex-between px-2 py-2 h-14">
         {navItems.map((item, index) => {
           const isActive = item.isActive(location.pathname);
           
@@ -91,7 +91,7 @@ export default function MobileBottomNav() {
               variant="ghost"
               size="sm"
               className={cn(
-                "flex flex-col items-center justify-center gap-0.5 h-10 px-2 rounded-lg transition-all duration-200 hover:scale-105 relative",
+                "mobile-flex-center flex-col gap-0.5 h-10 px-2 rounded-lg transition-all duration-200 hover:scale-105 relative flex-1",
                 isActive 
                   ? "text-immoo-gold" 
                   : "text-gray-600 hover:text-immoo-navy"

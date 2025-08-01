@@ -5,22 +5,23 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useLocalizedNavigation } from '@/hooks/useLocalizedNavigation';
-import { toast } from 'sonner';
+import { useMobileToast } from '@/hooks/useMobileToast';
 
 export default function MobileActionButtons() {
   const { user, profile, signOut } = useAuth();
   const navigate = useNavigate();
   const { currentLanguage } = useTranslation();
   const { changeLanguageAndNavigate } = useLocalizedNavigation();
+  const mobileToast = useMobileToast();
 
   const handleLogout = async () => {
     try {
       await signOut();
-      toast.success('Déconnexion réussie');
+      mobileToast.success('Déconnexion réussie', {}, true); // Essentiel
       navigate('/');
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
-      toast.error('Erreur lors de la déconnexion');
+      mobileToast.error('Erreur lors de la déconnexion');
     }
   };
 
@@ -36,11 +37,12 @@ export default function MobileActionButtons() {
     const newLanguage = currentLanguage === 'fr' ? 'en' : 'fr';
     console.log('MobileActionButtons: Changing to language:', newLanguage);
     changeLanguageAndNavigate(newLanguage as any);
-    toast.success(`Langue changée vers ${newLanguage === 'fr' ? 'Français' : 'English'}`);
+    // Toast de changement de langue désactivé sur mobile (non essentiel)
+    mobileToast.success(`Langue changée vers ${newLanguage === 'fr' ? 'Français' : 'English'}`);
   };
 
   return (
-    <div className="flex items-center space-x-1">
+    <div className="mobile-flex-center mobile-space-x-tight">
       {/* Bouton Langue - Toggle FR/EN */}
       <Button 
         variant="ghost" 

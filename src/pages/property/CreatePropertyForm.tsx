@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { toast } from "sonner";
+import { useMobileToast } from '@/hooks/useMobileToast';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -40,6 +40,7 @@ export default function CreatePropertyForm({
   agencyId,
   onSuccess 
 }: CreatePropertyFormProps) {
+  const mobileToast = useMobileToast();
   const [activeTab, setActiveTab] = useState("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useTranslation();
@@ -145,11 +146,11 @@ export default function CreatePropertyForm({
       if (isEditMode) {
         result = await updateProperty(propertyId!, propertyData);
         if (result.error) throw new Error(result.error);
-        toast.success(t('agencyDashboard.pages.createProperty.propertyUpdatedSuccessfully'));
+        mobileToast.success(t('agencyDashboard.pages.createProperty.propertyUpdatedSuccessfully'), {}, true);
       } else {
         result = await createProperty(propertyData);
         if (result.error) throw new Error(result.error);
-        toast.success(t('agencyDashboard.pages.createProperty.propertyCreatedSuccessfully'));
+        mobileToast.success(t('agencyDashboard.pages.createProperty.propertyCreatedSuccessfully'), {}, true);
       }
       
       console.log("Operation result:", result);

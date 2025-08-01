@@ -629,13 +629,13 @@ export default function HeroSection() {
           )}
           
           {/* Minimal Action Cards */}
-          <motion.div variants={itemVariants} className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 max-w-4xl mx-auto">
-            <div className="group text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
-                <Home className="h-5 w-5" />
+          <motion.div variants={itemVariants} className="mobile-flex-between mobile-space-x-tight grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-6 mt-16 max-w-4xl mx-auto">
+            <div className="group text-center mobile-card p-3 md:p-0">
+              <div className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-2 md:mb-4 rounded-xl md:rounded-2xl bg-gray-50 mobile-flex-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
+                <Home className="h-4 w-4 md:h-5 md:w-5" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900">{t('hero.exclusiveProperties')}</h3>
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">{t('hero.exclusivePropertiesDesc')}</p>
+              <h3 className="text-sm md:text-lg font-semibold mb-1 md:mb-2 text-gray-900 mobile-text">{t('hero.exclusiveProperties')}</h3>
+              <p className="text-gray-600 text-xs md:text-sm mb-2 md:mb-4 leading-relaxed hidden md:block">{t('hero.exclusivePropertiesDesc')}</p>
               <button 
                 onClick={() => {
                   console.log('Button clicked - searching for properties section');
@@ -669,32 +669,32 @@ export default function HeroSection() {
                   // If not found, try again after a short delay
                   setTimeout(scrollToSection, 100);
                 }}
-                className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto cursor-pointer"
+                className="text-gray-900 text-xs md:text-sm font-medium hover:text-gray-700 transition-colors mobile-flex-center mx-auto cursor-pointer"
               >
-                {t('hero.explore')} <ArrowRight className="ml-1 h-4 w-4" />
+                {t('hero.explore')} <ArrowRight className="ml-1 h-3 w-3 md:h-4 md:w-4" />
               </button>
             </div>
 
-            <div className="group text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
-                <Building className="h-5 w-5" />
+            <div className="group text-center mobile-card p-3 md:p-0">
+              <div className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-2 md:mb-4 rounded-xl md:rounded-2xl bg-gray-50 mobile-flex-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
+                <Building className="h-4 w-4 md:h-5 md:w-5" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900">{t('hero.trustedAgencies')}</h3>
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">{t('hero.trustedAgenciesDesc')}</p>
+              <h3 className="text-sm md:text-lg font-semibold mb-1 md:mb-2 text-gray-900 mobile-text">{t('hero.trustedAgencies')}</h3>
+              <p className="text-gray-600 text-xs md:text-sm mb-2 md:mb-4 leading-relaxed hidden md:block">{t('hero.trustedAgenciesDesc')}</p>
               <button 
                 onClick={() => navigate("/browse-agencies")}
-                className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto"
+                className="text-gray-900 text-xs md:text-sm font-medium hover:text-gray-700 transition-colors mobile-flex-center mx-auto"
               >
-                {t('hero.viewAgencies')} <ArrowRight className="ml-1 h-4 w-4" />
+                {t('hero.viewAgencies')} <ArrowRight className="ml-1 h-3 w-3 md:h-4 md:w-4" />
               </button>
             </div>
 
-            <div className="group text-center">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
-                <Search className="h-5 w-5" />
+            <div className="group text-center mobile-card p-3 md:p-0">
+              <div className="w-8 h-8 md:w-12 md:h-12 mx-auto mb-2 md:mb-4 rounded-xl md:rounded-2xl bg-gray-50 mobile-flex-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
+                <Search className="h-4 w-4 md:h-5 md:w-5" />
               </div>
-              <h3 className="text-lg font-semibold mb-2 text-gray-900">{t('hero.integratedPropertyManagement')}</h3>
-              <p className="text-gray-600 text-sm mb-4 leading-relaxed">{t('hero.integratedPropertyManagementDesc')}</p>
+              <h3 className="text-sm md:text-lg font-semibold mb-1 md:mb-2 text-gray-900 mobile-text">{t('hero.integratedPropertyManagement')}</h3>
+              <p className="text-gray-600 text-xs md:text-sm mb-2 md:mb-4 leading-relaxed hidden md:block">{t('hero.integratedPropertyManagementDesc')}</p>
               <button 
                 onClick={() => {
                   const featuresSection = document.getElementById('features');
@@ -702,9 +702,9 @@ export default function HeroSection() {
                     featuresSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }
                 }}
-                className="text-gray-900 text-sm font-medium hover:text-gray-700 transition-colors flex items-center justify-center mx-auto cursor-pointer"
+                className="text-gray-900 text-xs md:text-sm font-medium hover:text-gray-700 transition-colors mobile-flex-center mx-auto cursor-pointer"
               >
-                {t('hero.discover')} <ArrowRight className="ml-1 h-4 w-4" />
+                {t('hero.discover')} <ArrowRight className="ml-1 h-3 w-3 md:h-4 md:w-4" />
               </button>
             </div>
           </motion.div>

@@ -11,9 +11,9 @@ export default function MobileTopBar() {
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-immoo-gray/20 shadow-sm">
-      <div className="flex items-center justify-between px-4 py-3 h-16">
+      <div className="mobile-flex-between px-4 py-3 h-16">
         {/* Indicateur de visiteur connecté à gauche */}
-        <div className="flex items-center">
+        <div className="mobile-flex-start">
           <QuickVisitorIndicator />
         </div>
 
@@ -27,7 +27,9 @@ export default function MobileTopBar() {
         </div>
 
         {/* Boutons d'action (logout, account, langue) */}
-        <MobileActionButtons />
+        <div className="mobile-flex-end">
+          <MobileActionButtons />
+        </div>
       </div>
     </header>
   );

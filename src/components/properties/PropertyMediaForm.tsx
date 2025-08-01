@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Property } from "@/assets/types";
 import { Upload, X, Image as ImageIcon, Star, StarIcon, Plus, Trash2 } from "lucide-react";
-import { toast } from "sonner";
+import { useMobileToast } from '@/hooks/useMobileToast';
 import { uploadPropertyImage } from "@/services/property/propertyMediaService";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -28,6 +28,7 @@ interface ImageItem {
 
 export default function PropertyMediaForm({ initialData, onChange, onNext, onBack, propertyId }: PropertyMediaFormProps) {
   const { t } = useTranslation();
+  const mobileToast = useMobileToast();
   const [images, setImages] = useState<ImageItem[]>([]);
   const [virtualTourUrl, setVirtualTourUrl] = useState(initialData.virtualTourUrl || "");
 
@@ -150,9 +151,10 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
         return updated;
       });
       
-      toast.success(t('agencyDashboard.pages.createProperty.imageUploadedSuccessfully'));
+      // Toast de téléchargement d'image désactivé sur mobile (non essentiel)
+      mobileToast.success(t('agencyDashboard.pages.createProperty.imageUploadedSuccessfully'));
     } catch (error: any) {
-      toast.error(`${t('agencyDashboard.pages.createProperty.uploadError')}: ${error.message}`);
+      mobileToast.error(`${t('agencyDashboard.pages.createProperty.uploadError')}: ${error.message}`);
       
       // Reset uploading status
       setImages(prev => {
@@ -177,7 +179,8 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
       return updated;
     });
     
-    toast.success(t('agencyDashboard.pages.createProperty.imageRemoved'));
+    // Toast de suppression d'image désactivé sur mobile (non essentiel)
+    mobileToast.success(t('agencyDashboard.pages.createProperty.imageRemoved'));
   };
 
   const setImageAsPrimary = (index: number) => {
@@ -191,7 +194,8 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
       }));
     });
     
-    toast.success(t('agencyDashboard.pages.createProperty.primaryImageUpdated'));
+    // Toast de mise à jour d'image principale désactivé sur mobile (non essentiel)
+    mobileToast.success(t('agencyDashboard.pages.createProperty.primaryImageUpdated'));
   };
 
   const handleDescriptionChange = (index: number, description: string) => {
