@@ -79,23 +79,23 @@ export function NavbarMobileMenu({
       {/* Menu principal */}
       <div 
         className={cn(
-          "fixed top-0 right-0 h-full w-80 max-w-[85vw] bg-white z-50 md:hidden transform transition-all duration-300 ease-out shadow-2xl",
+          "fixed top-0 right-0 h-full w-72 max-w-[80vw] bg-white z-50 md:hidden transform transition-all duration-300 ease-out shadow-2xl",
           mobileMenuOpen ? "translate-x-0" : "translate-x-full"
         )}
       >
         {/* Header du menu */}
-        <div className="bg-gradient-to-r from-immoo-navy to-immoo-navy-light px-6 py-8">
+        <div className="bg-gradient-to-r from-immoo-navy to-immoo-navy-light px-4 py-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-bold text-immoo-pearl">IMMOO</h3>
-              <p className="text-sm text-immoo-pearl/70 mt-1">{t('navbar.navigationMenu')}</p>
+              <h3 className="text-lg font-bold text-immoo-pearl">IMMOO</h3>
+              <p className="text-xs text-immoo-pearl/70 mt-1">{t('navbar.navigationMenu')}</p>
             </div>
             <button
               onClick={() => setMobileMenuOpen(false)}
-              className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-immoo-pearl hover:bg-white/20 transition-colors duration-200"
+              className="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center text-immoo-pearl hover:bg-white/20 transition-colors duration-200"
               aria-label={t('navbar.closeMenu')}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -104,7 +104,7 @@ export function NavbarMobileMenu({
 
         {/* Contenu du menu */}
         <div className="flex flex-col h-full bg-white">
-          <nav className="flex-1 px-6 py-6">
+          <nav className="flex-1 px-4 py-4">
             {/* Accueil */}
             <div className="mb-8">
               <button
@@ -136,17 +136,17 @@ export function NavbarMobileMenu({
                       onClick={() => handleUserTypeClick(type)}
                       className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-immoo-pearl transition-all duration-200 group"
                     >
-                      <div className="flex items-center space-x-3">
+                      <div className="flex items-center space-x-2">
                         <div className={cn(
-                          "w-10 h-10 rounded-lg flex items-center justify-center",
+                          "w-8 h-8 rounded-lg flex items-center justify-center",
                           type.role === 'admin' 
                             ? "bg-red-100 text-red-600" 
                             : "bg-blue-100 text-blue-600"
                         )}>
-                          <IconComponent className="w-5 h-5" />
+                          <IconComponent className="w-4 h-4" />
                         </div>
                         <div className="text-left">
-                          <div className="font-medium text-immoo-navy">{type.name}</div>
+                          <div className="font-medium text-sm text-immoo-navy">{type.name}</div>
                           <div className="text-xs text-immoo-navy/60">
                             {type.role === 'admin' ? t('navbar.administration') : t('navbar.propertyManagement')}
                           </div>

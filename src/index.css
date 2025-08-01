@@ -17,20 +17,20 @@
   }
   
   .mobile-text {
-    @apply text-sm sm:text-base;
-    line-height: 1.5;
+    @apply text-xs sm:text-sm md:text-base;
+    line-height: 1.4;
   }
   
   .mobile-padding {
-    @apply p-3 sm:p-4 md:p-6;
+    @apply p-2 sm:p-3 md:p-4;
   }
   
   .mobile-margin {
-    @apply m-3 sm:m-4 md:m-6;
+    @apply m-2 sm:m-3 md:m-4;
   }
   
   .mobile-gap {
-    @apply gap-3 sm:gap-4 md:gap-6;
+    @apply gap-2 sm:gap-3 md:gap-4;
   }
   
   .mobile-grid {
@@ -116,32 +116,32 @@
 
   /* Responsive typography with better mobile scaling */
   h1 {
-    @apply text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl;
+    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl;
     line-height: 1.1;
   }
 
   h2 {
-    @apply text-xl sm:text-2xl md:text-3xl lg:text-4xl;
+    @apply text-lg sm:text-xl md:text-2xl lg:text-3xl;
     line-height: 1.2;
   }
 
   h3 {
-    @apply text-lg sm:text-xl md:text-2xl;
+    @apply text-base sm:text-lg md:text-xl;
     line-height: 1.3;
   }
 
   h4 {
-    @apply text-base sm:text-lg md:text-xl;
+    @apply text-sm sm:text-base md:text-lg;
     line-height: 1.4;
   }
 
   h5, h6 {
-    @apply text-sm sm:text-base md:text-lg;
+    @apply text-xs sm:text-sm md:text-base;
     line-height: 1.5;
   }
 
   p {
-    @apply leading-relaxed mobile-text;
+    @apply leading-normal mobile-text;
   }
 
   /* Better button sizing for mobile */
@@ -456,28 +456,38 @@
 /* Enhanced responsive typography improvements */
 @media (max-width: 640px) {
   h1 {
-    @apply text-2xl sm:text-3xl;
+    @apply text-lg;
     line-height: 1.2;
   }
   
   h2 {
-    @apply text-xl sm:text-2xl;
+    @apply text-base;
     line-height: 1.3;
   }
 
   h3 {
-    @apply text-lg sm:text-xl;
+    @apply text-sm;
     line-height: 1.4;
   }
 
   /* Better paragraph spacing on mobile */
   p {
-    @apply text-sm leading-relaxed mb-3;
+    @apply text-xs leading-normal mb-2;
   }
 
   /* Smaller buttons on very small screens */
   .btn-sm-mobile {
-    @apply px-3 py-2 text-xs;
+    @apply px-2 py-1.5 text-xs;
+  }
+  
+  /* Reduce container padding on mobile */
+  .container {
+    @apply px-3;
+  }
+  
+  /* Smaller cards on mobile */
+  .mobile-card {
+    @apply p-3 rounded-md;
   }
 }
 

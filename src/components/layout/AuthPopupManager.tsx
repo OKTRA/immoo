@@ -33,21 +33,6 @@ export default function AuthPopupManager({ isOpen, onClose, type }: AuthPopupMan
 
     return (
       <div className="space-y-6">
-        <div className="text-center">
-          <div className="mx-auto w-12 h-12 bg-immoo-navy/10 rounded-full flex items-center justify-center mb-4">
-            <Building2 className="h-6 w-6 text-immoo-navy" />
-          </div>
-          <h2 className="text-xl font-semibold text-immoo-navy mb-2">
-            {currentView === 'login' ? 'Connexion Agence' : 'Créer votre Agence'}
-          </h2>
-          <p className="text-sm text-immoo-gray">
-            {currentView === 'login' 
-              ? 'Connectez-vous à votre espace agence' 
-              : 'Rejoignez la plateforme IMMOO'
-            }
-          </p>
-        </div>
-
         {currentView === 'login' ? (
           <AgencyLoginForm 
             onSuccess={handleSuccess}
@@ -59,20 +44,6 @@ export default function AuthPopupManager({ isOpen, onClose, type }: AuthPopupMan
             onSwitchToLogin={() => setCurrentView('login')}
           />
         )}
-
-        <div className="text-center">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setCurrentView(currentView === 'login' ? 'signup' : 'login')}
-            className="text-immoo-navy hover:text-immoo-gold"
-          >
-            {currentView === 'login' 
-              ? "Pas encore d'agence ? Créer un compte" 
-              : "Déjà un compte ? Se connecter"
-            }
-          </Button>
-        </div>
       </div>
     );
   };
@@ -127,6 +98,9 @@ export default function AuthPopupManager({ isOpen, onClose, type }: AuthPopupMan
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
+          <DialogTitle className="sr-only">
+            {type === 'agency' ? 'Connexion Agence' : 'Contact Visiteur'}
+          </DialogTitle>
           <Button
             variant="ghost"
             size="sm"

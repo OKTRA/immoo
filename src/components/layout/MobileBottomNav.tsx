@@ -80,8 +80,8 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 bg-gradient-to-t from-white/95 to-white/90 backdrop-blur-lg border-t border-immoo-gray/10 shadow-xl rounded-t-2xl">
-      <div className="flex items-center justify-around px-4 py-3 h-16">
+    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200/50 shadow-lg">
+      <div className="flex items-center justify-around px-2 py-2 h-14">
         {navItems.map((item, index) => {
           const isActive = item.isActive(location.pathname);
           
@@ -91,29 +91,34 @@ export default function MobileBottomNav() {
               variant="ghost"
               size="sm"
               className={cn(
-                "flex flex-col items-center justify-center gap-1 h-12 px-3 rounded-xl transition-all duration-300 hover:scale-105",
+                "flex flex-col items-center justify-center gap-0.5 h-10 px-2 rounded-lg transition-all duration-200 hover:scale-105 relative",
                 isActive 
-                  ? "bg-immoo-navy/5 text-immoo-navy" 
-                  : "text-immoo-gray hover:bg-immoo-gold/5 hover:text-immoo-navy"
+                  ? "text-immoo-gold" 
+                  : "text-gray-600 hover:text-immoo-navy"
               )}
               onClick={() => handleNavClick(item)}
             >
+              {/* Indicateur actif en arrière-plan */}
+              {isActive && (
+                <div className="absolute inset-0 bg-immoo-gold/10 rounded-lg" />
+              )}
+              
               <div className={cn(
-                "transition-all duration-300",
-                isActive && "scale-110 text-immoo-gold drop-shadow-md"
+                "transition-all duration-200 relative z-10",
+                isActive ? "scale-110" : "scale-100"
               )}>
                 {item.icon}
               </div>
               <span className={cn(
-                "text-xs font-semibold tracking-wide transition-all duration-300",
-                isActive ? "text-immoo-gold" : "text-immoo-gray/80"
+                "text-[10px] font-medium transition-all duration-200 relative z-10",
+                isActive ? "text-immoo-gold" : "text-gray-500"
               )}>
                 {item.label}
               </span>
               
-              {/* Indicateur actif */}
+              {/* Point indicateur moderne */}
               {isActive && (
-                <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-10 h-1 bg-gradient-to-r from-immoo-gold/0 to-immoo-gold to-immoo-gold/0 rounded-full animate-pulse" />
+                <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-immoo-gold rounded-full" />
               )}
             </Button>
           );

@@ -20,7 +20,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
       {shouldShowNav && <MobileTopBar />}
       
       {/* Contenu principal */}
-      <main className={`flex-1 ${shouldShowNav ? 'pt-16 pb-20' : ''}`}>
+      <main className={`flex-1 ${shouldShowNav ? 'pt-14 pb-14' : ''}`}>
         {children}
       </main>
       
