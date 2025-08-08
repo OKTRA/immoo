@@ -88,7 +88,7 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
       
       // Check if we're not exceeding the limit (10 images total)
       if (images.length + filesArray.length > 10) {
-        toast.error(t('agencyDashboard.pages.createProperty.maxImagesReached'));
+        mobileToast.error(t('agencyDashboard.pages.createProperty.maxImagesReached'));
         return;
       }
 
@@ -111,20 +111,22 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
           updated[0].isPrimary = true;
         }
         
+        // Upload images immediately using the updated array
+        setTimeout(() => {
+          newImages.forEach((img, index) => {
+            const globalIndex = prev.length + index;
+            handleUploadImage(globalIndex);
+          });
+        }, 0);
+        
         return updated;
-      });
-
-      // Upload images immediately
-      newImages.forEach((img, index) => {
-        const globalIndex = images.length + index;
-        handleUploadImage(globalIndex);
       });
     }
   };
 
   const handleUploadImage = async (index: number) => {
     const image = images[index];
-    if (!image.file) return;
+    if (!image || !image.file) return;
     
     // Update uploading status
     setImages(prev => {

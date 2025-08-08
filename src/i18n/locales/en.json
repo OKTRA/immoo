@@ -77,7 +77,8 @@
     "immoAgency": "IMMOO Agency",
     "browseAgencies": "Browse Agencies",
     "documentGenerator": "Document Generator",
-    "pricing": "Pricing"
+    "pricing": "Pricing",
+    "backToHome": "Back to home"
   },
   "navbar": {
     "navigationMenu": "Navigation Menu",
@@ -709,9 +710,6 @@
   },
   "errors": {
     "accessDenied": "Access denied. This page is reserved for agencies."
-  },
-  "navigation": {
-    "backToHome": "Back to home"
   },
   "analytics": {
     "title": "Analytics",

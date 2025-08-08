@@ -7,6 +7,7 @@ import PropertyCardWrapper from '@/components/properties/PropertyCardWrapper';
 import PropertyCardImage from '@/components/properties/PropertyCardImage';
 import PropertyCardContent from '@/components/properties/PropertyCardContent';
 import PropertyCardActions from '@/components/properties/PropertyCardActions';
+import { recordView } from '@/services/analytics/viewTrackingService';
 
 interface PropertyCardProps {
   property: Property;
@@ -46,6 +47,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
+    // Enregistrer la vue de la propriété
+    recordView('property', property.id);
+    
     if (isPublicView) {
       e.preventDefault();
       setIsDialogOpen(true);

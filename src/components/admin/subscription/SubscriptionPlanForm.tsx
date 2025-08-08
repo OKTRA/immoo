@@ -15,6 +15,7 @@ interface PlanFormData {
   maxAgencies: number;
   maxLeases: number;
   maxUsers: number;
+  maxTenants: number;
   hasApiAccess: boolean;
   isActive: boolean;
 }
@@ -55,7 +56,7 @@ export default function SubscriptionPlanForm({
     });
   };
 
-  const handleUnlimitedChange = (field: 'maxProperties' | 'maxAgencies' | 'maxLeases' | 'maxUsers', unlimited: boolean) => {
+  const handleUnlimitedChange = (field: 'maxProperties' | 'maxAgencies' | 'maxLeases' | 'maxUsers' | 'maxTenants', unlimited: boolean) => {
     setFormData({
       ...formData,
       [field]: unlimited ? -1 : 1
@@ -134,7 +135,7 @@ export default function SubscriptionPlanForm({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
           <Label htmlFor="max-agencies">Agences max</Label>
           <div className="space-y-2">
@@ -187,6 +188,9 @@ export default function SubscriptionPlanForm({
             )}
           </div>
         </div>
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
         <div className="grid gap-2">
           <Label htmlFor="max-users">Utilisateurs max</Label>
           <div className="space-y-2">
@@ -209,6 +213,32 @@ export default function SubscriptionPlanForm({
                 onChange={(e) => setFormData({...formData, maxUsers: parseInt(e.target.value) || 1})}
                 min="1" 
                 placeholder="5" 
+              />
+            )}
+          </div>
+        </div>
+        <div className="grid gap-2">
+          <Label htmlFor="max-tenants">Locataires max</Label>
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="unlimited-tenants"
+                checked={isUnlimited(formData.maxTenants)}
+                onCheckedChange={(checked) => handleUnlimitedChange('maxTenants', checked as boolean)}
+              />
+              <Label htmlFor="unlimited-tenants" className="text-sm flex items-center gap-1">
+                <Infinity className="h-4 w-4" />
+                Illimité
+              </Label>
+            </div>
+            {!isUnlimited(formData.maxTenants) && (
+              <Input 
+                id="max-tenants" 
+                type="number" 
+                value={formData.maxTenants || ''}
+                onChange={(e) => setFormData({...formData, maxTenants: parseInt(e.target.value) || 1})}
+                min="1" 
+                placeholder="3" 
               />
             )}
           </div>

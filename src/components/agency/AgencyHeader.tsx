@@ -80,7 +80,12 @@ export default function AgencyHeader() {
         </div>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
+        {/* Bouton de traduction EN/FR - En première position */}
+        <div className="relative">
+          <LanguageSwitcher variant="agency" className="minimalist-lang-btn" />
+        </div>
+        
         {/* Bouton Quitter l'espace agence */}
         <Button 
           variant="outline" 
@@ -91,9 +96,6 @@ export default function AgencyHeader() {
         >
           <DoorOpen className="h-5 w-5" />
         </Button>
-        
-        {/* Bouton de traduction EN/FR */}
-        <LanguageSwitcher variant="agency" />
         
         {/* Bouton Se déconnecter */}
         <Button 

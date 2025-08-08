@@ -66,7 +66,6 @@ export const formatPropertyToDb = (propertyData: any, ownerId: string | null = n
   if (propertyData.surface !== undefined || !isUpdate) dbData.surface = propertyData.surface;
   if (propertyData.address !== undefined) dbData.address = propertyData.address;
   if (propertyData.charges !== undefined) dbData.charges = propertyData.charges;
-  if (propertyData.rooms !== undefined || !isUpdate) dbData.rooms = propertyData.rooms;
   if (propertyData.bedrooms !== undefined || !isUpdate) dbData.bedrooms = propertyData.bedrooms || propertyData.rooms;
   if (propertyData.bathrooms !== undefined || !isUpdate) dbData.bathrooms = propertyData.bathrooms;
   if (propertyData.price !== undefined || !isUpdate) dbData.price = propertyData.price;

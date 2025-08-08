@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Building2, Upload, Camera, Save, Loader2, MapPin, Mail, Phone, Globe, CheckCircle } from "lucide-react";
 import { useMobileToast } from '@/hooks/useMobileToast';
+import { toast } from 'sonner';
 import { getAgencyById } from "@/services/agency";
 import { updateAgency } from "@/services/agency/agencyManagementService";
 import { uploadAgencyLogo } from "@/services/agency/agencyMediaService";

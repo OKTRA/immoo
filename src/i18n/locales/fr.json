@@ -78,7 +78,8 @@
     "browseAgencies": "Parcourir les Agences",
     "documentGenerator": "Générateur de Documents",
     "pricing": "Tarifs",
-    "myAgencies": "Mes Agences"
+    "myAgencies": "Mes Agences",
+    "backToHome": "Retour à l'accueil"
   },
   "navbar": {
     "navigationMenu": "Menu Navigation",

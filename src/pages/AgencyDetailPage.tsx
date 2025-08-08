@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getAgencyById, getPropertiesByAgencyId, getAgencyStatistics } from "@/services/agency";
+import { getAgencyById, getPropertiesByAgencyId, getAgencyStatistics, getAgencyViewsTrend } from "@/services/agency";
+import { useViewTracking } from "@/services/analytics/viewTrackingService";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -113,6 +114,12 @@ export default function AgencyDetailPage() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
+  const { data: statisticsData, isLoading: isLoadingStatistics } = useQuery({
+    queryKey: ['agency-statistics', agencyId],
+    queryFn: () => getAgencyStatistics(agencyId!),
+    enabled: !!agencyId,
+  });
+
   useEffect(() => {
     if (agencyError) {
       toast.error("Impossible de charger les détails de l'agence");
@@ -124,6 +131,11 @@ export default function AgencyDetailPage() {
   const properties = propertiesData?.properties || [];
   const propertiesCount = propertiesData?.count || 0;
   const stats = statsData?.statistics || {};
+  const statisticsStats = statisticsData?.statistics;
+  const viewsTrend = statisticsStats ? getAgencyViewsTrend(statisticsStats.viewsThisMonth, statisticsStats.viewsLastMonth) : '+0%';
+
+  // Enregistrer la vue de l'agence
+  useViewTracking('agency', agencyId);
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
@@ -243,10 +255,12 @@ export default function AgencyDetailPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-600">{t('agencyDashboard.pages.overview.averageRating')}</p>
-                  <p className="text-2xl font-bold text-slate-900 mt-1">{agency.rating?.toFixed(1) || '4.8'}</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">
+                    {isLoadingStatistics ? '...' : (statisticsStats?.averageRating > 0 ? statisticsStats.averageRating.toFixed(1) : '0.0')}
+                  </p>
                   <div className="flex items-center mt-2">
                     {[...Array(5)].map((_, i) => (
-                      <Star key={i} className={`h-3 w-3 ${i < (agency.rating || 4.8) ? 'text-amber-400 fill-amber-400' : 'text-slate-300'}`} />
+                      <Star key={i} className={`h-3 w-3 ${i < (statisticsStats?.averageRating || 0) ? 'text-amber-400 fill-amber-400' : 'text-slate-300'}`} />
                     ))}
                   </div>
                 </div>
@@ -263,10 +277,18 @@ export default function AgencyDetailPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-600">{t('agencyDashboard.pages.overview.viewsThisMonth')}</p>
-                  <p className="text-2xl font-bold text-slate-900 mt-1">2,847</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">
+                    {isLoadingStatistics ? '...' : (statisticsStats?.viewsThisMonth?.toLocaleString() || '0')}
+                  </p>
                   <div className="flex items-center mt-2 text-emerald-600">
-                    <ArrowUp className="h-3 w-3 mr-1" />
-                    <span className="text-xs">+24%</span>
+                    {viewsTrend.startsWith('+') ? (
+                      <ArrowUp className="h-3 w-3 mr-1" />
+                    ) : viewsTrend.startsWith('-') ? (
+                      <ArrowDown className="h-3 w-3 mr-1" />
+                    ) : (
+                      <ArrowUp className="h-3 w-3 mr-1" />
+                    )}
+                    <span className="text-xs">{viewsTrend}</span>
                   </div>
                 </div>
                 <div className="bg-emerald-50 p-3 rounded-lg">
@@ -282,10 +304,16 @@ export default function AgencyDetailPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-slate-600">{t('agencyDashboard.pages.overview.performance')}</p>
-                  <p className="text-2xl font-bold text-slate-900 mt-1">98%</p>
+                  <p className="text-2xl font-bold text-slate-900 mt-1">
+                    {isLoadingStatistics ? '...' : `${statisticsStats?.performance || 0}%`}
+                  </p>
                   <div className="flex items-center mt-2 text-purple-600">
                     <Zap className="h-3 w-3 mr-1" />
-                    <span className="text-xs">{t('agencyDashboard.pages.overview.excellent')}</span>
+                    <span className="text-xs">
+                      {(statisticsStats?.performance || 0) >= 90 ? t('agencyDashboard.pages.overview.excellent') : 
+                       (statisticsStats?.performance || 0) >= 70 ? 'Bon' : 
+                       (statisticsStats?.performance || 0) >= 50 ? 'Moyen' : 'À améliorer'}
+                    </span>
                   </div>
                 </div>
                 <div className="bg-purple-50 p-3 rounded-lg">

@@ -18,6 +18,7 @@ interface FormData {
   maxAgencies: number;
   maxLeases: number;
   maxUsers: number;
+  maxTenants: number;
   hasApiAccess: boolean;
   isActive: boolean;
 }
@@ -45,6 +46,7 @@ export const useSubscriptionManagement = () => {
     maxAgencies: 1,
     maxLeases: 1,
     maxUsers: 1,
+    maxTenants: 3,
     hasApiAccess: false,
     isActive: true
   });
@@ -99,6 +101,7 @@ export const useSubscriptionManagement = () => {
       maxAgencies: 1,
       maxLeases: 1,
       maxUsers: 1,
+      maxTenants: 3,
       hasApiAccess: false,
       isActive: true
     });
@@ -120,6 +123,7 @@ export const useSubscriptionManagement = () => {
       maxAgencies: plan.maxAgencies || 1,
       maxLeases: plan.maxLeases || 1,
       maxUsers: plan.maxUsers || 1,
+      maxTenants: (plan as any).maxTenants || 3,
       hasApiAccess: plan.hasApiAccess || false,
       isActive: plan.isActive !== false
     });

@@ -657,6 +657,63 @@
     border-color: rgba(59, 130, 246, 0.25) !important;
     transform: scale(1.05) !important;
   }
+
+  /* Minimalist and elegant language button for agency header */
+  .minimalist-lang-btn {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9)) !important;
+    border: 1px solid rgba(212, 175, 55, 0.3) !important;
+    border-radius: 8px !important;
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.05),
+      0 2px 6px rgba(0, 0, 0, 0.03) !important;
+    font-weight: 600 !important;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.5px !important;
+    color: #1E3A8A !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    position: relative !important;
+    overflow: hidden !important;
+    min-width: 44px !important;
+    height: 44px !important;
+  }
+
+  .minimalist-lang-btn::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent) !important;
+    transition: left 0.5s ease !important;
+  }
+
+  .minimalist-lang-btn:hover {
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.08), rgba(255, 255, 255, 0.95)) !important;
+    border-color: rgba(212, 175, 55, 0.5) !important;
+    box-shadow: 
+      0 2px 8px rgba(212, 175, 55, 0.15),
+      0 4px 16px rgba(0, 0, 0, 0.08) !important;
+    transform: translateY(-1px) !important;
+    color: #1E3A8A !important;
+  }
+
+  .minimalist-lang-btn:hover::before {
+    left: 100% !important;
+  }
+
+  .minimalist-lang-btn:active {
+    transform: translateY(0) scale(0.98) !important;
+    transition: all 0.1s ease !important;
+  }
+
+  .minimalist-lang-btn:focus {
+    outline: none !important;
+    box-shadow: 
+      0 0 0 3px rgba(212, 175, 55, 0.2),
+      0 2px 8px rgba(212, 175, 55, 0.15),
+      0 4px 16px rgba(0, 0, 0, 0.08) !important;
+  }
 }
 
 /* Focus States with IMMOO Branding */

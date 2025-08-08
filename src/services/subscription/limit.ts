@@ -17,7 +17,7 @@ export interface SubscriptionLimit {
  */
 export const checkUserResourceLimit = async (
   userId: string,
-  resourceType: 'properties' | 'agencies' | 'leases' | 'users',
+  resourceType: 'properties' | 'agencies' | 'leases' | 'users' | 'tenants',
   agencyId?: string
 ): Promise<SubscriptionLimit> => {
   try {
@@ -107,7 +107,7 @@ export const checkUserResourceLimit = async (
  */
 export const getCurrentResourceCount = async (
   userId: string,
-  resourceType: 'properties' | 'agencies' | 'leases' | 'users',
+  resourceType: 'properties' | 'agencies' | 'leases' | 'users' | 'tenants',
   agencyId?: string
 ): Promise<number> => {
   try {
@@ -224,6 +224,39 @@ export const getCurrentResourceCount = async (
         console.log(`👤 User count: ${count}`);
         break;
         
+      case 'tenants':
+        if (agencyId) {
+          // Count tenants for specific agency
+          const { count: tenantCount } = await supabase
+            .from('tenants')
+            .select('id', { count: 'exact', head: true })
+            .eq('agency_id', agencyId);
+          count = tenantCount || 0;
+          console.log(`👤 Tenant count for agency ${agencyId}: ${count}`);
+        } else {
+          // First get all user's agency IDs
+          const { data: userAgencies } = await supabase
+            .from('agencies')
+            .select('id')
+            .eq('user_id', userId);
+          
+          if (userAgencies && userAgencies.length > 0) {
+            const agencyIds = userAgencies.map(a => a.id);
+            console.log(`🏢 User's agency IDs:`, agencyIds);
+            
+            // Count tenants from all user's agencies
+            const { count: tenantCount } = await supabase
+              .from('tenants')
+              .select('id', { count: 'exact', head: true })
+              .in('agency_id', agencyIds);
+            count = tenantCount || 0;
+          } else {
+            count = 0;
+          }
+          console.log(`👤 Total tenant count: ${count}`);
+        }
+        break;
+        
       default:
         count = 0;
     }
@@ -239,7 +272,7 @@ export const getCurrentResourceCount = async (
 /**
  * Get free plan limits from database instead of hardcoded values
  */
-const getDatabaseFreePlanLimits = async (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users'): Promise<SubscriptionLimit> => {
+const getDatabaseFreePlanLimits = async (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users' | 'tenants'): Promise<SubscriptionLimit> => {
   try {
     // Get the free plan from database
     const { data: freePlan, error } = await supabase
@@ -259,7 +292,8 @@ const getDatabaseFreePlanLimits = async (currentCount: number, resourceType: 'pr
       properties: freePlan.max_properties,
       agencies: freePlan.max_agencies,
       leases: freePlan.max_leases,
-      users: freePlan.max_users
+      users: freePlan.max_users,
+      tenants: freePlan.max_tenants
     };
 
     const maxAllowed = resourceLimits[resourceType];
@@ -287,12 +321,13 @@ const getDatabaseFreePlanLimits = async (currentCount: number, resourceType: 'pr
 /**
  * Fallback hardcoded free plan limits (only used if database fails)
  */
-const getHardcodedFreePlanLimits = (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users'): SubscriptionLimit => {
+const getHardcodedFreePlanLimits = (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users' | 'tenants'): SubscriptionLimit => {
   const freeLimits = {
     properties: 2, // Updated to match database
     agencies: 1, 
     leases: 2,
-    users: 1
+    users: 1,
+    tenants: 3 // Limite pour les locataires
   };
   
   const maxAllowed = freeLimits[resourceType];
