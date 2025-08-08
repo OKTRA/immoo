@@ -25,17 +25,28 @@ BEGIN
     WHERE a.user_id = auth.uid()
   ) INTO user_agency_ids;
   
-  -- Obtenir la limite de propriétés depuis l'abonnement
-  SELECT COALESCE(sp.max_properties, 1) INTO max_allowed
+  -- Obtenir la limite de propriétés depuis l'abonnement ACTIF (dernier en date)
+  SELECT sp.max_properties INTO max_allowed
   FROM user_subscriptions us
   JOIN subscription_plans sp ON us.plan_id = sp.id
   WHERE us.user_id = auth.uid()
   AND us.status = 'active'
   ORDER BY us.created_at DESC
   LIMIT 1;
-  
-  -- Si aucun abonnement trouvé, utiliser la limite du plan gratuit (1)
-  max_allowed := COALESCE(max_allowed, 1);
+
+  -- Si aucun abonnement actif trouvé, charger la limite depuis le plan 'Gratuit' par ID canonique
+  IF max_allowed IS NULL THEN
+    SELECT max_properties INTO max_allowed
+    FROM subscription_plans
+    WHERE id = '00000000-0000-0000-0000-000000000001'::uuid
+    LIMIT 1;
+  END IF;
+
+  -- Si toujours NULL, bloquer explicitement (aucun plan disponible)
+  IF max_allowed IS NULL THEN
+    RAISE EXCEPTION 'Aucun plan défini. Veuillez contacter l''administrateur.'
+    USING HINT = 'Aucun plan d''abonnement actif ni plan "Gratuit" trouvé';
+  END IF;
   
   -- Si limite illimitée (-1), autoriser
   IF max_allowed = -1 THEN
@@ -84,17 +95,28 @@ BEGIN
     WHERE a.user_id = auth.uid()
   ) INTO user_property_ids;
   
-  -- Obtenir la limite de baux depuis l'abonnement
-  SELECT COALESCE(sp.max_leases, 2) INTO max_allowed
+  -- Obtenir la limite de baux depuis l'abonnement ACTIF (dernier en date)
+  SELECT sp.max_leases INTO max_allowed
   FROM user_subscriptions us
   JOIN subscription_plans sp ON us.plan_id = sp.id
   WHERE us.user_id = auth.uid()
   AND us.status = 'active'
   ORDER BY us.created_at DESC
   LIMIT 1;
-  
-  -- Si aucun abonnement trouvé, utiliser la limite du plan gratuit (2)
-  max_allowed := COALESCE(max_allowed, 2);
+
+  -- Si aucun abonnement actif trouvé, charger la limite depuis le plan 'Gratuit' par ID canonique
+  IF max_allowed IS NULL THEN
+    SELECT max_leases INTO max_allowed
+    FROM subscription_plans
+    WHERE id = '00000000-0000-0000-0000-000000000001'::uuid
+    LIMIT 1;
+  END IF;
+
+  -- Si toujours NULL, bloquer explicitement (aucun plan disponible)
+  IF max_allowed IS NULL THEN
+    RAISE EXCEPTION 'Aucun plan défini. Veuillez contacter l''administrateur.'
+    USING HINT = 'Aucun plan d''abonnement actif ni plan "Gratuit" trouvé';
+  END IF;
   
   -- Si limite illimitée (-1), autoriser
   IF max_allowed = -1 THEN
@@ -152,6 +174,14 @@ DROP POLICY IF EXISTS "Users can only update their own properties" ON properties
 DROP POLICY IF EXISTS "Users can only view their own leases" ON leases;
 DROP POLICY IF EXISTS "Users can only insert their own leases" ON leases;
 DROP POLICY IF EXISTS "Users can only update their own leases" ON leases;
+
+-- Supprimer les politiques existantes portant les nouveaux noms, pour permettre la ré-exécution idempotente
+DROP POLICY IF EXISTS "Users can only view properties from their agencies" ON properties;
+DROP POLICY IF EXISTS "Users can only insert properties to their agencies" ON properties;
+DROP POLICY IF EXISTS "Users can only update properties from their agencies" ON properties;
+DROP POLICY IF EXISTS "Users can only view leases for their properties" ON leases;
+DROP POLICY IF EXISTS "Users can only insert leases for their properties" ON leases;
+DROP POLICY IF EXISTS "Users can only update leases for their properties" ON leases;
 
 -- Politiques CORRECTES pour les propriétés
 CREATE POLICY "Users can only view properties from their agencies"

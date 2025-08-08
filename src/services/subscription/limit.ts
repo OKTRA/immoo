@@ -32,25 +32,25 @@ export const checkUserResourceLimit = async (
       `)
       .eq('user_id', userId)
       .eq('status', 'active')
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
     console.log(`📊 Subscription query result:`, { subscription, error: subError });
 
     if (subError || !subscription) {
-      console.log(`⚠️ No active subscription found, using database free plan`);
-      // No active subscription found, get free plan from database
+      console.log(`⚠️ Aucune souscription active trouvée, utilisation du plan 'Gratuit' depuis la base`);
       const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
-      const freePlanResult = await getDatabaseFreePlanLimits(currentCount, resourceType);
-      console.log(`🆓 Database free plan result:`, freePlanResult);
+      const freePlanResult = await getFreePlanLimitsFromDatabase(currentCount, resourceType);
+      console.log(`🆓 Limites du plan 'Gratuit' (DB):`, freePlanResult);
       return freePlanResult;
     }
 
     if (!subscription.subscription_plans) {
-      console.log(`⚠️ No plan found in subscription, using database free plan`);
-      // No plan found, get free plan from database
+      console.log(`⚠️ Aucun plan lié à l'abonnement, utilisation du plan 'Gratuit' depuis la base`);
       const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
-      const freePlanResult = await getDatabaseFreePlanLimits(currentCount, resourceType);
-      console.log(`🆓 Database free plan result (no plan):`, freePlanResult);
+      const freePlanResult = await getFreePlanLimitsFromDatabase(currentCount, resourceType);
+      console.log(`🆓 Limites du plan 'Gratuit' (DB):`, freePlanResult);
       return freePlanResult;
     }
 
@@ -270,11 +270,14 @@ export const getCurrentResourceCount = async (
 };
 
 /**
- * Get free plan limits from database instead of hardcoded values
+ * Récupère les limites du plan "Gratuit" depuis la table subscription_plans
+ * (plan administrable). Tente d'abord l'ID canonique, sinon par nom.
  */
-const getDatabaseFreePlanLimits = async (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users' | 'tenants'): Promise<SubscriptionLimit> => {
+const getFreePlanLimitsFromDatabase = async (
+  currentCount: number,
+  resourceType: 'properties' | 'agencies' | 'leases' | 'users' | 'tenants'
+): Promise<SubscriptionLimit> => {
   try {
-    // Get the free plan from database
     const { data: freePlan, error } = await supabase
       .from('subscription_plans')
       .select('*')
@@ -282,23 +285,30 @@ const getDatabaseFreePlanLimits = async (currentCount: number, resourceType: 'pr
       .single();
 
     if (error || !freePlan) {
-      console.error('Error fetching free plan from database:', error);
-      // Fallback to hardcoded limits if database fails
-      return getHardcodedFreePlanLimits(currentCount, resourceType);
+      return {
+        allowed: false,
+        currentCount,
+        maxAllowed: 0,
+        planName: undefined,
+        percentageUsed: 100,
+        resourceType,
+        isUnlimited: false,
+        error: "Plan 'Gratuit' introuvable (ID canonique). Configurez l'ID 00000000-0000-0000-0000-000000000001."
+      };
     }
 
-    // Map database fields to resource types
     const resourceLimits = {
       properties: freePlan.max_properties,
       agencies: freePlan.max_agencies,
       leases: freePlan.max_leases,
       users: freePlan.max_users,
-      tenants: freePlan.max_tenants
-    };
+      tenants: freePlan.max_tenants ?? 0
+    } as const;
 
     const maxAllowed = resourceLimits[resourceType];
-    const allowed = currentCount < maxAllowed;
-    const percentageUsed = Math.round((currentCount / maxAllowed) * 100);
+    const isUnlimited = maxAllowed === -1;
+    const allowed = isUnlimited || currentCount < maxAllowed;
+    const percentageUsed = isUnlimited ? 0 : Math.round((currentCount / Math.max(maxAllowed, 1)) * 100);
 
     return {
       allowed,
@@ -308,40 +318,20 @@ const getDatabaseFreePlanLimits = async (currentCount: number, resourceType: 'pr
       planId: freePlan.id,
       percentageUsed,
       resourceType,
-      isUnlimited: false,
+      isUnlimited,
       error: null
     };
   } catch (err) {
-    console.error('Error in getDatabaseFreePlanLimits:', err);
-    // Fallback to hardcoded limits
-    return getHardcodedFreePlanLimits(currentCount, resourceType);
+    console.error('Erreur getFreePlanLimitsFromDatabase:', err);
+    return {
+      allowed: false,
+      currentCount,
+      maxAllowed: 0,
+      planName: undefined,
+      percentageUsed: 100,
+      resourceType,
+      isUnlimited: false,
+      error: "Erreur lors du chargement du plan 'Gratuit'"
+    };
   }
-};
-
-/**
- * Fallback hardcoded free plan limits (only used if database fails)
- */
-const getHardcodedFreePlanLimits = (currentCount: number, resourceType: 'properties' | 'agencies' | 'leases' | 'users' | 'tenants'): SubscriptionLimit => {
-  const freeLimits = {
-    properties: 2, // Updated to match database
-    agencies: 1, 
-    leases: 2,
-    users: 1,
-    tenants: 3 // Limite pour les locataires
-  };
-  
-  const maxAllowed = freeLimits[resourceType];
-  const allowed = currentCount < maxAllowed;
-  const percentageUsed = Math.round((currentCount / maxAllowed) * 100);
-  
-  return {
-    allowed,
-    currentCount,
-    maxAllowed,
-    planName: 'Gratuit (fallback)',
-    percentageUsed,
-    resourceType,
-    isUnlimited: false,
-    error: null
-  };
 };
