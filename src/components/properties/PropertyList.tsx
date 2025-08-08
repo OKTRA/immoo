@@ -208,7 +208,7 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
                     variant="outline" 
                     size="sm"
                     className="border-gray-300 hover:border-gray-400 rounded-lg font-medium transition-colors duration-200"
-                    onClick={() => navigate(`/properties/${property.id}/edit`)}
+                    onClick={() => navigate(`/agencies/${agencyId}/properties/${property.id}/edit`)}
                   >
                     <Edit className="h-4 w-4 mr-2" />
                     Modifier

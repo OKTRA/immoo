@@ -48,64 +48,62 @@ export default function usePropertyData(propertyId: string | undefined) {
     queryKey: ['property', propertyId],
     queryFn: () => getPropertyByIdForEdit(propertyId || ''),
     enabled: isEditMode,
-    meta: {
-      onSettled: (data, error) => {
-        if (data?.property) {
-          console.log("Property data loaded:", data.property);
-          const property = data.property;
-          
-          // Map all property data to form data structure
-          setFormData(prevData => ({
-            ...prevData,
-            // Basic info
-            title: property.title || "",
-            description: property.description || "",
-            type: property.type || "apartment",
-            location: property.location || "",
-            propertyCategory: property.propertyCategory || "residence",
-            
-            // Numeric fields
-            area: property.area || 0,
-            bedrooms: property.bedrooms || 0,
-            bathrooms: property.bathrooms || 0,
-            kitchens: property.kitchens || 0,
-            shops: property.shops || 0,
-            livingRooms: property.livingRooms || 0,
-            price: property.price || 0,
-            securityDeposit: property.securityDeposit || 0,
-            agencyFees: property.agencyFees || 0,
-            commissionRate: property.commissionRate || 0,
-            
-            // Other fields
-            status: property.status || "available",
-            features: property.features || [],
-            petsAllowed: property.petsAllowed || false,
-            furnished: property.furnished || false,
-            paymentFrequency: property.paymentFrequency || "monthly",
-            yearBuilt: property.yearBuilt || "",
-            
-            // Media
-            imageUrl: property.imageUrl || "",
-            virtualTourUrl: property.virtualTourUrl || "",
-            images: property.images || [],
-            additionalImages: property.additionalImages || [],
-            
-            // Owner info
-            ownerInfo: property.ownerInfo || {
-              ownerId: property.ownerId || "",
-              firstName: "",
-              lastName: "",
-              email: "",
-              phone: ""
-            }
-          }));
-        }
-        if (error) {
-          toast.error("Impossible de charger les données de la propriété");
-          console.error("Error fetching property:", error);
-        }
+    onSuccess: (data) => {
+      if (data?.property) {
+        console.log("Property data loaded:", data.property);
+        const property = data.property;
+
+        // Map all property data to form data structure
+        setFormData((prevData) => ({
+          ...prevData,
+          // Basic info
+          title: property.title || "",
+          description: property.description || "",
+          type: property.type || "apartment",
+          location: property.location || "",
+          propertyCategory: property.propertyCategory || "residence",
+
+          // Numeric fields
+          area: property.area || 0,
+          bedrooms: property.bedrooms || 0,
+          bathrooms: property.bathrooms || 0,
+          kitchens: property.kitchens || 0,
+          shops: property.shops || 0,
+          livingRooms: property.livingRooms || 0,
+          price: property.price || 0,
+          securityDeposit: property.securityDeposit || 0,
+          agencyFees: property.agencyFees || 0,
+          commissionRate: property.commissionRate || 0,
+
+          // Other fields
+          status: property.status || "available",
+          features: property.features || [],
+          petsAllowed: property.petsAllowed || false,
+          furnished: property.furnished || false,
+          paymentFrequency: property.paymentFrequency || "monthly",
+          yearBuilt: property.yearBuilt || "",
+
+          // Media
+          imageUrl: property.imageUrl || "",
+          virtualTourUrl: property.virtualTourUrl || "",
+          images: property.images || [],
+          additionalImages: property.additionalImages || [],
+
+          // Owner info
+          ownerInfo: property.ownerInfo || {
+            ownerId: property.ownerId || "",
+            firstName: "",
+            lastName: "",
+            email: "",
+            phone: "",
+          },
+        }));
       }
-    }
+    },
+    onError: (error) => {
+      toast.error("Impossible de charger les données de la propriété");
+      console.error("Error fetching property:", error);
+    },
   });
 
   return {

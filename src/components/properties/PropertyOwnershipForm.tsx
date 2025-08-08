@@ -23,6 +23,11 @@ export default function PropertyOwnershipForm({ initialData, onChange, onNestedC
     initialData.ownerId ? 'owner' : 'agency'
   );
 
+  // Sync ownership type when initialData changes (e.g., after edit data loads)
+  useEffect(() => {
+    setOwnershipType(initialData.ownerId ? 'owner' : 'agency');
+  }, [initialData.ownerId]);
+
   // Load property owners
   useEffect(() => {
     const fetchOwners = async () => {

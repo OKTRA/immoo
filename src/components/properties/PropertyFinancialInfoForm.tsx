@@ -47,6 +47,17 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
+  // Sync when initialData updates (e.g., after loading in edit mode)
+  useEffect(() => {
+    setFormData({
+      price: initialData.price?.toString() || "",
+      paymentFrequency: initialData.paymentFrequency || "monthly",
+      securityDeposit: initialData.securityDeposit?.toString() || "",
+      agencyFees: initialData.agencyFees?.toString() || "",
+      commissionRate: initialData.commissionRate?.toString() || "",
+    });
+  }, [initialData.price, initialData.paymentFrequency, initialData.securityDeposit, initialData.agencyFees, initialData.commissionRate]);
+
   // Validation function
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
