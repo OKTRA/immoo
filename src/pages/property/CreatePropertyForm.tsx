@@ -179,6 +179,12 @@ export default function CreatePropertyForm({
     setIsSubmitting(true);
     
     try {
+      // Prevent submit if media uploads are in progress
+      if ((formData as any).mediaUploading) {
+        toast.error('Veuillez attendre la fin du téléchargement des images avant de soumettre.');
+        return;
+      }
+
       if (!isEditMode && !limitCheck.allowed) {
         toast.error(t('agencyDashboard.pages.createProperty.subscriptionLimitReached'));
         return;

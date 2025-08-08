@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Property } from "@/assets/types";
-import { Upload, X, Image as ImageIcon, Star, StarIcon, Plus, Trash2 } from "lucide-react";
+import { Upload, X, Image as ImageIcon, Star, StarIcon, Plus, Trash2, Loader2 } from "lucide-react";
 import { useMobileToast } from '@/hooks/useMobileToast';
 import { uploadPropertyImage } from "@/services/property/propertyMediaService";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -73,6 +73,7 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
   useEffect(() => {
     // Find primary image
     const primaryImage = images.find(img => img.isPrimary);
+    const pendingUploadsCount = images.filter(img => img.uploading || !!img.file).length;
     
     onChange({
       imageUrl: primaryImage?.url || "",
@@ -83,7 +84,9 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
           url: img.url,
           isPrimary: img.isPrimary,
           description: img.description
-        }))
+        })),
+      mediaUploading: pendingUploadsCount > 0,
+      mediaUploadingCount: pendingUploadsCount
     });
   }, [images, virtualTourUrl, onChange]);
 
@@ -229,6 +232,16 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
         
         {/* Upload Area */}
         <div className="mb-4">
+          {/* Global Uploading Indicator */}
+          {images.some(img => img.uploading || !!img.file) && (
+            <div className="mb-3 flex items-center gap-2 text-sm text-blue-700 bg-blue-50 border border-blue-200 rounded-md px-3 py-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>
+                {t('agencyDashboard.pages.createProperty.uploading')}... {images.filter(img => img.uploading || !!img.file).length}
+              </span>
+            </div>
+          )}
+
           <Input
             id="propertyImages"
             type="file"

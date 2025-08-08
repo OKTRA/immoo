@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { getPropertyImages } from '@/services/property/propertyMedia';
 import { ChevronLeft, ChevronRight, Image as ImageIcon, Expand, X, Home } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
 
 interface PropertyImageGalleryProps {
   propertyId: string;
@@ -38,16 +39,45 @@ export default function PropertyImageGallery({
   const [isZoomOpen, setIsZoomOpen] = useState(false);
 
   useEffect(() => {
+    const resolveImageUrl = async (rawUrl: string): Promise<string> => {
+      if (!rawUrl) return rawUrl;
+      if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
+      // Try properties bucket
+      try {
+        const { data } = supabase.storage.from('properties').getPublicUrl(rawUrl);
+        if (data?.publicUrl) return data.publicUrl;
+      } catch {}
+      // Try legacy property-images bucket
+      try {
+        const { data } = supabase.storage.from('property-images').getPublicUrl(rawUrl);
+        if (data?.publicUrl) return data.publicUrl;
+      } catch {}
+      return rawUrl;
+    };
+
     const processImages = async () => {
       setLoading(true);
       let finalImages: ImageData[] = [];
 
       // Priorité 1: Utiliser les images passées directement en props
       if (initialImages && initialImages.length > 0) {
-        finalImages = initialImages.map((img, index) => ({
-          id: img.id,
-          url: img.image_url,
-          description: img.description || (img.is_primary ? 'Image principale' : `Image ${index + 1}`)
+        // Support both object and string formats
+        const anyImages: any[] = initialImages as any[];
+        finalImages = await Promise.all(anyImages.map(async (img, index) => {
+          if (typeof img === 'string') {
+            const url = await resolveImageUrl(img);
+            return {
+              id: `str-${index}`,
+              url,
+              description: `Image ${index + 1}`,
+            } as ImageData;
+          }
+          const url = await resolveImageUrl(img.image_url);
+          return {
+            id: img.id,
+            url,
+            description: img.description || (img.is_primary ? 'Image principale' : `Image ${index + 1}`)
+          } as ImageData;
         }));
       } 
       // Priorité 2: Récupérer les images avec l'ID de la propriété
@@ -55,11 +85,11 @@ export default function PropertyImageGallery({
         try {
           const { images: fetchedImages, error } = await getPropertyImages(propertyId);
           if (error) throw error;
-          finalImages = fetchedImages.map((img, index) => ({
+          finalImages = await Promise.all(fetchedImages.map(async (img: any, index: number) => ({
             id: img.id,
-            url: img.image_url,
+            url: await resolveImageUrl(img.image_url),
             description: img.description || (img.is_primary ? 'Image principale' : `Image ${index + 1}`)
-          }));
+          })));
         } catch (err) {
           console.error('Échec de la récupération des images:', err);
           // Laisser finalImages vide en cas d'erreur
@@ -70,7 +100,7 @@ export default function PropertyImageGallery({
       if (finalImages.length === 0 && mainImageUrl) {
         finalImages.push({
           id: 'fallback',
-          url: mainImageUrl,
+          url: await resolveImageUrl(mainImageUrl),
           description: 'Image principale'
         });
       }
@@ -92,6 +122,23 @@ export default function PropertyImageGallery({
 
   const goToImage = (index: number) => {
     setCurrentIndex(index);
+  };
+  const removeImageAtIndex = (index: number) => {
+    setImages((prev) => {
+      const updated = prev.filter((_, i) => i !== index);
+      // Adjust current index if needed
+      if (updated.length === 0) {
+        setCurrentIndex(0);
+      } else if (index >= updated.length) {
+        setCurrentIndex(updated.length - 1);
+      }
+      return updated;
+    });
+  };
+
+  const handleMainImageError = () => {
+    // Remove the current failing image and try the next one
+    removeImageAtIndex(currentIndex);
   };
 
   // Gestion du swipe sur mobile
@@ -170,6 +217,7 @@ export default function PropertyImageGallery({
           src={images[currentIndex]?.url}
           alt={images[currentIndex]?.description}
           className={`w-full h-full transition-transform duration-300 ${inModal ? 'object-contain' : 'object-cover group-hover:scale-105'}`}
+          onError={handleMainImageError}
         />
         
         {/* Overlay gradient subtil */}
@@ -277,6 +325,7 @@ export default function PropertyImageGallery({
                 src={image.url}
                 alt={image.description}
                 className="w-full h-full object-cover"
+                onError={() => removeImageAtIndex(index)}
               />
               {index === currentIndex && (
                 <div className="absolute inset-0 bg-primary/20" />
@@ -312,6 +361,7 @@ export default function PropertyImageGallery({
                       src={image.url}
                       alt={image.description}
                       className="w-full h-full object-cover"
+                      onError={() => removeImageAtIndex(index)}
                     />
                     {index === currentIndex && (
                       <div className="absolute inset-0 bg-white/20" />
