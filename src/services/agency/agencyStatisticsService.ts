@@ -41,22 +41,20 @@ export const getAgencyStatistics = async (agencyId: string): Promise<{ statistic
     const lastMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
     const thisMonthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
 
-    // Count views this month from visitor_contacts
+    // Count views this month from visitor_contacts (aligned with current schema)
     const { count: viewsThisMonth, error: viewsThisMonthError } = await supabase
       .from('visitor_contacts')
       .select('*', { count: 'exact', head: true })
-      .eq('entity_type', 'agency')
-      .eq('entity_id', agencyId)
-      .eq('contact_type', 'view')
+      .eq('agency_id', agencyId)
+      .eq('purpose', 'view')
       .gte('created_at', thisMonthStart.toISOString());
 
     // Count views last month from visitor_contacts
     const { count: viewsLastMonth, error: viewsLastMonthError } = await supabase
       .from('visitor_contacts')
       .select('*', { count: 'exact', head: true })
-      .eq('entity_type', 'agency')
-      .eq('entity_id', agencyId)
-      .eq('contact_type', 'view')
+      .eq('agency_id', agencyId)
+      .eq('purpose', 'view')
       .gte('created_at', lastMonth.toISOString())
       .lt('created_at', thisMonthStart.toISOString());
 
@@ -64,9 +62,8 @@ export const getAgencyStatistics = async (agencyId: string): Promise<{ statistic
     const { count: totalViews, error: totalViewsError } = await supabase
       .from('visitor_contacts')
       .select('*', { count: 'exact', head: true })
-      .eq('entity_type', 'agency')
-      .eq('entity_id', agencyId)
-      .eq('contact_type', 'view');
+      .eq('agency_id', agencyId)
+      .eq('purpose', 'view');
 
     if (viewsThisMonthError || viewsLastMonthError || totalViewsError) {
       console.warn('Error getting views data:', { viewsThisMonthError, viewsLastMonthError, totalViewsError });

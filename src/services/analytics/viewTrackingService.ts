@@ -16,29 +16,29 @@ export interface ViewRecord {
  */
 export async function recordView(entityType: 'property' | 'agency', entityId: string): Promise<void> {
   try {
-    // Obtenir l'adresse IP du visiteur (côté client, on peut utiliser un service externe)
-    const visitorData = {
-      user_agent: navigator.userAgent,
-      referrer: document.referrer || null,
+    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : undefined;
+
+    const payload: Record<string, any> = {
+      user_agent: userAgent,
+      created_at: new Date().toISOString(),
+      purpose: 'view',
     };
+
+    if (entityType === 'agency') {
+      payload.agency_id = entityId;
+    } else {
+      payload.property_id = entityId;
+    }
 
     const { error } = await supabase
       .from('visitor_contacts')
-      .insert({
-        entity_type: entityType,
-        entity_id: entityId,
-        contact_type: 'view',
-        visitor_ip: null, // À implémenter avec un service d'IP
-        user_agent: visitorData.user_agent,
-        referrer: visitorData.referrer,
-        created_at: new Date().toISOString(),
-      });
+      .insert(payload);
 
     if (error) {
-      console.error('Erreur lors de l\'enregistrement de la vue:', error);
+      console.error("Erreur lors de l'enregistrement de la vue:", error);
     }
   } catch (error) {
-    console.error('Erreur lors de l\'enregistrement de la vue:', error);
+    console.error("Erreur lors de l'enregistrement de la vue:", error);
   }
 }
 
@@ -63,12 +63,12 @@ export function useViewTracking(entityType: 'property' | 'agency', entityId: str
  */
 export async function getViewsCount(entityType: 'property' | 'agency', entityId: string): Promise<number> {
   try {
+    const idColumn = entityType === 'agency' ? 'agency_id' : 'property_id';
     const { count, error } = await supabase
       .from('visitor_contacts')
       .select('*', { count: 'exact', head: true })
-      .eq('entity_type', entityType)
-      .eq('entity_id', entityId)
-      .eq('contact_type', 'view');
+      .eq(idColumn as any, entityId)
+      .eq('purpose', 'view');
 
     if (error) {
       console.error('Erreur lors de la récupération du nombre de vues:', error);
@@ -92,12 +92,12 @@ export async function getViewsByPeriod(
   endDate: Date
 ): Promise<number> {
   try {
+    const idColumn = entityType === 'agency' ? 'agency_id' : 'property_id';
     const { count, error } = await supabase
       .from('visitor_contacts')
       .select('*', { count: 'exact', head: true })
-      .eq('entity_type', entityType)
-      .eq('entity_id', entityId)
-      .eq('contact_type', 'view')
+      .eq(idColumn as any, entityId)
+      .eq('purpose', 'view')
       .gte('created_at', startDate.toISOString())
       .lte('created_at', endDate.toISOString());
 

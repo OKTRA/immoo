@@ -7,6 +7,10 @@ import CreatePropertyForm from "./CreatePropertyForm";
 import usePropertyData from "./usePropertyData";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 export default function CreatePropertyPage() {
   const { agencyId, propertyId } = useParams();
@@ -14,10 +18,71 @@ export default function CreatePropertyPage() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const { formData, setFormData, isLoading, isEditMode } = usePropertyData(propertyId);
+  const { user } = useAuth();
+  const [agencyAllowed, setAgencyAllowed] = useState<boolean | null>(null);
 
   const handleNavigateBack = () => {
     navigate(`/agencies/${agencyId}`);
   };
+
+  // Guard: ensure the agency belongs to the current user (only for create mode)
+  useEffect(() => {
+    const checkAgencyOwnership = async () => {
+      if (!agencyId || isEditMode) {
+        setAgencyAllowed(true);
+        return;
+      }
+      if (!user?.id) {
+        setAgencyAllowed(false);
+        toast.error('Utilisateur non authentifié');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('agencies')
+        .select('id')
+        .eq('id', agencyId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Agency ownership guard failed:', error);
+        toast.error('Problème de connexion au service. Vérifiez votre connexion internet.');
+        setAgencyAllowed(false);
+        return;
+      }
+
+      if (!data) {
+        // Attempt automatic repair: link by matching email
+        const userEmail = user.email?.toLowerCase();
+        const { data: agency, error: agencyErr } = await supabase
+          .from('agencies')
+          .select('id, email, user_id')
+          .eq('id', agencyId)
+          .maybeSingle();
+        if (!agencyErr && agency && userEmail && (agency.email || '').toLowerCase() === userEmail) {
+          const { error: linkErr } = await supabase
+            .from('agencies')
+            .update({ user_id: user.id })
+            .eq('id', agencyId);
+          if (!linkErr) {
+            // Best-effort profile link
+            await supabase.from('profiles').update({ agency_id: agencyId }).eq('id', user.id);
+            await supabase.from('profiles').update({ agency_id: agencyId }).eq('user_id', user.id);
+            setAgencyAllowed(true);
+            return;
+          }
+        }
+        toast.error('Cette agence ne vous appartient pas.');
+        setAgencyAllowed(false);
+        return;
+      }
+
+      setAgencyAllowed(true);
+    };
+
+    checkAgencyOwnership();
+  }, [agencyId, isEditMode, user?.id]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -62,6 +127,22 @@ export default function CreatePropertyPage() {
             </div>
           </div>
         ) : (
+          agencyAllowed === false ? (
+            <Card className="p-6">
+              <CardHeader>
+                <CardTitle className="text-destructive">Accès refusé</CardTitle>
+                <CardDescription>
+                  Vous ne pouvez pas créer de propriété pour cette agence.
+                </CardDescription>
+              </CardHeader>
+              <div className="px-6 pb-6">
+                <Button variant="outline" onClick={handleNavigateBack}>
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Retour à l'agence
+                </Button>
+              </div>
+            </Card>
+          ) : (
           <CreatePropertyForm 
             formData={formData}
             setFormData={setFormData}
@@ -69,6 +150,7 @@ export default function CreatePropertyPage() {
             agencyId={agencyId}
             onSuccess={handleNavigateBack}
           />
+          )
         )}
       </div>
     </div>

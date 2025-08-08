@@ -61,11 +61,19 @@ export const formatPropertyToDb = (propertyData: any, ownerId: string | null = n
   if (propertyData.title !== undefined || !isUpdate) dbData.title = propertyData.title;
   if (propertyData.description !== undefined) dbData.description = propertyData.description;
   if (propertyData.type !== undefined || !isUpdate) dbData.type = propertyData.type;
+  // Location/address handling: write only to 'location' column
   if (propertyData.location !== undefined) dbData.location = propertyData.location;
-  if (propertyData.area !== undefined || !isUpdate) dbData.area = propertyData.area;
-  if (propertyData.surface !== undefined || !isUpdate) dbData.surface = propertyData.surface;
-  if (propertyData.address !== undefined) dbData.address = propertyData.address;
-  if (propertyData.charges !== undefined) dbData.charges = propertyData.charges;
+  else if (propertyData.address !== undefined) dbData.location = propertyData.address;
+
+  // Area/surface handling: database only has 'area'
+  if (propertyData.area !== undefined || (!isUpdate && propertyData.surface !== undefined)) {
+    dbData.area = propertyData.area !== undefined ? propertyData.area : propertyData.surface;
+  }
+
+  // Do NOT write non-existent columns
+  // - surface (no such column)
+  // - address (mapped above to location)
+  // - charges (no such column)
   if (propertyData.bedrooms !== undefined || !isUpdate) dbData.bedrooms = propertyData.bedrooms || propertyData.rooms;
   if (propertyData.bathrooms !== undefined || !isUpdate) dbData.bathrooms = propertyData.bathrooms;
   if (propertyData.price !== undefined || !isUpdate) dbData.price = propertyData.price;

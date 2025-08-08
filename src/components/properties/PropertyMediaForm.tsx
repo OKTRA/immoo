@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -32,11 +32,16 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
   const [images, setImages] = useState<ImageItem[]>([]);
   const [virtualTourUrl, setVirtualTourUrl] = useState(initialData.virtualTourUrl || "");
 
-  // Initialize existing images when editing
+  // Initialize existing images when editing (run once when data first arrives)
+  const hasInitializedFromInitialDataRef = useRef(false);
   useEffect(() => {
+    if (hasInitializedFromInitialDataRef.current) return;
+
+    const hasAnyInitial = Boolean(initialData.imageUrl) || Boolean(initialData.additionalImages && initialData.additionalImages.length > 0);
+    if (!hasAnyInitial) return;
+
     const existingImages: ImageItem[] = [];
-    
-    // Add main image if exists
+
     if (initialData.imageUrl) {
       existingImages.push({
         id: 'main-image',
@@ -47,8 +52,7 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
         description: ''
       });
     }
-    
-    // Add additional images if exist
+
     if (initialData.additionalImages && initialData.additionalImages.length > 0) {
       initialData.additionalImages.forEach((img, index) => {
         existingImages.push({
@@ -61,8 +65,9 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
         });
       });
     }
-    
+
     setImages(existingImages);
+    hasInitializedFromInitialDataRef.current = true;
   }, [initialData.imageUrl, initialData.additionalImages]);
 
   useEffect(() => {

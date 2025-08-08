@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useMobileToast } from '@/hooks/useMobileToast';
 import { toast } from 'sonner';
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ import { useTranslation } from "@/hooks/useTranslation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from '@/lib/supabase';
 
 interface CreatePropertyFormProps {
   formData: any;
@@ -111,11 +112,59 @@ export default function CreatePropertyForm({
     checkLimits();
   }, [isReady, isAuthenticated, user?.id, agencyId, isEditMode, t]);
 
-  const handleFormDataChange = (data: Partial<any>) => {
-    setFormData(prev => ({ ...prev, ...data }));
-  };
+  // Tentative de correction automatique de la propriété d'agence si possible
+  const ensureAgencyOwnership = useCallback(async (): Promise<boolean> => {
+    if (!agencyId || !user?.id) return false;
+    // 1) Re-check direct ownership
+    const { data: owned, error: ownedErr } = await supabase
+      .from('agencies')
+      .select('id')
+      .eq('id', agencyId)
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (!ownedErr && owned) return true;
 
-  const handleNestedChange = (parentField: string, field: string, value: any) => {
+    // 2) Try auto-repair if agency email matches user email
+    const userEmail = user.email?.toLowerCase();
+    if (!userEmail) return false;
+    const { data: agency, error: agencyErr } = await supabase
+      .from('agencies')
+      .select('id, email, user_id')
+      .eq('id', agencyId)
+      .maybeSingle();
+    if (agencyErr || !agency) return false;
+
+    const agencyEmail = (agency.email || '').toLowerCase();
+    if (agencyEmail && agencyEmail === userEmail) {
+      // Link agency to current user
+      const { error: linkErr } = await supabase
+        .from('agencies')
+        .update({ user_id: user.id })
+        .eq('id', agencyId);
+      if (linkErr) return false;
+
+      // Best-effort: link profile to agency (support both schemas)
+      await supabase.from('profiles').update({ agency_id: agencyId }).eq('id', user.id);
+      await supabase.from('profiles').update({ agency_id: agencyId }).eq('user_id', user.id);
+
+      // Re-check
+      const { data: recheck } = await supabase
+        .from('agencies')
+        .select('id')
+        .eq('id', agencyId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      return !!recheck;
+    }
+
+    return false;
+  }, [agencyId, user?.id, user?.email]);
+
+  const handleFormDataChange = useCallback((data: Partial<any>) => {
+    setFormData(prev => ({ ...prev, ...data }));
+  }, [setFormData]);
+
+  const handleNestedChange = useCallback((parentField: string, field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
       [parentField]: {
@@ -123,7 +172,7 @@ export default function CreatePropertyForm({
         [field]: value
       }
     }));
-  };
+  }, [setFormData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,6 +182,31 @@ export default function CreatePropertyForm({
       if (!isEditMode && !limitCheck.allowed) {
         toast.error(t('agencyDashboard.pages.createProperty.subscriptionLimitReached'));
         return;
+      }
+      // Vérifier la validité et l'appartenance de l'agence avant l'insertion
+      if (!agencyId) {
+        throw new Error(t('agencyDashboard.pages.createProperty.missingAgency') || 'Agence introuvable');
+      }
+      if (!user?.id) {
+        throw new Error('Utilisateur non authentifié');
+      }
+      const { data: agencyCheck, error: agencyCheckError } = await supabase
+        .from('agencies')
+        .select('id')
+        .eq('id', agencyId)
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (agencyCheckError) {
+        console.error('Agency ownership check failed:', agencyCheckError);
+        toast.error('Problème de connexion au service. Vérifiez votre connexion internet et réessayez.');
+        return;
+      }
+      if (!agencyCheck) {
+        // Try automatic repair
+        const repaired = await ensureAgencyOwnership();
+        if (!repaired) {
+          throw new Error('Vous ne pouvez pas créer de propriété pour cette agence');
+        }
       }
       
       const propertyData = {
