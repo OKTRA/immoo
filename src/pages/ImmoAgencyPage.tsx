@@ -239,14 +239,7 @@ Message: ${contactForm.message}
                      <LogIn className="mr-2 w-5 h-5" />
                      Se connecter
                    </Button>
-                  <Button 
-                     onClick={() => setContactDialogOpen(true)}
-                     variant="outline" 
-                     className="border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy px-8 py-3 text-lg font-semibold rounded-xl transition-all duration-300"
-                   >
-                     <Mail className="mr-2 w-5 h-5" />
-                     En savoir plus
-                   </Button>
+
                 </motion.div>
               </div>
             </div>

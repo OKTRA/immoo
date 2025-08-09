@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { PaymentData, getLeaseWithPayments, getLeasePaymentStats, createPayment, updatePayment, deletePayment } from "@/services/payment";
+import { syncOverduePayments } from "@/services/payment/paymentAutoSync";
 
 export const useLeasePayments = (leaseId: string | undefined) => {
   const { toast } = useToast();
@@ -20,20 +21,31 @@ export const useLeasePayments = (leaseId: string | undefined) => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [selectedPaymentIds, setSelectedPaymentIds] = useState<string[]>([]);
-  
+
   const fetchData = async () => {
     if (!leaseId) return;
     
     setLoading(true);
     try {
-      // Fetch lease data with payments
+      // 1) Synchroniser automatiquement les paiements manquants/en retard
+      const syncResult = await syncOverduePayments(leaseId);
+      if (syncResult.error) {
+        console.warn("Sync paiements en retard a échoué:", syncResult.error);
+      } else if (syncResult.data > 0) {
+        toast({
+          title: "Paiements synchronisés",
+          description: `${syncResult.data} ligne(s) de paiement ont été ajoutées automatiquement.`
+        });
+      }
+
+      // 2) Récupérer les données du bail et les paiements
       const { lease: leaseData, payments: paymentsData, error } = await getLeaseWithPayments(leaseId);
       if (error) throw new Error(error);
       
       setLease(leaseData);
       setPayments(paymentsData || []);
       
-      // Fetch payment stats
+      // 3) Récupérer les statistiques
       const { stats: paymentStats, error: statsError } = await getLeasePaymentStats(leaseId);
       if (statsError) throw new Error(statsError);
       
@@ -48,7 +60,7 @@ export const useLeasePayments = (leaseId: string | undefined) => {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchData();
   }, [leaseId]);
@@ -82,7 +94,7 @@ export const useLeasePayments = (leaseId: string | undefined) => {
       setSubmitting(false);
     }
   };
-  
+
   const handleUpdatePayment = async (paymentId: string, data: PaymentData) => {
     setSubmitting(true);
     try {
@@ -109,7 +121,7 @@ export const useLeasePayments = (leaseId: string | undefined) => {
       setSubmitting(false);
     }
   };
-  
+
   const handleDeletePayment = async (paymentId: string) => {
     if (!confirm("Êtes-vous sûr de vouloir supprimer ce paiement?")) return false;
     
@@ -134,7 +146,7 @@ export const useLeasePayments = (leaseId: string | undefined) => {
       return false;
     }
   };
-  
+
   const handlePaymentSelect = (paymentId: string, selected: boolean) => {
     if (selected) {
       setSelectedPaymentIds(prev => [...prev, paymentId]);
