@@ -9,7 +9,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatCurrency(amount: number, currency: string = 'FCFA') {
-  return `${amount.toLocaleString()} ${currency}`;
+  const safeAmount = Number(amount ?? 0);
+  return `${safeAmount.toLocaleString()} ${currency}`;
 }
 
 export function generateUniqueId(prefix: string = ''): string {

@@ -235,11 +235,11 @@ function App() {
                 />
                 <Route
                   path="/agencies/:agencyId/analytics"
-                  element={<AgencyDetailPageNew />}
+                  element={<AgencyAnalyticsPage />}
                 />
                 <Route
                   path="/agencies/:agencyId/statistics"
-                  element={<AgencyDetailPageNew />}
+                  element={<AgencyAnalyticsPage />}
                 />
                 <Route
                   path="/agencies/:agencyId/reports"
