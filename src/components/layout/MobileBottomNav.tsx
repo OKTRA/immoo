@@ -1,10 +1,8 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Building2, Users } from 'lucide-react';
+import { Search, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
-import AuthPopupManager from './AuthPopupManager';
 
 interface NavItem {
   icon: React.ReactNode;
@@ -17,8 +15,7 @@ interface NavItem {
 export default function MobileBottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, profile } = useAuth();
-  const [authPopup, setAuthPopup] = useState<{ isOpen: boolean; type: 'agency' | 'visitor' | null }>({ isOpen: false, type: null });
+
 
   const navItems: NavItem[] = [
     {
@@ -27,13 +24,7 @@ export default function MobileBottomNav() {
       path: '/',
       isActive: (pathname) => pathname === '/',
     },
-    {
-      icon: <Building2 className="h-5 w-5" />,
-      label: 'Espace Agence',
-      path: '/agencies',
-      isActive: (pathname) => pathname.startsWith('/agencies'),
-      requiresAuth: true,
-    },
+    
     {
       icon: <Users className="h-5 w-5" />,
       label: 'IMMOO Agency',
@@ -49,25 +40,6 @@ export default function MobileBottomNav() {
       return;
     }
 
-    // Pour l'espace agence - dashboard d'administration
-    if (item.path === '/agencies') {
-      console.log('🏢 Navigation Espace Agence:', {
-        user: !!user,
-        role: profile?.role,
-        agency_id: profile?.agency_id
-      });
-      
-      if (user && profile?.role === 'agency') {
-        // Rediriger vers la page de gestion des agences
-        console.log('🎯 Redirection mobile vers: /my-agencies');
-        navigate('/my-agencies');
-      } else {
-        // Ouvrir popup de connexion agence
-        console.log('🔐 Ouverture popup de connexion agence');
-        setAuthPopup({ isOpen: true, type: 'agency' });
-      }
-      return;
-    }
 
     // Pour IMMOO Agency - rediriger vers la page
     if (item.path === '/immo-agency') {
@@ -116,7 +88,7 @@ export default function MobileBottomNav() {
                 {item.label}
               </span>
               
-              {/* Point indicateur moderne */}
+              {/*// Point indicateur moderne */}
               {isActive && (
                 <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-immoo-gold rounded-full" />
               )}
@@ -124,12 +96,6 @@ export default function MobileBottomNav() {
           );
         })}
       </div>
-      
-      <AuthPopupManager 
-        isOpen={authPopup.isOpen}
-        onClose={() => setAuthPopup({ isOpen: false, type: null })}
-        type={authPopup.type}
-      />
     </nav>
   );
 }

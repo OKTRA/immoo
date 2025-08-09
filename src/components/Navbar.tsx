@@ -39,11 +39,6 @@ export default function Navbar() {
 
   const userTypes: UserType[] = [
     { 
-      name: "Espace Agence", 
-      path: "/agencies",
-      role: "agency" 
-    },
-    { 
       name: "IMMOO Agency", 
       path: "/immo-agency",
       role: "agency",

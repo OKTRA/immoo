@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ButtonEffects } from "@/components/ui/ButtonEffects";
-import { LogOut } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { UserType } from "./types";
 import { cn } from "@/lib/utils";
 import LoginDialog from "@/components/auth/LoginDialog";
@@ -34,6 +34,14 @@ export function NavbarDesktopMenu({
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const { profile } = useAuth();
+
+  const handleAccountClick = () => {
+    if (profile?.role === 'agency') {
+      navigate('/my-agencies');
+    } else {
+      navigate('/profile');
+    }
+  };
 
   const handleUserTypeClick = (type: UserType) => {
     console.log(`${type.name} Clicked. User authenticated:`, !!user);
@@ -138,15 +146,25 @@ export function NavbarDesktopMenu({
           </div>
 
           {user && (
-            <ButtonEffects
-              variant="ghost"
-              size="sm"
-              className="mx-1"
-              onClick={onLogoutClick}
-              disabled={isLoggingOut}
-            >
-              <LogOut className="h-4 w-4" />
-            </ButtonEffects>
+            <>
+              <ButtonEffects
+                variant="ghost"
+                size="sm"
+                className="mx-1"
+                onClick={handleAccountClick}
+              >
+                <User className="h-4 w-4" />
+              </ButtonEffects>
+              <ButtonEffects
+                variant="ghost"
+                size="sm"
+                className="mx-1"
+                onClick={onLogoutClick}
+                disabled={isLoggingOut}
+              >
+                <LogOut className="h-4 w-4" />
+              </ButtonEffects>
+            </>
           )}
         </div>
       </div>
