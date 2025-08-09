@@ -131,7 +131,8 @@ export const getPopularProperties = async (limit: number = 6) => {
 
 export const getPropertyById = async (propertyId: string) => {
   try {
-    const { data, error } = await supabase
+    // Primary attempt: include is_visible filter for modern schema
+    let query = supabase
       .from('properties')
       .select(`
         *,
@@ -167,9 +168,53 @@ export const getPropertyById = async (propertyId: string) => {
         )
       `)
       .eq('id', propertyId)
-      .eq('is_visible', true) // Only return visible properties for public access
-      .single();
-    
+      .eq('is_visible', true);
+
+    let { data, error } = await query.single();
+
+    // Fallback for environments without is_visible column
+    if (error && (error as any).code === '42703') {
+      const fallback = await supabase
+        .from('properties')
+        .select(`
+          *,
+          owner:property_owners(
+            id,
+            user_id,
+            company_name,
+            tax_id,
+            payment_method,
+            payment_percentage
+          ),
+          agency:agencies(
+            id,
+            name,
+            logo_url,
+            email,
+            phone,
+            website,
+            verified,
+            description,
+            specialties,
+            service_areas,
+            properties_count,
+            rating,
+            created_at
+          ),
+          property_images(
+            id,
+            image_url,
+            description,
+            is_primary,
+            position
+          )
+        `)
+        .eq('id', propertyId)
+        .single();
+      data = fallback.data as any;
+      error = fallback.error as any;
+    }
+
     if (error) throw error;
     
     // Get active leases to determine real status
@@ -241,7 +286,7 @@ export const getPropertyByIdForEdit = async (propertyId: string) => {
       .from('properties')
       .select(`
         *,
-        property_owners!owner_id(
+        owner:property_owners!owner_id(
           id,
           user_id,
           company_name,
@@ -249,7 +294,7 @@ export const getPropertyByIdForEdit = async (propertyId: string) => {
           payment_method,
           payment_percentage
         ),
-        agencies!agency_id(
+        agency:agencies!agency_id(
           id,
           name,
           logo_url,
@@ -301,40 +346,40 @@ export const getPropertyByIdForEdit = async (propertyId: string) => {
     }
     
     // Add complete agency information
-    if (data.agencies) {
-      property.agencyName = data.agencies.name;
-      property.agencyLogo = data.agencies.logo_url;
-      property.agencyPhone = data.agencies.phone;
-      property.agencyEmail = data.agencies.email;
-      property.agencyWebsite = data.agencies.website;
-      property.agencyVerified = data.agencies.verified;
-      property.agencyRating = typeof data.agencies.rating === 'number' ? data.agencies.rating : 0;
-      property.agencyDescription = data.agencies.description;
-      property.agencySpecialties = data.agencies.specialties || [];
-      property.agencyServiceAreas = data.agencies.service_areas || [];
-      property.agencyPropertiesCount = data.agencies.properties_count || 0;
+    if (data.agency) {
+      property.agencyName = data.agency.name;
+      property.agencyLogo = data.agency.logo_url;
+      property.agencyPhone = data.agency.phone;
+      property.agencyEmail = data.agency.email;
+      property.agencyWebsite = data.agency.website;
+      property.agencyVerified = data.agency.verified;
+      property.agencyRating = typeof data.agency.rating === 'number' ? data.agency.rating : 0;
+      property.agencyDescription = data.agency.description;
+      property.agencySpecialties = data.agency.specialties || [];
+      property.agencyServiceAreas = data.agency.service_areas || [];
+      property.agencyPropertiesCount = data.agency.properties_count || 0;
       
       // Calculate years active from creation date
-      if (data.agencies.created_at) {
-        const createdDate = new Date(data.agencies.created_at);
+      if (data.agency.created_at) {
+        const createdDate = new Date(data.agency.created_at);
         const currentDate = new Date();
         const yearsDiff = currentDate.getFullYear() - createdDate.getFullYear();
         property.agencyYearsActive = yearsDiff > 0 ? yearsDiff : 1;
       }
       
-      property.agencyJoinDate = data.agencies.created_at;
+      property.agencyJoinDate = data.agency.created_at;
     }
 
     // Add property owner information
-    if (data.property_owners) {
+    if (data.owner) {
       property.ownerInfo = {
-        ownerId: data.property_owners.id
+        ownerId: data.owner.id
       };
       // Add additional owner fields directly to property
-      property.ownerCompanyName = data.property_owners.company_name;
-      property.ownerTaxId = data.property_owners.tax_id;
-      property.ownerPaymentMethod = data.property_owners.payment_method;
-      property.ownerPaymentPercentage = data.property_owners.payment_percentage;
+      property.ownerCompanyName = data.owner.company_name;
+      property.ownerTaxId = data.owner.tax_id;
+      property.ownerPaymentMethod = data.owner.payment_method;
+      property.ownerPaymentPercentage = data.owner.payment_percentage;
     }
     
     return { property, error: null };

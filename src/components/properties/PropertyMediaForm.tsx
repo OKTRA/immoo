@@ -31,6 +31,8 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
   const mobileToast = useMobileToast();
   const [images, setImages] = useState<ImageItem[]>([]);
   const [virtualTourUrl, setVirtualTourUrl] = useState(initialData.virtualTourUrl || "");
+  const imagesRef = useRef<ImageItem[]>([]);
+  useEffect(() => { imagesRef.current = images; }, [images]);
 
   // Initialize existing images when editing (run once when data first arrives)
   const hasInitializedFromInitialDataRef = useRef(false);
@@ -73,13 +75,13 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
   useEffect(() => {
     // Find primary image
     const primaryImage = images.find(img => img.isPrimary);
-    const pendingUploadsCount = images.filter(img => img.uploading || !!img.file).length;
+    const pendingUploadsCount = images.filter(img => img.uploading).length;
     
     onChange({
       imageUrl: primaryImage?.url || "",
       virtualTourUrl,
       additionalImages: images
-        .filter(img => !img.isPrimary && !img.file) // Only non-primary, uploaded images
+        .filter(img => !img.isPrimary && !img.uploading && !!img.url)
         .map(img => ({
           url: img.url,
           isPrimary: img.isPrimary,
@@ -113,65 +115,65 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
       // Add new images to state
       setImages(prev => {
         const updated = [...prev, ...newImages];
-        
         // If this is the first image, make it primary
         if (prev.length === 0 && newImages.length > 0) {
           updated[0].isPrimary = true;
         }
-        
-        // Upload images immediately using the updated array
-        setTimeout(() => {
-          newImages.forEach((img, index) => {
-            const globalIndex = prev.length + index;
-            handleUploadImage(globalIndex);
-          });
-        }, 0);
-        
+        // Ensure only one primary at a time
+        const hasPrimary = updated.some(i => i.isPrimary);
+        if (!hasPrimary && updated.length > 0) {
+          updated[0].isPrimary = true;
+        }
         return updated;
+      });
+
+      // Start uploads immediately with raw file references to avoid stale state
+      newImages.forEach((img) => {
+        if (img.file) {
+          handleUploadImageRaw(img.id, img.file, img.isPrimary, img.description);
+        }
       });
     }
   };
 
-  const handleUploadImage = async (index: number) => {
-    const image = images[index];
-    if (!image || !image.file) return;
-    
-    // Update uploading status
-    setImages(prev => {
-      const updated = [...prev];
-      updated[index] = { ...updated[index], uploading: true };
-      return updated;
-    });
-    
+  const handleUploadImageById = async (imageId: string) => {
+    const current = imagesRef.current.find(img => img.id === imageId);
+    if (!current || !current.file) return;
+
+    // Mark uploading true for this image id
+    setImages(prev => prev.map(img => img.id === imageId ? { ...img, uploading: true } : img));
+
     try {
       const tempId = propertyId || "temp-" + Date.now();
-      const { imageUrl, error } = await uploadPropertyImage(tempId, image.file!, image.isPrimary, image.description);
-      
+      const { imageUrl, error } = await uploadPropertyImage(tempId, current.file!, current.isPrimary, current.description);
       if (error) throw new Error(error);
-      
-      // Update URL and uploading status
-      setImages(prev => {
-        const updated = [...prev];
-        updated[index] = { 
-          ...updated[index], 
-          url: imageUrl, 
-          uploading: false,
-          file: null // File uploaded, can be cleared
-        };
-        return updated;
-      });
-      
-      // Toast de téléchargement d'image désactivé sur mobile (non essentiel)
+
+      // Update URL and clear file/uploading
+      setImages(prev => prev.map(img => img.id === imageId ? { ...img, url: imageUrl, uploading: false, file: null } : img));
       mobileToast.success(t('agencyDashboard.pages.createProperty.imageUploadedSuccessfully'));
     } catch (error: any) {
+      // On error, clear uploading but keep the file so user can retry
+      setImages(prev => prev.map(img => img.id === imageId ? { ...img, uploading: false } : img));
       mobileToast.error(`${t('agencyDashboard.pages.createProperty.uploadError')}: ${error.message}`);
-      
-      // Reset uploading status
-      setImages(prev => {
-        const updated = [...prev];
-        updated[index] = { ...updated[index], uploading: false };
-        return updated;
-      });
+    }
+  };
+
+  const handleUploadImageRaw = async (imageId: string, file: File, isPrimary: boolean, description: string) => {
+    // Mark uploading true for this image id
+    setImages(prev => prev.map(img => img.id === imageId ? { ...img, uploading: true } : img));
+
+    try {
+      const tempId = propertyId || "temp-" + Date.now();
+      const { imageUrl, error } = await uploadPropertyImage(tempId, file, isPrimary, description);
+      if (error) throw new Error(error);
+
+      // Update URL and clear file/uploading
+      setImages(prev => prev.map(img => img.id === imageId ? { ...img, url: imageUrl, uploading: false, file: null } : img));
+      mobileToast.success(t('agencyDashboard.pages.createProperty.imageUploadedSuccessfully'));
+    } catch (error: any) {
+      // On error, clear uploading but keep the file so user can retry
+      setImages(prev => prev.map(img => img.id === imageId ? { ...img, uploading: false } : img));
+      mobileToast.error(`${t('agencyDashboard.pages.createProperty.uploadError')}: ${error.message}`);
     }
   };
 
@@ -330,7 +332,7 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
                             size="sm" 
                             variant="secondary" 
                             className="w-full text-xs"
-                            onClick={() => handleUploadImage(index)}
+                          onClick={() => handleUploadImageById(image.id)}
                             disabled={image.uploading}
                           >
                             {image.uploading ? t('agencyDashboard.pages.createProperty.uploading') : t('agencyDashboard.pages.createProperty.upload')}

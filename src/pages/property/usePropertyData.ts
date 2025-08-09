@@ -45,8 +45,14 @@ export default function usePropertyData(propertyId: string | undefined) {
   
   // Fetch property data in edit mode
   const { data: propertyData, isLoading } = useQuery({
-    queryKey: ['property', propertyId],
-    queryFn: () => getPropertyByIdForEdit(propertyId || ''),
+    // Use a dedicated key to avoid cache collisions with public property queries
+    queryKey: ['property-edit', propertyId],
+    // Try edit fetch first; if it returns null, fallback to public getter
+    queryFn: async () => {
+      const editResult = await getPropertyByIdForEdit(propertyId || '');
+      if (editResult?.property) return editResult;
+      return getPropertyById(propertyId || '');
+    },
     enabled: isEditMode,
     onSuccess: (data) => {
       if (data?.property) {
@@ -90,8 +96,9 @@ export default function usePropertyData(propertyId: string | undefined) {
           additionalImages: property.additionalImages || [],
 
           // Owner info
+          ownerId: (property as any).ownerId || property.ownerInfo?.ownerId || "",
           ownerInfo: property.ownerInfo || {
-            ownerId: property.ownerId || "",
+            ownerId: (property as any).ownerId || "",
             firstName: "",
             lastName: "",
             email: "",

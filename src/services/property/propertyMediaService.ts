@@ -22,7 +22,7 @@ export const uploadPropertyImage = async (propertyId: string, file: File, isPrim
     
     // Enregistrement des métadonnées dans la base de données
     // Seulement si l'ID n'est pas temporaire (ne commence pas par 'temp-')
-    if (!propertyId.startsWith('temp-') && propertyId !== 'temp') {
+    if (propertyId && !propertyId.startsWith('temp-') && propertyId !== 'temp') {
       const { error: dbError } = await supabase
         .from('property_images')
         .insert({
@@ -33,7 +33,7 @@ export const uploadPropertyImage = async (propertyId: string, file: File, isPrim
         });
       
       if (dbError) {
-        console.warn('Could not save image metadata to database (property not created yet):', dbError);
+        console.warn('Could not save image metadata to database (property not created yet or RLS):', dbError);
         // Ne pas jeter d'erreur car l'upload du fichier a réussi
       }
     }

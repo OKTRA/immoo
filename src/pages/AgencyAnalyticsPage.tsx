@@ -286,26 +286,9 @@ export default function AgencyAnalyticsPage() {
         <div className="container mx-auto py-4 px-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="sm" asChild>
-                <Link to={`/agencies/${agencyId}`}>
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Retour
-                </Link>
-              </Button>
-              
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-lg border overflow-hidden bg-gradient-to-br from-immoo-gold to-amber-400">
-                  {agency.logoUrl ? (
-                    <img src={agency.logoUrl} alt={agency.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <Building2 className="w-6 h-6 text-white" />
-                    </div>
-                  )}
-                </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h1 className="text-2xl font-bold text-slate-900">{agency.name}</h1>
                     {agency.verified && <Badge className="bg-green-100 text-green-700 border-green-200">Vérifié</Badge>}
                   </div>
                   <p className="text-sm text-slate-600">Tableau de bord analytique</p>
