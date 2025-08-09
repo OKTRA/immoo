@@ -76,24 +76,6 @@ export default function PropertyBasicInfoForm({ initialData, onChange, onNext, o
     }
   }, [formData, onChange]);
 
-  useEffect(() => {
-    if (!initialData) return;
-    setFormData(prev => ({
-      ...prev,
-      title: initialData.title || "",
-      location: initialData.location || "",
-      description: initialData.description || "",
-      type: initialData.type || "",
-      propertyCategory: initialData.propertyCategory || "residence",
-      bedrooms: initialData.bedrooms?.toString() || prev.bedrooms,
-      bathrooms: initialData.bathrooms?.toString() || prev.bathrooms,
-      kitchens: initialData.kitchens?.toString() || prev.kitchens,
-      shops: initialData.shops?.toString() || prev.shops,
-      livingRooms: initialData.livingRooms?.toString() || prev.livingRooms,
-      area: initialData.area?.toString() || prev.area,
-    }));
-  }, [initialData]);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));

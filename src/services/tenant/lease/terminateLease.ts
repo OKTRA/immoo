@@ -8,7 +8,12 @@ export const terminateLease = async (leaseId: string, details?: any) => {
   try {
     const { data: leaseData, error: updateError } = await supabase
       .from('leases')
-      .update({ status: 'terminated', is_active: false, termination_details: details ?? null })
+      .update({
+        status: 'terminated',
+        is_active: false,
+        termination_date: new Date().toISOString(),
+        termination_notes: details ? JSON.stringify(details) : null,
+      })
       .eq('id', leaseId)
       .select('property_id')
       .single();
