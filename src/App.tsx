@@ -59,6 +59,7 @@ import TestPropertyImages from "./pages/TestPropertyImages";
 import FavoritesPage from "./pages/FavoritesPage";
 import { LanguageRedirect } from "./components/LanguageRedirect";
 import { ElectronIntegration } from "./components/ElectronIntegration";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 // Import i18n to ensure translations are initialized
 import "@/i18n";
@@ -377,6 +378,7 @@ function App() {
         </div>
         <Toaster />
         <VisitorTracker />
+        <SpeedInsights />
       </Router>
         </AuthProvider>
       </TranslationProvider>
