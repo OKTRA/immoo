@@ -60,6 +60,7 @@ import FavoritesPage from "./pages/FavoritesPage";
 import { LanguageRedirect } from "./components/LanguageRedirect";
 import { ElectronIntegration } from "./components/ElectronIntegration";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { Analytics } from "@vercel/analytics/react";
 
 // Import i18n to ensure translations are initialized
 import "@/i18n";
@@ -379,6 +380,7 @@ function App() {
         <Toaster />
         <VisitorTracker />
         <SpeedInsights />
+        <Analytics />
       </Router>
         </AuthProvider>
       </TranslationProvider>
