@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ButtonEffects } from "@/components/ui/ButtonEffects";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Info } from "lucide-react";
 import { UserType } from "./types";
 import { cn } from "@/lib/utils";
 import LoginDialog from "@/components/auth/LoginDialog";
@@ -115,19 +115,32 @@ export function NavbarDesktopMenu({
               <button
                 key={type.name}
                 className={cn(
-                  "relative px-3 py-1.5 rounded-md font-medium text-xs transition-all duration-200",
-                  "hover:bg-gray-100 active:bg-gray-200",
-                  isActive
+                  "group relative px-2 py-1.5 rounded-md font-medium text-xs transition-all duration-300 transform",
+                  "hover:scale-105 hover:shadow-md active:scale-95",
+                  type.name === 'IMMOO Agency'
+                    ? "bg-gradient-to-r from-blue-600 to-gray-900 text-white shadow-sm hover:from-blue-700 hover:to-black hover:shadow-lg"
+                    : isActive
                     ? "bg-gray-900 text-white shadow-sm"
-                    : "text-gray-700 hover:text-gray-900"
+                    : "text-gray-700 hover:text-gray-900 hover:bg-gray-100 active:bg-gray-200"
                 )}
                 onClick={() => handleUserTypeClick(type)}
               >
-                <span className="relative z-10">
-                  {type.name}
+                <span className="relative z-10 flex items-center gap-2">
+                  {type.name === 'IMMOO Agency' ? (
+                    <>
+                      <Info className="h-4 w-4 animate-pulse" />
+                      <span className="hidden sm:inline">Découvrir</span>
+                      <span className="inline-block transform group-hover:translate-x-1 transition-transform duration-200">→</span>
+                    </>
+                  ) : (
+                    type.name
+                  )}
                 </span>
-                {isActive && (
-                  <div className="absolute inset-0 bg-gray-800 rounded-md" />
+                {isActive && type.name !== 'IMMOO Agency' && (
+                  <span className="absolute -left-2 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-immoo-gold shadow" />
+                )}
+                {type.name === 'IMMOO Agency' && (
+                  <span className="absolute inset-0 rounded-lg bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
                 )}
               </button>
             );
@@ -140,32 +153,31 @@ export function NavbarDesktopMenu({
             </div>
           )}
 
-          {/* Language Switcher */}
-          <div className="mx-2">
+          {/* Language Switcher and User Actions */}
+          <div className="flex items-center gap-0.5">
             <LanguageSwitcher />
+            {user && (
+              <>
+                <ButtonEffects
+                  variant="ghost"
+                  size="sm"
+                  className="mx-0.5"
+                  onClick={handleAccountClick}
+                >
+                  <User className="h-4 w-4" />
+                </ButtonEffects>
+                <ButtonEffects
+                  variant="ghost"
+                  size="sm"
+                  className="mx-0.5"
+                  onClick={onLogoutClick}
+                  disabled={isLoggingOut}
+                >
+                  <LogOut className="h-4 w-4" />
+                </ButtonEffects>
+              </>
+            )}
           </div>
-
-          {user && (
-            <>
-              <ButtonEffects
-                variant="ghost"
-                size="sm"
-                className="mx-1"
-                onClick={handleAccountClick}
-              >
-                <User className="h-4 w-4" />
-              </ButtonEffects>
-              <ButtonEffects
-                variant="ghost"
-                size="sm"
-                className="mx-1"
-                onClick={onLogoutClick}
-                disabled={isLoggingOut}
-              >
-                <LogOut className="h-4 w-4" />
-              </ButtonEffects>
-            </>
-          )}
         </div>
       </div>
 

@@ -15,7 +15,7 @@ export default function MobileLayout({ children }: MobileLayoutProps) {
   const shouldShowNav = !excludeNavPages.some(page => location.pathname.startsWith(page));
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-immoo-pearl via-immoo-gold/20 to-immoo-navy flex flex-col">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-immoo-pearl via-immoo-gold/20 to-immoo-navy flex flex-col">
       {/* Barre supérieure mobile */}
       {shouldShowNav && <MobileTopBar />}
       

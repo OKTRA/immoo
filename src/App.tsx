@@ -83,7 +83,7 @@ function App() {
           <Router>
             <LanguageRedirect />
             <ElectronIntegration />
-            <div className="min-h-screen flex flex-col">
+            <div className="min-h-[100dvh] flex flex-col">
               <main className="flex-1">
                 <TempoRoutes />
                 <Routes>

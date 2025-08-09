@@ -48,7 +48,7 @@ export default function MobileActionButtons() {
         variant="ghost" 
         size="sm"
         onClick={handleLanguageToggle}
-        className="h-9 w-12 px-2 rounded-full hover:bg-immoo-pearl/60 transition-all duration-200 hover:scale-105 shadow-sm font-semibold"
+        className="h-8 w-10 px-1.5 rounded-full hover:bg-immoo-pearl/60 transition-all duration-200 hover:scale-105 shadow-sm font-semibold"
         title={`Basculer vers ${currentLanguage === 'fr' ? 'English' : 'Français'}`}
       >
         <span className="text-xs text-immoo-navy font-bold">
@@ -64,7 +64,7 @@ export default function MobileActionButtons() {
             variant="ghost" 
             size="sm"
             onClick={handleAccountClick}
-            className="h-9 w-9 p-0 rounded-full hover:bg-immoo-pearl/60 transition-all duration-200 hover:scale-105 shadow-sm"
+            className="h-8 w-8 p-0 rounded-full hover:bg-immoo-pearl/60 transition-all duration-200 hover:scale-105 shadow-sm"
             title={profile?.role === 'agency' ? 'Mes Agences' : 'Mon Profil'}
           >
             <User className="h-4 w-4 text-immoo-navy" />
@@ -75,7 +75,7 @@ export default function MobileActionButtons() {
             variant="ghost" 
             size="sm"
             onClick={handleLogout}
-            className="h-9 w-9 p-0 rounded-full hover:bg-red-50 transition-all duration-200 hover:scale-105 shadow-sm border border-transparent hover:border-red-200"
+            className="h-8 w-8 p-0 rounded-full hover:bg-red-50 transition-all duration-200 hover:scale-105 shadow-sm border border-transparent hover:border-red-200"
             title="Se déconnecter"
           >
             <LogOut className="h-4 w-4 text-red-500 hover:text-red-600" />

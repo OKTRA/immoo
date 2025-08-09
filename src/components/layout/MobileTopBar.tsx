@@ -10,8 +10,8 @@ export default function MobileTopBar() {
   const { user, profile } = useAuth();
 
   return (
-    <header className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-immoo-gray/20 shadow-sm">
-      <div className="mobile-flex-between px-4 py-3 h-16">
+    <header className="fixed top-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md border-b border-immoo-gray/20 shadow-sm h-14">
+      <div className="mobile-flex-between px-4 py-3 h-14">
         {/* Indicateur de visiteur connecté à gauche */}
         <div className="mobile-flex-start">
           <QuickVisitorIndicator />

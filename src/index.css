@@ -107,6 +107,10 @@
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     /* Prevent horizontal scroll on mobile */
     overflow-x: hidden;
+    /* Ensure no extra vertical space on mobile */
+    margin: 0;
+    padding: 0;
+    height: 100%;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -557,7 +561,7 @@
   }
 
   .mobile-space-x-tight {
-    @apply space-x-1;
+    @apply space-x-0;
   }
 
   .mobile-space-x {

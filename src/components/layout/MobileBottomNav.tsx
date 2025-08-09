@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Search, Users } from 'lucide-react';
+import { Search, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -26,8 +26,8 @@ export default function MobileBottomNav() {
     },
     
     {
-      icon: <Users className="h-5 w-5" />,
-      label: 'IMMOO Agency',
+      icon: <Info className="h-5 w-5 animate-pulse" />,
+      label: 'Découvrir',
       path: '/immo-agency',
       isActive: (pathname) => pathname === '/immo-agency',
     },
@@ -52,7 +52,7 @@ export default function MobileBottomNav() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200/50 shadow-lg">
+    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/95 backdrop-blur-xl border-t border-gray-200/50 shadow-lg h-14">
       <div className="mobile-flex-between px-2 py-2 h-14">
         {navItems.map((item, index) => {
           const isActive = item.isActive(location.pathname);

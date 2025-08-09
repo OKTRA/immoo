@@ -130,7 +130,7 @@ Message: ${contactForm.message}
 
   return (
     <ResponsiveLayout>
-      <div className="bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 min-h-screen">
+      <div className="bg-gradient-to-br from-immoo-pearl/20 via-white to-immoo-pearl/10 dark:from-immoo-navy/50 dark:via-immoo-navy-light/30 dark:to-immoo-navy/50 min-h-[100dvh] overflow-x-hidden">
       
       {/* Navigation Tabs */}
       <section className="pt-20 pb-8">
