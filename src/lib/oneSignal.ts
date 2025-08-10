@@ -15,6 +15,8 @@ export const initOneSignalFromLocalConfig = () => {
     try {
       await OneSignal.init({
         appId,
+        serviceWorkerPath: '/OneSignalSDKWorker.js',
+        serviceWorkerParam: { scope: '/' },
         safari_web_id:
           localStorage.getItem('ONESIGNAL_SAFARI_WEB_ID') ||
           import.meta.env.VITE_ONESIGNAL_SAFARI_WEB_ID ||
