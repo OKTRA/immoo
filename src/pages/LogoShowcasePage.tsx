@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ImmooLogo from '@/components/ui/ImmooLogo';
 import ImmooLogoAnimated from '@/components/ui/ImmooLogoAnimated';
 import { generateAllFavicons, generateWebManifest, downloadFavicon } from '@/utils/generateFavicons';
+import { getCssVarHslColor, getCssVarHexColor } from '@/utils/brandColors';
 import { downloadOgImage } from '@/utils/generateOgImage';
 // @ts-ignore
 import GIF from 'gif.js';
@@ -119,18 +120,19 @@ export default function LogoShowcasePage() {
   ];
 
   const generateLogoSVG = (variant: LogoVariant, size: number) => {
+    const brandHsl = getCssVarHslColor('--immoo-gold', '#3F8EFC');
     const svgContent = `
       <svg width="${size * 1.1}" height="${size * 0.4}" viewBox="0 0 220 80" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <style>
             .logo-text { font-family: 'Inter', sans-serif; font-weight: 800; font-size: 24px; }
             .eye-outer { fill: white; stroke: black; stroke-width: 2; }
-            .pupil { fill: #D97706; }
+            .pupil { fill: ${brandHsl}; }
           </style>
         </defs>
         
         <!-- IMM Text -->
-        <text x="10" y="50" class="logo-text" fill="#D97706">IMM</text>
+        <text x="10" y="50" class="logo-text" fill="${brandHsl}">IMM</text>
         
         <!-- Left Eye -->
         <circle cx="130" cy="40" r="16" class="eye-outer"/>
@@ -172,7 +174,7 @@ export default function LogoShowcasePage() {
     const eyeRadius = eyeDiameter / 2;
     
     // Texte IMM avec les bonnes proportions
-    ctx.fillStyle = '#D97706';
+    ctx.fillStyle = getCssVarHslColor('--immoo-gold', '#3F8EFC');
     ctx.font = `800 ${fontSize}px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'left';
@@ -230,7 +232,7 @@ export default function LogoShowcasePage() {
       ctx.shadowOffsetX = 0;
       ctx.shadowOffsetY = 1;
       
-      ctx.fillStyle = '#D97706';
+      ctx.fillStyle = getCssVarHslColor('--immoo-gold', '#3F8EFC');
       ctx.beginPath();
       ctx.arc(centerX, centerY, pupilRadius, 0, 2 * Math.PI);
       ctx.fill();
@@ -315,6 +317,7 @@ export default function LogoShowcasePage() {
     const frameDuration = 150; // 150ms par frame pour une animation plus naturelle
     
     // Générer les frames d'animation
+    const brandHsl = getCssVarHslColor('--immoo-gold', '#3F8EFC');
     for (let frame = 0; frame < frameCount; frame++) {
       // Effacer le canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -327,7 +330,7 @@ export default function LogoShowcasePage() {
       const eyeRadius = eyeDiameter / 2;
       
       // Texte IMM avec les bonnes proportions
-      ctx.fillStyle = '#D97706';
+      ctx.fillStyle = brandHsl as unknown as string;
       ctx.font = `800 ${fontSize}px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
       ctx.textBaseline = 'middle';
       ctx.textAlign = 'left';
@@ -388,7 +391,7 @@ export default function LogoShowcasePage() {
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 1;
         
-        ctx.fillStyle = '#D97706';
+        ctx.fillStyle = brandHsl as unknown as string;
         ctx.beginPath();
         ctx.arc(centerX + pupilOffsetX, centerY + pupilOffsetY, pupilRadius, 0, 2 * Math.PI);
         ctx.fill();
@@ -496,18 +499,7 @@ export default function LogoShowcasePage() {
                             variant="outline"
                             size="sm"
                             onClick={() => downloadLogo(selectedVariantData, size, format)}
-                            style={{ 
-                              borderColor: '#D97706', 
-                              color: '#D97706',
-                              backgroundColor: 'transparent'
-                            }}
-                            className="hover:text-white"
-                            onMouseEnter={(e) => {
-                              e.currentTarget.style.backgroundColor = '#D97706';
-                            }}
-                            onMouseLeave={(e) => {
-                              e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
+                            className="border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-white"
                           >
                             {format}
                           </Button>
@@ -566,8 +558,8 @@ export default function LogoShowcasePage() {
                   {useCases.map((useCase, index) => (
                     <div key={index} className="flex gap-4">
                       <div className="flex-shrink-0">
-                        <div className="w-12 h-12 rounded-lg flex items-center justify-center" style={{ backgroundColor: 'rgba(217, 119, 6, 0.1)' }}>
-                          <useCase.icon className="w-6 h-6" style={{ color: '#D97706' }} />
+                        <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-immoo-gold/10">
+                          <useCase.icon className="w-6 h-6 text-immoo-gold" />
                         </div>
                       </div>
                       <div>
@@ -598,23 +590,12 @@ export default function LogoShowcasePage() {
                     <h4 className="font-semibold text-immoo-navy">Favicons Individuels</h4>
                     <div className="grid grid-cols-2 gap-3">
                       {[16, 32, 48, 64].map((size) => (
-                        <Button
+                          <Button
                           key={size}
                           variant="outline"
                           size="sm"
                           onClick={() => downloadFavicon(size, 'png')}
-                          style={{ 
-                            borderColor: '#D97706', 
-                            color: '#D97706',
-                            backgroundColor: 'transparent'
-                          }}
-                          className="hover:text-white"
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#D97706';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                          }}
+                            className="border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-white"
                         >
                           {size}×{size} PNG
                         </Button>
@@ -622,23 +603,12 @@ export default function LogoShowcasePage() {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       {[180, 192, 512].map((size) => (
-                        <Button
+                          <Button
                           key={size}
                           variant="outline"
                           size="sm"
                           onClick={() => downloadFavicon(size, 'png')}
-                          style={{ 
-                            borderColor: '#D97706', 
-                            color: '#D97706',
-                            backgroundColor: 'transparent'
-                          }}
-                          className="hover:text-white"
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#D97706';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = 'transparent';
-                          }}
+                            className="border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-white"
                         >
                           {size}×{size} PNG
                         </Button>
@@ -651,17 +621,7 @@ export default function LogoShowcasePage() {
                     <div className="space-y-3">
                       <Button
                         onClick={generateAllFavicons}
-                        style={{ 
-                          backgroundColor: '#D97706',
-                          color: 'white'
-                        }}
-                        className="w-full hover:opacity-90 transition-opacity"
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'rgba(217, 119, 6, 0.9)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#D97706';
-                        }}
+                        className="w-full bg-immoo-gold text-white hover:bg-immoo-gold/90 transition-opacity"
                       >
                         <Download className="w-4 h-4 mr-2" />
                         Télécharger Tous les Favicons
@@ -680,12 +640,12 @@ export default function LogoShowcasePage() {
                       <h5 className="font-medium text-immoo-navy mb-2">Aperçu Favicon</h5>
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 bg-white border border-immoo-gray rounded flex items-center justify-center">
-                          <div className="text-xs font-extrabold flex items-center" style={{ color: '#D97706' }}>
+                          <div className="text-xs font-extrabold flex items-center text-immoo-gold">
                             <span className="w-1.5 h-1.5 rounded-full border border-black bg-white flex items-center justify-center mr-0.5">
-                              <span className="w-0.5 h-0.5 rounded-full" style={{ backgroundColor: '#D97706' }}></span>
+                              <span className="w-0.5 h-0.5 rounded-full bg-immoo-gold"></span>
                             </span>
                             <span className="w-1.5 h-1.5 rounded-full border border-black bg-white flex items-center justify-center">
-                              <span className="w-0.5 h-0.5 rounded-full" style={{ backgroundColor: '#D97706' }}></span>
+                              <span className="w-0.5 h-0.5 rounded-full bg-immoo-gold"></span>
                             </span>
                           </div>
                         </div>
@@ -716,17 +676,7 @@ export default function LogoShowcasePage() {
                       <h4 className="font-semibold text-immoo-navy">Génération OG Image</h4>
                       <Button
                         onClick={downloadOgImage}
-                        style={{ 
-                          backgroundColor: '#D97706',
-                          color: 'white'
-                        }}
-                        className="w-full hover:opacity-90 transition-opacity"
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.backgroundColor = 'rgba(217, 119, 6, 0.9)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.backgroundColor = '#D97706';
-                        }}
+                        className="w-full bg-immoo-gold text-white hover:bg-immoo-gold/90 transition-opacity"
                       >
                         <Download className="w-4 h-4 mr-2" />
                         Télécharger OG Image (1200×630)

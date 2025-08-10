@@ -90,7 +90,7 @@ export default function ImmooLogo({ className = "", onClick, size = 'medium' }: 
       onClick={onClick}
     >
       {/* IMM en texte normal */}
-      <span className={`font-extrabold tracking-tight flex items-center ${config.textSize}`} style={{ color: '#D97706' }}>
+      <span className={`font-extrabold tracking-tight flex items-center ${config.textSize} text-immoo-gold`}>
         IMM
       </span>
       
@@ -99,9 +99,8 @@ export default function ImmooLogo({ className = "", onClick, size = 'medium' }: 
         <div className={`${config.eyeSize} rounded-full ${config.borderWidth} border-black shadow-lg bg-white flex items-center justify-center ring-1 ring-black/20`}>
           {/* Pupille gauche */}
           <div 
-            className={`${config.pupilSize} rounded-full transition-transform duration-100 ease-out shadow-sm`}
+            className={`${config.pupilSize} rounded-full transition-transform duration-100 ease-out shadow-sm bg-immoo-gold`}
             style={{
-              backgroundColor: '#D97706',
               transform: `translate(${eyePositions.left.x}px, ${eyePositions.left.y}px)`
             }}
           />
@@ -113,9 +112,8 @@ export default function ImmooLogo({ className = "", onClick, size = 'medium' }: 
         <div className={`${config.eyeSize} rounded-full ${config.borderWidth} border-black shadow-lg bg-white flex items-center justify-center ring-1 ring-black/20`}>
           {/* Pupille droite */}
           <div 
-            className={`${config.pupilSize} rounded-full transition-transform duration-100 ease-out shadow-sm`}
+            className={`${config.pupilSize} rounded-full transition-transform duration-100 ease-out shadow-sm bg-immoo-gold`}
             style={{
-              backgroundColor: '#D97706',
               transform: `translate(${eyePositions.right.x}px, ${eyePositions.right.y}px)`
             }}
           />

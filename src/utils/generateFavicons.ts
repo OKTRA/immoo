@@ -1,3 +1,4 @@
+import { getCssVarHslColor, getCssVarHexColor } from '@/utils/brandColors';
 export const generateFaviconCanvas = (size: number): HTMLCanvasElement => {
   const canvas = document.createElement('canvas');
   canvas.width = size;
@@ -36,8 +37,8 @@ export const generateFaviconCanvas = (size: number): HTMLCanvasElement => {
   ctx.fill();
   ctx.stroke();
   
-  // Pupilles dorées
-  ctx.fillStyle = '#D97706'; // Couleur or IMMOO
+  // Pupilles: utiliser la couleur de marque actuelle
+  ctx.fillStyle = getCssVarHslColor('--immoo-gold', '#3F8EFC');
   const pupilRadius = eyeRadius * 0.4;
   
   // Pupille gauche
@@ -110,7 +111,7 @@ export const generateWebManifest = () => {
     start_url: "/",
     display: "standalone",
     background_color: "#F9FAFB",
-    theme_color: "#D97706",
+    theme_color: getCssVarHexColor('--immoo-gold', '#3F8EFC'),
     icons: [
       {
         src: "/favicon-192x192.png",
