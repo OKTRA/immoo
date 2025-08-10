@@ -2,3 +2,6 @@ project_id = "hzbogwleoszwtneveuvx"
 
 [functions.contracts-generator]
 verify_jwt = false
+
+[functions.onesignal-notify]
+verify_jwt = false
