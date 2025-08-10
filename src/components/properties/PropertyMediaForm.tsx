@@ -108,7 +108,8 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
         url: URL.createObjectURL(file),
         file,
         isPrimary: images.length === 0, // First image becomes primary if no images exist
-        uploading: false,
+        // Mark as uploading immediately to avoid propagating temporary blob URLs to parent state/DB
+        uploading: true,
         description: ""
       }));
 
