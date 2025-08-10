@@ -57,6 +57,7 @@ import TestContractFormatting from "./pages/TestContractFormatting";
 import I18nTestPage from "./pages/I18nTestPage";
 import TestPropertyImages from "./pages/TestPropertyImages";
 import FavoritesPage from "./pages/FavoritesPage";
+import NotificationsSettingsPage from "@/pages/NotificationsSettingsPage";
 import { LanguageRedirect } from "./components/LanguageRedirect";
 import { ElectronIntegration } from "./components/ElectronIntegration";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -64,12 +65,15 @@ import { Analytics } from "@vercel/analytics/react";
 
 // Import i18n to ensure translations are initialized
 import "@/i18n";
+import { useOneSignal } from "@/hooks/useOneSignal";
 
 const queryClient = new QueryClient();
 
 function App() {
   // Initialize visitor session system
   useAutoVisitorSession();
+  // Initialize OneSignal if configured
+  useOneSignal();
 
   // Removed bucket creation logic that was causing RLS policy violations
   // This prevents the storage errors on app initialization
@@ -101,6 +105,7 @@ function App() {
               <Route path="/logo-showcase" element={<LogoShowcasePage />} />
               <Route path="/test-property-images" element={<TestPropertyImages />} />
               <Route path="/favorites" element={<FavoritesPage />} />
+              <Route path="/settings/notifications" element={<NotificationsSettingsPage />} />
               
               {/* Routes d'authentification */}
               <Route path="/auth" element={<Auth />} />

@@ -315,20 +315,12 @@ export default function AgencyContractsPage() {
           availableLeases={availableLeases}
           isReadOnly={editingContract.status === 'closed' || editingContract.isViewMode}
           showToolbar={editingContract.status !== 'closed' && !editingContract.isViewMode}
+        />
+      </div>
+    );
 
-      if (loading) {
-        return (
-          <div className="max-w-6xl mx-auto py-8">
-            <div className="animate-pulse space-y-4">
-              <div className="h-8 bg-gray-200 rounded w-1/4"></div>
-              <div className="h-64 bg-gray-200 rounded"></div>
-              <AlertTriangle className="h-5 w-5" />
-              {error}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
+  return (
+    <div className="max-w-6xl mx-auto py-8">
       {/* Empty State */}
       {contracts.length === 0 && !error && (
         <Card>

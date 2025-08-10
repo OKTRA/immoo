@@ -105,12 +105,6 @@ export default function TenantListContainer({ agencyId, propertyId }: TenantList
     }
   };
 
-  // const handleAddTenantSuccess = (newTenant: TenantWithLease) => {
-    setTenants([...tenants, newTenant]);
-    // setIsAddingTenant(false);
-    // toast.success("Locataire ajouté avec succès!");
-  };
-
   const filteredTenants = tenants
     .filter(tenant => {
       const fullName = `${tenant.firstName} ${tenant.lastName}`.toLowerCase();
@@ -177,7 +171,7 @@ export default function TenantListContainer({ agencyId, propertyId }: TenantList
           onSuccess={handleAddTenantSuccess}
           agencyId={agencyId}
         />
-      )}
+      )} */}
     </>
   );
 }
