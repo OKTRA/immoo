@@ -47,7 +47,7 @@ export default function NotificationPermissionPrompt() {
     window.OneSignalDeferred = window.OneSignalDeferred || [];
     window.OneSignalDeferred.push(async (OneSignal: any) => {
       try {
-        const res = await OneSignal.Notifications.requestPermission();
+        const res = await OneSignal.Notifications.requestPermission(true);
         if (res === "granted") {
           // Ensure a subscription is created
           await OneSignal.User.PushSubscription.optIn?.();
