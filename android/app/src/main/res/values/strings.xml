@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">immoo</string>
+    <string name="title_activity_main">immoo</string>
+    <string name="package_name">io.immoo.app</string>
+    <string name="custom_url_scheme">io.immoo.app</string>
+</resources>
