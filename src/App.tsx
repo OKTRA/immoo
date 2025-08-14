@@ -62,7 +62,7 @@ import { LanguageRedirect } from "./components/LanguageRedirect";
 import { ElectronIntegration } from "./components/ElectronIntegration";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { Analytics } from "@vercel/analytics/react";
-import NotificationPermissionPrompt from "@/components/notifications/NotificationPermissionPrompt";
+ 
 
 // Import i18n to ensure translations are initialized
 import "@/i18n";
@@ -90,7 +90,6 @@ function App() {
           <Router>
             <LanguageRedirect />
             <ElectronIntegration />
-            <NotificationPermissionPrompt />
             <div className="min-h-[100dvh] flex flex-col">
               <main className="flex-1">
                 <TempoRoutes />

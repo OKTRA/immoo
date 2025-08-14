@@ -67,10 +67,15 @@ export const initOneSignalFromLocalConfig = () => {
             undefined,
           notifyButton: { enable: true },
         });
-        // Ensure subscription is created after permission granted
+        // Auto-request permission on web and ensure subscription is created
         try {
           const status = await OneSignal.Notifications.permission;
-          if (status === 'granted') {
+          if (status === 'default') {
+            const res = await OneSignal.Notifications.requestPermission(true);
+            if (res === 'granted') {
+              await OneSignal.User.PushSubscription.optIn?.();
+            }
+          } else if (status === 'granted') {
             await OneSignal.User.PushSubscription.optIn?.();
           }
         } catch {
