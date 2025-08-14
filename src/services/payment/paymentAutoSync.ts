@@ -57,6 +57,28 @@ export const syncOverduePayments = async (leaseId: string): Promise<{ data: numb
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
+    // Mettre à jour les paiements existants passés de "pending" à "late" (période de grâce de 5 jours)
+    try {
+      const graceDays = 5;
+      const cutoffDate = new Date(today);
+      cutoffDate.setDate(cutoffDate.getDate() - graceDays);
+      const cutoffDateStr = cutoffDate.toISOString().split('T')[0];
+      
+      const { error: statusUpdateError } = await supabase
+        .from('payments')
+        .update({ status: 'late' })
+        .eq('lease_id', leaseId)
+        .eq('payment_type', 'rent')
+        .eq('status', 'pending')
+        .lt('due_date', cutoffDateStr);
+      
+      if (statusUpdateError) {
+        console.error('Erreur mise à jour des paiements en retard:', statusUpdateError);
+      }
+    } catch (e) {
+      console.error('Erreur inattendue lors de la mise à jour des statuts en retard:', e);
+    }
+    
     // Calculer la date de fin (soit end_date du bail, soit aujourd'hui)
     const endDateToUse = end_date ? new Date(end_date) : today;
     
