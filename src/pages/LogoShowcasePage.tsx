@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ImmooLogo from '@/components/ui/ImmooLogo';
 import ImmooLogoAnimated from '@/components/ui/ImmooLogoAnimated';
+import ImmooSplashScreen from '@/components/ui/ImmooSplashScreen';
 import { generateAllFavicons, generateWebManifest, downloadFavicon } from '@/utils/generateFavicons';
 import { getCssVarHslColor, getCssVarHexColor } from '@/utils/brandColors';
 import { downloadOgImage } from '@/utils/generateOgImage';
@@ -85,6 +86,44 @@ export default function LogoShowcasePage() {
       backgroundColor: 'bg-white',
       textColor: 'text-immoo-gold',
       preview: <ImmooLogo size="medium" />
+    },
+    {
+      id: 'splash-dark',
+      name: 'Splash Screen Sombre',
+      description: 'Écran de démarrage avec animations et chargement',
+      sizes: [512, 1024, 1536, 2048],
+      formats: ['PNG', 'JPG'],
+      backgroundColor: 'bg-immoo-navy',
+      textColor: 'text-immoo-pearl',
+      preview: (
+        <div className="relative w-32 h-20 bg-gradient-to-br from-immoo-navy via-immoo-navy/95 to-immoo-navy/90 rounded-lg overflow-hidden">
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <ImmooLogoAnimated size="small" variant="dark" />
+            <div className="mt-2 w-16 h-0.5 bg-immoo-gold/20 rounded-full overflow-hidden">
+              <div className="h-full w-3/4 bg-immoo-gold rounded-full animate-pulse" />
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      id: 'splash-light',
+      name: 'Splash Screen Clair',
+      description: 'Version claire de l\'écran de démarrage',
+      sizes: [512, 1024, 1536, 2048],
+      formats: ['PNG', 'JPG'],
+      backgroundColor: 'bg-immoo-pearl',
+      textColor: 'text-immoo-navy',
+      preview: (
+        <div className="relative w-32 h-20 bg-gradient-to-br from-immoo-pearl via-white to-immoo-pearl/80 rounded-lg overflow-hidden border border-immoo-gray/20">
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <ImmooLogoAnimated size="small" variant="light" />
+            <div className="mt-2 w-16 h-0.5 bg-immoo-navy/20 rounded-full overflow-hidden">
+              <div className="h-full w-3/4 bg-immoo-navy rounded-full animate-pulse" />
+            </div>
+          </div>
+        </div>
+      )
     }
   ];
 
@@ -116,6 +155,13 @@ export default function LogoShowcasePage() {
       description: 'Icône du navigateur',
       recommendedSizes: '16px, 32px, 48px',
       format: 'ICO, PNG'
+    },
+    {
+      icon: Smartphone,
+      title: 'Splash Screen',
+      description: 'Écrans de démarrage animés',
+      recommendedSizes: '512px, 1024px, 1536px',
+      format: 'PNG, JPG'
     }
   ];
 
@@ -542,6 +588,98 @@ export default function LogoShowcasePage() {
                       <p className="text-sm text-immoo-gray">
                         🎯 Mouvement fluide avec transition de 300ms
                       </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Section Splash Screen */}
+            {selectedVariantData?.id.includes('splash') && (
+              <Card className="mt-8">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Smartphone className="w-5 h-5" />
+                    Aperçu Splash Screen
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-6">
+                    <div className="bg-immoo-pearl p-6 rounded-lg">
+                      <h4 className="font-semibold text-immoo-navy mb-4">Démo Interactive</h4>
+                      <div className="flex justify-center mb-4">
+                        <div className="w-80 h-96 relative border-4 border-immoo-navy rounded-2xl overflow-hidden shadow-2xl">
+                          <ImmooSplashScreen 
+                            variant={selectedVariantData.id.includes('dark') ? 'dark' : 'light'}
+                            duration={4000}
+                            autoHide={false}
+                            className="relative"
+                          />
+                        </div>
+                      </div>
+                      <div className="text-center space-y-2">
+                        <p className="text-sm text-immoo-gray">
+                          📱 Écran de démarrage optimisé pour mobile et desktop
+                        </p>
+                        <p className="text-sm text-immoo-gray">
+                          ⚡ Animation fluide avec particules flottantes
+                        </p>
+                        <p className="text-sm text-immoo-gray">
+                          🎨 Barre de progression et effets de brillance
+                        </p>
+                        <p className="text-sm text-immoo-gray">
+                          🌟 Personnalisable (durée, couleurs, textes)
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <h4 className="font-semibold text-immoo-navy">Caractéristiques</h4>
+                        <ul className="space-y-2 text-sm text-immoo-gray">
+                          <li className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-immoo-gold rounded-full" />
+                            Logo animé avec yeux interactifs
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-immoo-gold rounded-full" />
+                            Barre de progression avec pourcentage
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-immoo-gold rounded-full" />
+                            Particules flottantes animées
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-immoo-gold rounded-full" />
+                            Effets de brillance et ombres
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="w-2 h-2 bg-immoo-gold rounded-full" />
+                            Transitions fluides d'entrée/sortie
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="space-y-4">
+                        <h4 className="font-semibold text-immoo-navy">Utilisation</h4>
+                        <div className="bg-white p-4 rounded-lg border border-immoo-gray/20">
+                          <pre className="text-xs text-immoo-navy overflow-x-auto">
+{`<ImmooSplashScreen
+  variant="dark"
+  duration={3000}
+  onComplete={() => {
+    // Navigation vers l'app
+  }}
+/>`}
+                          </pre>
+                        </div>
+                        <div className="text-xs text-immoo-gray space-y-1">
+                          <p>• Idéal pour les applications mobiles</p>
+                          <p>• Progressive Web Apps (PWA)</p>
+                          <p>• Écrans de chargement web</p>
+                          <p>• Transitions d'ouverture d'app</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
