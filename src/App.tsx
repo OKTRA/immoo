@@ -34,6 +34,7 @@ import AgencyPropertiesPage from "@/pages/AgencyPropertiesPage";
 import AgencyLeasesPage from "@/pages/AgencyLeasesPage";
 import AgencySettingsPage from "@/pages/AgencySettingsPage";
 import PricingPage from "@/pages/PricingPage";
+import PrivacyPolicyPage from "@/pages/PrivacyPolicyPage";
 import LogoShowcasePage from "@/pages/LogoShowcasePage";
 import ImmoAgencyPage from "@/pages/ImmoAgencyPage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -104,6 +105,7 @@ function App() {
               <Route path="/property/:propertyId" element={<PublicPropertyPage />} />
               <Route path="/search" element={<SearchPage />} />
               <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/immo-agency" element={<ImmoAgencyPage />} />
               <Route path="/logo-showcase" element={<LogoShowcasePage />} />
               <Route path="/test-property-images" element={<TestPropertyImages />} />
@@ -136,6 +138,7 @@ function App() {
               <Route path="/en/property/:propertyId" element={<PublicPropertyPage />} />
               <Route path="/en/search" element={<SearchPage />} />
               <Route path="/en/pricing" element={<PricingPage />} />
+              <Route path="/en/privacy" element={<PrivacyPolicyPage />} />
               <Route path="/en/immo-agency" element={<ImmoAgencyPage />} />
               <Route path="/en/logo-showcase" element={<LogoShowcasePage />} />
               <Route path="/en/test-property-images" element={<TestPropertyImages />} />

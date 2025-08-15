@@ -156,6 +156,8 @@ export function NavbarDesktopMenu({
             Vente
           </button>
 
+
+
           {/* Quick Visitor Indicator - only show if no user logged in */}
           {!user && (
             <div className="mx-2">

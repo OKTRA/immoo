@@ -297,6 +297,20 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
           </div>
         </div>
         
+        {/* Politique de Confidentialité */}
+        <div className="text-center">
+          <p className="text-xs text-gray-600">
+            En soumettant ce formulaire, vous acceptez notre{' '}
+            <button
+              type="button"
+              className="text-blue-600 hover:text-blue-700 font-semibold transition-colors duration-200 hover:underline"
+              onClick={() => window.open('/privacy', '_blank')}
+            >
+              Politique de Confidentialité
+            </button>
+          </p>
+        </div>
+        
         <Button 
           type="submit" 
           className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-sm rounded-xl shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200" 

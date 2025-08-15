@@ -124,6 +124,8 @@ export function NavbarMobileMenu({
               </button>
             </div>
 
+
+
             {/* Espaces */}
             <div className="mb-6">
               <h4 className="text-sm font-semibold text-immoo-navy/60 mb-4 px-2">{t('navbar.spaces')}</h4>
