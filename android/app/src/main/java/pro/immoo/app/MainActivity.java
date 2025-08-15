@@ -1,4 +1,4 @@
-package io.immoo.app;
+package pro.immoo.app;
 
 import com.getcapacitor.BridgeActivity;
 

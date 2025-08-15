@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.immoo.app',
+  appId: 'pro.immoo.app',
   appName: 'immoo',
   webDir: 'dist',
   server: {
