@@ -10,6 +10,19 @@ declare global {
 export const initOneSignalFromLocalConfig = () => {
   if (typeof window === 'undefined') return;
 
+  // Skip OneSignal initialization in development mode (localhost)
+  const isLocalhost = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1' ||
+                      window.location.hostname.includes('localhost');
+  
+  const isDevelopment = (import.meta as any).env?.DEV || 
+                       (import.meta as any).env?.NODE_ENV === 'development';
+  
+  if (isLocalhost || isDevelopment) {
+    console.log('[OneSignal] Skipping initialization in development mode');
+    return;
+  }
+
   const appId =
     localStorage.getItem('ONESIGNAL_APP_ID') ||
     // Vite env var support

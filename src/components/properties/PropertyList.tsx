@@ -18,6 +18,7 @@ import PropertyDetailsDialog from './PropertyDetailsDialog';
 import QuickVisitorLogin from '@/components/visitor/QuickVisitorLogin';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useTranslation } from '@/hooks/useTranslation';
+import { isBlobUrl } from '@/utils/imageUrlUtils';
 import { useFavorites } from '@/hooks/useFavorites';
 import { getPropertyStatusLabel, getPropertyStatusVariant } from '@/utils/translationUtils';
 import { SaleStatusBadge } from '@/utils/saleStatusUtils';
@@ -87,29 +88,51 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
             {/* Property Image */}
             <div className="relative h-48 bg-gray-200 overflow-hidden">
               {/* Try to display image from images array first, then fallback to imageUrl */}
-              {(property.images && property.images.length > 0) || property.imageUrl ? (
-                <img
-                  src={
-                    property.images && property.images.length > 0
-                      ? (typeof property.images[0] === 'string' ? property.images[0] : property.images[0].image_url)
-                      : property.imageUrl
-                  }
-                  alt={property.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  onError={(e) => {
-                    // If image fails to load, show placeholder
-                    const target = e.target as HTMLImageElement;
-                    target.style.display = 'none';
-                    const placeholder = target.nextElementSibling as HTMLElement;
-                    if (placeholder) placeholder.style.display = 'flex';
-                  }}
-                />
-              ) : null}
+              {(() => {
+                let imageUrl = '';
+                if (property.images && property.images.length > 0) {
+                  imageUrl = typeof property.images[0] === 'string' ? property.images[0] : property.images[0].image_url;
+                } else if (property.imageUrl) {
+                  imageUrl = property.imageUrl;
+                }
+
+                // Skip invalid blob URLs
+                if (imageUrl && isBlobUrl(imageUrl)) {
+                  console.warn('Skipping invalid blob URL in property list:', imageUrl);
+                  imageUrl = '';
+                }
+
+                return imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={property.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    onError={(e) => {
+                      // If image fails to load, show placeholder
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const placeholder = target.nextElementSibling as HTMLElement;
+                      if (placeholder) placeholder.style.display = 'flex';
+                    }}
+                  />
+                ) : null;
+              })()}
               
               {/* Placeholder - shown when no image or image fails to load */}
               <div 
                 className="w-full h-full flex items-center justify-center bg-gray-100" 
-                style={{ display: (property.images && property.images.length > 0) || property.imageUrl ? 'none' : 'flex' }}
+                style={{ 
+                  display: (() => {
+                    let hasValidImage = false;
+                    if (property.images && property.images.length > 0) {
+                      const imageUrl = typeof property.images[0] === 'string' ? property.images[0] : property.images[0].image_url;
+                      hasValidImage = imageUrl && !isBlobUrl(imageUrl);
+                    } else if (property.imageUrl) {
+                      hasValidImage = !isBlobUrl(property.imageUrl);
+                    }
+                    return hasValidImage ? 'none' : 'flex';
+                  })()
+                }}
               >
                 <Hotel className="h-12 w-12 text-gray-400" />
               </div>

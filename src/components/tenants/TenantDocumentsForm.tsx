@@ -37,6 +37,17 @@ export default function TenantDocumentsForm({
 
   const isMounted = useRef(false);
   const lastUpdateRef = useRef<any>({});
+  const formDataRef = useRef(formData);
+  const previewUrlsRef = useRef(previewUrls);
+
+  // Keep refs updated
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
+
+  useEffect(() => {
+    previewUrlsRef.current = previewUrls;
+  }, [previewUrls]);
 
   useEffect(() => {
     if (!isMounted.current) {
@@ -69,6 +80,22 @@ export default function TenantDocumentsForm({
       }));
     }
   }, [initialData]);
+
+  // Cleanup blob URLs on component unmount
+  useEffect(() => {
+    return () => {
+      // Clean up photo blob URL
+      if (formDataRef.current.photoUrl && formDataRef.current.photoUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(formDataRef.current.photoUrl);
+      }
+      // Clean up preview URLs
+      previewUrlsRef.current.forEach(url => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
+    };
+  }, []);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -128,11 +155,12 @@ export default function TenantDocumentsForm({
   };
 
   const clearPhoto = () => {
-    setFormData(prev => ({ ...prev, photoUrl: "" }));
-    setPhotoFile(null);
+    // Clean up blob URL before clearing
     if (formData.photoUrl && formData.photoUrl.startsWith('blob:')) {
       URL.revokeObjectURL(formData.photoUrl);
     }
+    setFormData(prev => ({ ...prev, photoUrl: "" }));
+    setPhotoFile(null);
   };
 
   const removeIdentityFile = (index: number) => {

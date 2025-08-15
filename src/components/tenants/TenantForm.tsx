@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -48,11 +48,26 @@ export default function TenantForm({ initialData, onUpdate, onFileUpload }: Tena
   });
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+
+  // Ref to keep track of current photoUrl for cleanup
+  const formDataRef = useRef(formData);
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
   useEffect(() => {
     onUpdate(formData);
   }, [formData, onUpdate]);
+
+  // Cleanup blob URLs on component unmount
+  useEffect(() => {
+    return () => {
+      if (formDataRef.current.photoUrl && formDataRef.current.photoUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(formDataRef.current.photoUrl);
+      }
+    };
+  }, []);
 
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -113,6 +128,11 @@ export default function TenantForm({ initialData, onUpdate, onFileUpload }: Tena
       const file = e.target.files[0];
       setPhotoFile(file);
       
+      // Clean up old blob URL if it exists
+      if (formData.photoUrl && formData.photoUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(formData.photoUrl);
+      }
+      
       // Create a preview
       const photoUrl = URL.createObjectURL(file);
       setFormData(prev => ({ ...prev, photoUrl }));
@@ -128,6 +148,12 @@ export default function TenantForm({ initialData, onUpdate, onFileUpload }: Tena
     setUploading(true);
     try {
       const photoUrl = await onFileUpload(photoFile);
+      
+      // Clean up old blob URL before setting new URL
+      if (formData.photoUrl && formData.photoUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(formData.photoUrl);
+      }
+      
       setFormData(prev => ({ ...prev, photoUrl }));
       setPhotoFile(null);
       toast.success("Photo téléchargée avec succès");

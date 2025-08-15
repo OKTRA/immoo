@@ -5,6 +5,7 @@ import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { getPropertyImages } from '@/services/property/propertyMedia';
 import { ChevronLeft, ChevronRight, Image as ImageIcon, Expand, X, Home } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
+import { sanitizeImageUrl, isBlobUrl } from '@/utils/imageUrlUtils';
 
 interface PropertyImageGalleryProps {
   propertyId: string;
@@ -41,6 +42,17 @@ export default function PropertyImageGallery({
   useEffect(() => {
     const resolveImageUrl = async (rawUrl: string): Promise<string> => {
       if (!rawUrl) return rawUrl;
+      
+      // Check for blob URLs and validate them
+      if (isBlobUrl(rawUrl)) {
+        const sanitized = await sanitizeImageUrl(rawUrl);
+        if (!sanitized) {
+          console.warn('Invalid blob URL detected and removed from gallery:', rawUrl);
+          return ''; // Return empty string for invalid blob URLs
+        }
+        return sanitized;
+      }
+      
       if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
       // Try properties bucket
       try {
@@ -105,7 +117,10 @@ export default function PropertyImageGallery({
         });
       }
       
-      setImages(finalImages);
+      // Filter out images with empty URLs (invalid blob URLs)
+      const validImages = finalImages.filter(img => img.url && img.url.trim() !== '');
+      
+      setImages(validImages);
       setLoading(false);
     };
 

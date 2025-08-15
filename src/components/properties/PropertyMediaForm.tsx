@@ -92,6 +92,17 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
     });
   }, [images, virtualTourUrl, onChange]);
 
+  // Cleanup blob URLs on component unmount
+  useEffect(() => {
+    return () => {
+      imagesRef.current.forEach(image => {
+        if (image.url && image.url.startsWith('blob:')) {
+          URL.revokeObjectURL(image.url);
+        }
+      });
+    };
+  }, []);
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const filesArray = Array.from(e.target.files);
@@ -149,8 +160,17 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
       const { imageUrl, error } = await uploadPropertyImage(tempId, current.file!, current.isPrimary, current.description);
       if (error) throw new Error(error);
 
-      // Update URL and clear file/uploading
-      setImages(prev => prev.map(img => img.id === imageId ? { ...img, url: imageUrl, uploading: false, file: null } : img));
+      // Clean up old blob URL and update with new URL
+      setImages(prev => prev.map(img => {
+        if (img.id === imageId) {
+          // Clean up the old blob URL
+          if (img.url && img.url.startsWith('blob:')) {
+            URL.revokeObjectURL(img.url);
+          }
+          return { ...img, url: imageUrl, uploading: false, file: null };
+        }
+        return img;
+      }));
       mobileToast.success(t('agencyDashboard.pages.createProperty.imageUploadedSuccessfully'));
     } catch (error: any) {
       // On error, clear uploading but keep the file so user can retry
@@ -168,8 +188,17 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
       const { imageUrl, error } = await uploadPropertyImage(tempId, file, isPrimary, description);
       if (error) throw new Error(error);
 
-      // Update URL and clear file/uploading
-      setImages(prev => prev.map(img => img.id === imageId ? { ...img, url: imageUrl, uploading: false, file: null } : img));
+      // Clean up old blob URL and update with new URL
+      setImages(prev => prev.map(img => {
+        if (img.id === imageId) {
+          // Clean up the old blob URL
+          if (img.url && img.url.startsWith('blob:')) {
+            URL.revokeObjectURL(img.url);
+          }
+          return { ...img, url: imageUrl, uploading: false, file: null };
+        }
+        return img;
+      }));
       mobileToast.success(t('agencyDashboard.pages.createProperty.imageUploadedSuccessfully'));
     } catch (error: any) {
       // On error, clear uploading but keep the file so user can retry
@@ -180,6 +209,11 @@ export default function PropertyMediaForm({ initialData, onChange, onNext, onBac
 
   const removeImage = (index: number) => {
     const imageToRemove = images[index];
+    
+    // Clean up blob URL if it exists
+    if (imageToRemove.url && imageToRemove.url.startsWith('blob:')) {
+      URL.revokeObjectURL(imageToRemove.url);
+    }
     
     setImages(prev => {
       const updated = prev.filter((_, i) => i !== index);

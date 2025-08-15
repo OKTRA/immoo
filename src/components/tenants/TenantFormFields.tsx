@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useFormContext } from "react-hook-form";
 import {
   FormField,
@@ -27,12 +27,46 @@ const TenantFormFields = () => {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [identityFiles, setIdentityFiles] = useState<File[]>([]);
   const photoUrl = watch('photoUrl');
+  const identityPhotos = watch('identityPhotos');
   const emergencyContact = watch('emergencyContact');
+
+  // Refs to keep track of current URLs for cleanup
+  const photoUrlRef = useRef(photoUrl);
+  const identityPhotosRef = useRef(identityPhotos);
+  
+  useEffect(() => {
+    photoUrlRef.current = photoUrl;
+  }, [photoUrl]);
+
+  useEffect(() => {
+    identityPhotosRef.current = identityPhotos;
+  }, [identityPhotos]);
+
+  // Cleanup blob URLs on component unmount
+  useEffect(() => {
+    return () => {
+      if (photoUrlRef.current && photoUrlRef.current.startsWith('blob:')) {
+        URL.revokeObjectURL(photoUrlRef.current);
+      }
+      if (identityPhotosRef.current) {
+        identityPhotosRef.current.forEach((url: string) => {
+          if (url && url.startsWith('blob:')) {
+            URL.revokeObjectURL(url);
+          }
+        });
+      }
+    };
+  }, []);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       setPhotoFile(file);
+      
+      // Clean up old blob URL if it exists
+      if (photoUrl && photoUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(photoUrl);
+      }
       
       // Create a preview URL
       const previewUrl = URL.createObjectURL(file);
@@ -41,6 +75,10 @@ const TenantFormFields = () => {
   };
 
   const clearPhoto = () => {
+    // Clean up blob URL before clearing
+    if (photoUrl && photoUrl.startsWith('blob:')) {
+      URL.revokeObjectURL(photoUrl);
+    }
     setValue('photoUrl', '');
     setPhotoFile(null);
   };
@@ -312,6 +350,13 @@ const TenantFormFields = () => {
                   onClick={() => {
                     const currentPhotos = watch('identityPhotos') || [];
                     const currentFiles = identityFiles;
+                    
+                    // Clean up the blob URL being removed
+                    const urlToRemove = currentPhotos[idx];
+                    if (urlToRemove && urlToRemove.startsWith('blob:')) {
+                      URL.revokeObjectURL(urlToRemove);
+                    }
+                    
                     setValue('identityPhotos', currentPhotos.filter((__, i) => i !== idx));
                     const newFiles = currentFiles.filter((__, i) => i !== idx);
                     setIdentityFiles(newFiles);
