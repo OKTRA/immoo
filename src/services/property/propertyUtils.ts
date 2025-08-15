@@ -21,6 +21,8 @@ export const formatPropertyFromDb = (item: any): Property => {
     imageUrl: item.image_url,
     virtualTourUrl: item.virtual_tour_url,
     features: item.features || [],
+    // Derive listingType from features to avoid DB migration (non-breaking)
+    listingType: (item.features || []).includes('for_sale') ? 'sale' : 'rent',
     petsAllowed: item.pets_allowed,
     furnished: item.furnished,
     yearBuilt: item.year_built,
@@ -81,6 +83,16 @@ export const formatPropertyToDb = (propertyData: any, ownerId: string | null = n
   if (propertyData.imageUrl !== undefined) dbData.image_url = propertyData.imageUrl;
   if (propertyData.virtualTourUrl !== undefined) dbData.virtual_tour_url = propertyData.virtualTourUrl;
   if (propertyData.features !== undefined) dbData.features = propertyData.features;
+  // Encode listingType into features to preserve schema
+  if (propertyData.listingType !== undefined) {
+    const existing: string[] = Array.isArray(dbData.features)
+      ? dbData.features
+      : Array.isArray(propertyData.features)
+        ? propertyData.features
+        : [];
+    const withoutFlag = existing.filter((f) => f !== 'for_sale');
+    dbData.features = propertyData.listingType === 'sale' ? [...withoutFlag, 'for_sale'] : withoutFlag;
+  }
   if (propertyData.petsAllowed !== undefined) dbData.pets_allowed = propertyData.petsAllowed;
   if (propertyData.furnished !== undefined) dbData.furnished = propertyData.furnished;
   if (propertyData.yearBuilt !== undefined) dbData.year_built = propertyData.yearBuilt;

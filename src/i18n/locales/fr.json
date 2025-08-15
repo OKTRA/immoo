@@ -583,6 +583,54 @@
     "loadingErrorDesc": "Veuillez réessayer ultérieurement"
   },
   "propertyDetails": {
+    "characteristics": {
+      "surface": "Surface",
+      "bedrooms": "Chambres",
+      "bathrooms": "Salles de bain",
+      "type": "Type"
+    },
+    "financial": {
+      "title": "Informations financières",
+      "rent": "Loyer",
+      "securityDeposit": "Caution / Dépôt de garantie",
+      "agencyFees": "Frais d'agence",
+      "commission": "Commission",
+      "totalCost": "Coût total à prévoir",
+      "caution": "Caution",
+      "totalInitial": "Total initial"
+    },
+    "paymentFrequency": {
+      "daily": "Journalier",
+      "weekly": "Hebdomadaire",
+      "monthly": "Mensuel",
+      "quarterly": "Trimestriel",
+      "biannual": "Semestriel",
+      "annual": "Annuel"
+    },
+    "actions": {
+      "close": "Fermer"
+    },
+    "description": {
+      "title": "Description"
+    },
+    "features": {
+      "title": "✨ Caractéristiques et équipements"
+    },
+    "agency": {
+      "title": "Informations complètes sur l'agence",
+      "aboutAgency": "À propos de l'agence",
+      "specialties": "Spécialités",
+      "serviceAreas": "Zones d'intervention",
+      "contact": "Coordonnées",
+      "statistics": "Statistiques",
+      "properties": "Propriétés",
+      "averageRating": "Note moyenne",
+      "yearsExperience": "Années d'expérience",
+      "memberSince": "Membre depuis",
+      "visitWebsite": "Visiter le site web",
+      "certified": "Certifiée",
+      "realEstateAgency": "Agence immobilière"
+    },
     "status": {
       "available": "Disponible",
       "rented": "Loué",
@@ -590,7 +638,24 @@
       "sold": "Vendu",
       "pending": "En attente",
       "maintenance": "En maintenance",
-      "reserved": "Réservé"
+      "reserved": "Réservé",
+      "title": "Statut de la propriété",
+      "currentStatus": "Statut actuel",
+      "lease": "Bail",
+      "active": "Actif",
+      "changeStatus": "Changer le statut",
+      "paymentManagement": "Gestion des paiements",
+      "changeStatusTitle": "Changer le statut de la propriété",
+      "changeStatusDescription": "Sélectionnez le nouveau statut pour cette propriété",
+      "limitedOptions": " (Options limitées car un bail est actif)",
+      "selectStatus": "Sélectionnez un statut",
+      "cancel": "Annuler",
+      "confirm": "Confirmer",
+      "updating": "Mise à jour...",
+      "statusUpdated": "Statut de la propriété mis à jour avec succès",
+      "updateError": "Erreur lors de la mise à jour du statut",
+      "noActiveLease": "Aucun bail actif trouvé pour cette propriété",
+      "error": "Erreur"
     }
   },
   "immoAgency": {
@@ -894,82 +959,7 @@
       }
     }
   },
-  "propertyDetails": {
-    "status": {
-      "available": "Disponible",
-      "sold": "Vendu",
-      "pending": "En attente",
-      "rented": "Loué",
-      "occupied": "Occupé"
-    },
-    "characteristics": {
-      "surface": "Surface",
-      "bedrooms": "Chambres",
-      "bathrooms": "Salles de bain",
-      "type": "Type"
-    },
-    "financial": {
-      "title": "Informations financières",
-      "rent": "Loyer",
-      "securityDeposit": "Caution / Dépôt de garantie",
-      "agencyFees": "Frais d'agence",
-      "commission": "Commission",
-      "totalCost": "Coût total à prévoir",
-      "caution": "Caution",
-      "totalInitial": "Total initial"
-    },
-    "paymentFrequency": {
-      "daily": "Journalier",
-      "weekly": "Hebdomadaire",
-      "monthly": "Mensuel",
-      "quarterly": "Trimestriel",
-      "biannual": "Semestriel",
-      "annual": "Annuel"
-    },
-    "actions": {
-      "close": "Fermer"
-    },
-    "description": {
-      "title": "Description"
-    },
-    "features": {
-      "title": "✨ Caractéristiques et équipements"
-    },
-    "agency": {
-      "title": "Informations complètes sur l'agence",
-      "aboutAgency": "À propos de l'agence",
-      "specialties": "Spécialités",
-      "serviceAreas": "Zones d'intervention",
-      "contact": "Coordonnées",
-      "statistics": "Statistiques",
-      "properties": "Propriétés",
-      "averageRating": "Note moyenne",
-      "yearsExperience": "Années d'expérience",
-      "memberSince": "Membre depuis",
-      "visitWebsite": "Visiter le site web",
-      "certified": "Certifiée",
-      "realEstateAgency": "Agence immobilière"
-    },
-    "status": {
-      "title": "Statut de la propriété",
-      "currentStatus": "Statut actuel",
-      "lease": "Bail",
-      "active": "Actif",
-      "changeStatus": "Changer le statut",
-      "paymentManagement": "Gestion des paiements",
-      "changeStatusTitle": "Changer le statut de la propriété",
-      "changeStatusDescription": "Sélectionnez le nouveau statut pour cette propriété",
-      "limitedOptions": " (Options limitées car un bail est actif)",
-      "selectStatus": "Sélectionnez un statut",
-      "cancel": "Annuler",
-      "confirm": "Confirmer",
-      "updating": "Mise à jour...",
-      "statusUpdated": "Statut de la propriété mis à jour avec succès",
-      "updateError": "Erreur lors de la mise à jour du statut",
-      "noActiveLease": "Aucun bail actif trouvé pour cette propriété",
-      "error": "Erreur"
-    }
-  },
+
   "agencyDashboard": {
     "header": {
       "title": "Administration de l'agence",

@@ -44,6 +44,7 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
     securityDeposit: initialData.securityDeposit?.toString() || "",
     agencyFees: initialData.agencyFees?.toString() || "",
     commissionRate: initialData.commissionRate?.toString() || "",
+    listingType: (initialData as any).listingType || ((initialData.features || []).includes('for_sale') ? 'sale' : 'rent')
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -55,8 +56,9 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
       securityDeposit: initialData.securityDeposit?.toString() || "",
       agencyFees: initialData.agencyFees?.toString() || "",
       commissionRate: initialData.commissionRate?.toString() || "",
+      listingType: (initialData as any).listingType || ((initialData.features || []).includes('for_sale') ? 'sale' : 'rent')
     });
-  }, [initialData.price, initialData.paymentFrequency, initialData.securityDeposit, initialData.agencyFees, initialData.commissionRate]);
+  }, [initialData.price, initialData.paymentFrequency, initialData.securityDeposit, initialData.agencyFees, initialData.commissionRate, (initialData as any).listingType]);
 
   // Validation function
   const validateForm = (): boolean => {
@@ -101,6 +103,7 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
       securityDeposit: formData.securityDeposit === "" ? undefined : parseFloat(formData.securityDeposit) || undefined,
       agencyFees: formData.agencyFees === "" ? undefined : parseFloat(formData.agencyFees) || undefined,
       commissionRate: formData.commissionRate === "" ? undefined : parseFloat(formData.commissionRate) || undefined,
+      listingType: (formData as any).listingType
     });
   }, [formData, onChange]);
 
@@ -134,6 +137,35 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
 
   return (
     <div className="space-y-8">
+      {/* Listing Type Toggle */}
+      <Card className="border-0 shadow-sm bg-gradient-to-br from-background to-muted/20">
+        <CardContent className="p-6 space-y-6">
+          <div className="space-y-2">
+            <h3 className="text-lg font-semibold flex items-center">
+              Type d'annonce
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Choisissez si ce bien est proposé à la location ou à la vente
+            </p>
+          </div>
+          <div className={`grid gap-4 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            <Button
+              type="button"
+              variant={formData.listingType === 'rent' ? 'default' : 'outline'}
+              onClick={() => setFormData(prev => ({ ...prev, listingType: 'rent' }))}
+            >
+              Location
+            </Button>
+            <Button
+              type="button"
+              variant={formData.listingType === 'sale' ? 'default' : 'outline'}
+              onClick={() => setFormData(prev => ({ ...prev, listingType: 'sale' }))}
+            >
+              Vente
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
       {/* Price and Payment Frequency */}
       <Card className="border-0 shadow-sm bg-gradient-to-br from-background to-muted/20">
         <CardContent className="p-6 space-y-6">
@@ -142,15 +174,15 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
               <DollarSign className="mr-2 h-5 w-5 text-primary" />
               Prix et conditions de paiement
             </h3>
-            <p className="text-sm text-muted-foreground">
-              Définissez le prix de location et la fréquence de paiement
-            </p>
+              <p className="text-sm text-muted-foreground">
+                {formData.listingType === 'sale' ? 'Définissez le prix de vente' : 'Définissez le prix de location et la fréquence de paiement'}
+              </p>
           </div>
 
           <div className={`grid gap-6 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
             <div className="space-y-3">
               <Label htmlFor="price" className="text-sm font-medium">
-                Prix de location *
+                {formData.listingType === 'sale' ? 'Prix de vente *' : 'Prix de location *'}
               </Label>
               <div className="relative">
                 <Input
@@ -184,6 +216,7 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
               </p>
             </div>
 
+            {formData.listingType !== 'sale' && (
             <div className="space-y-3">
               <Label htmlFor="paymentFrequency" className="text-sm font-medium">
                 Fréquence de paiement *
@@ -211,59 +244,62 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
                 Fréquence à laquelle le loyer doit être payé
               </p>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Security Deposit */}
-      <Card className="border-0 shadow-sm bg-gradient-to-br from-background to-muted/20">
-        <CardContent className="p-6 space-y-6">
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold flex items-center">
-              <Shield className="mr-2 h-5 w-5 text-primary" />
-              Dépôt de garantie
-            </h3>
-            <p className="text-sm text-muted-foreground">
-              Montant du dépôt de garantie (optionnel)
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            <Label htmlFor="securityDeposit" className="text-sm font-medium">
-              Dépôt de garantie
-            </Label>
-            <div className="relative">
-              <Input
-                id="securityDeposit"
-                name="securityDeposit"
-                type="text"
-                placeholder="Ex: 100 000"
-                className={`h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20 pl-16 ${
-                  errors.securityDeposit ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
-                }`}
-                value={formatCurrency(formData.securityDeposit)}
-                onChange={(e) => {
-                  const rawValue = parseCurrency(e.target.value);
-                  setFormData(prev => ({ ...prev, securityDeposit: rawValue }));
-                }}
-                aria-describedby={errors.securityDeposit ? "securityDeposit-error" : undefined}
-              />
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
-                <span className="text-sm font-medium text-muted-foreground">FCFA</span>
-              </div>
-            </div>
-            {errors.securityDeposit && (
-              <div id="securityDeposit-error" className="flex items-center gap-2 text-sm text-red-600">
-                <AlertCircle className="h-4 w-4" />
-                {errors.securityDeposit}
-              </div>
             )}
-            <p className="text-xs text-muted-foreground">
-              Montant remboursable à la fin du bail
-            </p>
           </div>
         </CardContent>
       </Card>
+
+      {/* Security Deposit - hidden for sale listing */}
+      {formData.listingType !== 'sale' && (
+        <Card className="border-0 shadow-sm bg-gradient-to-br from-background to-muted/20">
+          <CardContent className="p-6 space-y-6">
+            <div className="space-y-2">
+              <h3 className="text-lg font-semibold flex items-center">
+                <Shield className="mr-2 h-5 w-5 text-primary" />
+                Dépôt de garantie
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Montant du dépôt de garantie (optionnel)
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <Label htmlFor="securityDeposit" className="text-sm font-medium">
+                Dépôt de garantie
+              </Label>
+              <div className="relative">
+                <Input
+                  id="securityDeposit"
+                  name="securityDeposit"
+                  type="text"
+                  placeholder="Ex: 100 000"
+                  className={`h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20 pl-16 ${
+                    errors.securityDeposit ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' : ''
+                  }`}
+                  value={formatCurrency(formData.securityDeposit)}
+                  onChange={(e) => {
+                    const rawValue = parseCurrency(e.target.value);
+                    setFormData(prev => ({ ...prev, securityDeposit: rawValue }));
+                  }}
+                  aria-describedby={errors.securityDeposit ? "securityDeposit-error" : undefined}
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex items-center">
+                  <span className="text-sm font-medium text-muted-foreground">FCFA</span>
+                </div>
+              </div>
+              {errors.securityDeposit && (
+                <div id="securityDeposit-error" className="flex items-center gap-2 text-sm text-red-600">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.securityDeposit}
+                </div>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Montant remboursable à la fin du bail
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Agency Fees and Commission */}
       <Card className="border-0 shadow-sm bg-gradient-to-br from-background to-muted/20">
@@ -316,7 +352,7 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
 
             <div className="space-y-3">
               <Label htmlFor="commissionRate" className="text-sm font-medium">
-                Taux de commission (%)
+                {formData.listingType === 'sale' ? 'Taux de commission vente (%)' : 'Taux de commission (%)'}
               </Label>
               <div className="relative">
                 <Input
@@ -345,7 +381,7 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
                 </div>
               )}
               <p className="text-xs text-muted-foreground">
-                Pourcentage de commission sur le loyer
+                {formData.listingType === 'sale' ? 'Pourcentage de commission sur le prix de vente' : 'Pourcentage de commission sur le loyer'}
               </p>
             </div>
           </div>
@@ -375,10 +411,10 @@ export default function PropertyFinancialInfoForm({ initialData, onChange, onNex
                 <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Prix de location :</span>
                   <span className="font-medium">
-                    {formatCurrency(formData.price)} FCFA / {PAYMENT_FREQUENCIES.find(f => f.value === formData.paymentFrequency)?.label.toLowerCase()}
+                    {formatCurrency(formData.price)} FCFA {formData.listingType === 'sale' ? '' : `/ ${PAYMENT_FREQUENCIES.find(f => f.value === formData.paymentFrequency)?.label.toLowerCase()}`}
                   </span>
                 </div>
-                {formData.securityDeposit && (
+                {formData.listingType !== 'sale' && formData.securityDeposit && (
                   <div className="flex justify-between items-center">
                     <span className="text-muted-foreground">Dépôt de garantie :</span>
                     <span className="font-medium">{formatCurrency(formData.securityDeposit)} FCFA</span>

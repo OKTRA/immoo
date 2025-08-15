@@ -156,6 +156,21 @@ export function NavbarMobileMenu({
                     </button>
                   );
                 })}
+                <button
+                  onClick={() => { setMobileMenuOpen(false); navigate('/search?listingType=sale'); }}
+                  className="w-full flex items-center justify-between p-4 rounded-xl hover:bg-immoo-pearl transition-all duration-200 group"
+                >
+                  <div className="flex items-center space-x-2">
+                    <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-red-100 text-red-600">
+                      <span className="text-xs font-bold">VN</span>
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium text-sm text-immoo-navy">Vente</div>
+                      <div className="text-xs text-immoo-navy/60">Biens et terrains à vendre</div>
+                    </div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-immoo-navy/40 group-hover:text-immoo-gold group-hover:translate-x-1 transition-all duration-200" />
+                </button>
               </div>
             </div>
           </nav>

@@ -1,27 +1,42 @@
 
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Search } from 'lucide-react';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
+import { getProperties } from '@/services/propertyService';
+import PropertyList from '@/components/properties/PropertyList';
+import { Property } from '@/assets/types';
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState(() => {
     const params = new URLSearchParams(window.location.search);
     return params.get('search') || '';
   });
+  const [listingType, setListingType] = useState<'all' | 'rent' | 'sale'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const t = (params.get('listingType') || 'all').toLowerCase();
+    return (t === 'sale' || t === 'rent') ? (t as 'sale' | 'rent') : 'all';
+  });
   const [isLoading, setIsLoading] = useState(false);
+  const [results, setResults] = useState<Property[]>([]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simuler une recherche
-    setTimeout(() => {
+    (async () => {
+      const { properties } = await getProperties();
+      const filtered = (properties || []).filter((p) => {
+        const matchesText = !searchQuery || [p.title, p.description, p.location, p.address]
+          .filter(Boolean)
+          .some((s) => (s || '').toLowerCase().includes(searchQuery.toLowerCase()));
+        const matchesType = listingType === 'all' ? true : ((p as any).listingType || ((p.features || []).includes('for_sale') ? 'sale' : 'rent')) === listingType;
+        return matchesText && matchesType;
+      });
+      setResults(filtered);
       setIsLoading(false);
-      // Ici, vous ajouteriez la logique de recherche réelle
-    }, 1000);
+    })();
   };
 
   return (
@@ -44,6 +59,11 @@ export default function SearchPage() {
                 </div>
                 
                 <div className="flex flex-wrap gap-4">
+                  <select className="rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring" value={listingType} onChange={(e) => setListingType(e.target.value as any)}>
+                    <option value="all">Type d'annonce</option>
+                    <option value="rent">Location</option>
+                    <option value="sale">Vente</option>
+                  </select>
                   <select className="rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
                     <option value="">Type de bien</option>
                     <option value="apartment">Appartement</option>
@@ -83,8 +103,18 @@ export default function SearchPage() {
             </CardContent>
           </Card>
           
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">Utilisez les filtres ci-dessus pour trouver des propriétés</p>
+          <div>
+            {isLoading ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Recherche en cours...</p>
+              </div>
+            ) : results.length > 0 ? (
+              <PropertyList properties={results} />
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Utilisez les filtres ci-dessus pour trouver des propriétés</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

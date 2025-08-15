@@ -145,6 +145,16 @@ export function NavbarDesktopMenu({
               </button>
             );
           })}
+          {/* Quick link to properties for sale */}
+          <button
+            className={cn(
+              "group relative px-2 py-1.5 rounded-md font-medium text-xs transition-all duration-300 transform",
+              "text-gray-700 hover:text-gray-900 hover:bg-gray-100 active:bg-gray-200"
+            )}
+            onClick={() => navigate('/search?listingType=sale')}
+          >
+            Vente
+          </button>
 
           {/* Quick Visitor Indicator - only show if no user logged in */}
           {!user && (

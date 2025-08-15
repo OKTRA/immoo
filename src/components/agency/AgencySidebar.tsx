@@ -87,6 +87,12 @@ export default function AgencySidebar() {
       description: "Gestion des paiements"
     },
     {
+      title: 'Gérer les ventes',
+      href: `/agencies/${agencyId}/sales`,
+      icon: DollarSign,
+      description: "Gestion des propriétés en vente et suivi des commissions"
+    },
+    {
       title: t('agencyDashboard.sidebar.earnings'),
       href: `/agencies/${agencyId}/earnings`,
       icon: DollarSign,

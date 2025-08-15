@@ -50,6 +50,7 @@ export interface Property {
   commissionRate?: number;
   paymentFrequency?: string;
   securityDeposit?: number;
+  listingType?: 'rent' | 'sale';
   petsAllowed?: boolean;
   furnished?: boolean;
   yearBuilt?: string;

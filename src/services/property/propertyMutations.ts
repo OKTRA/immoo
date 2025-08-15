@@ -91,6 +91,25 @@ export const updateProperty = async (propertyId: string, propertyData: any) => {
   try {
     console.log('Updating property with ID', propertyId, 'and data:', propertyData);
     
+    // Check if the property is already sold and prevent status modifications
+    if (propertyData.status) {
+      const { data: currentProperty, error: currentPropertyError } = await supabase
+        .from('properties')
+        .select('status')
+        .eq('id', propertyId)
+        .single();
+        
+      if (currentPropertyError) {
+        console.error('Error checking current property status:', currentPropertyError);
+        throw currentPropertyError;
+      }
+      
+      if (currentProperty && currentProperty.status === 'sold') {
+        console.warn(`Cannot modify status of sold property ${propertyId}`);
+        throw new Error('Impossible de modifier le statut d\'une propriété déjà vendue');
+      }
+    }
+    
     // Check if we're updating status and if the property has active leases
     if (propertyData.status) {
       const { data: leases, error: leaseCheckError } = await supabase

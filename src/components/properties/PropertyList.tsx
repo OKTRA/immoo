@@ -20,6 +20,7 @@ import { useAuth } from '@/contexts/auth/AuthContext';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useFavorites } from '@/hooks/useFavorites';
 import { getPropertyStatusLabel, getPropertyStatusVariant } from '@/utils/translationUtils';
+import { SaleStatusBadge } from '@/utils/saleStatusUtils';
 
 interface PropertyListProps {
   properties: Property[];
@@ -113,16 +114,23 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
                 <Hotel className="h-12 w-12 text-gray-400" />
               </div>
               
-              {/* Status Badge */}
-              {property.status && (
-                <div className="absolute top-3 left-3">
-                  <Badge 
-                    variant={getPropertyStatusVariant(property.status)}
-                    className="text-xs"
-                  >
-                    {getPropertyStatusLabel(property.status, t)}
-                  </Badge>
+              {/* Combined Sale Badge for sale properties */}
+              {property.listingType === 'sale' ? (
+                <div className="absolute top-3 right-3">
+                  <SaleStatusBadge status={property.status || 'available'} size="sm" />
                 </div>
+              ) : (
+                /* Original status badge for rental properties */
+                property.status && (
+                  <div className="absolute top-3 right-3">
+                    <Badge 
+                      variant={getPropertyStatusVariant(property.status)}
+                      className="text-xs"
+                    >
+                      {getPropertyStatusLabel(property.status, t)}
+                    </Badge>
+                  </div>
+                )
               )}
               
               {/* Favorite Button */}
@@ -188,7 +196,11 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
                 {property.price && (
                   <div className="mb-4">
                     <span className="text-lg font-semibold text-gray-900">{formatCurrency(property.price)}</span>
-                    <span className="text-sm text-gray-500 ml-1">/ mois</span>
+                    {((property as any).listingType || ((property.features || []).includes('for_sale') ? 'sale' : 'rent')) === 'sale' ? (
+                      <span className="text-sm text-gray-500 ml-1">Prix de vente</span>
+                    ) : (
+                      <span className="text-sm text-gray-500 ml-1">/ mois</span>
+                    )}
                   </div>
                 )}
               </div>

@@ -20,7 +20,11 @@ export default function PropertyCardContent({ property }: PropertyCardContentPro
       </div>
 
       <div className="flex justify-between items-center mb-2">
-        <span className="font-bold text-primary">{formatCurrency(property.price)}</span>
+        <span className="font-bold text-primary">
+          {formatCurrency(property.price)}
+          {property.listingType === 'sale' ? '' : ' / '}
+          {property.listingType === 'sale' ? '' : t(`propertyDetails.paymentFrequency.${property.paymentFrequency || 'monthly'}`).toLowerCase()}
+        </span>
         <span className="text-sm text-muted-foreground">{property.area} m²</span>
       </div>
 
@@ -28,6 +32,7 @@ export default function PropertyCardContent({ property }: PropertyCardContentPro
         <div>{property.bedrooms} {t('propertyCard.bedrooms')}</div>
         <div>{property.bathrooms} {t('propertyCard.bathrooms')}</div>
         {property.propertyCategory && <div>{property.propertyCategory}</div>}
+        {property.listingType === 'sale' && <div>{t('property.sale')}</div>}
       </div>
     </CardContent>
   );

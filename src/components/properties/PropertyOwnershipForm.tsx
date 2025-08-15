@@ -118,7 +118,7 @@ export default function PropertyOwnershipForm({ initialData, onChange, onNestedC
         )}
 
         <div className="space-y-2">
-          <Label htmlFor="commission">Taux de commission (%)</Label>
+          <Label htmlFor="commission">{(initialData.listingType || ((initialData.features || []).includes('for_sale') ? 'sale' : 'rent')) === 'sale' ? 'Taux de commission vente (%)' : 'Taux de commission (%)'}</Label>
           <Input
             id="commission"
             type="number"
@@ -139,34 +139,53 @@ export default function PropertyOwnershipForm({ initialData, onChange, onNestedC
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="paymentFrequency">Fréquence de paiement</Label>
-          <Select 
-            value={initialData.paymentFrequency || ""} 
-            onValueChange={(value) => onChange({ paymentFrequency: value })}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Sélectionner la fréquence" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="monthly">Mensuel</SelectItem>
-              <SelectItem value="quarterly">Trimestriel</SelectItem>
-              <SelectItem value="biannual">Semestriel</SelectItem>
-              <SelectItem value="annual">Annuel</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Masquer les champs propres à la location quand c'est une vente */}
+        {((initialData.listingType || ((initialData.features || []).includes('for_sale') ? 'sale' : 'rent')) !== 'sale') && (
+          <>
+            <div className="space-y-2">
+              <Label htmlFor="paymentFrequency">Fréquence de paiement</Label>
+              <Select 
+                value={initialData.paymentFrequency || ""} 
+                onValueChange={(value) => onChange({ paymentFrequency: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner la fréquence" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Mensuel</SelectItem>
+                  <SelectItem value="quarterly">Trimestriel</SelectItem>
+                  <SelectItem value="biannual">Semestriel</SelectItem>
+                  <SelectItem value="annual">Annuel</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="securityDeposit">Dépôt de garantie (€)</Label>
-          <Input
-            id="securityDeposit"
-            type="number"
-            value={initialData.securityDeposit || ""}
-            onChange={(e) => onChange({ securityDeposit: parseFloat(e.target.value) || 0 })}
-            placeholder="ex: 1000"
-          />
-        </div>
+            <div className="space-y-2">
+              <Label htmlFor="securityDeposit">Dépôt de garantie (€)</Label>
+              <Input
+                id="securityDeposit"
+                type="number"
+                value={initialData.securityDeposit || ""}
+                onChange={(e) => onChange({ securityDeposit: parseFloat(e.target.value) || 0 })}
+                placeholder="ex: 1000"
+              />
+            </div>
+          </>
+        )}
+
+        {/* Conditions de vente si mode Vente */}
+        {((initialData.listingType || ((initialData.features || []).includes('for_sale') ? 'sale' : 'rent')) === 'sale') && (
+          <div className="space-y-2">
+            <Label htmlFor="saleTerms">Conditions de vente (optionnel)</Label>
+            <Input
+              id="saleTerms"
+              type="text"
+              value={initialData.saleTerms || ''}
+              onChange={(e) => onChange({ saleTerms: e.target.value })}
+              placeholder="Délai de signature, conditions suspensives, frais à charge, etc."
+            />
+          </div>
+        )}
       </div>
 
       {(onNext || onBack) && (

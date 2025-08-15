@@ -25,6 +25,8 @@ import LeaseDetailsPage from "@/pages/LeaseDetailsPage";
 import ManageTenantsPage from "@/pages/ManageTenantsPage";
 import CreateTenantPage from "@/pages/tenant/CreateTenantPage";
 import PropertyLeasePaymentsPage from "@/pages/PropertyLeasePaymentsPage";
+import PropertySalesPage from "@/pages/PropertySalesPage";
+import AgencySalesPage from "@/pages/agency/AgencySalesPage";
 import AgencyPaymentsPage from "@/pages/AgencyPaymentsPage";
 import AgencyEarningsPage from "@/pages/AgencyEarningsPage";
 import AgencyExpensesPage from "@/pages/AgencyExpensesPage";
@@ -205,6 +207,14 @@ function App() {
                   element={<PropertyDetailPage />}
                 />
                 <Route
+                  path="/agencies/:agencyId/properties/:propertyId/sales"
+                  element={<PropertySalesPage />}
+                />
+                <Route
+                  path="/agencies/:agencyId/sales"
+                  element={<AgencySalesPage />}
+                />
+                <Route
                   path="/agencies/:agencyId/properties/:propertyId/edit"
                   element={<CreatePropertyPage />}
                 />
@@ -340,6 +350,10 @@ function App() {
                 <Route
                   path="/en/agencies/:agencyId/properties/:propertyId"
                   element={<PropertyDetailPage />}
+                />
+                <Route
+                  path="/en/agencies/:agencyId/properties/:propertyId/sales"
+                  element={<PropertySalesPage />}
                 />
                 <Route
                   path="/en/agencies/:agencyId/properties/:propertyId/edit"

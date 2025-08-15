@@ -34,6 +34,7 @@ export interface PropertyFilters {
   minRooms: number;
   maxRooms: number;
   propertyType: string;
+  listingType?: 'all' | 'rent' | 'sale';
   bedrooms: number;
   bathrooms: number;
   features: string[];
@@ -64,6 +65,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
     minRooms: 0,
     maxRooms: 20,
     propertyType: '',
+    listingType: 'all',
     bedrooms: 0,
     bathrooms: 0,
     features: [],
@@ -205,6 +207,12 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
         return false;
       }
 
+      // Listing type (rent/sale)
+      if (filters.listingType && filters.listingType !== 'all') {
+        const pType = (property as any).listingType || ((property.features || []).includes('for_sale') ? 'sale' : 'rent');
+        if (pType !== filters.listingType) return false;
+      }
+
       // Features
       if (filters.features.length > 0) {
         const propertyFeatures = property.features || [];
@@ -260,6 +268,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
       minRooms: 0,
       maxRooms: 20,
       propertyType: '',
+      listingType: 'all',
       bedrooms: 0,
       bathrooms: 0,
       features: [],
@@ -274,6 +283,7 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
     filters.searchTerm,
     filters.location,
     filters.propertyType,
+    filters.listingType && filters.listingType !== 'all',
     filters.minPrice > 0 || filters.maxPrice < 1000000,
     filters.minSurface > 0 || filters.maxSurface < 1000,
     filters.minRooms > 0 || filters.maxRooms < 20,
@@ -346,6 +356,26 @@ const PropertyFilters: React.FC<PropertyFiltersProps> = ({
               <span>{formatCurrency(filters.minPrice)}</span>
               <span>{formatCurrency(filters.maxPrice)}</span>
             </div>
+          </div>
+        </div>
+
+        {/* Listing type */}
+        <div>
+          <Label>Type d'annonce</Label>
+          <div className="mt-1">
+            <Select
+              value={filters.listingType || 'all'}
+              onValueChange={(value) => handleFilterChange('listingType', value as any)}
+            >
+              <SelectTrigger className="h-12 text-base border-muted bg-background/50 focus:border-primary focus:ring-1 focus:ring-primary/20">
+                <SelectValue placeholder="Type d'annonce" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous</SelectItem>
+                <SelectItem value="rent">Location</SelectItem>
+                <SelectItem value="sale">Vente</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
