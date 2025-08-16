@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import { 
   Building2, 
   Users, 
@@ -37,8 +38,10 @@ import LoginDialog from '@/components/auth/LoginDialog';
 
 const ImmoAgencyPage: React.FC = () => {
   const { t } = useTranslation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [becomePartnerDialogOpen, setBecomePartnerDialogOpen] = useState(false);
+  const [needsAgencyDialogOpen, setNeedsAgencyDialogOpen] = useState(false);
   const [contactForm, setContactForm] = useState({
     name: '',
     email: '',
@@ -47,6 +50,32 @@ const ImmoAgencyPage: React.FC = () => {
   });
   const [activeSection, setActiveSection] = useState<'agencies' | 'immoo'>('agencies');
   const [agencyLoginDialogOpen, setAgencyLoginDialogOpen] = useState(false);
+
+  // Détecter si l'utilisateur arrive depuis l'authentification Google sans agence
+  useEffect(() => {
+    const fromAuth = searchParams.get('from');
+    const needsAgency = searchParams.get('needsAgency');
+    
+    if (fromAuth === 'auth' && needsAgency === 'true') {
+      console.log('🔔 Utilisateur redirigé depuis auth sans agence, affichage du popup');
+      setNeedsAgencyDialogOpen(true);
+      
+      // Nettoyer les paramètres d'URL après affichage
+      const newSearchParams = new URLSearchParams(searchParams);
+      newSearchParams.delete('from');
+      newSearchParams.delete('needsAgency');
+      setSearchParams(newSearchParams, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
+
+  const handleCloseNeedsAgencyDialog = () => {
+    setNeedsAgencyDialogOpen(false);
+  };
+
+  const handleCreateAgencyProfile = () => {
+    setNeedsAgencyDialogOpen(false);
+    setBecomePartnerDialogOpen(true);
+  };
 
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent("Bonjour, je souhaite obtenir un devis pour vos services de gestion immobilière.");
@@ -705,6 +734,64 @@ Message: ${contactForm.message}
          onOpenChange={setAgencyLoginDialogOpen}
          userType="agency"
        />
+
+       {/* Dialog informatif pour les utilisateurs sans agence */}
+       <Dialog open={needsAgencyDialogOpen} onOpenChange={setNeedsAgencyDialogOpen}>
+         <DialogContent className="sm:max-w-md">
+           <DialogHeader>
+             <DialogTitle className="flex items-center gap-2 text-immoo-navy">
+               <Building2 className="w-5 h-5 text-immoo-gold" />
+               Profil agence requis
+             </DialogTitle>
+           </DialogHeader>
+           <div className="space-y-4">
+             <div className="text-center space-y-3">
+               <div className="w-16 h-16 mx-auto bg-immoo-gold/10 rounded-full flex items-center justify-center">
+                 <Shield className="w-8 h-8 text-immoo-gold" />
+               </div>
+               <div className="space-y-2">
+                 <h3 className="font-semibold text-immoo-navy">
+                   Connexion Google réussie !
+                 </h3>
+                 <p className="text-sm text-gray-600">
+                   Pour accéder à la plateforme IMMOO, vous devez créer votre profil d'agence immobilière.
+                 </p>
+               </div>
+             </div>
+             
+             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+               <div className="flex items-start gap-2">
+                 <CheckCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                 <div className="text-xs text-blue-800">
+                   <p className="font-medium mb-1">Pourquoi créer un profil agence ?</p>
+                   <ul className="space-y-1 text-blue-700">
+                     <li>• Accès aux outils de gestion immobilière</li>
+                     <li>• Gestion de vos propriétés et locataires</li>
+                     <li>• Suivi des revenus et dépenses</li>
+                   </ul>
+                 </div>
+               </div>
+             </div>
+             
+             <div className="flex gap-2">
+               <Button 
+                 onClick={handleCreateAgencyProfile}
+                 className="flex-1 bg-gradient-to-r from-immoo-gold to-immoo-gold-light hover:from-immoo-gold-light hover:to-immoo-gold text-immoo-navy"
+               >
+                 <Building2 className="w-4 h-4 mr-2" />
+                 Créer mon profil agence
+               </Button>
+               <Button 
+                 variant="outline" 
+                 onClick={handleCloseNeedsAgencyDialog}
+                 className="px-4"
+               >
+                 <X className="w-4 h-4" />
+               </Button>
+             </div>
+           </div>
+         </DialogContent>
+       </Dialog>
      </div>
    </ResponsiveLayout>
   );

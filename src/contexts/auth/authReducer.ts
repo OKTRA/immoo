@@ -10,6 +10,8 @@ export const initialAuthState: AuthState = {
   initialized: false,
 };
 
+
+
 // Reducer pour gérer les changements d'état
 export const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
@@ -67,4 +69,4 @@ export const authReducer = (state: AuthState, action: AuthAction): AuthState => 
     default:
       return state;
   }
-}; 
+};

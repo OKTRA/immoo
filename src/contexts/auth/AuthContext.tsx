@@ -240,7 +240,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Initialiser l'authentification au montage
   useEffect(() => {
     initializeAuth();
-  }, [initializeAuth]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Listener pour les changements d'état d'authentification
   useEffect(() => {
@@ -327,4 +327,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   );
 };
 
-export default AuthProvider; 
+export default AuthProvider;

@@ -196,6 +196,65 @@ export const getFeaturedAgencies = async (limit = 6) => {
 /**
  * Fonction utilitaire pour transformer les données d'agence du format de la base de données au format de l'application
  */
+/**
+ * Check if a user has an agency profile
+ */
+export const checkUserHasAgency = async (userId: string): Promise<{ hasAgency: boolean; agencyId?: string; error?: string }> => {
+  try {
+    console.log('🔍 Checking if user has agency:', userId);
+    
+    // Get user profile
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('email, agency_id')
+      .eq('id', userId)
+      .single();
+
+    if (profileError) {
+      console.error('❌ Error fetching user profile:', profileError);
+      return { hasAgency: false, error: profileError.message };
+    }
+
+    // Check for agencies linked to this user in multiple ways:
+    // 1. By user_id direct
+    // 2. By agency_id in profile
+    // 3. By email correspondence
+    let orConditions = [`user_id.eq.${userId}`];
+    
+    if (profileData?.agency_id) {
+      orConditions.push(`id.eq.${profileData.agency_id}`);
+    }
+    
+    if (profileData?.email) {
+      orConditions.push(`email.eq.${profileData.email}`);
+    }
+    
+    const { data: agencies, error: agencyError } = await supabase
+      .from('agencies')
+      .select('id, name, email, user_id')
+      .or(orConditions.join(','));
+
+    if (agencyError) {
+      console.error('❌ Error fetching agencies:', agencyError);
+      return { hasAgency: false, error: agencyError.message };
+    }
+
+    const hasAgency = agencies && agencies.length > 0;
+    const agencyId = agencies?.[0]?.id;
+    
+    console.log(`${hasAgency ? '✅' : '❌'} User has agency:`, hasAgency, agencyId ? `(ID: ${agencyId})` : '');
+    
+    return { 
+      hasAgency, 
+      agencyId: hasAgency ? agencyId : undefined,
+      error: null 
+    };
+  } catch (error: any) {
+    console.error('❌ Error checking user agency:', error);
+    return { hasAgency: false, error: error.message };
+  }
+};
+
 export const transformAgencyData = (data: any, useFallbackValues = false): Agency => {
   // Ensure rating is always a number
   const rating = typeof data.rating === 'number' ? data.rating : 

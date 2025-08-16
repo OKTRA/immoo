@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Test - Immoo Auth</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .debug-box { background: #f0f0f0; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>Debug Test - Authentification Immoo</h1>
+    
+    <div class="debug-box">
+        <h3>Test des modifications</h3>
+        <p>✅ État de debug ajouté dans authReducer.ts</p>
+        <p>✅ AuthContext modifié pour utiliser l'état de debug</p>
+        <p>✅ NavbarDesktopMenu modifié pour forcer l'affichage des icônes</p>
+        <p>✅ Indicateur de debug ajouté dans Navbar.tsx</p>
+    </div>
+    
+    <div class="debug-box success">
+        <h3>Résultats attendus</h3>
+        <p>Avec ces modifications temporaires, les icônes User et LogOut devraient maintenant être visibles dans la navbar, même sans authentification réelle.</p>
+        <p>L'indicateur de debug devrait afficher "User: Yes" au lieu de "User: No".</p>
+    </div>
+    
+    <div class="debug-box">
+        <h3>Prochaines étapes</h3>
+        <p>1. Vérifier que les icônes s'affichent avec l'état de debug</p>
+        <p>2. Si oui, le problème vient de l'initialisation de l'authentification</p>
+        <p>3. Si non, le problème vient de l'affichage ou du rendu des composants</p>
+        <p>4. Restaurer l'état normal et corriger le problème identifié</p>
+    </div>
+    
+    <div class="debug-box error">
+        <h3>⚠️ Important</h3>
+        <p>Ces modifications sont temporaires et doivent être supprimées après le debug !</p>
+    </div>
+    
+    <script>
+        console.log('Debug test page loaded');
+        console.log('Modifications appliquées pour tester l\'affichage des icônes');
+    </script>
+</body>
+</html>

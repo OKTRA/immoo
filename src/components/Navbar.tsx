@@ -46,6 +46,8 @@ export default function Navbar() {
     },
   ];
 
+
+
   return (
     <header
       className={cn(
@@ -56,6 +58,7 @@ export default function Navbar() {
       )}
     >
       <div className="container mx-auto px-4 md:px-6">
+
         <nav className="flex items-center justify-between md:justify-center relative">
           {/* Logo - centré sur toutes les tailles d'écran */}
           <div className="absolute left-1/2 transform -translate-x-1/2 md:static md:transform-none">

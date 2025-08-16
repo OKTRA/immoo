@@ -1,166 +1,156 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { AlertCircle, Loader2, Building2, X } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useTranslation } from '@/hooks/useTranslation';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { signInWithEmail } from '@/services/authService';
 import { toast } from 'sonner';
+import GoogleAuthButton from './GoogleAuthButton';
 
 interface AgencyLoginFormProps {
   onSuccess: () => void;
-  onSwitchToSignup: () => void;
+  onSwitchMode: () => void;
 }
 
-const AgencyLoginForm: React.FC<AgencyLoginFormProps> = ({ onSuccess, onSwitchToSignup }) => {
-  const { t } = useTranslation();
+const AgencyLoginForm: React.FC<AgencyLoginFormProps> = ({
+  onSuccess,
+  onSwitchMode,
+}) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { signIn } = useAuth();
-
-  const validateForm = () => {
-    setError(null);
-    
-    if (!email) {
-      setError(t('auth.agency.emailRequired'));
-      return false;
-    }
-    
-    if (!password) {
-      setError(t('auth.agency.passwordRequired'));
-      return false;
-    }
-    
-    return true;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateForm()) {
+    if (!email || !password) {
+      toast.error('Veuillez remplir tous les champs');
       return;
     }
-    
-    setIsLoading(true);
-    setError(null);
 
+    setIsLoading(true);
+    
     try {
-      console.log('Attempting agency login with:', email);
-      const result = await signIn(email, password);
+      const result = await signInWithEmail(email, password);
       
-      if (!result.success) {
-        const errorMessage = result.error === "Invalid login credentials" 
-          ? t('auth.agency.invalidCredentials')
-          : result.error || t('auth.agency.unknownError');
-        
-        console.error('Error signing in:', errorMessage);
-        setError(errorMessage);
-        toast.error(t('auth.agency.loginFailed'), { 
-          description: errorMessage
+      if (result.error) {
+        toast.error('Erreur de connexion', {
+          description: result.error,
         });
-        setIsLoading(false);
         return;
       }
-      
-      onSuccess();
+
+      if (result.user) {
+        toast.success('Connexion réussie !');
+        onSuccess();
+      }
     } catch (error: any) {
-      console.error('Error during agency login:', error.message);
-      const errorMessage = error.message || t('auth.agency.unknownError');
-      setError(errorMessage);
-      toast.error(t('auth.agency.loginFailed'), { 
-        description: errorMessage
+      toast.error('Erreur de connexion', {
+        description: error.message || 'Une erreur inattendue s\'est produite',
       });
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleGoogleSuccess = () => {
+    // L'utilisateur sera redirigé vers Google, puis vers le callback
+    toast.success('Redirection vers Google...');
+  };
+
+  const handleGoogleError = (error: string) => {
+    console.error('Google auth error:', error);
+  };
+
   return (
-    <div className="w-full max-w-md mx-auto">
-      {/* Header avec icône et titre */}
-      <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-          <Building2 className="w-8 h-8 text-white" />
+    <div className="space-y-6">
+      {/* Bouton Google Auth */}
+      <div className="space-y-4">
+        <GoogleAuthButton
+          variant="default"
+          size="lg"
+          className="w-full"
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+        />
+        
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-gray-300" />
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-2 bg-white text-gray-500">ou</span>
+          </div>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          {t('auth.agency.loginTitle') || 'Connexion Agence'}
-        </h2>
-        <p className="text-gray-600 text-sm">
-          {t('auth.agency.loginSubtitle') || 'Connectez-vous à votre espace agence'}
-        </p>
       </div>
 
-      {/* Formulaire */}
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {error && (
-          <div className="bg-red-50 border border-red-200 p-4 rounded-xl flex items-start space-x-3 text-sm text-red-700">
-            <AlertCircle className="h-5 w-5 mt-0.5 shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-        
-        <div className="space-y-2">
-          <Label htmlFor="agency-email" className="text-sm font-medium text-gray-700">
-            {t('auth.agency.email') || 'Email'}
-          </Label>
-          <Input
-            id="agency-email"
+      {/* Formulaire Email/Password */}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            Email
+          </label>
+          <input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder={t('auth.agency.emailPlaceholder') || 'votre@email.com'}
-            autoComplete="email"
+            placeholder="votre@email.com"
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
             required
-            className="h-12 px-4 bg-gray-50 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-base"
           />
         </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="agency-password" className="text-sm font-medium text-gray-700">
-            {t('auth.agency.password') || 'Mot de passe'}
-          </Label>
-          <Input
-            id="agency-password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={t('auth.agency.passwordPlaceholder') || '••••••••'}
-            autoComplete="current-password"
-            required
-            className="h-12 px-4 bg-gray-50 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 text-base"
-          />
+
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            Mot de passe
+          </label>
+          <div className="relative mt-1">
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••"
+              className="block w-full px-3 py-2 pr-10 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5 text-gray-400" />
+              ) : (
+                <Eye className="h-5 w-5 text-gray-400" />
+              )}
+            </button>
+          </div>
         </div>
-        
-        <Button 
-          type="submit" 
-          className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed" 
+
+        <button
+          type="submit"
           disabled={isLoading}
+          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {t('auth.agency.connecting') || 'Connexion...'}
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Connexion...
             </>
           ) : (
-            t('auth.agency.login') || 'Se connecter'
+            'Se connecter'
           )}
-        </Button>
+        </button>
       </form>
 
-      {/* Lien vers inscription */}
-      <div className="mt-6 text-center">
-        <p className="text-sm text-gray-600">
-          {t('auth.agency.noAccount') || "Pas encore d'agence ? "}
-          <button
-            type="button"
-            onClick={onSwitchToSignup}
-            className="text-blue-600 hover:text-blue-700 font-medium hover:underline transition-colors duration-200"
-          >
-            {t('auth.agency.createAccount') || 'Créer un compte'}
-          </button>
-        </p>
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={onSwitchMode}
+          className="text-sm text-blue-600 hover:text-blue-500"
+        >
+          Pas encore d'agence ? Créer un compte
+        </button>
       </div>
     </div>
   );

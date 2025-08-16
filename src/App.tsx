@@ -41,6 +41,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import AgencyLayout from "@/components/agency/AgencyLayout";
 import Auth from "@/pages/Auth";
 import AdminAuth from "@/pages/AdminAuth";
+import GoogleAuthCallback from "@/pages/GoogleAuthCallback";
+import GoogleAuthTest from "@/components/auth/GoogleAuthTest";
+import AgencySignupDemo from "@/components/auth/AgencySignupDemo";
 import SearchPage from "@/pages/SearchPage";
 import ProfilePage from "@/pages/ProfilePage";
 import OwnerPage from "@/pages/OwnerPage";
@@ -61,6 +64,8 @@ import I18nTestPage from "./pages/I18nTestPage";
 import TestPropertyImages from "./pages/TestPropertyImages";
 import FavoritesPage from "./pages/FavoritesPage";
 import NotificationsSettingsPage from "@/pages/NotificationsSettingsPage";
+import AuthDebugPage from "./pages/AuthDebugPage";
+
 import { LanguageRedirect } from "./components/LanguageRedirect";
 import { ElectronIntegration } from "./components/ElectronIntegration";
 import { SpeedInsights } from "@vercel/speed-insights/react";
@@ -111,11 +116,16 @@ function App() {
               <Route path="/test-property-images" element={<TestPropertyImages />} />
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/settings/notifications" element={<NotificationsSettingsPage />} />
+              <Route path="/auth-debug" element={<AuthDebugPage />} />
+
               
               {/* Routes d'authentification */}
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin-auth" element={<AdminAuth />} />
               <Route path="/login" element={<Auth />} />
+              <Route path="/auth/callback" element={<GoogleAuthCallback />} />
+              <Route path="/test-google-auth" element={<GoogleAuthTest />} />
+              <Route path="/demo-agency-signup" element={<AgencySignupDemo />} />
               
               {/* Routes protégées pour les utilisateurs connectés */}
               <Route path="/profile" element={<ProfilePage />} />
