@@ -65,6 +65,9 @@ import TestPropertyImages from "./pages/TestPropertyImages";
 import FavoritesPage from "./pages/FavoritesPage";
 import NotificationsSettingsPage from "@/pages/NotificationsSettingsPage";
 import AuthDebugPage from "./pages/AuthDebugPage";
+import MobileSyncTestPage from "./pages/MobileSyncTestPage";
+import MobileAuthTestPage from "./pages/MobileAuthTestPage";
+import MobileUITestPage from "./pages/MobileUITestPage";
 
 import { LanguageRedirect } from "./components/LanguageRedirect";
 import { ElectronIntegration } from "./components/ElectronIntegration";
@@ -75,6 +78,8 @@ import { Analytics } from "@vercel/analytics/react";
 // Import i18n to ensure translations are initialized
 import "@/i18n";
 import { useOneSignal } from "@/hooks/useOneSignal";
+
+import { Capacitor } from "@capacitor/core";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +122,9 @@ function App() {
               <Route path="/favorites" element={<FavoritesPage />} />
               <Route path="/settings/notifications" element={<NotificationsSettingsPage />} />
               <Route path="/auth-debug" element={<AuthDebugPage />} />
+              <Route path="/mobile-sync-test" element={<MobileSyncTestPage />} />
+              <Route path="/mobile-auth-test" element={<MobileAuthTestPage />} />
+              <Route path="/mobile-ui-test" element={<MobileUITestPage />} />
 
               
               {/* Routes d'authentification */}
@@ -412,6 +420,7 @@ function App() {
         </div>
         <Toaster />
         <VisitorTracker />
+
         <SpeedInsights />
         <Analytics />
       </Router>

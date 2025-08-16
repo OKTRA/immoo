@@ -1,6 +1,8 @@
 import React from 'react';
 import { FcGoogle } from 'react-icons/fc';
+import { Capacitor } from '@capacitor/core';
 import { signInWithGoogle } from '@/services/googleAuthService';
+import { mobileAuthService } from '@/services/mobileAuthService';
 import { toast } from 'sonner';
 
 interface GoogleAuthButtonProps {
@@ -24,7 +26,10 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
     if (disabled) return;
     
     try {
-      const result = await signInWithGoogle();
+      // Utiliser le service d'authentification mobile si on est sur une plateforme native
+      const result = Capacitor.isNativePlatform() 
+        ? await mobileAuthService.signInWithGoogle()
+        : await signInWithGoogle();
       
       if (result.error) {
         toast.error('Erreur de connexion Google', {
@@ -35,7 +40,8 @@ const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({
       }
 
       // Si pas d'erreur, l'utilisateur sera redirigé vers Google
-      toast.success('Redirection vers Google...');
+      const platform = Capacitor.isNativePlatform() ? 'mobile' : 'web';
+      toast.success(`Redirection vers Google (${platform})...`);
       onSuccess?.();
     } catch (error: any) {
       const errorMessage = error.message || 'Une erreur inattendue s\'est produite';

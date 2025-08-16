@@ -6,6 +6,13 @@ const config: CapacitorConfig = {
   webDir: 'dist',
   server: {
     androidScheme: 'https'
+  },
+  plugins: {
+    // Configuration pour l'authentification mobile
+    App: {
+      // Gestion des URL schemes pour l'authentification
+      urlScheme: 'pro.immoo.app'
+    }
   }
 };
 

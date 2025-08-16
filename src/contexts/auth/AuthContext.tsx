@@ -5,6 +5,7 @@ import { getUserProfile, signInWithEmail, signUpWithEmail, signOut as authSignOu
 import { AuthContextType, UserProfile } from '@/types/auth';
 import { authReducer, initialAuthState } from './authReducer';
 import { toast } from 'sonner';
+import { initializeRealtimeSync, cleanupRealtimeSync } from '@/services/realtimeSync';
 
 // Créer le contexte
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,6 +67,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             type: 'SET_AUTHENTICATED',
             payload: { user: session.user, profile }
           });
+          
+          // Initialiser la synchronisation en temps réel
+          try {
+            await initializeRealtimeSync();
+            console.log('🔄 Real-time sync initialized for user:', session.user.id);
+          } catch (error) {
+            console.error('❌ Failed to initialize real-time sync:', error);
+          }
         } else {
           console.log('❌ Profile not found, signing out...');
           await authSignOut();
@@ -111,6 +120,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               type: 'SET_AUTHENTICATED',
               payload: { user, profile }
             });
+            
+            // Initialiser la synchronisation en temps réel
+            try {
+              await initializeRealtimeSync();
+              console.log('🔄 Real-time sync initialized after sign in');
+            } catch (error) {
+              console.error('❌ Failed to initialize real-time sync after sign in:', error);
+            }
+            
             toast.success('Connexion réussie !');
             resolve({ success: true });
             return;
@@ -267,6 +285,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         } else if (event === 'SIGNED_OUT') {
           console.log('ℹ️ Auth listener: User signed out');
+          
+          // Nettoyer la synchronisation en temps réel
+          try {
+            await cleanupRealtimeSync();
+            console.log('🛑 Real-time sync stopped after sign out');
+          } catch (error) {
+            console.error('❌ Error stopping real-time sync:', error);
+          }
+          
           dispatch({ type: 'SET_UNAUTHENTICATED' });
         } else if (event === 'TOKEN_REFRESHED' && session?.user) {
           console.log('🔄 Auth listener: Token refreshed');
