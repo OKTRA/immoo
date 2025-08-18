@@ -12,7 +12,8 @@ export const useSubscriptionPayment = () => {
   const processSubscriptionPayment = async (
     planId: string,
     transactionId: string,
-    agencyId?: string
+    agencyId?: string,
+    paymentMethod?: string
   ): Promise<boolean> => {
     if (!user?.id) {
       toast.error('Utilisateur non connecté');
@@ -40,7 +41,7 @@ export const useSubscriptionPayment = () => {
           user.id,
           planId,
           agencyId,
-          'cinetpay'
+          paymentMethod
         );
 
         if (error) {
