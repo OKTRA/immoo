@@ -13,6 +13,7 @@ import AnalyticsManagement from './analytics/AnalyticsManagement';
 import SupportManagement from './SupportManagement';
 import SubscriptionPlansManagement from './SubscriptionPlansManagement';
 import SubscriptionPaymentsManagement from './SubscriptionPaymentsManagement';
+import SubscriptionPaymentMethods from './SubscriptionPaymentMethods';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
@@ -80,6 +81,7 @@ export default function AdminLayout() {
               <TabsTrigger value="analytics">Rapports & Analyses</TabsTrigger>
               <TabsTrigger value="subscriptions">Abonnements</TabsTrigger>
               <TabsTrigger value="subscription-payments">Paiements Abonnements</TabsTrigger>
+              <TabsTrigger value="subscription-payment-methods">Config Paiements</TabsTrigger>
               <TabsTrigger value="promo">Codes Promo</TabsTrigger>
               <TabsTrigger value="support">Support Utilisateur</TabsTrigger>
               <TabsTrigger value="settings">Paramètres</TabsTrigger>
@@ -115,6 +117,10 @@ export default function AdminLayout() {
 
             <TabsContent value="subscription-payments" className="space-y-6">
               <SubscriptionPaymentsManagement />
+            </TabsContent>
+
+            <TabsContent value="subscription-payment-methods" className="space-y-6">
+              <SubscriptionPaymentMethods />
             </TabsContent>
 
             <TabsContent value="promo" className="space-y-6">

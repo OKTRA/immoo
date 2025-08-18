@@ -13,6 +13,7 @@ import {
   Settings,
   Crown,
   Wallet,
+  PhoneCall,
   FileText
 } from 'lucide-react';
 
@@ -39,6 +40,7 @@ export default function AdminSidebar({ activeTab, setActiveTab, userRole }: Admi
     { id: 'analytics', label: 'Rapports & Analyses', icon: BarChart3 },
     { id: 'subscriptions', label: 'Plans d\'abonnement', icon: Package },
     { id: 'subscription-payments', label: 'Paiements Abonnements', icon: Wallet },
+    { id: 'subscription-payment-methods', label: 'Config Paiements', icon: PhoneCall },
     { id: 'promo', label: 'Codes Promo', icon: Crown },
     { id: 'support', label: 'Support', icon: Ticket },
     { id: 'settings', label: 'Paramètres', icon: Settings },

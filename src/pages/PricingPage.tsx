@@ -18,6 +18,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/useTranslation';
 import { MuanaPayClient } from '../../libs/muana-pay-sdk/index.js';
+import { listSubscriptionPaymentMethods } from '@/services/subscription/paymentMethodService';
 
 interface PlanData {
   id: string;
@@ -45,6 +46,7 @@ export default function PricingPage() {
   const [paymentRef, setPaymentRef] = useState<string>('');
   const [verifying, setVerifying] = useState<boolean>(false);
   const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
+  const [paymentNumbers, setPaymentNumbers] = useState<{ provider: string; phone_number: string }[]>([]);
   const navigate = useNavigate();
 
   // Charger les plans depuis la base de données
@@ -133,6 +135,21 @@ export default function PricingPage() {
     // Plans PRO - ouvrir le dialogue WhatsApp
     setSelectedPlan(plan);
     setShowWhatsAppDialog(true);
+    
+    // Load active payment numbers for this plan
+    console.log('🔍 Loading payment methods for plan:', plan.id);
+    listSubscriptionPaymentMethods(plan.id)
+      .then(methods => {
+        console.log('✅ Payment methods loaded:', methods);
+        const numbers = methods.map(m => ({ provider: m.provider, phone_number: m.phone_number }));
+        console.log('📱 Payment numbers set:', numbers);
+        setPaymentNumbers(numbers);
+      })
+      .catch(error => {
+        console.error('❌ Error loading payment methods:', error);
+        setPaymentNumbers([]);
+        toast.error('Impossible de charger les méthodes de paiement');
+      });
   };
 
   const handleWhatsAppContact = () => {
@@ -485,9 +502,22 @@ export default function PricingPage() {
               </div>
             </div>
 
-            {/* Vérification par référence de paiement */}
+            {/* Numéros Mobile Money + Vérification par référence de paiement */}
             <div className="bg-white border border-gray-200 rounded-lg p-4">
               <div className="flex flex-col gap-3">
+                {paymentNumbers.length > 0 && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">Numéros Mobile Money</label>
+                    <div className="flex flex-col gap-2">
+                      {paymentNumbers.map((n, i) => (
+                        <div key={`${n.provider}-${i}`} className="flex items-center justify-between rounded-md border p-2 text-sm">
+                          <span className="text-gray-600">{n.provider}</span>
+                          <span className="font-semibold text-blue-700">{n.phone_number}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <label className="text-sm font-medium text-gray-700">Référence de paiement Mobile Money</label>
                 <Input
                   placeholder="Collez la référence (ex: ABC123)"

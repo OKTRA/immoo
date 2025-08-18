@@ -1,29 +1,40 @@
-// Export all realtime sync services and utilities
-export { realtimeSyncService } from './syncService';
-export { dataListenersService } from './dataListeners';
-export { realtimeErrorHandler } from './errorHandler';
-export { mobileSyncService } from './mobileSyncService';
+// Export all realtime sync services and utilities via getters to avoid circular dependencies
+export const getRealtimeSyncService = async () => {
+  const { realtimeSyncService } = await import('./syncService');
+  return realtimeSyncService;
+};
 
-// Export types
+export const getDataListenersService = async () => {
+  const { dataListenersService } = await import('./dataListeners');
+  return dataListenersService;
+};
+
+export const getRealtimeErrorHandler = async () => {
+  const { realtimeErrorHandler } = await import('./errorHandler');
+  return realtimeErrorHandler;
+};
+
+export const getMobileSyncService = async () => {
+  const { mobileSyncService } = await import('./mobileSyncService');
+  return mobileSyncService;
+};
+
+// Export types that exist
 export type {
   SyncEventType,
-  SyncCallback,
-  TableSubscription
+  SyncCallback
 } from './syncService';
 
 export type {
-  PropertyData,
-  LeaseData,
-  PaymentData,
-  UserProfileData,
-  CriticalDataType
+  Property,
+  Lease,
+  Payment,
+  UserProfile
 } from './dataListeners';
 
 export type {
   ErrorCategory,
-  ErrorSeverity,
-  ErrorReport,
-  ErrorCallback
+  ErrorSeverity
 } from './errorHandler';
 
 // Convenience function to initialize all sync services
@@ -32,12 +43,15 @@ export const initializeRealtimeSync = async () => {
     console.log('🚀 Initializing Realtime Sync Services...');
     
     // Initialize mobile sync service first (handles network/app state)
+    const { mobileSyncService } = await import('./mobileSyncService');
     await mobileSyncService.initialize();
     
     // Initialize the main sync service
+    const { realtimeSyncService } = await import('./syncService');
     await realtimeSyncService.initialize();
     
     // Initialize data listeners
+    const { dataListenersService } = await import('./dataListeners');
     await dataListenersService.initializeAllListeners();
     
     console.log('✅ Realtime Sync Services initialized successfully');
@@ -61,12 +75,15 @@ export const cleanupRealtimeSync = async () => {
     console.log('🧹 Cleaning up Realtime Sync Services...');
     
     // Stop data listeners
+    const { dataListenersService } = await import('./dataListeners');
     await dataListenersService.stopAllListeners();
     
     // Cleanup sync service
-    realtimeSyncService.cleanup();
+    const { realtimeSyncService } = await import('./syncService');
+    realtimeSyncService.unsubscribeAll();
     
     // Cleanup mobile sync service
+    const { mobileSyncService } = await import('./mobileSyncService');
     await mobileSyncService.cleanup();
     
     console.log('✅ Realtime Sync Services cleaned up successfully');
