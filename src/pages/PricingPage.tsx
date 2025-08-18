@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Check, Star, MessageCircle, X, ArrowLeft, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -16,6 +17,7 @@ import Navbar from '@/components/Navbar';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/useTranslation';
+import { MuanaPayClient } from '../../libs/muana-pay-sdk/index.js';
 
 interface PlanData {
   id: string;
@@ -40,6 +42,9 @@ export default function PricingPage() {
   const [plans, setPlans] = useState<PlanData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [paymentRef, setPaymentRef] = useState<string>('');
+  const [verifying, setVerifying] = useState<boolean>(false);
+  const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Charger les plans depuis la base de données
@@ -138,6 +143,57 @@ export default function PricingPage() {
     const whatsappUrl = `https://wa.me/22377010202?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
     setShowWhatsAppDialog(false);
+  };
+
+  const handleVerifyPayment = async () => {
+    try {
+      if (!selectedPlan) {
+        toast.error('Veuillez sélectionner un plan');
+        return;
+      }
+      if (!paymentRef || paymentRef.trim().length < 3) {
+        toast.error('Entrez une référence de paiement valide');
+        return;
+      }
+
+      setVerifying(true);
+      setVerificationMessage(null);
+
+      const { data: userRes, error: userErr } = await supabase.auth.getUser();
+      if (userErr || !userRes?.user) {
+        toast.error('Connectez-vous pour activer un plan');
+        navigate('/login');
+        return;
+      }
+      const userId = userRes.user.id;
+
+      const muana = new MuanaPayClient({
+        supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+        anonKey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+      });
+
+      const result = await muana.verifyTransaction({
+        userId,
+        paymentReference: paymentRef.trim(),
+        planId: selectedPlan.id,
+      });
+
+      if (result.status === 'verified') {
+        toast.success('Paiement vérifié et abonnement activé');
+        setVerificationMessage('✅ Paiement vérifié. Votre abonnement a été activé.');
+        setShowWhatsAppDialog(false);
+        navigate('/admin');
+      } else {
+        setVerificationMessage('❌ Référence non reconnue ou montant incorrect.');
+        toast.error('Vérification échouée');
+      }
+    } catch (e: any) {
+      console.error('Verification error', e);
+      toast.error(e?.message || 'Erreur lors de la vérification');
+      setVerificationMessage('❌ Erreur lors de la vérification');
+    } finally {
+      setVerifying(false);
+    }
   };
 
   return (
@@ -425,6 +481,40 @@ export default function PricingPage() {
                 <div className="text-sm text-blue-800">
                   <p className="font-medium mb-1">{t('pricing.quickActivation')}</p>
                   <p>{t('pricing.activationGuidance')}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Vérification par référence de paiement */}
+            <div className="bg-white border border-gray-200 rounded-lg p-4">
+              <div className="flex flex-col gap-3">
+                <label className="text-sm font-medium text-gray-700">Référence de paiement Mobile Money</label>
+                <Input
+                  placeholder="Collez la référence (ex: ABC123)"
+                  value={paymentRef}
+                  onChange={(e) => setPaymentRef(e.target.value)}
+                />
+                {verificationMessage && (
+                  <div className="text-sm">
+                    {verificationMessage}
+                  </div>
+                )}
+                <Button
+                  onClick={handleVerifyPayment}
+                  disabled={verifying || !paymentRef}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  {verifying ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Vérification...
+                    </>
+                  ) : (
+                    'Vérifier et activer'
+                  )}
+                </Button>
+                <div className="text-xs text-gray-500">
+                  Astuce: lʼapplication mobile Muana enverra automatiquement vos SMS vers IMMOO pour accélérer la vérification.
                 </div>
               </div>
             </div>
