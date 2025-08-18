@@ -480,8 +480,7 @@
     "allProFeatures": "Toutes les fonctionnalités PRO",
     "monthsOffered": "mois offerts",
     "needHelp": "Besoin d'aide pour choisir ?",
-    "contactTeam": "Contactez notre équipe",
-    "activationTitle": "Activation IMMOO PRO",
+
     "activationMessage": "Bonjour, je souhaite activer le plan {{planName}} ({{price}} FCFA pour {{period}}). Pouvez-vous m'aider avec la procédure d'activation ?",
     "whatsappContact": "Contacter via WhatsApp",
     "loadingPlans": "Chargement des plans...",
@@ -491,14 +490,12 @@
     "refreshPlans": "Actualiser",
     "whatsappNumbers": "Numéros Mobile Money",
     "paymentReference": "Référence de paiement Mobile Money",
-    "whatsAppActivationTitle": "Activation IMMOO PRO",
-    "whatsAppActivationDescription": "Contactez notre équipe pour activer votre plan premium",
+
     "selectedPlan": "Plan sélectionné",
     "plan": "Plan",
     "price": "Prix",
     "period": "Période",
-    "quickActivation": "Activation rapide par WhatsApp",
-    "activationGuidance": "Notre équipe vous guidera pour l'activation de votre plan et les modalités de paiement.",
+
     "cancel": "Annuler",
     "contactWhatsApp": "Contacter sur WhatsApp"
   },

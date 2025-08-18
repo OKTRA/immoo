@@ -415,20 +415,7 @@ export default function PricingPage() {
           </div>
         )}
         
-        {/* Footer compact pour mobile */}
-        <div className="text-center mt-8 md:mt-16 pb-6 md:pb-12 px-4">
-          <p className="text-gray-600 mb-3 md:mb-4 text-sm md:text-base">
-            {t('pricing.needHelp')}
-          </p>
-          <Button 
-            variant="outline" 
-            onClick={() => window.open('https://wa.me/22377010202?text=Bonjour, j\'ai besoin d\'aide pour choisir un plan IMMOO.', '_blank')}
-            className="flex items-center gap-2 mx-auto text-sm md:text-base py-2 md:py-3 px-4 md:px-6"
-          >
-            <MessageCircle className="w-4 h-4" />
-            {t('pricing.contactTeam')}
-          </Button>
-        </div>
+
       </div>
 
       {/* Dialog WhatsApp Élégant */}
@@ -437,17 +424,7 @@ export default function PricingPage() {
           {/* Header avec gradient */}
           <div className="relative overflow-hidden rounded-t-lg bg-gradient-to-br from-green-500 via-green-600 to-emerald-600 p-6 text-white">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl transform translate-x-8 -translate-y-8" />
-            <div className="relative z-10">
-              <DialogTitle className="flex items-center gap-3 text-xl font-bold mb-2">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                  <MessageCircle className="w-5 h-5" />
-                </div>
-                {t('pricing.whatsAppActivationTitle')}
-              </DialogTitle>
-              <DialogDescription className="text-green-100">
-                {t('pricing.whatsAppActivationDescription')}
-              </DialogDescription>
-            </div>
+
           </div>
           
           <div className="p-6 space-y-6">
@@ -489,18 +466,7 @@ export default function PricingPage() {
               </div>
             </div>
             
-            {/* Message d'information */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                  <span className="text-white text-sm">ℹ️</span>
-                </div>
-                <div className="text-sm text-blue-800">
-                  <p className="font-medium mb-1">{t('pricing.quickActivation')}</p>
-                  <p>{t('pricing.activationGuidance')}</p>
-                </div>
-              </div>
-            </div>
+
 
             {/* Numéros Mobile Money + Vérification par référence de paiement */}
             <div className="bg-white border border-gray-200 rounded-lg p-4">

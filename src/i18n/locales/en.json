@@ -455,8 +455,7 @@
     "allProFeatures": "All PRO features",
     "monthsOffered": "months offered",
     "needHelp": "Need help choosing?",
-    "contactTeam": "Contact our team",
-    "activationTitle": "IMMOO PRO Activation",
+
     "activationMessage": "Hello, I would like to activate the {{planName}} plan ({{price}} FCFA for {{period}}). Can you help me with the activation procedure?",
     "whatsappContact": "Contact via WhatsApp",
     "loadingPlans": "Loading plans...",
@@ -464,14 +463,12 @@
     "retryLoading": "Retry",
     "noPlansAvailable": "No plans available",
     "refreshPlans": "Refresh",
-    "whatsAppActivationTitle": "IMMOO PRO Activation",
-    "whatsAppActivationDescription": "Contact our team to activate your premium plan",
+
     "selectedPlan": "Selected plan",
     "plan": "Plan",
     "price": "Price",
     "period": "Period",
-    "quickActivation": "Quick activation via WhatsApp",
-    "activationGuidance": "Our team will guide you through plan activation and payment procedures.",
+
     "cancel": "Cancel",
     "contactWhatsApp": "Contact on WhatsApp"
   },
