@@ -16,8 +16,7 @@ export default function Navbar() {
   const location = useLocation();
 
   // Utilisation du contexte d'authentification global
-  const { user, profile, signOut, isLoading } = useAuth();
-  const userRole = profile?.role || null;
+  const { isLoading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -74,10 +73,7 @@ export default function Navbar() {
             <NavbarDesktopMenu 
               navLinks={[]}
               userTypes={userTypes}
-              user={user}
-              userRole={userRole}
               location={location}
-              handleLogout={signOut}
             />
           </div>
 
@@ -122,8 +118,6 @@ export default function Navbar() {
         setMobileMenuOpen={setMobileMenuOpen}
         navLinks={[]}
         userTypes={userTypes}
-        handleLogout={signOut}
-        user={user}
         location={location}
       />
     </header>

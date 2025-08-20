@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { 
   Building2, 
   Users, 
@@ -19,6 +19,7 @@ import {
   Camera,
   Handshake,
   LogIn,
+  LogOut,
   Globe,
   Zap,
   MessageCircle,
@@ -35,9 +36,14 @@ import BecomeAgencyForm from '@/components/auth/BecomeAgencyForm';
 import ResponsiveLayout from '@/components/layout/ResponsiveLayout';
 import { useTranslation } from '@/hooks/useTranslation';
 import LoginDialog from '@/components/auth/LoginDialog';
+import { useAuth } from '@/hooks/useAuth';
+import { checkUserHasAgency } from '@/services/agency/agencyBasicService';
+import { supabase } from '@/lib/supabase';
+import { toast } from 'sonner';
 
 const ImmoAgencyPage: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [contactDialogOpen, setContactDialogOpen] = useState(false);
   const [becomePartnerDialogOpen, setBecomePartnerDialogOpen] = useState(false);
@@ -50,6 +56,46 @@ const ImmoAgencyPage: React.FC = () => {
   });
   const [activeSection, setActiveSection] = useState<'agencies' | 'immoo'>('agencies');
   const [agencyLoginDialogOpen, setAgencyLoginDialogOpen] = useState(false);
+  const [isAgencyUser, setIsAgencyUser] = useState(false);
+  const [checkingAgencyStatus, setCheckingAgencyStatus] = useState(true);
+  const { user, signOut } = useAuth();
+
+  // Vérifier si l'utilisateur connecté a une agence
+  useEffect(() => {
+    const checkAgencyStatus = async () => {
+      if (user?.id) {
+        try {
+          const { hasAgency } = await checkUserHasAgency(user.id);
+          setIsAgencyUser(hasAgency);
+        } catch (error) {
+          console.error('Erreur lors de la vérification du statut agence:', error);
+          setIsAgencyUser(false);
+        }
+      } else {
+        setIsAgencyUser(false);
+      }
+      setCheckingAgencyStatus(false);
+    };
+
+    checkAgencyStatus();
+  }, [user]);
+
+  // Écouter les changements d'état d'authentification pour synchronisation automatique
+  useEffect(() => {
+    const handleAuthStateChange = (event: CustomEvent) => {
+      console.log('🔄 Auth state changed in ImmoAgencyPage:', event.detail);
+      if (event.detail.type === 'signin' || event.detail.type === 'signout') {
+        // Forcer une re-vérification du statut d'agence
+        setCheckingAgencyStatus(true);
+        // Le useEffect précédent se déclenchera automatiquement grâce à la dépendance [user]
+      }
+    };
+
+    window.addEventListener('auth-state-changed', handleAuthStateChange as EventListener);
+    return () => {
+      window.removeEventListener('auth-state-changed', handleAuthStateChange as EventListener);
+    };
+  }, []);
 
   // Détecter si l'utilisateur arrive depuis l'authentification Google sans agence
   useEffect(() => {
@@ -75,6 +121,17 @@ const ImmoAgencyPage: React.FC = () => {
   const handleCreateAgencyProfile = () => {
     setNeedsAgencyDialogOpen(false);
     setBecomePartnerDialogOpen(true);
+  };
+
+  const handleSignOut = async () => {
+    try {
+      console.log('Starting agency logout...');
+      await signOut();
+      navigate("/");
+    } catch (error: any) {
+      console.error("Error signing out:", error);
+      toast.error("Erreur lors de la déconnexion");
+    }
   };
 
   const handleWhatsAppClick = () => {
@@ -260,14 +317,34 @@ Message: ${contactForm.message}
                     <Handshake className="mr-2 w-5 h-5" />
                     Devenir Partenaire
                   </Button>
-                  <Button 
-                     onClick={() => setAgencyLoginDialogOpen(true)}
-                     variant="outline" 
-                     className="border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy px-8 py-3 text-lg font-semibold rounded-xl transition-all duration-300"
-                   >
-                     <LogIn className="mr-2 w-5 h-5" />
-                     Se connecter
-                   </Button>
+                  {checkingAgencyStatus ? (
+                    <Button 
+                      disabled
+                      variant="outline" 
+                      className="border-immoo-gold text-immoo-gold px-8 py-3 text-lg font-semibold rounded-xl transition-all duration-300"
+                    >
+                      <LogIn className="mr-2 w-5 h-5" />
+                      Chargement...
+                    </Button>
+                  ) : isAgencyUser ? (
+                    <Button 
+                      onClick={handleSignOut}
+                      variant="outline" 
+                      className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white px-8 py-3 text-lg font-semibold rounded-xl transition-all duration-300"
+                    >
+                      <LogOut className="mr-2 w-5 h-5" />
+                      Déconnexion
+                    </Button>
+                  ) : (
+                    <Button 
+                      onClick={() => setAgencyLoginDialogOpen(true)}
+                      variant="outline" 
+                      className="border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy px-8 py-3 text-lg font-semibold rounded-xl transition-all duration-300"
+                    >
+                      <LogIn className="mr-2 w-5 h-5" />
+                      Se connecter
+                    </Button>
+                  )}
 
                 </motion.div>
               </div>

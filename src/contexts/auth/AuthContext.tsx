@@ -129,6 +129,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               console.error('❌ Failed to initialize real-time sync after sign in:', error);
             }
             
+            // Déclencher un événement personnalisé pour notifier les autres composants
+            window.dispatchEvent(new CustomEvent('auth-state-changed', { 
+              detail: { type: 'signin', user, profile } 
+            }));
+            
             toast.success('Connexion réussie !');
             resolve({ success: true });
             return;
@@ -190,13 +195,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       console.log('🚪 Signing out...');
       dispatch({ type: 'SET_LOADING', payload: true });
+      
+      // Nettoyer la synchronisation en temps réel
+      cleanupRealtimeSync();
+      
+      // Déconnexion de Supabase
       await authSignOut();
+      
+      // Forcer la mise à jour de l'état
       dispatch({ type: 'SET_UNAUTHENTICATED' });
+      
+      // Déclencher un événement personnalisé pour notifier les autres composants
+      // Inclure une instruction de redirection dans l'événement
+      window.dispatchEvent(new CustomEvent('auth-state-changed', { 
+        detail: { type: 'signout', shouldRedirect: true } 
+      }));
+      
       toast.success('Déconnexion réussie');
       console.log('✅ Signed out successfully');
     } catch (error: any) {
       console.error('❌ Error signing out:', error);
       dispatch({ type: 'SET_UNAUTHENTICATED' });
+      // Même en cas d'erreur, déclencher l'événement avec redirection
+      window.dispatchEvent(new CustomEvent('auth-state-changed', { 
+        detail: { type: 'signout', shouldRedirect: true } 
+      }));
     }
   }, []);
 
@@ -317,7 +340,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [fetchUserProfile]);
 
-  // Synchronisation cross-tab
+  // Synchronisation cross-tab et événements d'authentification
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'supabase.auth.token') {
@@ -326,8 +349,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
+    const handleAuthStateChange = (e: CustomEvent) => {
+      console.log('🔄 Auth state change event detected:', e.detail);
+      // Forcer une re-initialisation pour s'assurer que l'état est synchronisé
+      setTimeout(() => {
+        initializeAuth();
+      }, 100);
+    };
+
     window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
+    window.addEventListener('auth-state-changed', handleAuthStateChange as EventListener);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('auth-state-changed', handleAuthStateChange as EventListener);
+    };
   }, [initializeAuth]);
 
   const contextValue: AuthContextType = {

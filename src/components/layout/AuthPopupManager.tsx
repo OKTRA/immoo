@@ -36,7 +36,7 @@ export default function AuthPopupManager({ isOpen, onClose, type }: AuthPopupMan
         {currentView === 'login' ? (
           <AgencyLoginForm 
             onSuccess={handleSuccess}
-            onSwitchToSignup={() => setCurrentView('signup')}
+            onSwitchMode={() => setCurrentView('signup')}
           />
         ) : (
           <BecomeAgencyForm 

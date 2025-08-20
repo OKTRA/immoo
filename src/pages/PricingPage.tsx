@@ -17,7 +17,7 @@ import Navbar from '@/components/Navbar';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/useTranslation';
-import { MuanaPayClient } from '../../libs/muana-pay-sdk/index.js';
+import { MuanaPayClient } from '@muana/pay-sdk/supabase';
 import { listSubscriptionPaymentMethods } from '@/services/subscription/paymentMethodService';
 
 interface PlanData {
@@ -44,6 +44,7 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [paymentRef, setPaymentRef] = useState<string>('');
+  const [senderNumber, setSenderNumber] = useState<string>('');
   const [verifying, setVerifying] = useState<boolean>(false);
   const [verificationMessage, setVerificationMessage] = useState<string | null>(null);
   const [paymentNumbers, setPaymentNumbers] = useState<{ provider: string; phone_number: string }[]>([]);
@@ -192,6 +193,7 @@ export default function PricingPage() {
       const result = await muana.verifyTransaction({
         userId,
         paymentReference: paymentRef.trim(),
+        senderNumber: senderNumber.trim(),
         planId: selectedPlan.id,
       });
 
@@ -484,6 +486,12 @@ export default function PricingPage() {
                     </div>
                   </div>
                 )}
+                <label className="text-sm font-medium text-gray-700">Numéro d'envoi</label>
+                <Input
+                  placeholder="Numéro qui a envoyé l'argent (ex: +223 70 00 00 00)"
+                  value={senderNumber}
+                  onChange={(e) => setSenderNumber(e.target.value)}
+                />
                 <label className="text-sm font-medium text-gray-700">Référence de paiement Mobile Money</label>
                 <Input
                   placeholder="Collez la référence (ex: ABC123)"
@@ -497,7 +505,7 @@ export default function PricingPage() {
                 )}
                 <Button
                   onClick={handleVerifyPayment}
-                  disabled={verifying || !paymentRef}
+                  disabled={verifying || !paymentRef || !senderNumber}
                   className="w-full bg-blue-600 hover:bg-blue-700"
                 >
                   {verifying ? (

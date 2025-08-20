@@ -6,14 +6,13 @@ import LoginDialog from "@/components/auth/LoginDialog";
 import { ChevronRight, User, Shield, LogOut, Home } from "lucide-react";
 import { useTranslation } from "@/hooks/useTranslation";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import { useAuth } from "@/hooks/useAuth";
 
 interface NavbarMobileMenuProps {
   mobileMenuOpen: boolean;
   setMobileMenuOpen: (open: boolean) => void;
   navLinks: { name: string; path: string }[];
   userTypes: UserType[];
-  handleLogout: () => void;
-  user: any;
   location: any;
 }
 
@@ -21,13 +20,12 @@ export function NavbarMobileMenu({
   mobileMenuOpen,
   setMobileMenuOpen,
   userTypes,
-  handleLogout,
-  user,
 }: NavbarMobileMenuProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const [loginDialogOpen, setLoginDialogOpen] = useState(false);
   const [selectedUserType, setSelectedUserType] = useState<'agency' | 'admin'>('agency');
+  const { user, profile, signOut } = useAuth();
 
   const handleUserTypeClick = (type: UserType) => {
     setMobileMenuOpen(false);
@@ -49,9 +47,11 @@ export function NavbarMobileMenu({
   const onLogoutClick = async () => {
     setMobileMenuOpen(false);
     try {
-      await handleLogout();
+      await signOut();
+      navigate('/');
     } catch (error) {
       console.error('Logout error:', error);
+      navigate('/');
     }
   };
 
@@ -163,8 +163,8 @@ export function NavbarMobileMenu({
             </div>
           </nav>
 
-          {/* Footer du menu */}
-          {user && (
+          {/* Footer du menu - seulement pour les utilisateurs d'agence */}
+          {user && profile?.role === 'agency' && (
             <div className="px-6 py-6 border-t border-immoo-gray/20">
               <button
                 onClick={onLogoutClick}

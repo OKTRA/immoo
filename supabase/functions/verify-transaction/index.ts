@@ -46,77 +46,76 @@ Deno.serve(async (req: Request) => {
 		let planPrice: number | null = null;
 		let planName: string | null = null;
 
-		// Note: our schema uses subscription_plans, not plans
 		if (!planId && plan_name) {
 			const { data: plan } = await supabase
-				.from('subscription_plans')
-				.select('id, name, price')
+				.from('plans')
+				.select('id, name, price_cents')
 				.eq('name', plan_name)
 				.eq('is_active', true)
 				.single();
 			if (!plan) return new Response(JSON.stringify({ error: 'Plan not found or inactive' }), { status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 			planId = plan.id;
-			planPrice = Number(plan.price);
+			planPrice = Number(plan.price_cents);
 			planName = plan.name;
 		}
 
 		// If we got a plan_id directly, fetch its price for validation
 		if (planId && planPrice == null) {
 			const { data: p } = await supabase
-				.from('subscription_plans')
-				.select('id, name, price')
+				.from('plans')
+				.select('id, name, price_cents')
 				.eq('id', planId)
 				.single();
 			if (p) {
-				planPrice = Number(p.price);
+				planPrice = Number(p.price_cents);
 				planName = p.name;
 			}
 		}
 
-		// payment_transactions table might not exist in our schema.
-		// Instead, log in billing_history for traceability and use it for idempotency per reference.
-		const { data: existingBilling } = await supabase
-			.from('billing_history')
-			.select('id, user_id, plan_id, amount, status, transaction_id')
+		const { data: existingTxn } = await supabase
+			.from('transactions')
+			.select('id, user_id, plan_id, amount_cents, status, payment_reference')
 			.eq('user_id', user_id)
-			.eq('transaction_id', payment_reference)
+			.eq('payment_reference', payment_reference)
 			.order('created_at', { ascending: false })
 			.limit(1)
 			.maybeSingle();
 
-		let billingId: string | null = existingBilling?.id ?? null;
-		let amountToCheck: number | null = existingBilling ? Number(existingBilling.amount) : null;
-		let finalPlanId: string | null = existingBilling?.plan_id || planId;
+		let transactionId: string;
+		let amountToCheck: number | null = null;
+		let finalPlanId: string | null = existingTxn?.plan_id || planId;
 
-		if (!existingBilling) {
+		if (!existingTxn) {
 			if (!finalPlanId) return new Response(JSON.stringify({ error: 'plan_name is required for new verification' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 			if (amount_cents == null && planPrice == null) return new Response(JSON.stringify({ error: 'amount_cents is required when creating a new transaction' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
 			amountToCheck = Number(amount_cents ?? planPrice ?? 0);
 			const { data: created } = await supabase
-				.from('billing_history')
+				.from('transactions')
 				.insert({
 					user_id,
 					plan_id: finalPlanId,
-					amount: amountToCheck,
+					amount_cents: amountToCheck,
 					status: 'pending',
 					payment_method: 'mobile_money',
-					transaction_id: payment_reference,
-					description: `Vérification mobile money pour ${planName || 'plan'}`,
+					payment_reference,
 				})
 				.select('id')
 				.single();
-			billingId = created?.id ?? null;
+			transactionId = created!.id;
+		} else {
+			transactionId = existingTxn.id;
+			amountToCheck = Number(existingTxn.amount_cents);
 		}
 
 		if (!planPrice && finalPlanId) {
 			const { data: plan } = await supabase
-				.from('subscription_plans')
-				.select('id, name, price')
+				.from('plans')
+				.select('id, name, price_cents')
 				.eq('id', finalPlanId)
 				.single();
 			if (plan) {
-				planPrice = Number(plan.price);
+				planPrice = Number(plan.price_cents);
 				planName = plan.name;
 			}
 		}
@@ -126,6 +125,7 @@ Deno.serve(async (req: Request) => {
 			.from('transactions')
 			.select('id, message, timestamp, sender, payment_reference')
 			.eq('payment_reference', normalizedRef)
+			.not('sender', 'is', null)
 			.order('timestamp', { ascending: false })
 			.limit(1)
 			.maybeSingle();
@@ -142,12 +142,12 @@ Deno.serve(async (req: Request) => {
 		let smsAmount: number | null = null;
 		if (matchedSms?.message) smsAmount = parseAmountFromSms(matchedSms.message);
 
-		if (amountToCheck == null && smsAmount != null && billingId) {
+		if (amountToCheck == null && smsAmount != null) {
 			amountToCheck = smsAmount;
 			await supabase
-				.from('billing_history')
-				.update({ amount: amountToCheck })
-				.eq('id', billingId);
+				.from('transactions')
+				.update({ amount_cents: amountToCheck })
+				.eq('id', transactionId);
 		}
 
 		let verified = true;
@@ -157,18 +157,16 @@ Deno.serve(async (req: Request) => {
 		if (!matchedSms) verified = false;
 
 		const finalStatus = verified ? 'verified' : 'rejected';
-		if (billingId) {
-			await supabase
-				.from('billing_history')
-				.update({ status: verified ? 'paid' : 'failed', payment_date: verified ? new Date().toISOString() : null })
-				.eq('id', billingId);
-		}
+		await supabase
+			.from('transactions')
+			.update({ status: verified ? 'paid' : 'failed' })
+			.eq('id', transactionId);
 
 		if (matchedSms?.id) {
 			await supabase
 				.from('transactions')
 				.update({
-					matched_payment_transaction_id: billingId,
+					matched_payment_transaction_id: transactionId,
 					matched_status: finalStatus,
 					matched_at: new Date().toISOString(),
 				})
@@ -178,49 +176,27 @@ Deno.serve(async (req: Request) => {
 		let subscription: any = null;
 		if (verified && finalPlanId) {
 			const now = new Date();
-			// Compute end date from plan billing_cycle
-			const { data: planCycle } = await supabase
-				.from('subscription_plans')
-				.select('billing_cycle')
-				.eq('id', finalPlanId)
-				.single();
-
-			const end = new Date(now);
-			switch (planCycle?.billing_cycle) {
-				case 'monthly': end.setMonth(end.getMonth() + 1); break;
-				case 'yearly':
-				case 'annual': end.setFullYear(end.getFullYear() + 1); break;
-				case 'quarterly': end.setMonth(end.getMonth() + 3); break;
-				case 'semestriel':
-				case 'semestrial': end.setMonth(end.getMonth() + 6); break;
-				case 'weekly': end.setDate(end.getDate() + 7); break;
-				case 'lifetime': end.setFullYear(end.getFullYear() + 100); break;
-				default: end.setMonth(end.getMonth() + 1);
-			}
-
+			const expiresAt = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 			const { data: sub } = await supabase
 				.from('user_subscriptions')
 				.upsert(
 					{
 						user_id,
-						agency_id: null,
 						plan_id: finalPlanId,
 						status: 'active',
 						starts_at: now.toISOString(),
-						start_date: now.toISOString(),
-						end_date: end.toISOString(),
+						expires_at: expiresAt.toISOString(),
 						auto_renew: false,
-						payment_method: 'mobile_money',
 					},
 					{ onConflict: 'user_id' },
 				)
-				.select('*, subscription_plans(name, price)')
+				.select('*, plans(name, sync_interval_seconds, max_endpoints)')
 				.single();
 			subscription = sub;
 		}
 
 		return new Response(
-			JSON.stringify({ status: verified ? 'verified' : 'rejected', subscription }),
+			JSON.stringify({ status: finalStatus, subscription }),
 			{ status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
 		);
 	} catch (e) {

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { signInWithEmail } from '@/services/authService';
 import { toast } from 'sonner';
 import GoogleAuthButton from './GoogleAuthButton';
+import { useAuth } from '@/hooks/useAuth';
 
 interface AgencyLoginFormProps {
   onSuccess: () => void;
@@ -17,6 +17,7 @@ const AgencyLoginForm: React.FC<AgencyLoginFormProps> = ({
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,19 +30,17 @@ const AgencyLoginForm: React.FC<AgencyLoginFormProps> = ({
     setIsLoading(true);
     
     try {
-      const result = await signInWithEmail(email, password);
+      const result = await signIn(email, password);
       
-      if (result.error) {
+      if (!result.success) {
         toast.error('Erreur de connexion', {
-          description: result.error,
+          description: result.error || 'Identifiants invalides',
         });
         return;
       }
 
-      if (result.user) {
-        toast.success('Connexion réussie !');
-        onSuccess();
-      }
+      toast.success('Connexion réussie !');
+      onSuccess();
     } catch (error: any) {
       toast.error('Erreur de connexion', {
         description: error.message || 'Une erreur inattendue s\'est produite',

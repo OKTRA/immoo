@@ -19,14 +19,22 @@ export default function MyAgenciesPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   
-  // Vérifier que l'utilisateur a le rôle "agency"
+  // Vérifier l'authentification et le rôle "agency"
   useEffect(() => {
-    if (initialized && profile && profile.role !== 'agency') {
-      toast.error(t('errors.accessDenied'));
-      navigate('/');
-      return;
+    if (initialized) {
+      if (!isAuthenticated || !user) {
+        toast.error(t('auth.loginRequired'));
+        navigate('/immo-agency');
+        return;
+      }
+      
+      if (profile && profile.role !== 'agency') {
+        toast.error(t('errors.accessDenied'));
+        navigate('/');
+        return;
+      }
     }
-  }, [initialized, profile, navigate]);
+  }, [initialized, isAuthenticated, user, profile, navigate, t]);
 
   // Debug logs pour identifier le problème
   useEffect(() => {

@@ -34,7 +34,7 @@ const LoginDialog: React.FC<LoginDialogProps> = ({
       return (
         <AgencyLoginForm 
           onSuccess={handleSuccess}
-          onSwitchToSignup={() => setAgencyMode('signup')}
+          onSwitchMode={() => setAgencyMode('signup')}
         />
       );
     }

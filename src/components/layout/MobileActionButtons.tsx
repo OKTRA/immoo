@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { LogOut, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
@@ -14,11 +14,25 @@ export default function MobileActionButtons() {
   const { changeLanguageAndNavigate } = useLocalizedNavigation();
   const mobileToast = useMobileToast();
 
+  // Écouter l'événement de déconnexion pour redirection automatique
+  useEffect(() => {
+    const handleAuthStateChange = (event: CustomEvent) => {
+      if (event.detail.type === 'signout' && event.detail.shouldRedirect) {
+        navigate('/');
+      }
+    };
+
+    window.addEventListener('auth-state-changed', handleAuthStateChange as EventListener);
+    return () => {
+      window.removeEventListener('auth-state-changed', handleAuthStateChange as EventListener);
+    };
+  }, [navigate]);
+
   const handleLogout = async () => {
     try {
       await signOut();
       mobileToast.success('Déconnexion réussie', {}, true); // Essentiel
-      navigate('/');
+      // La redirection sera gérée par l'événement auth-state-changed
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error);
       mobileToast.error('Erreur lors de la déconnexion');
@@ -28,9 +42,8 @@ export default function MobileActionButtons() {
   const handleAccountClick = () => {
     if (profile?.role === 'agency') {
       navigate('/my-agencies');
-    } else {
-      navigate('/profile');
     }
+    // Suppression de la navigation vers /profile pour les autres utilisateurs
   };
 
   const handleLanguageToggle = () => {
@@ -56,8 +69,8 @@ export default function MobileActionButtons() {
         </span>
       </Button>
 
-      {/* Boutons Account et Logout - Seulement si connecté */}
-      {user && (
+      {/* Boutons Account et Logout - Seulement pour les utilisateurs d'agence */}
+      {user && profile?.role === 'agency' && (
         <>
           {/* Bouton Account */}
           <Button 
@@ -65,7 +78,7 @@ export default function MobileActionButtons() {
             size="sm"
             onClick={handleAccountClick}
             className="h-8 w-8 p-0 rounded-full hover:bg-immoo-pearl/60 transition-all duration-200 hover:scale-105 shadow-sm"
-            title={profile?.role === 'agency' ? 'Mes Agences' : 'Mon Profil'}
+            title="Mes Agences"
           >
             <User className="h-4 w-4 text-immoo-navy" />
           </Button>

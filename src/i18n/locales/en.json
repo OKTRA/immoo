@@ -173,6 +173,7 @@
     "loginSuccess": "Login successful",
     "signupSuccess": "Sign up successful",
     "loginError": "Login error",
+    "loginRequired": "Login required to access this page",
     "signupError": "Sign up error",
     "emailRequired": "Email is required",
     "passwordRequired": "Password is required",

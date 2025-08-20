@@ -79,9 +79,9 @@ Deno.serve(async (req) => {
 
 		let parsed = extract(normalizedMessage);
 
-		// Optional: augment with Groq if key available and regex failed
+		// Optional: augment with Groq for intelligent filtering and extraction
 		const groqKey = Deno.env.get('GROQ_API_KEY');
-		if (groqKey && (!parsed.payment_reference || !parsed.amount_cents)) {
+		if (groqKey) {
 			try {
 				const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
 					method: 'POST',
@@ -92,7 +92,26 @@ Deno.serve(async (req) => {
 					body: JSON.stringify({
 						model: 'llama-3.1-8b-instant',
 						messages: [
-							{ role: 'system', content: 'Tu extrais des champs depuis SMS Mobile Money. Retourne un JSON strict avec: payment_reference, amount_cents, currency, counterparty_number, provider.' },
+							{ 
+								role: 'system', 
+								content: `Tu analyses les SMS Mobile Money en français et anglais. Détermine si c'est une VRAIE TRANSACTION ou du marketing/info.
+
+VRAIE TRANSACTION = SMS confirmant un transfert d'argent effectué (envoi, réception, paiement, retrait, dépôt)
+MARKETING/INFO = publicité, informations générales, promotions, mises à jour de service
+
+Retourne un JSON strict avec:
+- is_transaction: true/false (true seulement si c'est une vraie transaction financière)
+- payment_reference: ID/référence de transaction (ou null)
+- amount_cents: montant en centimes (ou null)
+- currency: devise (FCFA, XOF, USD, etc.)
+- counterparty_number: numéro expéditeur/destinataire (ou null)
+- provider: opérateur (Orange Money, MTN, etc.)
+- confidence: 0.0-1.0
+
+Exemples:
+- "Orange Money c'est simple ! Transférez..." → is_transaction: false
+- "Transfert de 5000 FCFA du 77123456 ID: ABC123" → is_transaction: true` 
+							},
 							{ role: 'user', content: `SMS: ${normalizedMessage}` }
 						],
 						temperature: 0,
@@ -103,16 +122,37 @@ Deno.serve(async (req) => {
 					const out = await res.json();
 					const content = out?.choices?.[0]?.message?.content || '{}';
 					const ai = JSON.parse(content);
-					parsed = {
-						payment_reference: parsed.payment_reference || ai.payment_reference || null,
-						amount_cents: parsed.amount_cents || ai.amount_cents || null,
-						currency: parsed.currency || ai.currency || 'FCFA',
-						counterparty_number: parsed.counterparty_number || ai.counterparty_number || null,
-						parsed_confidence: 0.85,
-					};
+					
+					// Si l'IA dit que ce n'est pas une transaction, ignorer le SMS
+					if (ai.is_transaction === false) {
+						console.log('Groq detected non-transaction SMS, ignoring:', normalizedMessage.substring(0, 100));
+						return new Response(
+							JSON.stringify({
+								success: true,
+								message: 'SMS ignored (marketing/info)',
+								filtered: true
+							}),
+							{
+								status: 200,
+								headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+							}
+						);
+					}
+					
+					// Si c'est une transaction, utiliser les données extraites par l'IA
+					if (ai.is_transaction === true) {
+						parsed = {
+							payment_reference: ai.payment_reference || parsed.payment_reference || null,
+							amount_cents: ai.amount_cents || parsed.amount_cents || null,
+							currency: ai.currency || parsed.currency || 'FCFA',
+							counterparty_number: ai.counterparty_number || parsed.counterparty_number || null,
+							parsed_confidence: Math.max(ai.confidence || 0.85, parsed.parsed_confidence || 0.5),
+						};
+					}
 				}
 			} catch (_e) {
 				// ignore AI errors; keep regex result
+				console.log('Groq AI error, falling back to regex parsing:', _e.message);
 			}
 		}
 
@@ -176,6 +216,3 @@ Deno.serve(async (req) => {
 		);
 	}
 });
-
-
-

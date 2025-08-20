@@ -14,18 +14,12 @@ import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
 interface NavbarDesktopMenuProps {
   navLinks: { name: string; path: string }[];
   userTypes: UserType[];
-  user: any;
-  userRole: string | null;
   location: any;
-  handleLogout: () => void;
 }
 
 export function NavbarDesktopMenu({
   userTypes,
-  user,
-  userRole,
-  location,
-  handleLogout
+  location
 }: NavbarDesktopMenuProps) {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -33,14 +27,14 @@ export function NavbarDesktopMenu({
   const [selectedUserType, setSelectedUserType] = useState<'agency' | 'admin'>('agency');
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const { profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
+  const userRole = profile?.role || null;
 
   const handleAccountClick = () => {
     if (profile?.role === 'agency') {
       navigate('/my-agencies');
-    } else {
-      navigate('/profile');
     }
+    // Suppression de la navigation vers /profile pour les autres utilisateurs
   };
 
   const handleUserTypeClick = (type: UserType) => {
@@ -92,12 +86,14 @@ export function NavbarDesktopMenu({
       setIsLoggingOut(true);
       console.log('Initiating logout...');
       
-      await handleLogout();
+      await signOut();
       console.log('Logout completed successfully');
+      navigate('/');
       
     } catch (error) {
       console.error('Logout error:', error);
       toast.error(t('auth.logoutError'));
+      navigate('/');
     } finally {
       setIsLoggingOut(false);
     }
@@ -159,7 +155,7 @@ export function NavbarDesktopMenu({
           {/* Language Switcher and User Actions */}
           <div className="flex items-center gap-0.5">
             <LanguageSwitcher />
-            {user && (
+            {user && profile?.role === 'agency' && (
               <>
                 <ButtonEffects
                   variant="ghost"

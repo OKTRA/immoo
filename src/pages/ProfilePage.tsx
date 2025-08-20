@@ -70,6 +70,20 @@ export default function ProfilePage() {
     fetchUserAndProfile();
   }, [navigate]);
 
+  // Écouter l'événement de déconnexion pour redirection automatique
+  useEffect(() => {
+    const handleAuthStateChange = (event: CustomEvent) => {
+      if (event.detail.type === 'signout' && event.detail.shouldRedirect) {
+        navigate('/');
+      }
+    };
+
+    window.addEventListener('auth-state-changed', handleAuthStateChange as EventListener);
+    return () => {
+      window.removeEventListener('auth-state-changed', handleAuthStateChange as EventListener);
+    };
+  }, [navigate]);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -129,7 +143,7 @@ export default function ProfilePage() {
     await signOut();
     setUser(null);
     setProfile(null);
-    navigate('/');
+    // La redirection sera gérée par l'événement auth-state-changed
   };
 
   if (isLoading) {
