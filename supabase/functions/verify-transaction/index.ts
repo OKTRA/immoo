@@ -159,6 +159,93 @@ async function handleRealtimeVerification(supabase: any, user_id: string, plan_i
 				if (profileError) {
 					console.error('Profile update error:', profileError);
 				}
+
+				// Créer l'abonnement dans user_subscriptions
+				try {
+					// Récupérer les infos du plan pour calculer la date de fin
+					const { data: planInfo, error: planError } = await supabase
+						.from('subscription_plans')
+						.select('billing_cycle, name, price')
+						.eq('id', plan_id)
+						.single();
+
+					if (planError) {
+						console.error('Plan info error:', planError);
+					} else {
+						// Calculer la date de fin selon le cycle de facturation
+						const now = new Date();
+						let endDate = new Date(now);
+						
+						switch (planInfo.billing_cycle) {
+							case 'monthly':
+								endDate.setMonth(endDate.getMonth() + 1);
+								break;
+							case 'quarterly':
+								endDate.setMonth(endDate.getMonth() + 3);
+								break;
+							case 'semestriel':
+								endDate.setMonth(endDate.getMonth() + 6);
+								break;
+							case 'yearly':
+							case 'annual':
+								endDate.setFullYear(endDate.getFullYear() + 1);
+								break;
+							case 'lifetime':
+								endDate.setFullYear(endDate.getFullYear() + 100); // 100 ans pour lifetime
+								break;
+							default:
+								endDate.setMonth(endDate.getMonth() + 1); // Par défaut mensuel
+						}
+
+						// Désactiver tous les anciens abonnements
+						const { error: deactivateError } = await supabase
+							.from('user_subscriptions')
+							.update({ status: 'cancelled', end_date: now.toISOString() })
+							.eq('user_id', user_id)
+							.neq('status', 'cancelled');
+
+						if (deactivateError) {
+							console.error('Deactivate old subscriptions error:', deactivateError);
+						}
+
+						// Créer le nouvel abonnement
+						const { error: subscriptionError } = await supabase
+							.from('user_subscriptions')
+							.insert({
+								user_id: user_id,
+								plan_id: plan_id,
+								status: 'active',
+								payment_method: 'cinetpay',
+								start_date: now.toISOString(),
+								end_date: endDate.toISOString()
+							});
+
+						if (subscriptionError) {
+							console.error('Subscription creation error:', subscriptionError);
+						}
+
+						// Créer l'entrée dans billing_history
+						const { error: billingError } = await supabase
+							.from('billing_history')
+							.insert({
+								user_id: user_id,
+								plan_id: plan_id,
+								amount: planInfo.price || (amount_cents ? amount_cents / 100 : 0),
+								status: 'paid',
+								payment_method: 'cinetpay',
+								transaction_id: existingTransaction.id,
+								payment_date: now.toISOString(),
+								billing_date: now.toISOString(),
+								description: `Paiement CinetPay - ${planInfo.name || plan_name}`
+							});
+
+						if (billingError) {
+							console.error('Billing history creation error:', billingError);
+						}
+					}
+				} catch (subscriptionCreationError) {
+					console.error('Error creating subscription and billing history:', subscriptionCreationError);
+				}
 			}
 
 			return new Response(JSON.stringify({ 
@@ -278,6 +365,93 @@ async function handleStandardVerification(supabase: any, user_id: string, plan_i
 
 					if (profileError) {
 						console.error('Profile update error:', profileError);
+					}
+
+					// Créer l'abonnement dans user_subscriptions
+					try {
+						// Récupérer les infos du plan pour calculer la date de fin
+						const { data: planInfo, error: planError } = await supabase
+							.from('subscription_plans')
+							.select('billing_cycle, name, price')
+							.eq('id', plan_id)
+							.single();
+
+						if (planError) {
+							console.error('Plan info error:', planError);
+						} else {
+							// Calculer la date de fin selon le cycle de facturation
+							const now = new Date();
+							let endDate = new Date(now);
+							
+							switch (planInfo.billing_cycle) {
+								case 'monthly':
+									endDate.setMonth(endDate.getMonth() + 1);
+									break;
+								case 'quarterly':
+									endDate.setMonth(endDate.getMonth() + 3);
+									break;
+								case 'semestriel':
+									endDate.setMonth(endDate.getMonth() + 6);
+									break;
+								case 'yearly':
+								case 'annual':
+									endDate.setFullYear(endDate.getFullYear() + 1);
+									break;
+								case 'lifetime':
+									endDate.setFullYear(endDate.getFullYear() + 100); // 100 ans pour lifetime
+									break;
+								default:
+									endDate.setMonth(endDate.getMonth() + 1); // Par défaut mensuel
+							}
+
+							// Désactiver tous les anciens abonnements
+							const { error: deactivateError } = await supabase
+								.from('user_subscriptions')
+								.update({ status: 'cancelled', end_date: now.toISOString() })
+								.eq('user_id', user_id)
+								.neq('status', 'cancelled');
+
+							if (deactivateError) {
+								console.error('Deactivate old subscriptions error:', deactivateError);
+							}
+
+							// Créer le nouvel abonnement
+							const { error: subscriptionError } = await supabase
+								.from('user_subscriptions')
+								.insert({
+									user_id: user_id,
+									plan_id: plan_id,
+									status: 'active',
+									payment_method: 'cinetpay',
+									start_date: now.toISOString(),
+									end_date: endDate.toISOString()
+								});
+
+							if (subscriptionError) {
+								console.error('Subscription creation error:', subscriptionError);
+							}
+
+							// Créer l'entrée dans billing_history
+							const { error: billingError } = await supabase
+								.from('billing_history')
+								.insert({
+									user_id: user_id,
+									plan_id: plan_id,
+									amount: planInfo.price || (amount_cents ? amount_cents / 100 : 0),
+									status: 'paid',
+									payment_method: 'cinetpay',
+									transaction_id: existingTransaction.id,
+									payment_date: now.toISOString(),
+									billing_date: now.toISOString(),
+									description: `Paiement CinetPay - ${planInfo.name || plan_name}`
+								});
+
+							if (billingError) {
+								console.error('Billing history creation error:', billingError);
+							}
+						}
+					} catch (subscriptionCreationError) {
+						console.error('Error creating subscription and billing history:', subscriptionCreationError);
 					}
 				}
 
