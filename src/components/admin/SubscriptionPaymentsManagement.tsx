@@ -296,13 +296,8 @@ export default function SubscriptionPaymentsManagement() {
   const loadManualActivationHistory = async () => {
     try {
       const { data: history, error } = await supabase
-        .from('billing_history')
-        .select(`
-          *,
-          profiles(email, first_name, last_name),
-          agencies(name),
-          subscription_plans(name, price)
-        `)
+        .from('billing_history_with_details')
+        .select('*')
         .eq('payment_method', 'manual_activation')
         .order('created_at', { ascending: false })
         .limit(30);

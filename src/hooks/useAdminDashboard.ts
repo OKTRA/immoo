@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { SupportTicketService } from '@/services/admin/supportTicketService';
 
 interface DashboardStats {
   totalUsers: number;
@@ -79,32 +80,41 @@ export function useAdminDashboard() {
       const occupancyRate = totalProperties?.length ? 
         Math.round((rentedProperties?.length || 0) / totalProperties.length * 100) : 0;
 
-      // Fetch recent activities - simplified query without join to profiles
-      const { data: activities, error: activitiesError } = await supabase
-        .from('user_activities')
-        .select('id, activity_type, description, created_at, user_id')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (activitiesError) throw activitiesError;
-
-      // Fetch user names separately for activities
-      const userIds = activities?.map(a => a.user_id).filter(Boolean) || [];
+      // Fetch recent activities - with error handling
+      let activities: any[] = [];
       let userProfiles: any[] = [];
       
-      if (userIds.length > 0) {
-        const { data: profiles, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name, email')
-          .in('id', userIds);
-        
-        if (!profilesError) {
-          userProfiles = profiles || [];
+      try {
+        const { data: activitiesData, error: activitiesError } = await supabase
+          .from('user_activities')
+          .select('id, activity_type, description, created_at, user_id')
+          .order('created_at', { ascending: false })
+          .limit(5);
+
+        if (!activitiesError && activitiesData) {
+          activities = activitiesData;
+          
+          // Fetch user names separately for activities
+          const userIds = activities.map(a => a.user_id).filter(Boolean);
+          
+          if (userIds.length > 0) {
+            const { data: profiles, error: profilesError } = await supabase
+              .from('profiles')
+              .select('id, first_name, last_name, email')
+              .in('id', userIds);
+            
+            if (!profilesError) {
+              userProfiles = profiles || [];
+            }
+          }
         }
+      } catch (activitiesError) {
+        console.warn('Could not fetch user activities:', activitiesError);
+        // Continue with empty activities array
       }
 
       // Transform activities with user names
-      const transformedActivities: RecentActivity[] = activities?.map(activity => {
+      const transformedActivities: RecentActivity[] = activities.map(activity => {
         const userProfile = userProfiles.find(p => p.id === activity.user_id);
         const userName = userProfile ? 
           `${userProfile.first_name || ''} ${userProfile.last_name || ''}`.trim() || userProfile.email || 'Utilisateur'
@@ -117,7 +127,7 @@ export function useAdminDashboard() {
           time: getRelativeTime(new Date(activity.created_at)),
           status: getActivityStatus(activity.activity_type)
         };
-      }) || [];
+      });
 
       // Fetch pending verifications
       const { count: unverifiedAgencies } = await supabase
@@ -125,11 +135,14 @@ export function useAdminDashboard() {
         .select('*', { count: 'exact', head: true })
         .eq('verified', false);
 
-      // Fetch open support tickets
-      const { count: openTickets } = await supabase
-        .from('support_tickets')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'open');
+      // Fetch open support tickets using service
+      let openTickets = 0;
+      try {
+        openTickets = await SupportTicketService.getOpenTicketsCount();
+      } catch (ticketsError) {
+        console.warn('Could not fetch support tickets:', ticketsError);
+        // Continue with 0 tickets
+      }
 
       // Fetch properties pending moderation
       const { count: pendingProperties } = await supabase
@@ -146,7 +159,7 @@ export function useAdminDashboard() {
         },
         {
           type: 'report' as const,
-          count: openTickets || 0,
+          count: openTickets,
           description: 'signalements d\'utilisateurs',
           daysWaiting: 1
         },

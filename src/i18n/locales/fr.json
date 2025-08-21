@@ -762,7 +762,8 @@
       "send": "Envoyer",
       "cancel": "Annuler"
     },
-    "becomePartnerTitle": "Devenir Partenaire IMMOO"
+    "becomePartnerTitle": "Devenir Partenaire IMMOO",
+    "sendEmail": "Envoyer un email"
   },
   "propertyCard": {
     "bedrooms": "chambres",

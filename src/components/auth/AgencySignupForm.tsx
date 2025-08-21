@@ -131,6 +131,7 @@ const AgencySignupForm: React.FC<AgencySignupFormProps> = ({
             first_name: formData.first_name,
             last_name: formData.last_name,
             phone: formData.phone,
+            agency_name: formData.agency_name,
             role: 'agency',
           }
         );

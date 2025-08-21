@@ -106,12 +106,12 @@ export class ManualSubscriptionService {
     // Récupérer les abonnements actifs
     const userIds = users.map(u => u.id);
     const { data: subscriptions } = await supabase
-      .from('user_subscriptions')
+      .from('user_subscriptions_with_plans')
       .select(`
         user_id,
         plan_id,
         status,
-        subscription_plans(id, name)
+        plan_name
       `)
       .in('user_id', userIds)
       .eq('status', 'active');
@@ -131,7 +131,7 @@ export class ManualSubscriptionService {
         last_name: user.last_name || '',
         agency_id: user.agency_id,
         agency_name: agency?.name || 'N/A',
-        current_plan: (subscription?.subscription_plans as any)?.name || 'Aucun',
+        current_plan: subscription?.plan_name || 'Aucun',
         current_plan_id: subscription?.plan_id || null
       };
     });
@@ -156,10 +156,10 @@ export class ManualSubscriptionService {
    */
   static async getPaymentMethods(): Promise<PaymentMethod[]> {
     const { data: methods, error } = await supabase
-      .from('payment_methods')
+      .from('payment_methods_formatted')
       .select('*')
       .eq('is_active', true)
-      .order('name');
+      .order('display_name');
 
     if (error) throw error;
     return (methods as PaymentMethod[]) || [];
@@ -170,7 +170,7 @@ export class ManualSubscriptionService {
    */
   static async getPromoCodes(): Promise<PromoCode[]> {
     const { data: codes, error } = await supabase
-      .from('promo_codes')
+      .from('promo_codes_formatted')
       .select('*')
       .eq('is_active', true)
       .order('created_at', { ascending: false });

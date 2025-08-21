@@ -319,12 +319,12 @@ const BecomeAgencyForm: React.FC<BecomeAgencyFormProps> = ({ onSuccess, onSwitch
           {isLoading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {t('auth.creatingAgency')}
+              {t('auth.creatingAgency') || 'Création en cours...'}
             </>
           ) : (
             <>
               <Building2 className="mr-2 h-4 w-4" />
-              {t('auth.createMyAgency')}
+              {t('auth.createMyAgency') || 'Créer mon agence'}
             </>
           )}
         </Button>

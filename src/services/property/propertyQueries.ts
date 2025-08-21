@@ -6,40 +6,8 @@ import { formatPropertyFromDb } from './propertyUtils';
 export const getProperties = async (agencyId?: string, limit?: number) => {
   try {
     let query = supabase
-      .from('properties')
-      .select(`
-        *,
-        owner:property_owners(
-          id,
-          user_id,
-          company_name,
-          tax_id,
-          payment_method,
-          payment_percentage
-        ),
-        agency:agencies(
-          id,
-          name,
-          logo_url,
-          email,
-          phone,
-          website,
-          verified,
-          description,
-          specialties,
-          service_areas,
-          properties_count,
-          rating,
-          created_at
-        ),
-        property_images(
-          id,
-          image_url,
-          description,
-          is_primary,
-          position
-        )
-      `)
+      .from('properties_complete')
+      .select('*')
       .eq('is_visible', true); // Only show visible properties in public views
     
     if (agencyId) {
@@ -57,7 +25,7 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
     const properties = data.map(property => {
       const formatted = formatPropertyFromDb(property);
       
-      // Add images to the property
+      // Add images to the property (now directly from the view)
       if (property.property_images && property.property_images.length > 0) {
         formatted.images = property.property_images.map((img: any) => ({
           id: img.id,
@@ -68,29 +36,37 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
         }));
       }
       
-      // Add complete agency information to each property
-      if (property.agency) {
-        formatted.agencyName = property.agency.name;
-        formatted.agencyLogo = property.agency.logo_url;
-        formatted.agencyPhone = property.agency.phone;
-        formatted.agencyEmail = property.agency.email;
-        formatted.agencyWebsite = property.agency.website;
-        formatted.agencyVerified = property.agency.verified;
-        formatted.agencyRating = typeof property.agency.rating === 'number' ? property.agency.rating : 0;
-        formatted.agencyDescription = property.agency.description;
-        formatted.agencySpecialties = property.agency.specialties || [];
-        formatted.agencyServiceAreas = property.agency.service_areas || [];
-        formatted.agencyPropertiesCount = property.agency.properties_count || 0;
+      // Add complete agency information to each property (now directly from the view)
+      if (property.agency_name) {
+        formatted.agencyName = property.agency_name;
+        formatted.agencyLogo = property.agency_logo;
+        formatted.agencyPhone = property.agency_phone;
+        formatted.agencyEmail = property.agency_email;
+        formatted.agencyWebsite = property.agency_website;
+        formatted.agencyVerified = property.agency_verified;
+        formatted.agencyRating = typeof property.agency_rating === 'number' ? property.agency_rating : 0;
+        formatted.agencyDescription = property.agency_description;
+        formatted.agencySpecialties = property.agency_specialties || [];
+        formatted.agencyServiceAreas = property.agency_service_areas || [];
+        formatted.agencyPropertiesCount = property.agency_properties_count || 0;
         
         // Calculate years active from creation date
-        if (property.agency.created_at) {
-          const createdDate = new Date(property.agency.created_at);
+        if (property.agency_created_at) {
+          const createdDate = new Date(property.agency_created_at);
           const currentDate = new Date();
           const yearsDiff = currentDate.getFullYear() - createdDate.getFullYear();
           formatted.agencyYearsActive = yearsDiff > 0 ? yearsDiff : 1;
         }
         
-        formatted.agencyJoinDate = property.agency.created_at;
+        formatted.agencyJoinDate = property.agency_created_at;
+      }
+      
+      // Add owner information (now directly from the view)
+      if (property.owner_id) {
+        formatted.ownerCompany = property.company_name;
+        formatted.ownerTaxId = property.tax_id;
+        formatted.ownerPaymentMethod = property.payment_method;
+        formatted.ownerPaymentPercentage = property.payment_percentage;
       }
       
       return formatted;
@@ -131,84 +107,19 @@ export const getPopularProperties = async (limit: number = 6) => {
 
 export const getPropertyById = async (propertyId: string) => {
   try {
-    // Primary attempt: include is_visible filter for modern schema
-    let query = supabase
-      .from('properties')
-      .select(`
-        *,
-        owner:property_owners(
-          id,
-          user_id,
-          company_name,
-          tax_id,
-          payment_method,
-          payment_percentage
-        ),
-        agency:agencies(
-          id,
-          name,
-          logo_url,
-          email,
-          phone,
-          website,
-          verified,
-          description,
-          specialties,
-          service_areas,
-          properties_count,
-          rating,
-          created_at
-        ),
-        property_images(
-          id,
-          image_url,
-          description,
-          is_primary,
-          position
-        )
-      `)
+    // Use our optimized view with all relationships
+    let { data, error } = await supabase
+      .from('properties_complete')
+      .select('*')
       .eq('id', propertyId)
-      .eq('is_visible', true);
-
-    let { data, error } = await query.single();
+      .eq('is_visible', true)
+      .single();
 
     // Fallback for environments without is_visible column
     if (error && (error as any).code === '42703') {
       const fallback = await supabase
-        .from('properties')
-        .select(`
-          *,
-          owner:property_owners(
-            id,
-            user_id,
-            company_name,
-            tax_id,
-            payment_method,
-            payment_percentage
-          ),
-          agency:agencies(
-            id,
-            name,
-            logo_url,
-            email,
-            phone,
-            website,
-            verified,
-            description,
-            specialties,
-            service_areas,
-            properties_count,
-            rating,
-            created_at
-          ),
-          property_images(
-            id,
-            image_url,
-            description,
-            is_primary,
-            position
-          )
-        `)
+        .from('properties_complete')
+        .select('*')
         .eq('id', propertyId)
         .single();
       data = fallback.data as any;
@@ -236,7 +147,7 @@ export const getPropertyById = async (propertyId: string) => {
     
     const property = formatPropertyFromDb(data);
     
-    // Add images to the property
+    // Add images to the property (now directly from the view)
     if (data.property_images && data.property_images.length > 0) {
       property.images = data.property_images.map((img: any) => ({
         id: img.id,
@@ -247,29 +158,37 @@ export const getPropertyById = async (propertyId: string) => {
       }));
     }
     
-    // Add complete agency information
-    if (data.agency) {
-      property.agencyName = data.agency.name;
-      property.agencyLogo = data.agency.logo_url;
-      property.agencyPhone = data.agency.phone;
-      property.agencyEmail = data.agency.email;
-      property.agencyWebsite = data.agency.website;
-      property.agencyVerified = data.agency.verified;
-      property.agencyRating = typeof data.agency.rating === 'number' ? data.agency.rating : 0;
-      property.agencyDescription = data.agency.description;
-      property.agencySpecialties = data.agency.specialties || [];
-      property.agencyServiceAreas = data.agency.service_areas || [];
-      property.agencyPropertiesCount = data.agency.properties_count || 0;
+    // Add complete agency information (now directly from the view)
+    if (data.agency_name) {
+      property.agencyName = data.agency_name;
+      property.agencyLogo = data.agency_logo;
+      property.agencyPhone = data.agency_phone;
+      property.agencyEmail = data.agency_email;
+      property.agencyWebsite = data.agency_website;
+      property.agencyVerified = data.agency_verified;
+      property.agencyRating = typeof data.agency_rating === 'number' ? data.agency_rating : 0;
+      property.agencyDescription = data.agency_description;
+      property.agencySpecialties = data.agency_specialties || [];
+      property.agencyServiceAreas = data.agency_service_areas || [];
+      property.agencyPropertiesCount = data.agency_properties_count || 0;
       
       // Calculate years active from creation date
-      if (data.agency.created_at) {
-        const createdDate = new Date(data.agency.created_at);
+      if (data.agency_created_at) {
+        const createdDate = new Date(data.agency_created_at);
         const currentDate = new Date();
         const yearsDiff = currentDate.getFullYear() - createdDate.getFullYear();
         property.agencyYearsActive = yearsDiff > 0 ? yearsDiff : 1;
       }
       
-      property.agencyJoinDate = data.agency.created_at;
+      property.agencyJoinDate = data.agency_created_at;
+    }
+    
+    // Add owner information (now directly from the view)
+    if (data.owner_id) {
+      property.ownerCompany = data.company_name;
+      property.ownerTaxId = data.tax_id;
+      property.ownerPaymentMethod = data.payment_method;
+      property.ownerPaymentPercentage = data.payment_percentage;
     }
     
     return { property, error: null, hasActiveLeases };

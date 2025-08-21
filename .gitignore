@@ -26,3 +26,15 @@ dist-ssr
 # Tempo files
 **/tempobook/dynamic/
 **/tempobook/storyboards/
+
+# Ignore SQL files and Supabase migrations from version control
+*.sql
+supabase/migrations/
+sql/
+restore-database.sql
+restore-supabase.sql
+verify-*.sql
+test-*.sql
+fix-*.sql
+debug-*.sql
+ensure-default-free-plan.sql

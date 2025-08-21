@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Vérification Transaction</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test de Vérification de Transaction</h1>
+        <p>Ce test permet de vérifier que les modifications apportées à la fonction verify-transaction fonctionnent correctement.</p>
+        
+        <form id="testForm">
+            <div class="form-group">
+                <label for="userId">ID Utilisateur (UUID):</label>
+                <input type="text" id="userId" placeholder="ex: 123e4567-e89b-12d3-a456-426614174000" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="planId">ID Plan:</label>
+                <input type="text" id="planId" placeholder="ex: plan_premium_monthly" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="planName">Nom du Plan:</label>
+                <input type="text" id="planName" placeholder="ex: Premium Mensuel" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="paymentReference">Référence de Paiement:</label>
+                <input type="text" id="paymentReference" placeholder="ex: TEST_REF_123456" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="amountCents">Montant (en centimes):</label>
+                <input type="number" id="amountCents" placeholder="ex: 2500 (pour 25.00)" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="senderNumber">Numéro Expéditeur (optionnel):</label>
+                <input type="text" id="senderNumber" placeholder="ex: +22370123456">
+            </div>
+            
+            <button type="button" onclick="testRealtimeVerification()">🔄 Test Vérification Temps Réel</button>
+            <button type="button" onclick="testStandardVerification()">📋 Test Vérification Standard</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ztjhxvqkqfqfqfqfqfqf.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...';
+        
+        function showResult(message, type = 'info') {
+            const resultDiv = document.getElementById('result');
+            resultDiv.className = `result ${type}`;
+            resultDiv.textContent = message;
+        }
+        
+        async function testRealtimeVerification() {
+            const formData = getFormData();
+            if (!formData) return;
+            
+            showResult('🔄 Test de vérification en temps réel en cours...', 'info');
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/verify-transaction`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        user_id: formData.userId,
+                        plan_id: formData.planId,
+                        plan_name: formData.planName,
+                        payment_reference: formData.paymentReference,
+                        amount_cents: formData.amountCents,
+                        sender_number: formData.senderNumber,
+                        verification_type: 'realtime'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(`✅ Succès!\n\n${JSON.stringify(result, null, 2)}`, 'success');
+                } else {
+                    showResult(`❌ Erreur HTTP ${response.status}:\n\n${JSON.stringify(result, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Erreur de connexion:\n\n${error.message}`, 'error');
+            }
+        }
+        
+        async function testStandardVerification() {
+            const formData = getFormData();
+            if (!formData) return;
+            
+            showResult('📋 Test de vérification standard en cours...', 'info');
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/functions/v1/verify-transaction`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+                    },
+                    body: JSON.stringify({
+                        user_id: formData.userId,
+                        plan_id: formData.planId,
+                        plan_name: formData.planName,
+                        payment_reference: formData.paymentReference,
+                        amount_cents: formData.amountCents,
+                        verification_type: 'standard'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showResult(`✅ Succès!\n\n${JSON.stringify(result, null, 2)}`, 'success');
+                } else {
+                    showResult(`❌ Erreur HTTP ${response.status}:\n\n${JSON.stringify(result, null, 2)}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Erreur de connexion:\n\n${error.message}`, 'error');
+            }
+        }
+        
+        function getFormData() {
+            const userId = document.getElementById('userId').value.trim();
+            const planId = document.getElementById('planId').value.trim();
+            const planName = document.getElementById('planName').value.trim();
+            const paymentReference = document.getElementById('paymentReference').value.trim();
+            const amountCents = parseInt(document.getElementById('amountCents').value);
+            const senderNumber = document.getElementById('senderNumber').value.trim();
+            
+            if (!userId || !planId || !planName || !paymentReference || !amountCents) {
+                showResult('❌ Veuillez remplir tous les champs obligatoires.', 'error');
+                return null;
+            }
+            
+            return {
+                userId,
+                planId,
+                planName,
+                paymentReference,
+                amountCents,
+                senderNumber: senderNumber || undefined
+            };
+        }
+        
+        // Pré-remplir avec des données de test
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('userId').value = '123e4567-e89b-12d3-a456-426614174000';
+            document.getElementById('planId').value = 'plan_premium_monthly';
+            document.getElementById('planName').value = 'Premium Mensuel';
+            document.getElementById('paymentReference').value = 'TEST_REF_' + Date.now();
+            document.getElementById('amountCents').value = '2500';
+            document.getElementById('senderNumber').value = '+22370123456';
+        });
+    </script>
+</body>
+</html>

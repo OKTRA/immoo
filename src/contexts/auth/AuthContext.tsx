@@ -278,6 +278,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return state.profile?.role === 'admin';
   }, [state.profile]);
 
+  const isOwner = useCallback((): boolean => {
+    return state.profile?.role === 'owner';
+  }, [state.profile]);
+
+  const isPublic = useCallback((): boolean => {
+    return state.profile?.role === 'public' || !state.profile?.role;
+  }, [state.profile]);
+
+  const getUserRole = useCallback((): string => {
+    return state.profile?.role || 'public';
+  }, [state.profile]);
+
+  const hasPermission = useCallback((permission: string): boolean => {
+    if (!state.profile?.role) return false;
+    
+    const permissions = {
+      public: ['view_properties', 'contact_agency', 'search_properties'],
+      agency: ['create_property', 'manage_tenants', 'view_analytics', 'manage_contracts', 'manage_payments'],
+      admin: ['manage_users', 'manage_agencies', 'system_settings', 'view_all_data'],
+      owner: ['manage_own_properties', 'view_own_analytics']
+    };
+    
+    return permissions[state.profile.role as keyof typeof permissions]?.includes(permission) || false;
+  }, [state.profile]);
+
   // Initialiser l'authentification au montage
   useEffect(() => {
     initializeAuth();
@@ -366,6 +391,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [initializeAuth]);
 
+
+
   const contextValue: AuthContextType = {
     status: state.status,
     user: state.user,
@@ -381,6 +408,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     hasRole,
     isAgency,
     isAdmin,
+    isOwner,
+    isPublic,
+    getUserRole,
+    hasPermission,
   };
 
   return (

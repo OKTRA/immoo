@@ -9,43 +9,11 @@ import { formatPropertyFromDb } from '../property/propertyUtils';
 export const getPublicPropertiesByAgencyId = async (agencyId: string, limit?: number) => {
   try {
     let query = supabase
-      .from('properties')
-      .select(`
-        *,
-        owner:property_owners(
-          id,
-          user_id,
-          company_name,
-          tax_id,
-          payment_method,
-          payment_percentage
-        ),
-        agency:agencies(
-          id,
-          name,
-          logo_url,
-          email,
-          phone,
-          website,
-          verified,
-          description,
-          specialties,
-          service_areas,
-          properties_count,
-          rating,
-          created_at
-        ),
-        property_images(
-          id,
-          image_url,
-          description,
-          is_primary,
-          position
-        )
-      `, { count: 'exact' })
+      .from('properties_complete')
+      .select('*', { count: 'exact' })
       .eq('agency_id', agencyId)
-      .eq('is_visible', true) // Only show visible properties in public views
-      .eq('status', 'available'); // Only show available properties
+      .eq('is_visible', true)
+      .eq('status', 'available');
     
     if (limit) {
       query = query.limit(limit);
@@ -58,7 +26,7 @@ export const getPublicPropertiesByAgencyId = async (agencyId: string, limit?: nu
     const properties = data?.map(property => {
       const formatted = formatPropertyFromDb(property);
       
-      // Add images to the property
+      // Add images to the property (view already embeds images)
       if (property.property_images && property.property_images.length > 0) {
         formatted.images = property.property_images.map((img: any) => ({
           id: img.id,
@@ -68,30 +36,27 @@ export const getPublicPropertiesByAgencyId = async (agencyId: string, limit?: nu
           position: img.position
         }));
       }
-      
-      // Add complete agency information to each property
-      if (property.agency) {
-        formatted.agencyName = property.agency.name;
-        formatted.agencyLogo = property.agency.logo_url;
-        formatted.agencyPhone = property.agency.phone;
-        formatted.agencyEmail = property.agency.email;
-        formatted.agencyWebsite = property.agency.website;
-        formatted.agencyVerified = property.agency.verified;
-        formatted.agencyRating = typeof property.agency.rating === 'number' ? property.agency.rating : 0;
-        formatted.agencyDescription = property.agency.description;
-        formatted.agencySpecialties = property.agency.specialties || [];
-        formatted.agencyServiceAreas = property.agency.service_areas || [];
-        formatted.agencyPropertiesCount = property.agency.properties_count || 0;
-        
-        // Calculate years active from creation date
-        if (property.agency.created_at) {
-          const createdDate = new Date(property.agency.created_at);
+
+      // Add agency info from view columns if present
+      if (property.agency_name) {
+        formatted.agencyName = property.agency_name;
+        formatted.agencyLogo = property.agency_logo;
+        formatted.agencyPhone = property.agency_phone;
+        formatted.agencyEmail = property.agency_email;
+        formatted.agencyWebsite = property.agency_website;
+        formatted.agencyVerified = property.agency_verified;
+        formatted.agencyRating = typeof property.agency_rating === 'number' ? property.agency_rating : 0;
+        formatted.agencyDescription = property.agency_description;
+        formatted.agencySpecialties = property.agency_specialties || [];
+        formatted.agencyServiceAreas = property.agency_service_areas || [];
+        formatted.agencyPropertiesCount = property.agency_properties_count || 0;
+        if (property.agency_created_at) {
+          const createdDate = new Date(property.agency_created_at);
           const currentDate = new Date();
           const yearsDiff = currentDate.getFullYear() - createdDate.getFullYear();
           formatted.agencyYearsActive = yearsDiff > 0 ? yearsDiff : 1;
         }
-        
-        formatted.agencyJoinDate = property.agency.created_at;
+        formatted.agencyJoinDate = property.agency_created_at;
       }
       
       return formatted;
@@ -110,42 +75,10 @@ export const getPublicPropertiesByAgencyId = async (agencyId: string, limit?: nu
 export const getPropertiesByAgencyId = async (agencyId: string, status?: string) => {
   try {
     let query = supabase
-      .from('properties')
-      .select(`
-        *,
-        owner:property_owners(
-          id,
-          user_id,
-          company_name,
-          tax_id,
-          payment_method,
-          payment_percentage
-        ),
-        agency:agencies(
-          id,
-          name,
-          logo_url,
-          email,
-          phone,
-          website,
-          verified,
-          description,
-          specialties,
-          service_areas,
-          properties_count,
-          rating,
-          created_at
-        ),
-        property_images(
-          id,
-          image_url,
-          description,
-          is_primary,
-          position
-        )
-      `, { count: 'exact' })
+      .from('properties_complete')
+      .select('*', { count: 'exact' })
       .eq('agency_id', agencyId);
-      // Note: For agency management, we show ALL properties (visible and hidden)
+      // For management, show all properties; no is_visible filter
     
     if (status) {
       query = query.eq('status', status);
@@ -158,7 +91,7 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
     const properties = data?.map(property => {
       const formatted = formatPropertyFromDb(property);
       
-      // Add images to the property
+      // Add images to the property (view already embeds images)
       if (property.property_images && property.property_images.length > 0) {
         formatted.images = property.property_images.map((img: any) => ({
           id: img.id,
@@ -168,30 +101,27 @@ export const getPropertiesByAgencyId = async (agencyId: string, status?: string)
           position: img.position
         }));
       }
-      
-      // Add complete agency information to each property
-      if (property.agency) {
-        formatted.agencyName = property.agency.name;
-        formatted.agencyLogo = property.agency.logo_url;
-        formatted.agencyPhone = property.agency.phone;
-        formatted.agencyEmail = property.agency.email;
-        formatted.agencyWebsite = property.agency.website;
-        formatted.agencyVerified = property.agency.verified;
-        formatted.agencyRating = typeof property.agency.rating === 'number' ? property.agency.rating : 0;
-        formatted.agencyDescription = property.agency.description;
-        formatted.agencySpecialties = property.agency.specialties || [];
-        formatted.agencyServiceAreas = property.agency.service_areas || [];
-        formatted.agencyPropertiesCount = property.agency.properties_count || 0;
-        
-        // Calculate years active from creation date
-        if (property.agency.created_at) {
-          const createdDate = new Date(property.agency.created_at);
+
+      // Add agency info from view columns if present
+      if (property.agency_name) {
+        formatted.agencyName = property.agency_name;
+        formatted.agencyLogo = property.agency_logo;
+        formatted.agencyPhone = property.agency_phone;
+        formatted.agencyEmail = property.agency_email;
+        formatted.agencyWebsite = property.agency_website;
+        formatted.agencyVerified = property.agency_verified;
+        formatted.agencyRating = typeof property.agency_rating === 'number' ? property.agency_rating : 0;
+        formatted.agencyDescription = property.agency_description;
+        formatted.agencySpecialties = property.agency_specialties || [];
+        formatted.agencyServiceAreas = property.agency_service_areas || [];
+        formatted.agencyPropertiesCount = property.agency_properties_count || 0;
+        if (property.agency_created_at) {
+          const createdDate = new Date(property.agency_created_at);
           const currentDate = new Date();
           const yearsDiff = currentDate.getFullYear() - createdDate.getFullYear();
           formatted.agencyYearsActive = yearsDiff > 0 ? yearsDiff : 1;
         }
-        
-        formatted.agencyJoinDate = property.agency.created_at;
+        formatted.agencyJoinDate = property.agency_created_at;
       }
       
       return formatted;

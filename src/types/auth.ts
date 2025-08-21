@@ -53,8 +53,12 @@ export interface AuthContextType {
   refreshAuth: () => Promise<void>;
   updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   
-  // Utilitaires
+  // Utilitaires de rôles
   hasRole: (role: string) => boolean;
   isAgency: () => boolean;
   isAdmin: () => boolean;
+  isOwner: () => boolean;
+  isPublic: () => boolean;
+  getUserRole: () => string;
+  hasPermission: (permission: string) => boolean;
 } 

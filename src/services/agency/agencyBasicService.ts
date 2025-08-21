@@ -72,31 +72,73 @@ export const getUserAgencies = async (
       throw new Error("Utilisateur non connecté");
     }
 
-    // Récupérer le profil utilisateur pour obtenir l'email
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('email, agency_id')
-      .eq('id', userId)
-      .single();
+    // Récupérer le profil utilisateur pour obtenir l'email (support user_id puis fallback id)
+    let profileData: { email?: string | null; agency_id?: string | null } | null = null;
+    {
+      const { data: byUserId } = await supabase
+        .from('profiles')
+        .select('email, agency_id')
+        .eq('user_id', userId)
+        .maybeSingle();
+      if (byUserId) {
+        profileData = byUserId as any;
+      } else {
+        const { data: byId } = await supabase
+          .from('profiles')
+          .select('email, agency_id')
+          .eq('id', userId)
+          .maybeSingle();
+        profileData = byId as any;
+      }
+    }
 
     console.log("Profil utilisateur:", profileData);
 
-    // Récupérer les agences de l'utilisateur de plusieurs façons :
-    // 1. Par user_id direct
-    // 2. Par agency_id dans le profil
-    // 3. Par email correspondant (pour les agences créées automatiquement)
-    const { data, error, count } = await supabase
-      .from('agencies_with_property_count')
-      .select('*', { count: 'exact' })
-      .or(`user_id.eq.${userId},id.eq.${profileData?.agency_id || 'null'},email.eq.${profileData?.email || 'null'}`)
-      .order(sortBy === 'properties_count' ? 'computed_properties_count' : sortBy, { ascending: sortOrder === 'asc' })
-      .range(offset, offset + limit - 1);
+    // Étape 1: Collecter les IDs d'agences via la table agencies (la vue ne contient pas user_id)
+    const orConditions: string[] = [`user_id.eq.${userId}`];
+    if (profileData?.agency_id) orConditions.push(`id.eq.${profileData.agency_id}`);
+    if (profileData?.email) orConditions.push(`email.eq.${profileData.email}`);
 
-    if (error) {
-      console.error('Erreur Supabase:', error);
-      throw error;
+    const { data: userAgencies, error: findAgenciesError } = await supabase
+      .from('agencies')
+      .select('id')
+      .or(orConditions.join(','));
+
+    if (findAgenciesError) {
+      console.error('Erreur Supabase (find agencies):', findAgenciesError);
+      throw findAgenciesError;
     }
-    
+
+    const agencyIds = Array.from(new Set((userAgencies || []).map(a => a.id))).filter(Boolean);
+
+    // Étape 2: Charger les données enrichies depuis la vue uniquement si on a des IDs
+    if (agencyIds.length === 0) {
+      console.log('Aucune agence liée au user trouvée');
+    }
+
+    let data: any[] | null = null;
+    let count: number | null = null;
+    if (agencyIds.length > 0) {
+      const { data: viewData, error: viewError, count: viewCount } = await supabase
+        .from('agencies_with_property_count')
+        .select('*', { count: 'exact' })
+        .in('id', agencyIds)
+        .order(
+          sortBy === 'properties_count' ? 'computed_properties_count' : sortBy,
+          { ascending: sortOrder === 'asc' }
+        )
+        .range(offset, offset + limit - 1);
+      if (viewError) {
+        console.error('Erreur Supabase (view):', viewError);
+        throw viewError;
+      }
+      data = viewData;
+      count = viewCount as number | null;
+    } else {
+      data = [];
+      count = 0;
+    }
+
     console.log(`Agences utilisateur récupérées: ${data?.length || 0}`, data);
 
     // Si aucune agence trouvée, essayer de corriger automatiquement la liaison
@@ -124,7 +166,7 @@ export const getUserAgencies = async (
         await supabase
           .from('profiles')
           .update({ agency_id: orphanAgency.id })
-          .eq('id', userId);
+          .eq('user_id', userId);
 
         console.log("Liaison corrigée automatiquement");
         
