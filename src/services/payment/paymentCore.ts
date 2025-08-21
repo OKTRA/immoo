@@ -9,10 +9,23 @@ export const createPayment = async (paymentData: PaymentData) => {
       return { data: null, error: 'LeaseId is required' };
     }
 
+    // Get tenant_id from lease
+    const { data: leaseData, error: leaseError } = await supabase
+      .from('leases')
+      .select('tenant_id')
+      .eq('id', paymentData.leaseId)
+      .single();
+
+    if (leaseError) {
+      console.error('Error fetching lease for tenant_id:', leaseError);
+      return { data: null, error: 'Failed to get lease information' };
+    }
+
     const { data, error } = await supabase
       .from('payments')
       .insert({
         lease_id: paymentData.leaseId,
+        tenant_id: leaseData.tenant_id,
         amount: paymentData.amount,
         payment_date: paymentData.paymentDate || new Date().toISOString().split('T')[0], // Ensure payment_date is never null
         due_date: paymentData.dueDate,

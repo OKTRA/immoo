@@ -72,24 +72,16 @@ export const getUserAgencies = async (
       throw new Error("Utilisateur non connecté");
     }
 
-    // Récupérer le profil utilisateur pour obtenir l'email (support user_id puis fallback id)
-    let profileData: { email?: string | null; agency_id?: string | null } | null = null;
-    {
-      const { data: byUserId } = await supabase
-        .from('profiles')
-        .select('email, agency_id')
-        .eq('user_id', userId)
-        .maybeSingle();
-      if (byUserId) {
-        profileData = byUserId as any;
-      } else {
-        const { data: byId } = await supabase
-          .from('profiles')
-          .select('email, agency_id')
-          .eq('id', userId)
-          .maybeSingle();
-        profileData = byId as any;
-      }
+    // Récupérer le profil utilisateur pour obtenir l'email
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('email, agency_id')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    if (profileError) {
+      console.error('❌ Error fetching user profile:', profileError);
+      throw profileError;
     }
 
     console.log("Profil utilisateur:", profileData);
@@ -249,7 +241,7 @@ export const checkUserHasAgency = async (userId: string): Promise<{ hasAgency: b
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('email, agency_id')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .single();
 
     if (profileError) {

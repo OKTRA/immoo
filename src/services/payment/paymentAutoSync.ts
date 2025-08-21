@@ -10,7 +10,7 @@ export const syncOverduePayments = async (leaseId: string): Promise<{ data: numb
     // Récupérer les informations du bail
     const { data: leaseData, error: leaseError } = await supabase
       .from('leases')
-      .select('start_date, payment_start_date, payment_frequency, payment_day, monthly_rent, end_date')
+      .select('start_date, payment_start_date, payment_frequency, payment_day, monthly_rent, end_date, tenant_id')
       .eq('id', leaseId)
       .single();
       
@@ -25,7 +25,8 @@ export const syncOverduePayments = async (leaseId: string): Promise<{ data: numb
       payment_frequency,
       payment_day,
       monthly_rent,
-      end_date
+      end_date,
+      tenant_id
     } = leaseData as any;
 
     // Déterminer la date de début des paiements
@@ -102,6 +103,7 @@ export const syncOverduePayments = async (leaseId: string): Promise<{ data: numb
         
         payments.push({
           lease_id: leaseId,
+          tenant_id: tenant_id,
           amount: monthly_rent,
           due_date: dueDateStr,
           payment_date: new Date().toISOString().split('T')[0], // Satisfait la contrainte NOT NULL
@@ -149,20 +151,22 @@ export const syncOverduePayments = async (leaseId: string): Promise<{ data: numb
 export const syncOverduePaymentsForAgency = async (agencyId: string): Promise<{ totalSynced: number; error: string | null }> => {
   try {
     // Récupérer les baux actifs liés aux propriétés de l'agence
+    // Fallback path without embedded joins
+    const { data: props, error: propsError } = await supabase
+      .from('properties')
+      .select('id')
+      .eq('agency_id', agencyId);
+    if (propsError) {
+      console.error('Erreur lors de la récupération des propriétés de l\'agence:', propsError);
+      return { totalSynced: 0, error: propsError.message } as any;
+    }
+    const propertyIds = (props || []).map(p => p.id);
+    if (propertyIds.length === 0) return { totalSynced: 0, error: null } as any;
+
     const { data: leases, error: leasesError } = await supabase
       .from('leases')
-      .select(`
-        id,
-        status,
-        start_date,
-        end_date,
-        monthly_rent,
-        payment_start_date,
-        payment_frequency,
-        payment_day,
-        properties!inner(agency_id)
-      `)
-      .eq('properties.agency_id', agencyId)
+      .select('id, status, start_date, end_date, monthly_rent, payment_start_date, payment_frequency, payment_day, property_id')
+      .in('property_id', propertyIds)
       .eq('status', 'active');
 
     if (leasesError) {

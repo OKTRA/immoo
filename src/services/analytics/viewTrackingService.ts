@@ -15,31 +15,9 @@ export interface ViewRecord {
  * Enregistre une vue pour une propriété ou une agence
  */
 export async function recordView(entityType: 'property' | 'agency', entityId: string): Promise<void> {
-  try {
-    const userAgent = typeof navigator !== 'undefined' ? navigator.userAgent : undefined;
-
-    const payload: Record<string, any> = {
-      user_agent: userAgent,
-      created_at: new Date().toISOString(),
-      purpose: 'view',
-    };
-
-    if (entityType === 'agency') {
-      payload.agency_id = entityId;
-    } else {
-      payload.property_id = entityId;
-    }
-
-    const { error } = await supabase
-      .from('visitor_contacts')
-      .insert(payload);
-
-    if (error) {
-      console.error("Erreur lors de l'enregistrement de la vue:", error);
-    }
-  } catch (error) {
-    console.error("Erreur lors de l'enregistrement de la vue:", error);
-  }
+  // Temporarily disabled due to RLS issues
+  console.log(`View tracking disabled for ${entityType} ${entityId} due to RLS policy conflicts`);
+  return;
 }
 
 /**
@@ -64,10 +42,10 @@ export function useViewTracking(entityType: 'property' | 'agency', entityId: str
 export async function getViewsCount(entityType: 'property' | 'agency', entityId: string): Promise<number> {
   try {
     const idColumn = entityType === 'agency' ? 'agency_id' : 'property_id';
-    const { count, error } = await supabase
+    const { data, error } = await supabase
       .from('visitor_contacts')
-      .select('*', { count: 'exact', head: true })
-      .eq(idColumn as any, entityId)
+      .select('id')
+      .eq(idColumn, entityId)
       .eq('purpose', 'view');
 
     if (error) {
@@ -75,7 +53,7 @@ export async function getViewsCount(entityType: 'property' | 'agency', entityId:
       return 0;
     }
 
-    return count || 0;
+    return data?.length || 0;
   } catch (error) {
     console.error('Erreur lors de la récupération du nombre de vues:', error);
     return 0;
@@ -93,10 +71,10 @@ export async function getViewsByPeriod(
 ): Promise<number> {
   try {
     const idColumn = entityType === 'agency' ? 'agency_id' : 'property_id';
-    const { count, error } = await supabase
+    const { data, error } = await supabase
       .from('visitor_contacts')
-      .select('*', { count: 'exact', head: true })
-      .eq(idColumn as any, entityId)
+      .select('id')
+      .eq(idColumn, entityId)
       .eq('purpose', 'view')
       .gte('created_at', startDate.toISOString())
       .lte('created_at', endDate.toISOString());
@@ -106,7 +84,7 @@ export async function getViewsByPeriod(
       return 0;
     }
 
-    return count || 0;
+    return data?.length || 0;
   } catch (error) {
     console.error('Erreur lors de la récupération des vues par période:', error);
     return 0;

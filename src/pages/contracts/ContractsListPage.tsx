@@ -98,9 +98,9 @@ export default function ContractsListPage() {
     // Filter by search term
     if (searchTerm) {
       filtered = filtered.filter(contract =>
-        contract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.jurisdiction.toLowerCase().includes(searchTerm.toLowerCase())
+        contract.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.contract_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.jurisdiction?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -111,7 +111,7 @@ export default function ContractsListPage() {
 
     // Filter by type
     if (typeFilter !== 'all') {
-      filtered = filtered.filter(contract => contract.type === typeFilter);
+      filtered = filtered.filter(contract => contract.contract_type === typeFilter);
     }
 
     setFilteredContracts(filtered);
@@ -320,31 +320,31 @@ export default function ContractsListPage() {
               <TableBody>
                 {filteredContracts.map((contract) => (
                   <TableRow key={contract.id}>
-                    <TableCell>
-                      <div className="font-medium">{contract.title}</div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline">
-                        {getTypeLabel(contract.type)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {getStatusBadge(contract.status)}
-                    </TableCell>
-                    <TableCell>{contract.jurisdiction}</TableCell>
+                                         <TableCell>
+                       <div className="font-medium">{contract.title || `Contrat ${contract.contract_type}`}</div>
+                     </TableCell>
+                     <TableCell>
+                       <Badge variant="outline">
+                         {getTypeLabel(contract.contract_type)}
+                       </Badge>
+                     </TableCell>
+                     <TableCell>
+                       {getStatusBadge(contract.status)}
+                     </TableCell>
+                     <TableCell>{contract.jurisdiction || 'Non spécifié'}</TableCell>
                     <TableCell>
                       {contract.created_at && format(new Date(contract.created_at), 'dd/MM/yyyy', { locale: fr })}
                     </TableCell>
-                    <TableCell>
-                      {contract.related_entity ? (
-                        <Badge variant="secondary" className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          Associé
-                        </Badge>
-                      ) : (
-                        <span className="text-gray-400">-</span>
-                      )}
-                    </TableCell>
+                                         <TableCell>
+                       {contract.property_id ? (
+                         <Badge variant="secondary" className="flex items-center gap-1">
+                           <Users className="h-3 w-3" />
+                           Associé
+                         </Badge>
+                       ) : (
+                         <span className="text-gray-400">-</span>
+                       )}
+                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button
@@ -375,7 +375,7 @@ export default function ContractsListPage() {
                           </Button>
                         )}
                         
-                        {!contract.related_entity && contract.status !== 'closed' && (
+                                                 {!contract.property_id && contract.status !== 'closed' && (
                           <Button
                             variant="outline"
                             size="sm"

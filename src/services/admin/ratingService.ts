@@ -86,7 +86,7 @@ export async function getAgencyAverageRating(agencyId: string): Promise<number> 
       .eq('agency_id', agencyId);
 
     if (error) {
-      console.error('Erreur lors de la récupération des notes d\'agence:', error);
+      console.warn('Error getting agency average rating:', error);
       return 0;
     }
 
@@ -97,7 +97,7 @@ export async function getAgencyAverageRating(agencyId: string): Promise<number> 
     const totalRating = data.reduce((sum, item) => sum + item.rating, 0);
     return Math.round((totalRating / data.length) * 10) / 10; // Arrondi à 1 décimale
   } catch (error) {
-    console.error('Erreur lors de la récupération des notes d\'agence:', error);
+    console.error('Error getting agency average rating:', error);
     return 0;
   }
 }
@@ -111,50 +111,9 @@ export async function setPropertyRating(
   adminId: string,
   comment?: string
 ): Promise<{ success: boolean; error?: string }> {
-  try {
-    // Vérifier si une note existe déjà
-    const { data: existingRating } = await supabase
-      .from('property_ratings')
-      .select('id')
-      .eq('property_id', propertyId)
-      .eq('admin_id', adminId)
-      .single();
-
-    if (existingRating) {
-      // Mettre à jour la note existante
-      const { error } = await supabase
-        .from('property_ratings')
-        .update({
-          rating,
-          comment,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', existingRating.id);
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
-    } else {
-      // Créer une nouvelle note
-      const { error } = await supabase
-        .from('property_ratings')
-        .insert({
-          property_id: propertyId,
-          rating,
-          comment,
-          admin_id: adminId,
-          created_at: new Date().toISOString(),
-        });
-
-      if (error) {
-        return { success: false, error: error.message };
-      }
-    }
-
-    return { success: true };
-  } catch (error) {
-    return { success: false, error: (error as Error).message };
-  }
+  // Temporarily disabled: property_ratings table doesn't exist
+  console.log(`setPropertyRating disabled for property ${propertyId} - table doesn't exist`);
+  return { success: false, error: "Rating service temporarily disabled" };
 }
 
 /**
@@ -168,7 +127,7 @@ export async function getPropertyAverageRating(propertyId: string): Promise<numb
       .eq('property_id', propertyId);
 
     if (error) {
-      console.error('Erreur lors de la récupération des notes de propriété:', error);
+      console.warn('Error getting property average rating:', error);
       return 0;
     }
 
@@ -179,7 +138,7 @@ export async function getPropertyAverageRating(propertyId: string): Promise<numb
     const totalRating = data.reduce((sum, item) => sum + item.rating, 0);
     return Math.round((totalRating / data.length) * 10) / 10; // Arrondi à 1 décimale
   } catch (error) {
-    console.error('Erreur lors de la récupération des notes de propriété:', error);
+    console.error('Error getting property average rating:', error);
     return 0;
   }
 }
@@ -196,13 +155,13 @@ export async function getAgencyRatings(agencyId: string): Promise<AgencyRating[]
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Erreur lors de la récupération des notes d\'agence:', error);
+      console.warn('Error getting agency ratings:', error);
       return [];
     }
 
     return data || [];
   } catch (error) {
-    console.error('Erreur lors de la récupération des notes d\'agence:', error);
+    console.error('Error getting agency ratings:', error);
     return [];
   }
 }
@@ -211,21 +170,7 @@ export async function getAgencyRatings(agencyId: string): Promise<AgencyRating[]
  * Obtenir toutes les notes d'une propriété avec les détails
  */
 export async function getPropertyRatings(propertyId: string): Promise<PropertyRating[]> {
-  try {
-    const { data, error } = await supabase
-      .from('property_ratings')
-      .select('*')
-      .eq('property_id', propertyId)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Erreur lors de la récupération des notes de propriété:', error);
-      return [];
-    }
-
-    return data || [];
-  } catch (error) {
-    console.error('Erreur lors de la récupération des notes de propriété:', error);
-    return [];
-  }
+  // Temporarily disabled: property_ratings table doesn't exist
+  console.log(`getPropertyRatings disabled for property ${propertyId} - table doesn't exist`);
+  return [];
 }

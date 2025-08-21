@@ -63,7 +63,7 @@ interface Contract {
   parties: any;
   created_at: string;
   updated_at: string;
-  related_entity?: string;
+  property_id?: string;
   isViewMode?: boolean;
 }
 
@@ -101,7 +101,7 @@ export default function AgencyContractsPageNew() {
       try {
         let query = supabase
           .from("contracts")
-          .select("id, type, title, jurisdiction, status, content, details, parties, created_at, updated_at, lease_id")
+          .select("*")
           .eq("agency_id", agencyId)
           .order("created_at", { ascending: false });
 
@@ -135,9 +135,9 @@ export default function AgencyContractsPageNew() {
     
     if (searchTerm) {
       filtered = filtered.filter(contract => 
-        contract.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        contract.jurisdiction.toLowerCase().includes(searchTerm.toLowerCase())
+        contract.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.contract_type.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        contract.jurisdiction?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
     
@@ -283,11 +283,11 @@ export default function AgencyContractsPageNew() {
       const success = await assignContractToLease(contractId, leaseId);
       if (success) {
         setContracts(prev => prev.map(c => 
-          c.id === contractId ? { ...c, status: 'validated' as const, related_entity: leaseId } : c
+          c.id === contractId ? { ...c, status: 'validated' as const, property_id: leaseId } : c
         ));
         
         if (editingContract && editingContract.id === contractId) {
-          setEditingContract({ ...editingContract, status: 'validated' as const, related_entity: leaseId });
+          setEditingContract({ ...editingContract, status: 'validated' as const, property_id: leaseId });
         }
         
         toast.success(t('agencyDashboard.pages.contracts.contractAssignedSuccess'));
@@ -357,7 +357,7 @@ export default function AgencyContractsPageNew() {
           </div>
 
           <ContractWysiwygEditor
-            initialContent={editingContract.content}
+                            initialContent={editingContract.terms}
             contractId={editingContract.id}
             onSave={handleSaveContract}
             onAssignToLease={handleAssignToLease}
@@ -523,7 +523,7 @@ export default function AgencyContractsPageNew() {
         {filteredContracts.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
             {filteredContracts.map((contract) => {
-              const TypeIcon = getTypeIcon(contract.type);
+              const TypeIcon = getTypeIcon(contract.contract_type);
               return (
                 <Card key={contract.id} className="w-full hover:shadow-lg transition-all duration-200 border-0 shadow-md bg-white/80 backdrop-blur-sm">
                   <CardHeader className="pb-3 px-4 pt-4">
@@ -533,8 +533,8 @@ export default function AgencyContractsPageNew() {
                           <TypeIcon className="h-4 w-4 text-gray-600" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{contract.title}</h3>
-                          <p className="text-xs sm:text-sm text-gray-500 truncate">{getTypeLabel(contract.type)}</p>
+                                                      <h3 className="font-semibold text-gray-900 text-sm sm:text-base truncate">{contract.title || `Contrat ${contract.contract_type}`}</h3>
+                          <p className="text-xs sm:text-sm text-gray-500 truncate">{getTypeLabel(contract.contract_type)}</p>
                         </div>
                       </div>
                       <div className="flex-shrink-0">
@@ -547,7 +547,7 @@ export default function AgencyContractsPageNew() {
                     <div className="space-y-2 sm:space-y-3">
                       <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
                         <MapPin className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
-                        <span className="truncate">{contract.jurisdiction}</span>
+                        <span className="truncate">{contract.jurisdiction || 'Non spécifié'}</span>
                       </div>
                       
                       <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-600">
@@ -555,7 +555,7 @@ export default function AgencyContractsPageNew() {
                         <span className="truncate">{new Date(contract.created_at).toLocaleDateString('fr-FR')}</span>
                       </div>
                       
-                      {contract.related_entity && (
+                      {contract.property_id && (
                         <div className="flex items-center gap-2 text-xs sm:text-sm text-blue-600">
                           <Link className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                           <span className="text-xs truncate">Assigné à un bail</span>
@@ -564,7 +564,7 @@ export default function AgencyContractsPageNew() {
                       
                       <div className="text-xs sm:text-sm text-gray-600 bg-gray-50 p-2 sm:p-3 rounded-lg">
                         <p className="line-clamp-2">
-                          {previewContractContent(contract.content, 100)}
+                          {previewContractContent(contract.terms, 100)}
                         </p>
                       </div>
                     </div>

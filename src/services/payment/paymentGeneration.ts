@@ -10,10 +10,10 @@ export const generateHistoricalPayments = async (
   currentDate: string = new Date().toISOString().split('T')[0]
 ): Promise<{ data: PaymentData[] | null; error: string | null }> => {
   try {
-    // Get lease details for payment day calculation
+    // Get lease details for payment day calculation and tenant_id
     const { data: leaseData, error: leaseError } = await supabase
       .from('leases')
-      .select('payment_day, payment_frequency, start_date')
+      .select('payment_day, payment_frequency, start_date, tenant_id')
       .eq('id', leaseId)
       .single();
       
@@ -97,6 +97,7 @@ export const generateHistoricalPayments = async (
     if (payments.length > 0) {
       const paymentsToInsert = payments.map(p => ({
         lease_id: p.leaseId,
+        tenant_id: leaseData.tenant_id,
         amount: p.amount,
         due_date: p.dueDate,
         payment_date: p.paymentDate, // This will now always have a value

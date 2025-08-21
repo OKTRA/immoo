@@ -22,18 +22,21 @@ import {
 interface ContractPreviewProps {
   contract: {
     id: string;
-    title: string;
-    type: string;
+    contract_type: string; // Changed from 'type'
     status: string;
-    jurisdiction: string;
-    content: string;
-    parties: Record<string, any>;
-    details: Record<string, any>;
+    terms: string; // Changed from 'content'
     created_at: string;
     updated_at: string;
-    related_entity?: string;
     property_id?: string;
-    tenant_id?: string;
+    client_id?: string; // Changed from 'tenant_id'
+    start_date?: string;
+    end_date?: string;
+    value?: number;
+    // Optional fields that might not exist in the DB
+    title?: string;
+    jurisdiction?: string;
+    parties?: Record<string, any>;
+    details?: Record<string, any>;
     lease?: {
       start_date: string;
       end_date: string;
@@ -121,16 +124,16 @@ export default function ContractPreview({
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="flex items-center gap-2 mb-2">
-              <FileText className="h-5 w-5 text-blue-600" />
-              {contract.title}
-            </CardTitle>
-            <div className="flex items-center gap-2 mb-2">
-              {getStatusBadge(contract.status)}
-              <Badge variant="outline">
-                {getTypeLabel(contract.type)}
-              </Badge>
-            </div>
+                         <CardTitle className="flex items-center gap-2 mb-2">
+               <FileText className="h-5 w-5 text-blue-600" />
+               {contract.title || `Contrat ${contract.contract_type}`}
+             </CardTitle>
+             <div className="flex items-center gap-2 mb-2">
+               {getStatusBadge(contract.status)}
+               <Badge variant="outline">
+                 {getTypeLabel(contract.contract_type)}
+               </Badge>
+             </div>
           </div>
           
           {showActions && (
@@ -168,10 +171,10 @@ export default function ContractPreview({
       <CardContent className="space-y-4">
         {/* Informations de base */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-gray-500" />
-            <span className="text-sm text-gray-600">{contract.jurisdiction}</span>
-          </div>
+                     <div className="flex items-center gap-2">
+             <MapPin className="h-4 w-4 text-gray-500" />
+             <span className="text-sm text-gray-600">{contract.jurisdiction || 'Non spécifié'}</span>
+           </div>
           
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-gray-500" />
@@ -212,9 +215,9 @@ export default function ContractPreview({
         {/* Aperçu du contenu */}
         <div>
           <h4 className="text-sm font-medium text-gray-700 mb-2">Aperçu du contenu</h4>
-          <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded border">
-            {truncateContent(stripHtmlTags(contract.content))}
-          </div>
+                     <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded border">
+             {truncateContent(stripHtmlTags(contract.terms))}
+           </div>
         </div>
 
         {/* Parties impliquées */}
@@ -236,7 +239,7 @@ export default function ContractPreview({
         {showActions && (
           <div className="flex items-center justify-between pt-4 border-t">
             <div className="flex items-center gap-2">
-              {!contract.related_entity && onAssignToLease && (
+                             {!contract.property_id && onAssignToLease && (
                 <Button
                   variant="outline"
                   size="sm"

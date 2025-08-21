@@ -95,14 +95,18 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
         // Après avoir obtenu les baux, déterminer ceux qui ont déjà un contrat
         let enrichedLeases = fetchedLeases ?? [];
         if (enrichedLeases.length > 0) {
-          const leaseIds = enrichedLeases.map((l:any) => l.id);
+          const leaseIds = enrichedLeases.map((l:any) => l.id).filter(id => id); // Filter out any undefined/null IDs
+          if (leaseIds.length > 0) { // Only query if we have valid IDs
+                      // Since the database doesn't have lease_id, we'll check by property_id
+          // This is a workaround - in a real implementation, you'd want to add lease_id to the database
           const { data: contracts, error: contractsError } = await supabase
             .from('contracts')
-            .select('id, related_entity')
-            .in('related_entity', leaseIds);
+            .select('id, property_id')
+            .in('property_id', leaseIds);
           if (!contractsError) {
-            const leasesWithContract = new Set(contracts.map(c => c.related_entity));
-            enrichedLeases = enrichedLeases.map((l:any) => ({ ...l, hasContract: leasesWithContract.has(l.id) }));
+            const leasesWithContract = new Set(contracts.map(c => c.property_id));
+              enrichedLeases = enrichedLeases.map((l:any) => ({ ...l, hasContract: leasesWithContract.has(l.id) }));
+            }
           }
         }
         setLeases(enrichedLeases);
@@ -477,9 +481,9 @@ export default function AgencyLeasesDisplay({ agencyId }: AgencyLeasesDisplayPro
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <h4 className="font-medium">{contract.title}</h4>
+                        <h4 className="font-medium">{contract.title || `Contrat ${contract.contract_type}`}</h4>
                         <p className="text-sm text-muted-foreground">
-                          {t('agencyDashboard.pages.leases.type')}: {contract.type} | {t('agencyDashboard.pages.leases.status')}: {contract.status}
+                          {t('agencyDashboard.pages.leases.type')}: {contract.contract_type} | {t('agencyDashboard.pages.leases.status')}: {contract.status}
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {t('agencyDashboard.pages.leases.createdOn')} {new Date(contract.created_at).toLocaleDateString()}

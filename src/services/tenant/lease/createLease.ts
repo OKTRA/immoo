@@ -70,8 +70,13 @@ export const createLease = async (leaseData: Omit<ApartmentLease, 'id'>) => {
     if (error) {
       console.error('Supabase error creating lease:', error);
       
-      // Fallback to regular insert if the RPC doesn't exist
-      if (error.message.includes('does not exist')) {
+      // Fallback to regular insert if the RPC doesn't exist OR if it fails due to NOT NULL/tenant issues
+      const shouldFallback =
+        error.message?.includes('does not exist') ||
+        error.code === '23502' ||
+        (typeof error.message === 'string' && error.message.toLowerCase().includes('tenant_id'));
+
+      if (shouldFallback) {
         console.log('Fallback to non-transactional operation');
         
         // Insert the lease with active status

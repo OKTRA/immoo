@@ -146,8 +146,8 @@ export default function AttachLeaseDialog({
             <CardContent>
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="font-medium">{contract.title}</p>
-                  <p className="text-sm text-muted-foreground">Type: {contract.type}</p>
+                  <p className="font-medium">{contract.title || `Contrat ${contract.contract_type}`}</p>
+                  <p className="text-sm text-muted-foreground">Type: {contract.contract_type}</p>
                 </div>
               </div>
             </CardContent>

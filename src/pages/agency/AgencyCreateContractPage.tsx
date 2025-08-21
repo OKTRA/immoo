@@ -227,6 +227,13 @@ export default function AgencyCreateContractPage() {
         };
       }
 
+      // Compute top-level ids to satisfy backend required fields
+      const selectedLease = selectedLeaseId ? leases.find(l => l.id === selectedLeaseId) : null;
+      const propertyId = selectedLease?.property_id || details?.property_id || undefined;
+      const clientId = selectedLease?.tenant_id || (contractType === "autre" && selectedTenantId ? selectedTenantId : details?.client_id) || undefined;
+      const startDate = selectedLease?.start_date || details?.start_date || details?.date_debut;
+      const endDate = selectedLease?.end_date || details?.end_date || details?.date_fin;
+
       const result = await generateContract({
         type,
         title,
@@ -234,6 +241,10 @@ export default function AgencyCreateContractPage() {
         details: contractDetails,
         jurisdiction,
         agency_id: agencyId,
+        property_id: propertyId,
+        client_id: clientId,
+        start_date: startDate,
+        end_date: endDate,
       });
       
       setGeneratedContract(result.contract);
@@ -251,15 +262,17 @@ export default function AgencyCreateContractPage() {
   const handleSaveContract = async (content: string, metadata: any) => {
     try {
       const contractData = {
+        // Optional UI fields kept for display only
         title: metadata.title || title,
-        type: metadata.type || type,
         jurisdiction: metadata.jurisdiction || jurisdiction,
-        content,
+        // Schema fields expected by backend
+        contract_type: metadata.type || type,
+        terms: content,
+        status: metadata.status || 'draft',
+        // Other optional fields from the editor (not persisted in current schema)
         parties: metadata.parties || parties,
         details: metadata.details || details,
-        status: metadata.status || 'draft',
-        agency_id: agencyId
-      };
+      } as any;
 
       const savedContract = await createContract(contractData);
       setFinalContract(savedContract);
@@ -683,7 +696,7 @@ export default function AgencyCreateContractPage() {
               </Alert>
 
               <ContractWysiwygEditor
-                initialContent={generatedContract.content}
+                initialContent={generatedContract.terms}
                 onSave={handleSaveContract}
                 onAssignToLease={handleAssignToLease}
                 availableLeases={availableLeases}

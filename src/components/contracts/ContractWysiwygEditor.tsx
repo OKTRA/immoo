@@ -682,23 +682,23 @@ const ContractWysiwygEditor: React.FC<ContractWysiwygEditorProps> = ({
                             Sélectionnez le bail auquel vous souhaitez attribuer ce contrat.
                           </DialogDescription>
                         </DialogHeader>
-                                                  <div className="space-y-4">
-                            <div className="space-y-2">
-                              <span className="text-sm font-medium">Sélectionner un bail</span>
-                              <select 
-                                value={selectedLeaseId} 
-                                onChange={(e) => setSelectedLeaseId(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              >
-                                <option value="">Choisir un bail...</option>
-                                {availableLeases.map((lease) => (
-                                  <option key={lease.id} value={lease.id}>
-                                    {lease.title} - {lease.tenantName} ({lease.propertyName})
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                          
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <span className="text-sm font-medium">Sélectionner un bail</span>
+                            <select 
+                              value={selectedLeaseId} 
+                              onChange={(e) => setSelectedLeaseId(e.target.value)}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="">Choisir un bail...</option>
+                              {availableLeases.map((lease) => (
+                                <option key={lease.id} value={lease.id}>
+                                  {lease.title} - {lease.tenantName} ({lease.propertyName})
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                        
                           <div className="flex justify-end gap-2">
                             <Button variant="outline" onClick={() => setShowAssignDialog(false)}>
                               Annuler

@@ -10,7 +10,7 @@ export const getContractByLeaseId = async (leaseId: string) => {
     const { data: contractData, error: contractError } = await supabase
       .from('contracts')
       .select('*')
-      .eq('lease_id', leaseId)
+      .eq('property_id', leaseId)
       .single();
 
     if (contractError && contractError.code !== 'PGRST116') { // PGRST116 = no rows returned
@@ -65,7 +65,7 @@ export const hasContract = async (leaseId: string): Promise<boolean> => {
     const { count, error } = await supabase
       .from('contracts')
       .select('*', { count: 'exact', head: true })
-      .eq('lease_id', leaseId);
+      .eq('property_id', leaseId);
 
     if (error) throw error;
     return (count || 0) > 0;
@@ -82,7 +82,7 @@ export const attachContractToLease = async (contractId: string, leaseId: string)
   try {
     const { error } = await supabase
       .from('contracts')
-      .update({ lease_id: leaseId })
+      .update({ property_id: leaseId })
       .eq('id', contractId);
 
     if (error) throw error;
@@ -103,7 +103,7 @@ export const detachContractFromLease = async (contractId: string) => {
   try {
     const { error } = await supabase
       .from('contracts')
-      .update({ lease_id: null })
+      .update({ property_id: null })
       .eq('id', contractId);
 
     if (error) throw error;
@@ -124,9 +124,8 @@ export const getUnattachedContracts = async (agencyId: string) => {
   try {
     const { data, error } = await supabase
       .from('contracts')
-      .select('id, title, type, status, created_at')
-      .eq('agency_id', agencyId)
-      .is('lease_id', null)
+      .select('id, contract_type, status, created_at')
+      .is('property_id', null)
       .order('created_at', { ascending: false });
 
     if (error) throw error;

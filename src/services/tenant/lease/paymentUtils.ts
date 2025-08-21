@@ -13,10 +13,10 @@ export const createInitialPayments = async (
   paymentDate?: string // Payment date parameter
 ) => {
   try {
-    // Get lease details to ensure proper due date calculation
+    // Get lease details to ensure proper due date calculation and get tenant_id
     const { data: leaseData, error: leaseError } = await supabase
       .from('leases')
-      .select('start_date, payment_start_date, payment_frequency, payment_day')
+      .select('start_date, payment_start_date, payment_frequency, payment_day, tenant_id')
       .eq('id', leaseId)
       .single();
     
@@ -37,6 +37,7 @@ export const createInitialPayments = async (
     if (securityDeposit > 0) {
       payments.push({
         lease_id: leaseId,
+        tenant_id: leaseData.tenant_id,
         amount: securityDeposit,
         payment_date: asPaid ? effectivePaymentDate : null,
         due_date: effectiveStartDate, // Always due on lease start date
@@ -52,6 +53,7 @@ export const createInitialPayments = async (
     if (agencyFees > 0) {
       payments.push({
         lease_id: leaseId,
+        tenant_id: leaseData.tenant_id,
         amount: agencyFees,
         payment_date: asPaid ? effectivePaymentDate : null,
         due_date: effectiveStartDate, // Always due on lease start date

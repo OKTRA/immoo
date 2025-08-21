@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { createTenant, updateTenant } from "@/services/tenant/tenantService";
-import { uploadIdentityPhotos } from "@/services/tenant/tenantMedia";
-import { tenantFormSchema, TenantFormValues } from '../schemas/tenantFormSchema';
+import { createTenant, updateTenant } from "@/services/tenant/tenantCrud";
+import { tenantFormSchema, TenantFormValues } from "@/components/tenants/schemas/tenantFormSchema";
+import { uploadIdentityPhotos, uploadProfilePhoto } from "@/services/tenant/tenantMedia";
 
 interface UseTenantFormProps {
   agencyId?: string;
@@ -36,14 +36,11 @@ export const useTenantForm = ({ agencyId, onSuccess }: UseTenantFormProps) => {
 
   const onSubmit = async (values: TenantFormValues) => {
     if (!agencyId) {
-      toast.error("ID d'agence manquant. Impossible de créer le locataire.");
       return;
     }
 
     setIsSubmitting(true);
     try {
-      console.log("Creating tenant with values:", values, "for agency:", agencyId);
-      
       // Convert form values to the format expected by the API
       const tenantData = {
         first_name: values.firstName,
@@ -59,28 +56,47 @@ export const useTenantForm = ({ agencyId, onSuccess }: UseTenantFormProps) => {
         agency_id: agencyId
       };
 
-      console.log("Creating tenant:", tenantData);
       const { tenant, error } = await createTenant(tenantData);
 
       if (error) {
-        console.error("Error creating tenant:", error);
         throw new Error(error);
       }
 
       if (tenant) {
+        // Upload profile photo if provided
+        let profilePhotoUrl: string | null = null;
+        if (values.photoUrl && values.photoUrl.startsWith('blob:')) {
+          try {
+            // Convert blob URL to File object
+            const response = await fetch(values.photoUrl);
+            const blob = await response.blob();
+            const file = new File([blob], 'profile-photo.jpg', { type: blob.type });
+            profilePhotoUrl = await uploadProfilePhoto(tenant.id, file);
+          } catch (uploadErr) {
+            // Silent fail - photo upload is not critical
+          }
+        }
+
         // Upload identity photos if any
         let identityUrls: string[] = [];
         const files: File[] = (values as any).identityFiles || [];
         if (files.length > 0) {
           try {
             identityUrls = await uploadIdentityPhotos(tenant.id, files);
-            await updateTenant(tenant.id, { identity_photos: identityUrls } as any);
           } catch (uploadErr) {
-            console.error('Error uploading identity photos', uploadErr);
+            // Silent fail - identity photos upload is not critical
           }
         }
 
-        console.log("Successfully created tenant:", tenant);
+        // Update tenant with photo URLs
+        if (profilePhotoUrl || identityUrls.length > 0) {
+          const updateData: any = {};
+          if (profilePhotoUrl) updateData.photo_url = profilePhotoUrl;
+          if (identityUrls.length > 0) updateData.identity_photos = identityUrls;
+          
+          await updateTenant(tenant.id, updateData);
+        }
+
         toast.success("Locataire ajouté avec succès!");
         
         // Map back to the format expected by the parent component
@@ -92,7 +108,7 @@ export const useTenantForm = ({ agencyId, onSuccess }: UseTenantFormProps) => {
           phone: tenant.phone,
           profession: tenant.profession,
           employmentStatus: tenant.employment_status,
-          photoUrl: tenant.photo_url,
+          photoUrl: profilePhotoUrl || tenant.photo_url,
           emergencyContact: tenant.emergency_contact,
           identityPhotos: identityUrls.length ? identityUrls : tenant.identity_photos,
           hasLease: false
@@ -101,7 +117,6 @@ export const useTenantForm = ({ agencyId, onSuccess }: UseTenantFormProps) => {
         onSuccess(mappedTenant);
       }
     } catch (error: any) {
-      console.error("Error in tenant creation:", error);
       toast.error(`Erreur lors de la création du locataire: ${error.message}`);
     } finally {
       setIsSubmitting(false);

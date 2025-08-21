@@ -118,7 +118,7 @@ export default function ContractEditorPage() {
     try {
       const success = await assignContractToLease(contractId, leaseId);
       if (success && contract) {
-        setContract({ ...contract, related_entity: leaseId });
+        setContract({ ...contract, lease_id: leaseId });
       }
     } catch (error) {
       console.error('Error assigning contract to lease:', error);
@@ -226,7 +226,7 @@ export default function ContractEditorPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="flex items-center gap-2">
                 <Building className="h-4 w-4 text-gray-500" />
-                <span className="text-sm text-gray-600">Type: {contract.type}</span>
+                                 <span className="text-sm text-gray-600">Type: {contract.contract_type}</span>
               </div>
               
               <div className="flex items-center gap-2">
@@ -236,7 +236,7 @@ export default function ContractEditorPage() {
                 </span>
               </div>
               
-              {contract.related_entity && (
+                             {contract.property_id && (
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Attribué à un bail</span>

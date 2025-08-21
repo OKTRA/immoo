@@ -43,14 +43,19 @@ export default function ContractViewDialog({
 }: ContractViewDialogProps) {
   if (!contract) return null;
 
-  // Convert markdown-like syntax (**bold**) and line breaks to HTML
+  // Convert markdown-like syntax (**bold**) and line breaks to HTML.
+  // If content already contains HTML, avoid injecting excessive <br/> that create big gaps.
   const formattedHtml = React.useMemo(() => {
-    if (!contract.content) return '';
-    let html = contract.content;
-    html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    html = html.replace(/\n/g, '<br/>');
-    return html;
-  }, [contract.content]);
+    if (!contract.terms) return '';
+    const looksLikeHtml = /<\/?[a-z][\s\S]*>/i.test(contract.terms);
+    if (looksLikeHtml) {
+      return contract.terms.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+    return contract.terms
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n{2,}/g, '\n')
+      .replace(/\n/g, '<br/>');
+  }, [contract.terms]);
 
   const handlePrint = () => {
     const iframe = document.createElement('iframe');
@@ -66,7 +71,7 @@ export default function ContractViewDialog({
     if (!doc) return;
 
     doc.open();
-    doc.write(`<!DOCTYPE html><html><head><title>${contract.title}</title><style>
+            doc.write(`<!DOCTYPE html><html><head><title>${contract.title || `Contrat ${contract.contract_type}`}</title><style>
       @page { margin: 20mm }
       body { font-family: Arial, sans-serif; font-size: 12px; line-height: 1.4; }
       strong { font-weight: 600; }
@@ -122,10 +127,10 @@ export default function ContractViewDialog({
             <div className="flex items-center gap-3">
               <FileText className="h-6 w-6 text-blue-600" />
               <div>
-                <DialogTitle className="text-xl">{contract.title}</DialogTitle>
+                <DialogTitle className="text-xl">{contract.title || `Contrat ${contract.contract_type}`}</DialogTitle>
                 <div className="flex items-center gap-2 mt-1">
                   {getStatusBadge(contract.status)}
-                  <Badge variant="outline">{getTypeLabel(contract.type)}</Badge>
+                  <Badge variant="outline">{getTypeLabel(contract.contract_type)}</Badge>
                 </div>
               </div>
             </div>
@@ -199,7 +204,8 @@ export default function ContractViewDialog({
                 <CardContent>
                   <div className="bg-gray-50 p-4 rounded-lg border max-h-96 overflow-y-auto">
                     <div 
-                      className="prose prose-sm max-w-none text-sm leading-relaxed"
+                      className="text-sm"
+                      style={{ lineHeight: 1.5 }}
                       dangerouslySetInnerHTML={{ __html: formattedHtml }}
                     />
                   </div>

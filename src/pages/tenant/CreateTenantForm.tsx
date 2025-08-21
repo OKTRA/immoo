@@ -149,11 +149,15 @@ export default function CreateTenantForm({
     
     try {
       if (!isEditMode && !limitCheck.allowed) {
-        toast.error("Limite d'abonnement atteinte");
+        return;
+      }
+      
+      if (!user?.id) {
         return;
       }
       
       const tenantData = {
+        user_id: user?.id,
         first_name: formData.firstName,
         last_name: formData.lastName,
         email: formData.email,
@@ -167,27 +171,20 @@ export default function CreateTenantForm({
         agency_id: agencyId
       };
       
-      console.log("Submitting tenant data:", tenantData);
-      
       let result;
       
       if (isEditMode) {
         result = await updateTenant(tenantId!, tenantData);
         if (result.error) throw new Error(result.error);
-        toast.success("Locataire mis à jour avec succès");
       } else {
         result = await createTenant(tenantData);
         if (result.error) throw new Error(result.error);
-        toast.success("Locataire créé avec succès");
       }
-      
-      console.log("Operation result:", result);
       
       if (onSuccess) {
         onSuccess();
       }
     } catch (error: any) {
-      console.error("Error saving tenant:", error);
       toast.error(`Erreur lors de la sauvegarde : ${error.message}`);
     } finally {
       setIsSubmitting(false);

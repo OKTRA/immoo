@@ -22,23 +22,20 @@ export const checkUserResourceLimit = async (
 ): Promise<SubscriptionLimit> => {
   try {
     console.log(`🔍 Checking resource limit for user ${userId}, resource: ${resourceType}, agency: ${agencyId}`);
-    
-    // First, try to get the user's subscription
-    const { data: subscription, error: subError } = await supabase
+
+    // First, try to get the user's subscription (without join to avoid REST errors)
+    const { data: subRow, error: subError } = await supabase
       .from('user_subscriptions')
-      .select(`
-        *,
-        subscription_plans:plan_id(*)
-      `)
+      .select('id, plan_id, status, created_at')
       .eq('user_id', userId)
       .eq('status', 'active')
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    console.log(`📊 Subscription query result:`, { subscription, error: subError });
+    console.log(`📊 Subscription query result:`, { subscription: subRow, error: subError });
 
-    if (subError || !subscription) {
+    if (subError || !subRow) {
       console.log(`⚠️ Aucune souscription active trouvée, utilisation du plan 'Gratuit' depuis la base`);
       const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
       const freePlanResult = await getFreePlanLimitsFromDatabase(currentCount, resourceType);
@@ -46,8 +43,15 @@ export const checkUserResourceLimit = async (
       return freePlanResult;
     }
 
-    if (!subscription.subscription_plans) {
-      console.log(`⚠️ Aucun plan lié à l'abonnement, utilisation du plan 'Gratuit' depuis la base`);
+    // Then fetch the plan details in a second query
+    const { data: plan, error: planError } = await supabase
+      .from('subscription_plans')
+      .select('*')
+      .eq('id', subRow.plan_id)
+      .maybeSingle();
+
+    if (planError || !plan) {
+      console.log(`⚠️ Plan introuvable pour l'abonnement, utilisation du plan 'Gratuit'`);
       const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
       const freePlanResult = await getFreePlanLimitsFromDatabase(currentCount, resourceType);
       console.log(`🆓 Limites du plan 'Gratuit' (DB):`, freePlanResult);
@@ -57,25 +61,25 @@ export const checkUserResourceLimit = async (
     // Get current count of resources
     const currentCount = await getCurrentResourceCount(userId, resourceType, agencyId);
     console.log(`📈 Current count for ${resourceType}:`, currentCount);
-    
+
     // Get the appropriate limit from the plan
-    const plan = subscription.subscription_plans;
     console.log(`📋 Plan details:`, plan);
-    
+
     const limits = {
-      properties: plan.max_properties || 1,
-      agencies: plan.max_agencies || 1,
-      leases: plan.max_leases || 2,
-      users: plan.max_users || 1
-    };
+      properties: plan.max_properties ?? 1,
+      agencies: plan.max_agencies ?? 1,
+      leases: plan.max_leases ?? 2,
+      users: plan.max_users ?? 1,
+      tenants: plan.max_tenants ?? 0
+    } as Record<string, number>;
 
     const maxAllowed = limits[resourceType];
     console.log(`🎯 Limits for ${resourceType}:`, { maxAllowed, currentCount });
-    
+
     // Si la limite est -1, c'est illimité
     const isUnlimited = maxAllowed === -1;
     const allowed = isUnlimited || currentCount < maxAllowed;
-    const percentageUsed = isUnlimited ? 0 : Math.round((currentCount / maxAllowed) * 100);
+    const percentageUsed = isUnlimited ? 0 : Math.round((currentCount / Math.max(maxAllowed, 1)) * 100);
 
     const result = {
       resourceType,
@@ -227,36 +231,43 @@ export const getCurrentResourceCount = async (
         break;
         
       case 'tenants':
-        if (agencyId) {
-          // Count tenants for specific agency
-          const { count: tenantCount } = await supabase
-            .from('tenants')
-            .select('id', { count: 'exact', head: true })
-            .eq('agency_id', agencyId);
-          count = tenantCount || 0;
-          console.log(`👤 Tenant count for agency ${agencyId}: ${count}`);
-        } else {
-          // First get all user's agency IDs
+        // Tenants table has no agency_id. We infer via properties and leases.
+        const resolveAgencyPropertyIds = async (aid?: string): Promise<string[]> => {
+          if (aid) {
+            const { data: props } = await supabase
+              .from('properties')
+              .select('id')
+              .eq('agency_id', aid);
+            return (props || []).map(p => p.id);
+          }
           const { data: userAgencies } = await supabase
             .from('agencies')
             .select('id')
-            .eq('user_id', userId);
-          
-          if (userAgencies && userAgencies.length > 0) {
-            const agencyIds = userAgencies.map(a => a.id);
-            console.log(`🏢 User's agency IDs:`, agencyIds);
-            
-            // Count tenants from all user's agencies
-            const { count: tenantCount } = await supabase
-              .from('tenants')
-              .select('id', { count: 'exact', head: true })
-              .in('agency_id', agencyIds);
-            count = tenantCount || 0;
-          } else {
-            count = 0;
-          }
-          console.log(`👤 Total tenant count: ${count}`);
+            .or(`user_id.eq.${userId},owner_id.eq.${userId}`);
+          const agencyIds = (userAgencies || []).map(a => a.id);
+          if (agencyIds.length === 0) return [];
+          const { data: props } = await supabase
+            .from('properties')
+            .select('id')
+            .in('agency_id', agencyIds);
+          return (props || []).map(p => p.id);
+        };
+
+        const propertyIds = await resolveAgencyPropertyIds(agencyId);
+        if (propertyIds.length === 0) {
+          count = 0;
+          break;
         }
+
+        const { data: leasesForProps } = await supabase
+          .from('leases')
+          .select('tenant_id')
+          .in('property_id', propertyIds);
+        const tenantIds = Array.from(new Set((leasesForProps || [])
+          .map(l => (l as any).tenant_id)
+          .filter((id: string | null | undefined): id is string => !!id)));
+        count = tenantIds.length;
+        console.log(`👤 Tenant inferred count: ${count}`);
         break;
         
       default:

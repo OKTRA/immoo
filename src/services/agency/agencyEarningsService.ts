@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { fixInvalidDate } from '@/utils/dateUtils';
 
 export interface AgencyEarning {
   id: string;
@@ -102,46 +103,69 @@ export const getAgencyEarnings = async (
 
     console.log(`💰 Found ${commissions?.length || 0} commissions`);
 
-    // 2. Récupérer les frais d'agence (paiements de type agency_fee)
-    const { data: agencyFees, error: agencyFeeError } = await supabase
-      .from('payments')
-      .select(`
-        id,
-        amount,
-        status,
-        payment_date,
-        due_date,
-        created_at,
-        lease_id,
-        payment_type,
-        leases(
-          id,
-          property_id,
-          tenants(
-            first_name,
-            last_name,
-            email
-          ),
-          properties(
-            id,
-            title,
-            agency_id,
-            agency_fees
-          )
-        )
-      `)
-      .eq('payment_type', 'agency_fee')
-      .eq('leases.properties.agency_id', agencyId)
-      .gte('created_at', startDate.toISOString())
-      .lte('created_at', endDate.toISOString())
-      .order('created_at', { ascending: false });
+    // 2. Récupérer les frais d'agence (paiements de type agency_fee) sans embedded joins (évite les 400)
+    // 2.1 Propriétés de l'agence
+    const { data: props, error: propsError } = await supabase
+      .from('properties')
+      .select('id, title, agency_id')
+      .eq('agency_id', agencyId);
+    if (propsError) {
+      console.error('❌ Properties fetch error:', propsError);
+      throw propsError;
+    }
+    const propertyIds = (props || []).map(p => p.id);
 
-    if (agencyFeeError) {
-      console.error('❌ Agency fee error:', agencyFeeError);
-      throw agencyFeeError;
+    // 2.2 Baux des propriétés
+    let leasesForAgency: Array<{ id: string; property_id: string; tenant_id: string } > = [];
+    if (propertyIds.length > 0) {
+      const { data: leasesList, error: leasesErr } = await supabase
+        .from('leases')
+        .select('id, property_id, tenant_id')
+        .in('property_id', propertyIds);
+      if (leasesErr) {
+        console.error('❌ Leases fetch error:', leasesErr);
+        throw leasesErr;
+      }
+      leasesForAgency = leasesList || [];
+    }
+    const leaseIds = leasesForAgency.map(l => l.id);
+
+    // 2.3 Paiements agency_fee rattachés à ces baux
+    let agencyFeesPayments: Array<{ id: string; amount: number; status: string; payment_date: string | null; due_date: string | null; created_at: string; lease_id: string } > = [];
+    if (leaseIds.length > 0) {
+      const { data: paymentsList, error: paymentsErr } = await supabase
+        .from('payments')
+        .select('id, amount, status, payment_date, due_date, created_at, lease_id')
+        .eq('payment_type', 'agency_fee')
+        .in('lease_id', leaseIds)
+        .gte('created_at', startDate.toISOString())
+        .lte('created_at', endDate.toISOString())
+        .order('created_at', { ascending: false });
+      if (paymentsErr) {
+        console.error('❌ Agency fee payments fetch error:', paymentsErr);
+        throw paymentsErr;
+      }
+      agencyFeesPayments = paymentsList || [];
     }
 
-    console.log(`🏢 Found ${agencyFees?.length || 0} agency fees`);
+    console.log(`🏢 Found ${agencyFeesPayments.length} agency fee payments`);
+
+    // 2.4 Hydrate tenants (names) pour l'affichage
+    const tenantIds = Array.from(new Set(leasesForAgency.map(l => l.tenant_id))).filter(Boolean) as string[];
+    let tenantsMap = new Map<string, { first_name: string | null; last_name: string | null; email: string | null }>();
+    if (tenantIds.length > 0) {
+      const { data: tenantsList } = await supabase
+        .from('tenants')
+        .select('id, first_name, last_name, email')
+        .in('id', tenantIds);
+      (tenantsList || []).forEach((t: any) => {
+        tenantsMap.set(t.id, { first_name: t.first_name || null, last_name: t.last_name || null, email: t.email || null });
+      });
+    }
+
+    // 2.5 Maps utilitaires
+    const leaseById = new Map(leasesForAgency.map(l => [l.id, l] as const));
+    const propertyById = new Map((props || []).map(p => [p.id, p] as const));
 
     // 3. Transformer les commissions
     const commissionEarnings: AgencyEarning[] = (commissions || [])
@@ -163,21 +187,25 @@ export const getAgencyEarnings = async (
       }));
 
     // 4. Transformer les frais d'agence
-    const agencyFeeEarnings: AgencyEarning[] = (agencyFees || [])
-      .filter(fee => fee.leases?.properties)
-      .map((fee: any) => ({
+    const agencyFeeEarnings: AgencyEarning[] = agencyFeesPayments.map((fee) => {
+      const lease = leaseById.get(fee.lease_id);
+      const property = lease ? propertyById.get(lease.property_id) : undefined;
+      const tenant = lease ? tenantsMap.get(lease.tenant_id) : undefined;
+      const tenantName = `${tenant?.first_name || ''} ${tenant?.last_name || ''}`.trim() || 'Locataire inconnu';
+      return {
         id: `agency_fee_${fee.id}`,
         amount: fee.amount || 0,
         type: 'agency_fee' as const,
-        status: fee.status as 'pending' | 'paid',
-        propertyTitle: fee.leases?.properties?.title || 'Propriété inconnue',
-        propertyId: fee.leases?.properties?.id || '',
+        status: (fee.status as 'pending' | 'paid'),
+        propertyTitle: property?.title || 'Propriété inconnue',
+        propertyId: property?.id || '',
         leaseId: fee.lease_id,
         paymentId: fee.id,
-        tenantName: `${fee.leases?.tenants?.first_name || ''} ${fee.leases?.tenants?.last_name || ''}`.trim() || 'Locataire inconnu',
+        tenantName,
         createdAt: (fee.due_date as string) || fee.payment_date || fee.created_at,
-        processedAt: fee.status === 'paid' ? fee.payment_date : undefined
-      }));
+        processedAt: fee.status === 'paid' ? fee.payment_date || undefined : undefined,
+      } as AgencyEarning;
+    });
 
     // 5. Combiner et trier tous les gains
     const allEarnings = [...commissionEarnings, ...agencyFeeEarnings]
@@ -328,7 +356,9 @@ function getPeriodDates(period: 'month' | 'quarter' | 'year', year: number) {
     
     case 'year':
       startDate = new Date(year, 0, 1);
-      endDate = new Date(year, 11, 31, 23, 59, 59);
+      // Use the date utility function to ensure valid date
+      const lastDay = fixInvalidDate(year, 12, 31);
+      endDate = new Date(lastDay + 'T23:59:59');
       break;
   }
 

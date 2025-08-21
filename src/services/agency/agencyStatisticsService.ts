@@ -23,9 +23,9 @@ export const getAgencyStatistics = async (agencyId: string): Promise<{ statistic
     }
 
     // Get total properties count
-    const { count: propertiesCount, error: propertiesError } = await supabase
+    const { data: propertiesRows, error: propertiesError } = await supabase
       .from('properties')
-      .select('*', { count: 'exact', head: true })
+      .select('id')
       .eq('agency_id', agencyId);
       
     if (propertiesError) {
@@ -42,26 +42,26 @@ export const getAgencyStatistics = async (agencyId: string): Promise<{ statistic
     const thisMonthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
 
     // Count views this month from visitor_contacts (aligned with current schema)
-    const { count: viewsThisMonth, error: viewsThisMonthError } = await supabase
+    const { data: viewsThisMonthRows, error: viewsThisMonthError } = await supabase
       .from('visitor_contacts')
-      .select('*', { count: 'exact', head: true })
+      .select('id')
       .eq('agency_id', agencyId)
       .eq('purpose', 'view')
       .gte('created_at', thisMonthStart.toISOString());
 
     // Count views last month from visitor_contacts
-    const { count: viewsLastMonth, error: viewsLastMonthError } = await supabase
+    const { data: viewsLastMonthRows, error: viewsLastMonthError } = await supabase
       .from('visitor_contacts')
-      .select('*', { count: 'exact', head: true })
+      .select('id')
       .eq('agency_id', agencyId)
       .eq('purpose', 'view')
       .gte('created_at', lastMonth.toISOString())
       .lt('created_at', thisMonthStart.toISOString());
 
     // Get total views (all time)
-    const { count: totalViews, error: totalViewsError } = await supabase
+    const { data: totalViewsRows, error: totalViewsError } = await supabase
       .from('visitor_contacts')
-      .select('*', { count: 'exact', head: true })
+      .select('id')
       .eq('agency_id', agencyId)
       .eq('purpose', 'view');
 
@@ -71,9 +71,9 @@ export const getAgencyStatistics = async (agencyId: string): Promise<{ statistic
 
     // Calculate performance based on multiple factors
     const performance = calculateAgencyPerformance({
-      propertiesCount: propertiesCount || 0,
+      propertiesCount: propertiesRows?.length || 0,
       averageRating,
-      viewsThisMonth: viewsThisMonth || 0,
+      viewsThisMonth: viewsThisMonthRows?.length || 0,
       ratingCount
     });
     
@@ -91,13 +91,13 @@ export const getAgencyStatistics = async (agencyId: string): Promise<{ statistic
     
     return {
       statistics: {
-        propertiesCount: propertiesCount || 0,
+        propertiesCount: (propertiesRows?.length || 0),
         averageRating: Math.round(averageRating * 10) / 10, // Round to 1 decimal
-        viewsThisMonth: viewsThisMonth || 0,
-        viewsLastMonth: viewsLastMonth || 0,
+        viewsThisMonth: (viewsThisMonthRows?.length || 0),
+        viewsLastMonth: (viewsLastMonthRows?.length || 0),
         performance,
         recentListings: recentListings || [],
-        totalViews: totalViews || 0,
+        totalViews: (totalViewsRows?.length || 0),
         ratingCount
       },
       error: null

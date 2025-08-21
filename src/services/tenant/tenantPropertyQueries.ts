@@ -31,11 +31,29 @@ export const getTenantsByPropertyId = async (propertyId: string) => {
       throw new Error('Property does not have an associated agency');
     }
     
-    // Récupérer tous les locataires pour cette agence
+    // Récupérer les baux pour cette propriété, puis les locataires correspondants
+    const { data: propertyLeases, error: propertyLeasesError } = await supabase
+      .from('leases')
+      .select('id, tenant_id, property_id, status')
+      .eq('property_id', propertyId);
+
+    if (propertyLeasesError) {
+      console.error('Error fetching leases for property:', propertyLeasesError);
+      throw propertyLeasesError;
+    }
+
+    const tenantIds = Array.from(new Set((propertyLeases || [])
+      .map(l => l.tenant_id)
+      .filter((id: string | null | undefined): id is string => !!id)));
+
+    if (tenantIds.length === 0) {
+      return { tenants: [], error: null };
+    }
+
     const { data: allTenants, error: tenantsError } = await supabase
       .from('tenants')
-      .select('*, leases!leases_tenant_id_fkey(id, property_id, status)')
-      .eq('agency_id', agencyId)
+      .select('*')
+      .in('id', tenantIds)
       .order('last_name', { ascending: true });
 
     if (tenantsError) {
@@ -43,16 +61,20 @@ export const getTenantsByPropertyId = async (propertyId: string) => {
       throw tenantsError;
     }
 
-    // Afficher les données pour débogage
-    console.log(`Found ${allTenants?.length || 0} tenants for agency ${agencyId}`);
-    console.log('Tenant data sample:', allTenants?.slice(0, 2));
-    
-    // Associer les locataires à leurs informations de bail pour cette propriété
-    const tenantsWithLeaseInfo = allTenants.map(tenant => {
-      // Trouver si ce locataire a un bail pour cette propriété
-      const tenantLeases = tenant.leases || [];
-      const propertyLease = tenantLeases.find(lease => lease.property_id === propertyId);
-      
+    // Associer bail -> locataire
+    const tenantIdToLease = new Map<string, { id: string; status: string | null; property_id: string | null }>();
+    for (const lease of propertyLeases || []) {
+      if (lease.tenant_id) {
+        tenantIdToLease.set(lease.tenant_id, {
+          id: lease.id,
+          status: (lease as any).status ?? null,
+          property_id: (lease as any).property_id ?? null,
+        });
+      }
+    }
+
+    const tenantsWithLeaseInfo = (allTenants || []).map(tenant => {
+      const leaseInfo = tenantIdToLease.get(tenant.id);
       return {
         id: tenant.id,
         firstName: tenant.first_name,
@@ -64,10 +86,10 @@ export const getTenantsByPropertyId = async (propertyId: string) => {
         photoUrl: tenant.photo_url,
         identityPhotos: tenant.identity_photos,
         emergencyContact: tenant.emergency_contact,
-        hasLease: !!propertyLease,
-        leaseId: propertyLease?.id,
-        leaseStatus: propertyLease?.status,
-        propertyId: propertyLease?.property_id || null,
+        hasLease: !!leaseInfo,
+        leaseId: leaseInfo?.id ?? null,
+        leaseStatus: leaseInfo?.status ?? null,
+        propertyId: leaseInfo?.property_id ?? null,
         createdAt: tenant.created_at
       };
     });
@@ -105,34 +127,53 @@ export const getTenantsByAgencyId = async (agencyId: string) => {
       console.log('Agency found:', agency);
     }
     
-    // Utiliser une requête optimisée pour récupérer les locataires avec leurs informations de bail
-    const { data: tenants, error } = await supabase
+    // Récupérer TOUS les locataires de l'agence directement
+    const { data: tenants, error: tenantsError } = await supabase
       .from('tenants')
-      .select(`
-        *,
-        leases:leases(
-          id,
-          property_id,
-          status
-        )
-      `)
+      .select('*')
       .eq('agency_id', agencyId)
       .order('last_name', { ascending: true });
 
-    if (error) {
-      console.error('Error fetching tenants:', error);
-      throw error;
+    if (tenantsError) {
+      console.error('Error fetching tenants:', tenantsError);
+      throw tenantsError;
     }
-    
+
     console.log(`Found ${tenants?.length || 0} tenants for agency ${agencyId}`);
     console.log('Tenant data sample:', tenants?.slice(0, 2));
+
+    // Récupérer les baux pour ces locataires (optionnel, pour enrichir les données)
+    const tenantIds = (tenants || []).map(t => t.id);
+    let leases: any[] = [];
     
-    // Mapper la réponse API au format attendu avec des informations de bail supplémentaires
-    const tenantsWithLeaseInfo = tenants.map(tenant => {
-      const tenantLeases = tenant.leases || [];
-      const hasActiveLease = tenantLeases.some(lease => lease.status === 'active');
-      const firstLease = tenantLeases[0] || {};
-      
+    if (tenantIds.length > 0) {
+      const { data: leasesData, error: leasesError } = await supabase
+        .from('leases')
+        .select('id, tenant_id, property_id, status')
+        .in('tenant_id', tenantIds);
+
+      if (leasesError) {
+        console.error('Error fetching leases for tenants:', leasesError);
+        // Ne pas faire échouer la requête principale à cause des baux
+      } else {
+        leases = leasesData || [];
+      }
+    }
+
+    // Associer locataire -> premier bail trouvé
+    const tenantIdToLease = new Map<string, { id: string; status: string | null; property_id: string | null }>();
+    for (const lease of leases) {
+      if (lease.tenant_id && !tenantIdToLease.has(lease.tenant_id)) {
+        tenantIdToLease.set(lease.tenant_id, {
+          id: lease.id,
+          status: (lease as any).status ?? null,
+          property_id: (lease as any).property_id ?? null,
+        });
+      }
+    }
+    
+    const tenantsWithLeaseInfo = (tenants || []).map(tenant => {
+      const leaseInfo = tenantIdToLease.get(tenant.id);
       return {
         id: tenant.id,
         firstName: tenant.first_name,
@@ -144,16 +185,10 @@ export const getTenantsByAgencyId = async (agencyId: string) => {
         photoUrl: tenant.photo_url,
         identityPhotos: tenant.identity_photos,
         emergencyContact: tenant.emergency_contact,
-        hasLease: tenantLeases.length > 0,
-        leaseId: hasActiveLease 
-          ? tenantLeases.find(lease => lease.status === 'active')?.id 
-          : firstLease?.id,
-        leaseStatus: hasActiveLease 
-          ? 'active' 
-          : (tenantLeases.length > 0 ? firstLease.status : null),
-        propertyId: hasActiveLease 
-          ? tenantLeases.find(lease => lease.status === 'active')?.property_id 
-          : firstLease?.property_id,
+        hasLease: !!leaseInfo,
+        leaseId: leaseInfo?.id ?? null,
+        leaseStatus: leaseInfo?.status ?? null,
+        propertyId: leaseInfo?.property_id ?? null,
         createdAt: tenant.created_at
       };
     });

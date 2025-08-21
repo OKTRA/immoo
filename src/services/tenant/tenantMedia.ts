@@ -1,6 +1,31 @@
 import { supabase } from '@/lib/supabase';
 
 /**
+ * Upload a profile photo for a tenant and return the public URL.
+ * Bucket must exist in Supabase Storage (e.g. "tenant-profile-photos").
+ */
+export const uploadProfilePhoto = async (
+  tenantId: string,
+  file: File,
+  bucket = 'tenant-profile-photos'
+): Promise<string> => {
+  const filePath = `${tenantId}/profile-${Date.now()}-${file.name}`;
+
+  // Upload file (content-type inferred automatically)
+  const { error } = await supabase.storage.from(bucket).upload(filePath, file, {
+    upsert: false,
+  });
+
+  if (error) {
+    console.error('Error uploading profile photo:', error);
+    throw error;
+  }
+
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filePath);
+  return data.publicUrl;
+};
+
+/**
  * Upload multiple identity photos for a tenant and return the public URLs.
  * Bucket must exist in Supabase Storage (e.g. "tenant-identity").
  */
@@ -12,7 +37,7 @@ export const uploadIdentityPhotos = async (
   const uploadedUrls: string[] = [];
 
   for (const file of files) {
-    const filePath = `${tenantId}/${Date.now()}-${file.name}`;
+    const filePath = `${tenantId}/identity-${Date.now()}-${file.name}`;
 
     // Upload file (content-type inferred automatically)
     const { error } = await supabase.storage.from(bucket).upload(filePath, file, {

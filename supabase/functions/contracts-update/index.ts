@@ -14,11 +14,11 @@ serve(async (req) => {
     return new Response("ok", { headers: corsHeaders });
   }
 
-  const { id, content, status } = await req.json();
+  const { id, terms, status } = await req.json();
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
   const { data, error } = await supabase
     .from("contracts")
-    .update({ ...(content && { content }), ...(status && { status }) })
+    .update({ ...(terms && { terms }), ...(status && { status }) })
     .eq("id", id)
     .select();
   if (error) return new Response(JSON.stringify({ error }), { status: 500, headers: corsHeaders });

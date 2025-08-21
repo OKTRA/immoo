@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { fixInvalidDate } from '@/utils/dateUtils';
 import {
   Expense,
   ExpenseDetails,
@@ -629,11 +630,15 @@ function getPeriodDates(period: 'month' | 'quarter' | 'year', year: number) {
       break;
     case 'year':
       startDate = new Date(currentYear, 0, 1);
-      endDate = new Date(currentYear, 11, 31);
+      // Use the date utility function to ensure valid date
+      const lastDay = fixInvalidDate(currentYear, 12, 31);
+      endDate = new Date(lastDay);
       break;
     default:
       startDate = new Date(currentYear, 0, 1);
-      endDate = new Date(currentYear, 11, 31);
+      // Use the date utility function to ensure valid date
+      const defaultLastDay = fixInvalidDate(currentYear, 12, 31);
+      endDate = new Date(defaultLastDay);
   }
 
   return { startDate, endDate };

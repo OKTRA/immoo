@@ -54,7 +54,7 @@ export default function ContractForm() {
       {contract && (
         <div style={{ marginTop: 20 }}>
           <h3>Contrat généré</h3>
-          <pre style={{ whiteSpace: "pre-wrap", background: "#f5f5f5", padding: 10 }}>{contract.content}</pre>
+                          <pre style={{ whiteSpace: "pre-wrap", background: "#f5f5f5", padding: 10 }}>{contract.terms}</pre>
         </div>
       )}
     </form>

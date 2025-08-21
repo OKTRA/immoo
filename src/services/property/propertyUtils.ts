@@ -76,8 +76,16 @@ export const formatPropertyToDb = (propertyData: any, ownerId: string | null = n
   // - surface (no such column)
   // - address (mapped above to location)
   // - charges (no such column)
-  if (propertyData.bedrooms !== undefined || !isUpdate) dbData.bedrooms = propertyData.bedrooms || propertyData.rooms;
-  if (propertyData.bathrooms !== undefined || !isUpdate) dbData.bathrooms = propertyData.bathrooms;
+  if (propertyData.bedrooms !== undefined || !isUpdate) {
+    // Ensure bedrooms is always a valid integer, default to 0 if invalid
+    const bedroomsValue = propertyData.bedrooms || propertyData.rooms || 0;
+    dbData.bedrooms = typeof bedroomsValue === 'string' ? parseInt(bedroomsValue) || 0 : bedroomsValue || 0;
+  }
+  if (propertyData.bathrooms !== undefined || !isUpdate) {
+    // Ensure bathrooms is always a valid integer, default to 0 if invalid
+    const bathroomsValue = propertyData.bathrooms || 0;
+    dbData.bathrooms = typeof bathroomsValue === 'string' ? parseInt(bathroomsValue) || 0 : bathroomsValue || 0;
+  }
   if (propertyData.price !== undefined || !isUpdate) dbData.price = propertyData.price;
   if (propertyData.status !== undefined) dbData.status = propertyData.status;
   if (propertyData.imageUrl !== undefined) dbData.image_url = propertyData.imageUrl;

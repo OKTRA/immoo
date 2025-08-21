@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
@@ -22,7 +22,7 @@ export const usePropertyLeases = (propertyId: string | undefined) => {
           .from('leases')
           .select(`
             *,
-            tenants:tenant_id (
+            tenants!fk_leases_tenant_id (
               id,
               first_name,
               last_name,
@@ -45,7 +45,7 @@ export const usePropertyLeases = (propertyId: string | undefined) => {
     fetchLeases();
   }, [propertyId]);
 
-  const formatPropertyStatus = (status: string): DisplayStatus => {
+  const formatPropertyStatus = useCallback((status: string): DisplayStatus => {
     switch (status) {
       case "available":
         return { label: "Disponible", variant: "default" };
@@ -60,10 +60,10 @@ export const usePropertyLeases = (propertyId: string | undefined) => {
       default:
         return { label: status, variant: "outline" };
     }
-  };
+  }, []);
 
-  const hasActiveLeases = leases.filter((lease: any) => lease.status === 'active').length > 0;
-  const activeLeaseId = hasActiveLeases ? leases.filter((lease: any) => lease.status === 'active')[0]?.id : undefined;
+  const hasActiveLeases = leases.filter((lease: any) => lease.is_active === true).length > 0;
+  const activeLeaseId = hasActiveLeases ? leases.filter((lease: any) => lease.is_active === true)[0]?.id : undefined;
 
   return {
     leases,

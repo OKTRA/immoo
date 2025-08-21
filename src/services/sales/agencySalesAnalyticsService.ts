@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { PropertySale } from './propertySalesService';
+import { fixInvalidDate } from '@/utils/dateUtils';
 
 export interface AgencySalesStats {
   totalForSale: number;
@@ -107,23 +108,7 @@ export async function getAgencySalesStats(agencyId: string): Promise<AgencySales
     // Récupérer toutes les propriétés de l'agence avec leurs ventes
     const { data: properties, error: propertiesError } = await supabase
       .from('properties')
-      .select(`
-        id,
-        price,
-        type,
-        created_at,
-        status,
-        features,
-        property_sales (
-          id,
-          sale_price,
-          sale_date,
-          commission_amount,
-          commission_rate,
-          status,
-          created_at
-        )
-      `)
+      .select('id, price, type, created_at, status, features')
       .eq('agency_id', agencyId);
 
     if (propertiesError) throw propertiesError;
@@ -135,7 +120,15 @@ export async function getAgencySalesStats(agencyId: string): Promise<AgencySales
     });
 
     // Toutes les ventes (incluant celles des propriétés qui ne sont plus en vente)
-    const allSales = (properties || []).flatMap(p => p.property_sales || []);
+    const propIds = (properties || []).map(p => p.id);
+    let allSales: any[] = [];
+    if (propIds.length > 0) {
+      const { data: salesRows } = await supabase
+        .from('property_sales')
+        .select('id, sale_price, sale_date, commission_amount, commission_rate, status, created_at, property_id')
+        .in('property_id', propIds);
+      allSales = salesRows || [];
+    }
     
     const completedSales = allSales.filter(s => s.status === 'completed');
     const pendingSales = allSales.filter(s => s.status === 'pending');
@@ -191,29 +184,28 @@ export async function getAgencySalesStats(agencyId: string): Promise<AgencySales
  */
 export async function getSalesPerformanceMetrics(agencyId: string, year: number = new Date().getFullYear()): Promise<SalesPerformanceMetrics> {
   try {
-    // Récupérer les ventes de l'année avec les détails des propriétés
-    const { data: salesData, error } = await supabase
-      .from('property_sales')
-      .select(`
-        *,
-        properties!inner (
-          id,
-          agency_id,
-          price,
-          created_at,
-          type,
-          features
-        )
-      `)
-      .eq('properties.agency_id', agencyId)
-      .gte('sale_date', `${year}-01-01`)
-      .lte('sale_date', `${year}-12-31`)
-      .eq('status', 'completed')
-      .order('sale_date', { ascending: true });
-
-    if (error) throw error;
-
-    const sales = salesData || [];
+    // Fallback two-step: properties -> property_sales
+    const { data: props, error: propsErr } = await supabase
+      .from('properties')
+      .select('id, created_at, price, type, features')
+      .eq('agency_id', agencyId);
+    if (propsErr) throw propsErr;
+    const pIds = (props || []).map(p => p.id);
+    let sales: any[] = [];
+    if (pIds.length > 0) {
+      const { data: salesRows, error: sErr } = await supabase
+        .from('property_sales')
+        .select('id, property_id, sale_price, sale_date, commission_amount, commission_rate, status')
+        .in('property_id', pIds)
+        .gte('sale_date', `${year}-01-01`)
+        .lte('sale_date', `${year}-12-31`)
+        .eq('status', 'completed')
+        .order('sale_date', { ascending: true });
+      if (sErr) throw sErr;
+      sales = salesRows || [];
+      const propsById = new Map((props || []).map(p => [p.id, p] as const));
+      sales.forEach((s: any) => (s.properties = propsById.get(s.property_id)));
+    }
 
     // Générer les données mensuelles
     const monthlyData = generateMonthlyData(sales, year);
@@ -456,7 +448,7 @@ async function generateSalesVelocity(agencyId: string, year: number): Promise<Sa
 
   for (let month = 0; month < 12; month++) {
     const monthStart = `${year}-${(month + 1).toString().padStart(2, '0')}-01`;
-    const monthEnd = `${year}-${(month + 1).toString().padStart(2, '0')}-31`;
+    const monthEnd = fixInvalidDate(year, month + 1, 31);
 
     try {
       // Nouvelles inscriptions
@@ -507,18 +499,20 @@ async function generateSalesVelocity(agencyId: string, year: number): Promise<Sa
 async function generateMarketComparison(agencyId: string, agencySales: any[]): Promise<MarketComparisonData> {
   try {
     // Récupérer les données du marché (toutes les agences)
-    const { data: marketSales, error } = await supabase
+    const { data: marketSalesRows, error } = await supabase
       .from('property_sales')
-      .select(`
-        sale_price,
-        commission_rate,
-        sale_date,
-        properties!inner (created_at)
-      `)
+      .select('sale_price, commission_rate, sale_date, property_id, status')
       .eq('status', 'completed')
       .gte('sale_date', `${new Date().getFullYear()}-01-01`);
 
     if (error) throw error;
+
+    // attach property created_at for days-on-market calculation
+    const { data: allProps } = await supabase
+      .from('properties')
+      .select('id, created_at');
+    const propsMap = new Map((allProps || []).map(p => [p.id, p] as const));
+    const marketSales = (marketSalesRows || []).map(ms => ({ ...ms, properties: propsMap.get(ms.property_id) }));
 
     // Calculs pour l'agence
     const agencyRevenue = agencySales.reduce((sum, sale) => sum + sale.sale_price, 0);

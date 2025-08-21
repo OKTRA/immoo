@@ -63,7 +63,7 @@ interface Contract {
   parties: any;
   created_at: string;
   updated_at: string;
-  related_entity?: string; // Changé de lease_id à related_entity
+  property_id?: string; // Using property_id as per actual database schema
   isViewMode?: boolean; // Added for view mode
 }
 
@@ -102,7 +102,7 @@ export default function AgencyContractsPage() {
         // Charger les contrats
         let query = supabase
           .from("contracts")
-          .select("id, type, title, jurisdiction, status, content, details, parties, created_at, updated_at, lease_id")
+          .select("*")
           .eq("agency_id", agencyId)
           .order("created_at", { ascending: false });
 
@@ -243,12 +243,12 @@ export default function AgencyContractsPage() {
       if (success) {
         // Mettre à jour la liste des contrats
         setContracts(prev => prev.map(c => 
-          c.id === contractId ? { ...c, status: 'validated' as const, related_entity: leaseId } : c
+          c.id === contractId ? { ...c, status: 'validated' as const, property_id: leaseId } : c
         ));
         
         // Mettre à jour le contrat en cours d'édition
         if (editingContract && editingContract.id === contractId) {
-          setEditingContract({ ...editingContract, status: 'validated' as const, related_entity: leaseId });
+          setEditingContract({ ...editingContract, status: 'validated' as const, property_id: leaseId });
         }
         
         toast.success(t('agencyDashboard.pages.contracts.contractAssignedSuccess'));
@@ -308,7 +308,7 @@ export default function AgencyContractsPage() {
         </div>
 
         <ContractWysiwygEditor
-          initialContent={editingContract.content}
+                          initialContent={editingContract.terms}
           contractId={editingContract.id}
           onSave={handleSaveContract}
           onAssignToLease={handleAssignToLease}
@@ -365,28 +365,28 @@ export default function AgencyContractsPage() {
                     <tr key={contract.id} className="border-b hover:bg-gray-50">
                       <td className="p-4">
                         <Badge variant="outline">
-                          {getTypeLabel(contract.type)}
+                          {getTypeLabel(contract.contract_type)}
                         </Badge>
                       </td>
                       <td className="p-4">
-                        <div className="font-medium">{contract.title}</div>
+                        <div className="font-medium">{contract.title || `Contrat ${contract.contract_type}`}</div>
                         <div className="text-sm text-gray-500">
                           {new Date(contract.created_at).toLocaleDateString('fr-FR')}
                         </div>
-                        {contract.related_entity && (
+                        {contract.property_id && (
                           <div className="text-xs text-blue-600 flex items-center gap-1 mt-1">
                             <Link className="h-3 w-3" />
                             {t('agencyDashboard.pages.contracts.assignedToLease')}
                           </div>
                         )}
                       </td>
-                      <td className="p-4">{contract.jurisdiction}</td>
+                                              <td className="p-4">{contract.jurisdiction || 'Non spécifié'}</td>
                       <td className="p-4">
                         {getStatusBadge(contract.status)}
                       </td>
                       <td className="p-4 max-w-xs">
                         <div className="truncate text-sm text-gray-600">
-                          {previewContractContent(contract.content, 100)}
+                          {previewContractContent(contract.terms, 100)}
                         </div>
                       </td>
                       <td className="p-4">

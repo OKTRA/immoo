@@ -80,39 +80,46 @@ export const getLeasesByAgencyId = async (agencyId: string) => {
     
     console.log('Agency found:', agency);
     
-    // Méthode directe: récupérer les baux liés aux propriétés de cette agence
-    // Cette requête est beaucoup plus directe et résout le problème de récupération des baux
-    const { data: leases, error: leasesError } = await supabase
-      .from('leases')
-      .select(`
-        *,
-        properties!inner(
-          id, 
-          title, 
-          agency_id
-        ),
-        tenants:tenant_id (
-          id,
-          first_name,
-          last_name,
-          email,
-          phone
-        ),
-        payments:payments (
-          id,
-          status,
-          amount,
-          payment_type
-        )
-      `)
-      .eq('properties.agency_id', agencyId);
+    // Direct two-step fetch (avoids embedded join 400s if schema cache misses relationships)
+    const { data: props, error: propsError } = await supabase
+      .from('properties')
+      .select('id, title, agency_id')
+      .eq('agency_id', agencyId);
+    if (propsError) throw propsError;
+    const propertyIds = (props || []).map(p => p.id);
+    if (propertyIds.length === 0) return { leases: [], error: null };
 
-    if (leasesError) {
-      console.error('Error fetching leases:', leasesError);
-      throw leasesError;
+    const { data: rawLeases, error: rawLeasesError } = await supabase
+      .from('leases')
+      .select('*')
+      .in('property_id', propertyIds);
+    if (rawLeasesError) throw rawLeasesError;
+
+    // Hydrate properties for display (title, location, etc.)
+    const propertyById: Record<string, any> = {};
+    for (const p of props || []) {
+      propertyById[p.id] = p;
     }
-    
-    console.log(`Found ${leases?.length || 0} leases for agency ${agencyId} with direct query:`, leases);
+
+    // Fetch tenants for these leases to populate names in UI
+    const tenantIds = Array.from(new Set((rawLeases || []).map(l => l.tenant_id).filter(Boolean)));
+    let tenantById: Record<string, any> = {};
+    if (tenantIds.length > 0) {
+      const { data: tenantsData, error: tenantsError } = await supabase
+        .from('tenants')
+        .select('id, first_name, last_name, email, phone, profession')
+        .in('id', tenantIds as string[]);
+      if (tenantsError) throw tenantsError;
+      for (const t of tenantsData || []) tenantById[t.id] = t;
+    }
+
+    // Shape leases with embedded structures expected by UI (leases.properties, leases.tenants)
+    const leases = (rawLeases || []).map(l => ({
+      ...l,
+      properties: propertyById[l.property_id] || null,
+      tenants: l.tenant_id ? tenantById[l.tenant_id] || null : null,
+    }));
+
     return { leases, error: null };
   } catch (error: any) {
     console.error(`Error getting leases for agency ${agencyId}:`, error);

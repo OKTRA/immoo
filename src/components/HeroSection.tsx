@@ -109,9 +109,9 @@ export default function HeroSection() {
             agenciesData.map(async (agency: any) => {
               try {
                 // Get properties count
-                const { count } = await supabase
+                const { data: props } = await supabase
                   .from('properties')
-                  .select('*', { count: 'exact', head: true })
+                  .select('id')
                   .eq('agency_id', agency.id);
                 
                 // Get average rating from visitor contacts or reviews
@@ -129,7 +129,7 @@ export default function HeroSection() {
                 
                 return {
                   ...agency,
-                  properties_count: count || 0,
+                  properties_count: (props?.length || 0),
                   calculated_rating: averageRating,
                   reviews_count: contactsData?.length || 0
                 };
