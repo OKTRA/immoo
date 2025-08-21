@@ -117,12 +117,14 @@ export const getCurrentResourceCount = async (
     
     switch (resourceType) {
       case 'agencies':
+        // Count agencies where the current user is either recorded as user_id or owner_id
+        // This covers historical rows created with only owner_id as well as newer rows with user_id
         const { count: agencyCount } = await supabase
           .from('agencies')
           .select('id', { count: 'exact', head: true })
-          .eq('user_id', userId);
+          .or(`user_id.eq.${userId},owner_id.eq.${userId}`);
         count = agencyCount || 0;
-        console.log(`🏢 Agency count: ${count}`);
+        console.log(`🏢 Agency count (user_id or owner_id): ${count}`);
         break;
         
       case 'properties':

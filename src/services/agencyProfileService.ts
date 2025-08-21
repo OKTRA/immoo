@@ -63,6 +63,7 @@ export const createAgencyProfileForGoogleUser = async (
       .insert({
         name: userData.agency_name,
         owner_id: profile.id,
+        user_id: user.id, // Ensure user_id is set for subscription limit checks
         email: userData.email,
         phone: userData.phone || null,
         status: 'active',

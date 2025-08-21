@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { Agency } from '@/assets/types';
 import { transformAgencyData } from './agencyBasicService';
+import { checkUserResourceLimit } from '@/services/subscription/limit';
 
 /**
  * Create a new agency
@@ -13,6 +14,16 @@ export const createAgency = async (agencyData: Omit<Agency, 'id'>) => {
     
     if (!userId) {
       throw new Error("Utilisateur non authentifié");
+    }
+    
+    // Guard: verify user's plan allows creating another agency
+    const limit = await checkUserResourceLimit(userId, 'agencies');
+    if (!limit.allowed) {
+      const max = limit.maxAllowed === -1 ? 'illimité' : String(limit.maxAllowed);
+      throw new Error(
+        `Limite atteinte: votre plan (${limit.planName || 'actuel'}) autorise ${max} agence(s). ` +
+        `Veuillez mettre à niveau votre abonnement pour créer une autre agence.`
+      );
     }
     
     console.log('Creating agency with data:', agencyData);

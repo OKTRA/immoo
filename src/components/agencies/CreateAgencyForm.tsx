@@ -14,6 +14,8 @@ import { Separator } from "@/components/ui/separator";
 import { supabase } from "@/lib/supabase";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { getCurrentUser } from "@/services/authService";
+import { useResourceGuard } from '@/hooks/subscription/useResourceGuard';
+import { useSubscriptionLimits } from '@/hooks/subscription/useSubscriptionLimits';
 
 export default function CreateAgencyForm() {
   const navigate = useNavigate();
@@ -31,6 +33,10 @@ export default function CreateAgencyForm() {
     specialties: "",
     serviceAreas: ""
   });
+  const { canCreateResource } = useResourceGuard();
+  const { limits: subscriptionLimits, isLoading: limitsLoading } = useSubscriptionLimits();
+  const agencyLimitReached = !!subscriptionLimits && subscriptionLimits.agencies && !subscriptionLimits.agencies.allowed;
+  const createDisabled = isSubmitting || (!subscriptionLimits ? true : agencyLimitReached);
 
   // Vérifier si l'utilisateur est authentifié
   useEffect(() => {
@@ -75,6 +81,12 @@ export default function CreateAgencyForm() {
       if (!user) {
         toast.error("Vous devez être connecté pour créer une agence");
         navigate('/auth'); // Rediriger vers la page d'authentification
+        return;
+      }
+
+      // Vérifier la limite d'abonnement pour les agences
+      const allowed = await canCreateResource('agencies', 'agence');
+      if (!allowed) {
         return;
       }
 
@@ -374,8 +386,9 @@ export default function CreateAgencyForm() {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={createDisabled}
               className="bg-primary text-white hover:bg-primary/90 min-w-32"
+              title={agencyLimitReached ? 'Limite de plan atteinte pour les agences' : (!subscriptionLimits ? 'Vérification de l\'abonnement en cours' : undefined)}
             >
               {isSubmitting ? 'Création en cours...' : 'Créer l\'agence'}
             </Button>

@@ -5,9 +5,13 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
+import { useSubscriptionLimits } from '@/hooks/subscription/useSubscriptionLimits';
 
 export default function AgenciesPage() {
   const navigate = useNavigate();
+  const { limits: subscriptionLimits, isLoading: limitsLoading } = useSubscriptionLimits();
+  const agencyLimitReached = !!subscriptionLimits && subscriptionLimits.agencies && !subscriptionLimits.agencies.allowed;
+  const createDisabled = !subscriptionLimits ? true : agencyLimitReached;
 
   return (
     <>
@@ -16,7 +20,13 @@ export default function AgenciesPage() {
         <h1 className="text-3xl font-bold mb-8">Agencies</h1>
         <p className="mb-4">Explore our featured agencies and find the perfect partner for your real estate needs.</p>
         
-        <Button onClick={() => navigate('/agencies/create')}>Create Agency</Button>
+        <Button
+          onClick={() => navigate('/agencies/create')}
+          disabled={createDisabled}
+          title={agencyLimitReached ? 'Plan limit reached for agencies' : (!subscriptionLimits ? 'Checking subscription...' : undefined)}
+        >
+          Create Agency
+        </Button>
       </div>
       <Footer />
     </>

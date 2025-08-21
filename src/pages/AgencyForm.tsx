@@ -10,6 +10,8 @@ import { Agency } from '@/assets/types';
 import { getAgencyById, createAgency, updateAgency } from "@/services/agency";
 import { MapPin, Mail, Phone, Globe, Tag, Map, Building } from "lucide-react";
 import { useQuery } from '@tanstack/react-query';
+import { useResourceGuard } from '@/hooks/subscription/useResourceGuard';
+import { useSubscriptionLimits } from '@/hooks/subscription/useSubscriptionLimits';
 
 // Pour l'erreur de type dans AgencyForm.tsx, nous devons typer correctement le résultat de la requête:
 interface AgencyQueryResult {
@@ -36,6 +38,10 @@ export default function AgencyForm() {
   });
   const [isSubmitting, setSubmitting] = useState(false);
   const isNewAgency = agencyId === 'new';
+  const { canCreateResource } = useResourceGuard();
+  const { limits: subscriptionLimits, isLoading: limitsLoading } = useSubscriptionLimits();
+  const agencyLimitReached = !!subscriptionLimits && subscriptionLimits.agencies && !subscriptionLimits.agencies.allowed;
+  const createDisabled = isSubmitting || (isNewAgency && (!subscriptionLimits ? true : agencyLimitReached));
 
   // Remplacer la partie qui utilise les données de l'agence avec la vérification de type:
   const { data, isLoading } = useQuery<AgencyQueryResult>({
@@ -104,6 +110,11 @@ export default function AgencyForm() {
       };
       
       if (isNewAgency) {
+        // Check plan limit before creating a new agency
+        const allowed = await canCreateResource('agencies', 'agence');
+        if (!allowed) {
+          return;
+        }
         const agencyResult = await createAgency(newAgencyData);
         if (agencyResult.error) {
           throw new Error(agencyResult.error);
@@ -319,8 +330,9 @@ export default function AgencyForm() {
             </Button>
             <Button
               type="submit"
-              disabled={isSubmitting}
+              disabled={createDisabled}
               className="bg-primary text-white hover:bg-primary/90 min-w-32"
+              title={isNewAgency && agencyLimitReached ? 'Limite de plan atteinte pour les agences' : (isNewAgency && !subscriptionLimits ? 'Vérification de l\'abonnement en cours' : undefined)}
             >
               {isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
             </Button>
