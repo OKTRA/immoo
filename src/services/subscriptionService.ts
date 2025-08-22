@@ -29,6 +29,7 @@ export const getAllSubscriptionPlans = async (activeOnly = true) => {
       maxUsers: plan.max_users,
       maxAgencies: plan.max_agencies,
       maxLeases: plan.max_leases,
+      maxTenants: plan.max_tenants,
       hasApiAccess: plan.has_api_access
     }));
     
@@ -63,6 +64,7 @@ export const getSubscriptionPlanById = async (id: string) => {
       maxUsers: data.max_users,
       maxAgencies: data.max_agencies,
       maxLeases: data.max_leases,
+      maxTenants: data.max_tenants,
       hasApiAccess: data.has_api_access
     };
     
@@ -90,6 +92,7 @@ export const createSubscriptionPlan = async (planData: Omit<SubscriptionPlan, 'i
         max_users: planData.maxUsers,
         max_agencies: planData.maxAgencies,
         max_leases: planData.maxLeases,
+        max_tenants: planData.maxTenants,
         has_api_access: planData.hasApiAccess
       }])
       .select()
@@ -108,6 +111,7 @@ export const createSubscriptionPlan = async (planData: Omit<SubscriptionPlan, 'i
       maxUsers: data.max_users,
       maxAgencies: data.max_agencies,
       maxLeases: data.max_leases,
+      maxTenants: data.max_tenants,
       hasApiAccess: data.has_api_access
     };
     
@@ -133,6 +137,7 @@ export const updateSubscriptionPlan = async (id: string, planData: Partial<Subsc
     if (planData.maxUsers !== undefined) updateData.max_users = planData.maxUsers;
     if (planData.maxAgencies !== undefined) updateData.max_agencies = planData.maxAgencies;
     if (planData.maxLeases !== undefined) updateData.max_leases = planData.maxLeases;
+    if (planData.maxTenants !== undefined) updateData.max_tenants = planData.maxTenants;
     if (planData.hasApiAccess !== undefined) updateData.has_api_access = planData.hasApiAccess;
 
     const { data, error } = await supabase
@@ -155,6 +160,7 @@ export const updateSubscriptionPlan = async (id: string, planData: Partial<Subsc
       maxUsers: data.max_users,
       maxAgencies: data.max_agencies,
       maxLeases: data.max_leases,
+      maxTenants: data.max_tenants,
       hasApiAccess: data.has_api_access
     };
     

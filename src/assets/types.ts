@@ -214,6 +214,7 @@ export interface SubscriptionPlan {
   maxUsers?: number;
   maxAgencies?: number;
   maxLeases?: number;
+  maxTenants?: number;
   hasApiAccess?: boolean;
 }
 
