@@ -207,15 +207,27 @@ export default function PublicPropertyPage() {
                         / mois
                       </span>
                     </div>
-                    {property.charges && (
-                      <p className="text-gray-600 dark:text-gray-400">
-                        + {formatCurrency(property.charges)} de charges
-                      </p>
-                    )}
+                    <div className="space-y-1">
+                      {property.charges && (
+                        <p className="text-gray-600 dark:text-gray-400">
+                          + {formatCurrency(property.charges)} de charges
+                        </p>
+                      )}
+                      {property.securityDeposit && (
+                        <p className="text-gray-600 dark:text-gray-400">
+                          Caution: {formatCurrency(property.securityDeposit)}
+                        </p>
+                      )}
+                      {property.agencyFees && (
+                        <p className="text-gray-600 dark:text-gray-400">
+                          Frais d'agence: {formatCurrency(property.agencyFees)}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* Property Features */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
                     <div className="text-center p-4 rounded-2xl bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30">
                       <Ruler className="h-6 w-6 text-blue-500 mx-auto mb-2" />
                       <div className="font-semibold text-gray-900 dark:text-white">
@@ -226,9 +238,9 @@ export default function PublicPropertyPage() {
                     <div className="text-center p-4 rounded-2xl bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/30">
                       <Hotel className="h-6 w-6 text-green-500 mx-auto mb-2" />
                       <div className="font-semibold text-gray-900 dark:text-white">
-                        {property.rooms || property.bedrooms}
+                        {property.bedrooms}
                       </div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">Pièces</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Chambres</div>
                     </div>
                     <div className="text-center p-4 rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/30">
                       <Bath className="h-6 w-6 text-purple-500 mx-auto mb-2" />
@@ -236,6 +248,20 @@ export default function PublicPropertyPage() {
                         {property.bathrooms}
                       </div>
                       <div className="text-sm text-gray-600 dark:text-gray-400">Salles de bain</div>
+                    </div>
+                    <div className="text-center p-4 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-900/30 dark:to-indigo-800/30">
+                      <Home className="h-6 w-6 text-indigo-500 mx-auto mb-2" />
+                      <div className="font-semibold text-gray-900 dark:text-white">
+                        {property.living_rooms || property.livingRooms || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Salons</div>
+                    </div>
+                    <div className="text-center p-4 rounded-2xl bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:to-yellow-800/30">
+                      <Building2 className="h-6 w-6 text-yellow-500 mx-auto mb-2" />
+                      <div className="font-semibold text-gray-900 dark:text-white">
+                        {property.kitchens || 0}
+                      </div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Cuisines</div>
                     </div>
                     <div className="text-center p-4 rounded-2xl bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30">
                       <Tag className="h-6 w-6 text-orange-500 mx-auto mb-2" />

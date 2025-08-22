@@ -594,6 +594,8 @@
       "rent": "Loyer",
       "securityDeposit": "Caution / Dépôt de garantie",
       "agencyFees": "Frais d'agence",
+      "charges": "Charges",
+      "salePrice": "Prix de vente",
       "commission": "Commission",
       "totalCost": "Coût total à prévoir",
       "caution": "Caution",

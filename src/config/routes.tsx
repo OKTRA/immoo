@@ -5,6 +5,8 @@ import HomePage from '@/pages/HomePage';
 import UserProfilePage from '@/pages/UserProfilePage';
 import MyAgenciesPage from '@/pages/MyAgenciesPage';
 import AgencyRedirectTest from '@/components/test/AgencyRedirectTest';
+import TestFinancialInfo from '@/pages/TestFinancialInfo';
+import TestMultipleImages from '@/pages/TestMultipleImages';
 
 // Configuration des routes avec protection
 export const routes: RouteObject[] = [
@@ -25,6 +27,18 @@ export const routes: RouteObject[] = [
   {
     path: '/test-agency-redirect',
     element: <AgencyRedirectTest />
+  },
+
+  // Route de test pour les informations financières
+  {
+    path: '/test-financial-info',
+    element: <TestFinancialInfo />
+  },
+
+  // Route de test pour les images multiples
+  {
+    path: '/test-multiple-images',
+    element: <TestMultipleImages />
   },
 
   // Routes pour les agences

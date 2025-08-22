@@ -7,7 +7,10 @@ import {
   MapPin, 
   Ruler, 
   Hotel, 
-  Bath, 
+  Bath,
+  Home,
+  Building2, 
+  Store,
   Heart, 
   Eye, 
   Edit
@@ -22,6 +25,7 @@ import { isBlobUrl } from '@/utils/imageUrlUtils';
 import { useFavorites } from '@/hooks/useFavorites';
 import { getPropertyStatusLabel, getPropertyStatusVariant } from '@/utils/translationUtils';
 import { SaleStatusBadge } from '@/utils/saleStatusUtils';
+import PropertyImageGallery from './PropertyImageGallery';
 
 interface PropertyListProps {
   properties: Property[];
@@ -85,57 +89,17 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {properties.map((property) => (
           <Card key={property.id} className="group hover:shadow-lg transition-all duration-300 overflow-hidden">
-            {/* Property Image */}
+            {/* Property Image Gallery */}
             <div className="relative h-48 bg-gray-200 overflow-hidden">
-              {/* Try to display image from images array first, then fallback to imageUrl */}
-              {(() => {
-                let imageUrl = '';
-                if (property.images && property.images.length > 0) {
-                  imageUrl = typeof property.images[0] === 'string' ? property.images[0] : property.images[0].image_url;
-                } else if (property.imageUrl) {
-                  imageUrl = property.imageUrl;
-                }
-
-                // Skip invalid blob URLs
-                if (imageUrl && isBlobUrl(imageUrl)) {
-                  console.warn('Skipping invalid blob URL in property list:', imageUrl);
-                  imageUrl = '';
-                }
-
-                return imageUrl ? (
-                  <img
-                    src={imageUrl}
-                    alt={property.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      // If image fails to load, show placeholder
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      const placeholder = target.nextElementSibling as HTMLElement;
-                      if (placeholder) placeholder.style.display = 'flex';
-                    }}
-                  />
-                ) : null;
-              })()}
-              
-              {/* Placeholder - shown when no image or image fails to load */}
-              <div 
-                className="w-full h-full flex items-center justify-center bg-gray-100" 
-                style={{ 
-                  display: (() => {
-                    let hasValidImage = false;
-                    if (property.images && property.images.length > 0) {
-                      const imageUrl = typeof property.images[0] === 'string' ? property.images[0] : property.images[0].image_url;
-                      hasValidImage = imageUrl && !isBlobUrl(imageUrl);
-                    } else if (property.imageUrl) {
-                      hasValidImage = !isBlobUrl(property.imageUrl);
-                    }
-                    return hasValidImage ? 'none' : 'flex';
-                  })()
-                }}
-              >
-                <Hotel className="h-12 w-12 text-gray-400" />
-              </div>
+              <PropertyImageGallery 
+                propertyId={property.id}
+                mainImageUrl={property.imageUrl}
+                images={property.images || []}
+                height="h-48"
+                enableZoom={false}
+                showThumbnails={false}
+                showControls={true}
+              />
               
               {/* Combined Sale Badge for sale properties */}
               {property.listingType === 'sale' ? (
@@ -198,16 +162,38 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
                       <span>{property.surface} m²</span>
                     </div>
                   )}
-                  {property.rooms && (
-                    <div className="flex items-center gap-1">
-                      <Hotel className="h-3 w-3" />
-                      <span>{property.rooms} {t('propertyCard.rooms')}</span>
-                    </div>
-                  )}
                   {property.bedrooms && (
                     <div className="flex items-center gap-1">
-                      <Bath className="h-3 w-3" />
+                      <Hotel className="h-3 w-3" />
                       <span>{property.bedrooms} {t('propertyCard.bedrooms')}</span>
+                    </div>
+                  )}
+                  {property.bathrooms && (
+                    <div className="flex items-center gap-1">
+                      <Bath className="h-3 w-3" />
+                      <span>{property.bathrooms} {t('propertyCard.bathrooms') || 'Sdb'}</span>
+                    </div>
+                  )}
+                  {(((property as any).living_rooms ?? (property as any).livingRooms) > 0 || (property as any).kitchens > 0 || (property as any).shops > 0) && (
+                    <div className="flex items-center gap-2">
+                      {(((property as any).living_rooms ?? (property as any).livingRooms) > 0) && (
+                        <div className="flex items-center gap-1">
+                          <Home className="h-3 w-3" />
+                          <span className="text-xs text-gray-500">{((property as any).living_rooms ?? (property as any).livingRooms)}</span>
+                        </div>
+                      )}
+                      {((property as any).kitchens > 0) && (
+                        <div className="flex items-center gap-1">
+                          <Building2 className="h-3 w-3" />
+                          <span className="text-xs text-gray-500">{(property as any).kitchens}</span>
+                        </div>
+                      )}
+                      {((property as any).shops > 0) && (
+                        <div className="flex items-center gap-1">
+                          <Store className="h-3 w-3" />
+                          <span className="text-xs text-gray-500">{(property as any).shops}</span>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -218,12 +204,18 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
                 
                 {property.price && (
                   <div className="mb-4">
-                    <span className="text-lg font-semibold text-gray-900">{formatCurrency(property.price)}</span>
-                    {((property as any).listingType || ((property.features || []).includes('for_sale') ? 'sale' : 'rent')) === 'sale' ? (
-                      <span className="text-sm text-gray-500 ml-1">Prix de vente</span>
-                    ) : (
-                      <span className="text-sm text-gray-500 ml-1">/ mois</span>
-                    )}
+                    <div className="space-y-1">
+                      <div>
+                        <span className="text-lg font-semibold text-gray-900">{formatCurrency(property.price)}</span>
+                        {((property as any).listingType || ((property.features || []).includes('for_sale') ? 'sale' : 'rent')) === 'sale' ? (
+                          <span className="text-sm text-gray-500 ml-1">Prix de vente</span>
+                        ) : (
+                          <span className="text-sm text-gray-500 ml-1">/ mois</span>
+                        )}
+                      </div>
+                      
+                      {/* Les informations financières détaillées sont affichées dans la page de détails */}
+                    </div>
                   </div>
                 )}
               </div>

@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Property } from "@/assets/types";
-import { Ruler, Hotel, Bath, Tag } from "lucide-react";
+import { Ruler, Hotel, Bath, Tag, Home, Building2, Store } from "lucide-react";
 import { useTranslation } from '@/hooks/useTranslation';
 
 interface PropertyCharacteristicsProps {
@@ -40,6 +40,30 @@ export default function PropertyCharacteristics({ property }: PropertyCharacteri
           <Tag className="h-6 w-6 mx-auto mb-2 text-purple-600" />
           <p className="text-xs text-muted-foreground mb-1">{t('propertyDetails.characteristics.type')}</p>
           <p className="font-bold text-sm">{property.type}</p>
+        </div>
+      )}
+
+      {(property.livingRooms ?? 0) > 0 && (
+        <div className="bg-indigo-50 dark:bg-indigo-950/30 rounded-xl p-4 text-center">
+          <Home className="h-6 w-6 mx-auto mb-2 text-indigo-600" />
+          <p className="text-xs text-muted-foreground mb-1">{t('agencyDashboard.pages.properties.livingRooms')}</p>
+          <p className="font-bold text-lg">{property.livingRooms}</p>
+        </div>
+      )}
+
+      {(property.kitchens ?? 0) > 0 && (
+        <div className="bg-yellow-50 dark:bg-yellow-950/30 rounded-xl p-4 text-center">
+          <Building2 className="h-6 w-6 mx-auto mb-2 text-yellow-600" />
+          <p className="text-xs text-muted-foreground mb-1">{t('agencyDashboard.pages.properties.kitchens')}</p>
+          <p className="font-bold text-lg">{property.kitchens}</p>
+        </div>
+      )}
+
+      {(property.shops ?? 0) > 0 && (
+        <div className="bg-pink-50 dark:bg-pink-950/30 rounded-xl p-4 text-center">
+          <Store className="h-6 w-6 mx-auto mb-2 text-pink-600" />
+          <p className="text-xs text-muted-foreground mb-1">{t('agencyDashboard.pages.properties.shops')}</p>
+          <p className="font-bold text-lg">{property.shops}</p>
         </div>
       )}
     </div>

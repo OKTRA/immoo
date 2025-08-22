@@ -42,16 +42,10 @@ export const useFavorites = () => {
       const newFavorites = new Set(favorites);
       if (wasAdded) {
         newFavorites.add(property.id);
-        toast.success(`${property.title} ajouté aux favoris`, {
-          duration: 2000,
-          position: 'bottom-right'
-        });
+        // Propriété ajoutée aux favoris
       } else {
         newFavorites.delete(property.id);
-        toast.success(`${property.title} retiré des favoris`, {
-          duration: 2000,
-          position: 'bottom-right'
-        });
+        // Propriété retirée des favoris
       }
       
       setFavorites(newFavorites);
@@ -88,10 +82,7 @@ export const useFavorites = () => {
         const updatedDetails = FavoritesService.getFavoriteDetails();
         setFavoritesDetails(updatedDetails);
         
-        toast.success('Propriété retirée des favoris', {
-          duration: 2000,
-          position: 'bottom-right'
-        });
+        // Propriété retirée des favoris
       } catch (error) {
         console.error('Error removing from favorites:', error);
         toast.error('Erreur lors de la suppression');

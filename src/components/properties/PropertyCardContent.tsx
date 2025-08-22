@@ -19,13 +19,16 @@ export default function PropertyCardContent({ property }: PropertyCardContentPro
         <p className="text-muted-foreground text-sm">{property.location}</p>
       </div>
 
-      <div className="flex justify-between items-center mb-2">
-        <span className="font-bold text-primary">
-          {formatCurrency(property.price)}
-          {property.listingType === 'sale' ? '' : ' / '}
-          {property.listingType === 'sale' ? '' : t(`propertyDetails.paymentFrequency.${property.paymentFrequency || 'monthly'}`).toLowerCase()}
-        </span>
-        <span className="text-sm text-muted-foreground">{property.area} m²</span>
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex-1">
+          <div className="font-bold text-primary">
+            {formatCurrency(property.price)}
+            {property.listingType === 'sale' ? '' : ' / '}
+            {property.listingType === 'sale' ? '' : t(`propertyDetails.paymentFrequency.${property.paymentFrequency || 'monthly'}`).toLowerCase()}
+          </div>
+          {/* Les informations financières détaillées sont affichées dans la page de détails */}
+        </div>
+        <span className="text-sm text-muted-foreground ml-2">{property.area} m²</span>
       </div>
 
       <div className="flex space-x-4 text-sm text-muted-foreground">

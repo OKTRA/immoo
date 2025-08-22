@@ -27,13 +27,17 @@ export const getProperties = async (agencyId?: string, limit?: number) => {
       
       // Add images to the property (now directly from the view)
       if (property.property_images && property.property_images.length > 0) {
-        formatted.images = property.property_images.map((img: any) => ({
-          id: img.id,
-          image_url: img.image_url,
-          description: img.description,
-          is_primary: img.is_primary,
-          position: img.position
-        }));
+        // Filter out null/invalid images
+        const validImages = property.property_images.filter((img: any) => img.id && img.image_url);
+        if (validImages.length > 0) {
+          formatted.images = validImages.map((img: any) => ({
+            id: img.id,
+            image_url: img.image_url,
+            description: img.description,
+            is_primary: img.is_primary,
+            position: img.position
+          }));
+        }
       }
       
       // Add complete agency information to each property (now directly from the view)
@@ -246,22 +250,26 @@ export const getPropertyByIdForEdit = async (propertyId: string) => {
     
     // Add images to the property for editing
     if (data.property_images && data.property_images.length > 0) {
-      property.images = data.property_images.map((img: any) => ({
-        id: img.id,
-        image_url: img.image_url,
-        description: img.description,
-        is_primary: img.is_primary,
-        position: img.position
-      }));
-      
-      // Also prepare additionalImages format for the media form
-      property.additionalImages = data.property_images
-        .filter((img: any) => !img.is_primary)
-        .map((img: any) => ({
-          url: img.image_url,
-          isPrimary: img.is_primary,
-          description: img.description || ''
+      // Filter out null/invalid images
+      const validImages = data.property_images.filter((img: any) => img.id && img.image_url);
+      if (validImages.length > 0) {
+        property.images = validImages.map((img: any) => ({
+          id: img.id,
+          image_url: img.image_url,
+          description: img.description,
+          is_primary: img.is_primary,
+          position: img.position
         }));
+        
+        // Also prepare additionalImages format for the media form
+        property.additionalImages = validImages
+          .filter((img: any) => !img.is_primary)
+          .map((img: any) => ({
+            url: img.image_url,
+            isPrimary: img.is_primary,
+            description: img.description || ''
+          }));
+      }
     }
     
     // Add complete agency information
