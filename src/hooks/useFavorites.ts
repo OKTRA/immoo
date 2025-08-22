@@ -96,7 +96,7 @@ export const useFavorites = () => {
       FavoritesService.clearAllFavorites();
       setFavorites(new Set());
       setFavoritesDetails([]);
-      toast.success('Tous les favoris ont été supprimés');
+              // Tous les favoris ont été supprimés
     } catch (error) {
       console.error('Error clearing favorites:', error);
       toast.error('Erreur lors de la suppression des favoris');

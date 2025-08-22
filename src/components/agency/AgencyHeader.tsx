@@ -37,18 +37,18 @@ export default function AgencyHeader() {
         console.warn('Logout warning:', error);
       }
       
-      toast.success("Déconnexion réussie");
+      // Déconnexion réussie
       navigate("/");
     } catch (error: any) {
       console.error("Error signing out:", error);
-      toast.success("Déconnexion réussie");
+      // Déconnexion réussie
       navigate("/");
     }
   };
 
   const handleExitAgencySpace = () => {
     navigate("/my-agencies");
-    toast.success("Vous avez quitté l'espace agence");
+    // Vous avez quitté l'espace agence
   };
 
   return (

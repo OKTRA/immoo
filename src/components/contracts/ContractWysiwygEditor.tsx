@@ -309,8 +309,8 @@ const ContractWysiwygEditor: React.FC<ContractWysiwygEditorProps> = ({
         status: metadata.status || 'draft'
       };
       await onSave?.(content, defaultMetadata);
-      toast.success('Contrat sauvegardé avec succès');
     } catch (error) {
+      console.error('Error saving contract:', error);
       toast.error('Erreur lors de la sauvegarde');
     } finally {
       setIsSaving(false);
@@ -336,8 +336,8 @@ const ContractWysiwygEditor: React.FC<ContractWysiwygEditorProps> = ({
       await onAssignToLease?.(contractId, selectedLeaseId);
       setShowAssignDialog(false);
       setSelectedLeaseId('');
-      toast.success('Contrat attribué au bail avec succès');
     } catch (error) {
+      console.error('Error assigning contract:', error);
       toast.error('Erreur lors de l\'attribution');
     }
   };
@@ -456,9 +456,9 @@ const ContractWysiwygEditor: React.FC<ContractWysiwygEditorProps> = ({
       // Sauvegarder le PDF (taille optimisée)
       pdf.save(fileName);
       
-      toast.success('PDF généré avec succès ! (Taille optimisée)');
+      // PDF généré avec succès ! (Taille optimisée)
     } catch (error) {
-      console.error('Erreur lors de la génération du PDF:', error);
+      console.error('Error generating PDF:', error);
       toast.error('Erreur lors de la génération du PDF');
     } finally {
       setIsExportingPDF(false);
@@ -634,9 +634,9 @@ const ContractWysiwygEditor: React.FC<ContractWysiwygEditorProps> = ({
       // Sauvegarder le fichier
       saveAs(blob, fileName);
       
-      toast.success('Document Word structuré généré avec succès !');
+      // Document Word structuré généré avec succès !
     } catch (error) {
-      console.error('Erreur lors de la génération du document Word:', error);
+      console.error('Error generating Word document:', error);
       toast.error('Erreur lors de la génération du document Word');
     } finally {
       setIsExportingWord(false);

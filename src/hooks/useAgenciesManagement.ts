@@ -102,7 +102,7 @@ export function useAgenciesManagement() {
 
       setAgencies(agencies.filter(agency => agency.id !== agencyId));
       setTotalCount(prev => prev - 1);
-      toast.success('Agence supprimée avec succès');
+      // Agence supprimée avec succès
     } catch (error) {
       console.error('Error deleting agency:', error);
       toast.error('Erreur lors de la suppression de l\'agence');
@@ -128,7 +128,7 @@ export function useAgenciesManagement() {
       if (error) throw error;
 
       await fetchAgencies();
-      toast.success('Agence mise à jour avec succès');
+      // Agence mise à jour avec succès
     } catch (error) {
       console.error('Error updating agency:', error);
       toast.error('Erreur lors de la mise à jour de l\'agence');

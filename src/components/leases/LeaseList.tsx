@@ -122,7 +122,7 @@ const LeaseList: React.FC<LeaseListProps> = ({ leases, loading, onViewLeaseDetai
     try {
       const success = await assignContractToLease(selectedContractToAssign, leaseToAssignContract.id);
       if (success) {
-        toast.success('Contrat assigné au bail avec succès');
+        // Contrat assigné au bail avec succès
         setIsContractSelectionOpen(false);
         setSelectedContractToAssign('');
         setLeaseToAssignContract(null);
@@ -165,7 +165,7 @@ const LeaseList: React.FC<LeaseListProps> = ({ leases, loading, onViewLeaseDetai
     }
     const { success, error } = result;
     if (success) {
-      toast.success(actionType === 'cancel' ? 'Bail annulé' : 'Bail résilié');
+      // Bail annulé/résilié
       setIsCancelOpen(false);
       window.location.reload();
     } else {

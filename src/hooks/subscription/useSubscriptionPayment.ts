@@ -45,14 +45,11 @@ export const useSubscriptionPayment = () => {
         );
 
         if (error) {
-          toast.error(`Erreur lors de la mise à niveau: ${error}`);
-          return false;
+          throw new Error(error);
         }
-
-        if (success) {
-          toast.success('Abonnement activé avec succès!');
-          return true;
-        }
+        // Abonnement activé avec succès!
+        await refreshUser();
+        return true;
       } else {
         toast.error('Le paiement n\'a pas été accepté');
         return false;

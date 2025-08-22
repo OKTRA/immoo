@@ -134,7 +134,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
               detail: { type: 'signin', user, profile } 
             }));
             
-            toast.success('Connexion réussie !');
+            // Connexion réussie !
             resolve({ success: true });
             return;
           } else {
@@ -173,14 +173,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             type: 'SET_AUTHENTICATED',
             payload: { user, profile }
           });
-          toast.success('Inscription réussie !');
+          // Inscription réussie !
           return { success: true };
         }
       }
 
       console.log('ℹ️ Sign up successful, awaiting email confirmation');
       dispatch({ type: 'SET_UNAUTHENTICATED' });
-      toast.info('Vérifiez votre email pour confirmer votre inscription.');
+      // Vérifiez votre email pour confirmer votre inscription.
       return { success: true };
     } catch (error: any) {
       console.error('❌ Sign up exception:', error);
@@ -211,7 +211,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         detail: { type: 'signout', shouldRedirect: true } 
       }));
       
-      toast.success('Déconnexion réussie');
+      // Déconnexion réussie
       console.log('✅ Signed out successfully');
     } catch (error: any) {
       console.error('❌ Error signing out:', error);
@@ -257,7 +257,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         payload: { ...state.profile, ...updates }
       });
       
-      toast.success('Profil mis à jour avec succès');
+      // Profil mis à jour avec succès
       console.log('✅ Profile updated');
     } catch (error: any) {
       console.error('❌ Error updating profile:', error);

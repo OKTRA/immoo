@@ -26,20 +26,14 @@ export const useSubscriptionUpgrade = (reloadSubscription: () => Promise<void>) 
       );
 
       if (error) {
-        toast.error(`Erreur lors de la mise à niveau: ${error}`);
-        return false;
+        throw new Error(error);
       }
-
-      if (success) {
-        toast.success('Abonnement mis à niveau avec succès!');
-        await reloadSubscription();
-        return true;
-      }
-
-      return false;
-    } catch (error) {
+      // Abonnement mis à niveau avec succès!
+      await reloadSubscription();
+      return true;
+    } catch (error: any) {
       console.error('Error upgrading subscription:', error);
-      toast.error('Erreur lors de la mise à niveau');
+      toast.error(`Erreur lors de la mise à niveau: ${error}`);
       return false;
     }
   };

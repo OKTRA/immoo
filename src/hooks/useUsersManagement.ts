@@ -191,20 +191,25 @@ export function useUsersManagement() {
           .delete()
           .eq('id', userId);
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
+        // Utilisateur supprimé avec succès
+        await fetchUsers();
       } else {
         const { error } = await supabase
           .from('profiles')
           .delete()
           .eq('id', userId);
 
-        if (error) throw error;
+        if (error) {
+          throw error;
+        }
+        // Utilisateur supprimé avec succès
+        await fetchUsers();
       }
-
-      setUsers(users.filter(user => user.id !== userId));
-      setTotalCount(prev => prev - 1);
-      toast.success('Utilisateur supprimé avec succès');
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
       toast.error('Erreur lors de la suppression');
     }
   };

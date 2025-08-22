@@ -64,7 +64,7 @@ export const useExpensesManagement = (agencyId: string) => {
       queryClient.invalidateQueries({ queryKey: ['expense-summary', agencyId] });
       queryClient.invalidateQueries({ queryKey: ['expenses-by-category', agencyId] });
       queryClient.invalidateQueries({ queryKey: ['monthly-expense-chart', agencyId] });
-      toast.success('Dépense créée avec succès');
+      // Dépense créée avec succès
     },
     onError: (error: any) => {
       toast.error('Erreur lors de la création de la dépense');
@@ -80,7 +80,7 @@ export const useExpensesManagement = (agencyId: string) => {
       queryClient.invalidateQueries({ queryKey: ['expense-summary', agencyId] });
       queryClient.invalidateQueries({ queryKey: ['expenses-by-category', agencyId] });
       queryClient.invalidateQueries({ queryKey: ['monthly-expense-chart', agencyId] });
-      toast.success('Dépense mise à jour avec succès');
+      // Dépense mise à jour avec succès
     },
     onError: (error: any) => {
       toast.error('Erreur lors de la mise à jour de la dépense');
@@ -93,10 +93,9 @@ export const useExpensesManagement = (agencyId: string) => {
     mutationFn: (id: string) => deleteExpense(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['expenses', agencyId] });
-      queryClient.invalidateQueries({ queryKey: ['expense-summary', agencyId] });
       queryClient.invalidateQueries({ queryKey: ['expenses-by-category', agencyId] });
       queryClient.invalidateQueries({ queryKey: ['monthly-expense-chart', agencyId] });
-      toast.success('Dépense supprimée avec succès');
+      // Dépense supprimée avec succès
     },
     onError: (error: any) => {
       toast.error('Erreur lors de la suppression de la dépense');

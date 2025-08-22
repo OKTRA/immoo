@@ -88,11 +88,11 @@ export const useMobileAuth = (): MobileAuthHook => {
           error: null,
           isAuthenticated: true,
         });
-        toast.success('Connexion réussie!');
+        // Connexion réussie!
       } else {
         // Sur web, l'utilisateur sera redirigé
         setAuthState(prev => ({ ...prev, isLoading: false }));
-        toast.success(`Redirection vers Google (${platformInfo.platform})...`);
+        // Redirection vers Google (${platformInfo.platform})...
       }
     } catch (error: any) {
       setAuthState(prev => ({
@@ -133,7 +133,7 @@ export const useMobileAuth = (): MobileAuthHook => {
         isAuthenticated: false,
       });
       
-      toast.success('Déconnexion réussie');
+      // Déconnexion réussie
     } catch (error: any) {
       setAuthState(prev => ({
         ...prev,

@@ -125,12 +125,12 @@ export default function CreateAgencyForm() {
         
         if (logoError) {
           console.error("Erreur lors du téléchargement du logo, mais l'agence a été créée", logoError);
-          toast.warning("Agence créée, mais le logo n'a pas pu être téléchargé");
+          // Agence créée, mais le logo n'a pas pu être téléchargé
         } else {
-          toast.success("Agence créée avec succès avec logo");
+          // Agence créée avec succès avec logo
         }
       } else {
-        toast.success("Agence créée avec succès");
+        // Agence créée avec succès
       }
 
       // Redirect to agency page or list
