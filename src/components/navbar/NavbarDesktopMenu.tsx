@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslation } from "@/hooks/useTranslation";
 import { LanguageSwitcher } from "@/components/ui/LanguageSwitcher";
+import AgencyProfileIconCompact from "@/components/ui/AgencyProfileIcon";
 
 interface NavbarDesktopMenuProps {
   navLinks: { name: string; path: string }[];
@@ -160,10 +161,14 @@ export function NavbarDesktopMenu({
                 <ButtonEffects
                   variant="ghost"
                   size="sm"
-                  className="mx-0.5"
+                  className="mx-0.5 p-1"
                   onClick={handleAccountClick}
                 >
-                  <User className="h-4 w-4" />
+                  <AgencyProfileIconCompact 
+                    size="sm" 
+                    showBadge={true}
+                    isPremium={profile?.subscription_tier === 'premium'}
+                  />
                 </ButtonEffects>
                 <ButtonEffects
                   variant="ghost"

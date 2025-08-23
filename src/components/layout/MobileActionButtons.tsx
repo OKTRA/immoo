@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useTranslation } from '@/hooks/useTranslation';
 import { useLocalizedNavigation } from '@/hooks/useLocalizedNavigation';
 import { useMobileToast } from '@/hooks/useMobileToast';
+import AgencyProfileIconCompact from '@/components/ui/AgencyProfileIcon';
 
 export default function MobileActionButtons() {
   const { user, profile, signOut } = useAuth();
@@ -80,7 +81,11 @@ export default function MobileActionButtons() {
             className="h-8 w-8 p-0 rounded-full hover:bg-immoo-pearl/60 transition-all duration-200 hover:scale-105 shadow-sm"
             title="Mes Agences"
           >
-            <User className="h-4 w-4 text-immoo-navy" />
+            <AgencyProfileIconCompact 
+              size="sm" 
+              showBadge={true}
+              isPremium={profile?.subscription_tier === 'premium'}
+            />
           </Button>
 
           {/* Bouton Logout */}
