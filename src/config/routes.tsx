@@ -7,6 +7,8 @@ import MyAgenciesPage from '@/pages/MyAgenciesPage';
 import AgencyRedirectTest from '@/components/test/AgencyRedirectTest';
 import TestFinancialInfo from '@/pages/TestFinancialInfo';
 import TestMultipleImages from '@/pages/TestMultipleImages';
+import AdminSidebarTest from '@/components/admin/AdminSidebarTest';
+import SimpleLogoutTest from '@/components/admin/SimpleLogoutTest';
 
 // Configuration des routes avec protection
 export const routes: RouteObject[] = [
@@ -39,6 +41,18 @@ export const routes: RouteObject[] = [
   {
     path: '/test-multiple-images',
     element: <TestMultipleImages />
+  },
+
+  // Route de test pour la sidebar d'administration
+  {
+    path: '/test-admin-sidebar',
+    element: <AdminSidebarTest />
+  },
+
+  // Route de test simple pour le bouton de déconnexion
+  {
+    path: '/test-logout-button',
+    element: <SimpleLogoutTest />
   },
 
   // Routes pour les agences

@@ -66,7 +66,7 @@ export default function AdminLayout() {
 
   return (
     <div className="flex min-h-screen bg-muted/30">
-      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} userRole={userRole} />
 
       <div className="flex-1 flex flex-col">
         <AdminHeader user={user} />
