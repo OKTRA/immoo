@@ -14,6 +14,7 @@ import SupportManagement from './SupportManagement';
 import SubscriptionPlansManagement from './SubscriptionPlansManagement';
 import SubscriptionPaymentsManagement from './SubscriptionPaymentsManagement';
 import SubscriptionPaymentMethods from './SubscriptionPaymentMethods';
+import VisitorAnalytics from './VisitorAnalytics';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 
@@ -77,6 +78,7 @@ export default function AdminLayout() {
               <TabsTrigger value="users">Utilisateurs</TabsTrigger>
               <TabsTrigger value="agencies">Agences</TabsTrigger>
               <TabsTrigger value="properties">Propriétés</TabsTrigger>
+              <TabsTrigger value="visitor-analytics">Favoris & Visiteurs</TabsTrigger>
               <TabsTrigger value="payments">Paiements</TabsTrigger>
               <TabsTrigger value="analytics">Rapports & Analyses</TabsTrigger>
               <TabsTrigger value="subscriptions">Abonnements</TabsTrigger>
@@ -101,6 +103,10 @@ export default function AdminLayout() {
 
             <TabsContent value="properties" className="space-y-6">
               <PropertiesManagement />
+            </TabsContent>
+
+            <TabsContent value="visitor-analytics" className="space-y-6">
+              <VisitorAnalytics />
             </TabsContent>
 
             <TabsContent value="payments" className="space-y-6">
