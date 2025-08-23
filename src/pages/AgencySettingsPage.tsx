@@ -19,6 +19,8 @@ import { getAgencyById } from "@/services/agency";
 import { updateAgency } from "@/services/agency/agencyManagementService";
 import { uploadAgencyLogo } from "@/services/agency/agencyMediaService";
 import { useTranslation } from "@/hooks/useTranslation";
+import PlanSummary from "@/components/subscription/PlanSummary";
+import { useUserSubscription } from "@/hooks/useUserSubscription";
 
 interface AgencyFormData {
   name: string;
@@ -33,6 +35,7 @@ export default function AgencySettingsPage() {
   const mobileToast = useMobileToast();
   const { agencyId } = useParams();
   const { t } = useTranslation();
+  const { subscription } = useUserSubscription();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [logoFile, setLogoFile] = useState<File | null>(null);
@@ -206,6 +209,11 @@ export default function AgencySettingsPage() {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-immoo-navy mb-2">{t('agencyDashboard.pages.settings.title')}</h1>
           <p className="text-immoo-gray">{t('agencyDashboard.pages.settings.description')}</p>
+        </div>
+
+        {/* Plan Summary */}
+        <div className="mb-6">
+          <PlanSummary subscription={subscription} />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

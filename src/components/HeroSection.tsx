@@ -12,6 +12,7 @@ import { useAuth } from "@/contexts/auth/AuthContext";
 import QuickVisitorLogin from "./visitor/QuickVisitorLogin";
 import { useQuickVisitorAccess } from "@/hooks/useQuickVisitorAccess";
 import { useTranslation } from "@/hooks/useTranslation";
+import { formatCurrency } from "@/lib/utils";
 
 export default function HeroSection() {
   const { t } = useTranslation();
@@ -32,6 +33,14 @@ export default function HeroSection() {
   const [hasSearched, setHasSearched] = useState(false);
   const [showVisitorLogin, setShowVisitorLogin] = useState(false);
   const [selectedAgency, setSelectedAgency] = useState<any>(null);
+  // Dynamic filter options derived from existing properties
+  const [locationOptions, setLocationOptions] = useState<string[]>(['Kabala', 'Kati Fouga']); // Default fallbacks
+  const [typeOptions, setTypeOptions] = useState<string[]>(['apartment', 'house', 'villa']); // Default fallbacks
+  const [budgetOptions, setBudgetOptions] = useState<Array<{ value: string; label: string }>>([
+    { value: '0-75000', label: '0 FCFA - 75 000 FCFA' },
+    { value: '75000-100000', label: '75 000 FCFA - 100 000 FCFA' },
+    { value: '100000-', label: '100 000 FCFA +' }
+  ]); // Default fallbacks
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isLoggedIn: visitorIsLoggedIn } = useQuickVisitorAccess();
@@ -43,6 +52,81 @@ export default function HeroSection() {
   
   useEffect(() => {
     setIsLoaded(true);
+  }, []);
+
+  // Load available filter values from existing properties
+  useEffect(() => {
+    const loadFilterMetadata = async () => {
+      try {
+        // Use the basic properties table with guaranteed columns
+        const { data, error } = await supabase
+          .from('properties')
+          .select('location,type,price')
+          .limit(1000); // Limit to avoid overwhelming the query
+
+        if (error) {
+          console.error('Error loading filter metadata:', error);
+          // Set empty arrays as fallback
+          setLocationOptions([]);
+          setTypeOptions([]);
+          setBudgetOptions([]);
+          return;
+        }
+
+        const safeData = (data || []) as Array<{ location?: string | null; type?: string | null; price?: number | null }>;
+
+        // Locations: use distinct locations only
+        const rawLocations = safeData
+          .map(p => (p.location || '').toString().trim())
+          .filter(Boolean);
+        const distinctLocations = Array.from(new Set(rawLocations)).sort((a, b) => a.localeCompare(b));
+        setLocationOptions(distinctLocations);
+
+        // Property types
+        const distinctTypes = Array.from(new Set(
+          safeData.map(p => (p.type || '').toString().trim()).filter(Boolean)
+        )).sort((a, b) => a.localeCompare(b));
+        setTypeOptions(distinctTypes);
+
+        // Budget buckets from min/max
+        const prices = safeData.map(p => Number(p.price || 0)).filter(n => !Number.isNaN(n) && n > 0);
+        if (prices.length > 0) {
+          const min = Math.min(...prices);
+          const max = Math.max(...prices);
+          
+          // Create reasonable budget ranges
+          if (max > min) {
+            const range = Math.max(1, Math.ceil((max - min) / 4));
+            const b1 = min + range;
+            const b2 = min + range * 2;
+            const b3 = min + range * 3;
+            const opts: Array<{ value: string; label: string }> = [
+              { value: `${min}-${b1}`, label: `${formatCurrency(min)} - ${formatCurrency(b1)}` },
+              { value: `${b1}-${b2}`, label: `${formatCurrency(b1)} - ${formatCurrency(b2)}` },
+              { value: `${b2}-${b3}`, label: `${formatCurrency(b2)} - ${formatCurrency(b3)}` },
+              { value: `${b3}-${max}`, label: `${formatCurrency(b3)} - ${formatCurrency(max)}` },
+              { value: `${max}-`, label: `${formatCurrency(max)} +` },
+            ];
+            setBudgetOptions(opts);
+          } else {
+            // Single price point
+            setBudgetOptions([
+              { value: `${min}-`, label: `${formatCurrency(min)} +` }
+            ]);
+          }
+        } else {
+          setBudgetOptions([]);
+        }
+      } catch (err) {
+        console.error('Unexpected error loading filter metadata:', err);
+        // Set empty arrays as fallback
+        setLocationOptions([]);
+        setTypeOptions([]);
+        setBudgetOptions([]);
+      }
+    };
+
+    loadFilterMetadata();
   }, []);
 
   const handleSearch = async () => {
@@ -65,8 +149,9 @@ export default function HeroSection() {
         }
         
         if (location) {
+          const locLower = location.toLowerCase();
           filteredProperties = filteredProperties.filter(p => 
-            p.location?.toLowerCase().includes(location.toLowerCase())
+            p.location?.toLowerCase().includes(locLower)
           );
         }
         
@@ -371,8 +456,9 @@ export default function HeroSection() {
                       onChange={(e) => setLocation(e.target.value)}
                     >
                       <option value="">📍 {t('hero.location')}</option>
-                      <option value="Kabala">Kabala</option>
-                      <option value="Kati Fouga">Kati Fouga</option>
+                      {locationOptions.map((loc) => (
+                        <option key={loc} value={loc}>{loc}</option>
+                      ))}
                     </select>
 
                     {/* Property Type */}
@@ -382,8 +468,9 @@ export default function HeroSection() {
                       onChange={(e) => setPropertyType(e.target.value)}
                     >
                       <option value="">🏠 {t('hero.propertyType')}</option>
-                      <option value="apartment">{t('hero.apartment')}</option>
-                      <option value="house">{t('hero.house')}</option>
+                      {typeOptions.map((typ) => (
+                        <option key={typ} value={typ}>{typ}</option>
+                      ))}
                     </select>
 
                     {/* Price Range */}
@@ -393,9 +480,9 @@ export default function HeroSection() {
                       onChange={(e) => setPriceRange(e.target.value)}
                     >
                       <option value="">💰 {t('hero.budget')}</option>
-                      <option value="0-75000">{t('hero.budgetUpTo75000')}</option>
-                      <option value="75000-100000">{t('hero.budget75000To100000')}</option>
-                      <option value="100000-">{t('hero.budgetOver100000')}</option>
+                      {budgetOptions.map(opt => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
                     </select>
                   </div>
                   

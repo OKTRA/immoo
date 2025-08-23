@@ -103,13 +103,13 @@ export default function PropertyList({ properties, agencyId }: PropertyListProps
               
               {/* Combined Sale Badge for sale properties */}
               {property.listingType === 'sale' ? (
-                <div className="absolute top-3 right-3">
+                <div className="absolute top-3 left-3">
                   <SaleStatusBadge status={property.status || 'available'} size="sm" />
                 </div>
               ) : (
                 /* Original status badge for rental properties */
                 property.status && (
-                  <div className="absolute top-3 right-3">
+                  <div className="absolute top-3 left-3">
                     <Badge 
                       variant={getPropertyStatusVariant(property.status)}
                       className="text-xs"

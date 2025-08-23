@@ -59,49 +59,69 @@ export default function TransactionVerifier({
     setStatus({ type: 'verifying', message: '🔄 Démarrage de la vérification en temps réel...' });
 
     try {
-      const { data, error } = await supabase.functions.invoke('verify-transaction', {
-        body: {
+      console.log('🚀 Appel de l\'edge function muana-validation avec:', {
+        transaction_id: `PAY_${Date.now()}`,
+        amount: amountCents,
+        currency: 'FCFA',
+        status: 'pending',
+        provider: 'muana',
+        metadata: {
           user_id: userId,
           plan_id: planId,
           plan_name: planName,
-          amount_cents: amountCents,
           payment_reference: `PAY_${Date.now()}`,
           sender_number: senderNumber.trim(),
           verification_mode: 'realtime_listening'
+        },
+        validation_type: 'pre_validation'
+      });
+
+      const { data, error } = await supabase.functions.invoke('muana-validation', {
+        body: {
+          // Nouveau flux: vérification par numéro uniquement
+          sender_number: senderNumber.trim(),
+          user_id: userId,
+          plan_id: planId,
+          amount_cents: amountCents
         }
       });
 
-      if (error) throw new Error(error.message);
+      console.log('📡 Réponse de l\'edge function:', { data, error });
 
-      if (data.success) {
-        if (data.immediate_match) {
-          // Transaction trouvée immédiatement
-          setStatus({ type: 'success', message: '✅ Paiement vérifié avec succès ! Votre abonnement a été activé.', details: data });
-          toast.success('Paiement vérifié et abonnement activé !');
-          // Pas de redirection automatique - l'utilisateur reste sur la page
+      if (error) {
+        console.error('❌ Erreur de l\'edge function:', error);
+        throw new Error(error.message);
+      }
+
+      if (data?.success && data?.found && data?.verified) {
+        const already = data?.already_verified === true;
+        setStatus({ 
+          type: 'success', 
+          message: already 
+            ? '✅ Transaction déjà confirmée. Abonnement actif.' 
+            : '✅ Paiement confirmé ! Abonnement activé.', 
+          details: data 
+        });
+        already ? toast.info('Transaction déjà confirmée') : toast.success('Paiement vérifié et abonnement activé !');
+      } else if (data?.success && !data?.found) {
+        if (data?.not_ready === true) {
+          setStatus({ 
+            type: 'listening', 
+            message: '⏳ Nous attendons la réception du SMS par Muana (1-3 min). L\'écran va se mettre à jour automatiquement...', 
+            details: data 
+          });
+          startListeningMode();
         } else {
-          // Mode écoute activé
-          setStatus({ type: 'listening', message: '👂 Nous sommes maintenant en écoute de votre transaction !', details: data });
+          // Démarre/continue l'écoute jusqu'à 5 minutes
+          setStatus({ type: 'listening', message: '👂 Démarrage de la vérification en temps réel...', details: data });
           startListeningMode();
         }
       } else {
-        // Gérer les cas d'échec
-        if (data.verification_method === 'already_verified') {
-          setStatus({ type: 'error', message: data.message, details: data });
-          toast.warning('Transaction déjà confirmée');
-        } else if (data.verification_method === 'transaction_already_used') {
-          setStatus({ type: 'error', message: data.message, details: data });
-          toast.error('Transaction déjà utilisée');
-        } else if (data.verification_method === 'transaction_update_failed') {
-          setStatus({ type: 'error', message: data.message, details: data });
-          toast.error('Transaction non utilisable');
-        } else {
-          setStatus({ type: 'error', message: data.message || '❌ Erreur lors de la vérification', details: data });
-          toast.error('Vérification échouée');
-        }
+        setStatus({ type: 'error', message: data?.message || '❌ Erreur lors de la vérification', details: data });
+        toast.error('Vérification échouée');
       }
     } catch (error: any) {
-      console.error('Edge function error:', error);
+      console.error('💥 Edge function error:', error);
       setStatus({ type: 'error', message: `❌ Erreur de connexion : ${error.message}`, details: error });
       toast.error('Erreur de connexion');
       if (onError) onError(error.message);
@@ -131,29 +151,29 @@ export default function TransactionVerifier({
 
       // Vérifier s'il y a une nouvelle transaction en appelant la même Edge Function
       try {
-        const { data, error } = await supabase.functions.invoke('verify-transaction', {
+        const { data, error } = await supabase.functions.invoke('muana-validation', {
           body: {
+            // Écoute par numéro (même flux)
+            sender_number: senderNumber.trim(),
             user_id: userId,
             plan_id: planId,
-            plan_name: planName,
-            amount_cents: amountCents,
-            payment_reference: `PAY_${Date.now()}`,
-            sender_number: senderNumber.trim(),
-            verification_mode: 'realtime_listening'
+            amount_cents: amountCents
           }
         });
 
         if (error) throw new Error(error.message);
 
-        if (data.success && data.immediate_match) {
-          // Transaction trouvée !
+        if (data?.success && data?.found && data?.verified) {
+          const already = data?.already_verified === true;
           clearInterval(listeningIntervalRef.current!);
           setStatus({ 
             type: 'success', 
-            message: '🎉 Transaction trouvée et vérifiée ! Votre abonnement a été activé.', 
+            message: already 
+              ? '✅ Transaction déjà confirmée. Abonnement actif.' 
+              : '🎉 Transaction validée avec succès ! Votre abonnement a été activé.', 
             details: data 
           });
-          toast.success('Paiement vérifié et abonnement activé !');
+          already ? toast.info('Transaction déjà confirmée') : toast.success('Paiement vérifié et abonnement activé !');
           // Pas de redirection automatique - l'utilisateur reste sur la page
         } else {
           // Mettre à jour le statut pour montrer qu'on écoute toujours
@@ -179,42 +199,45 @@ export default function TransactionVerifier({
     setStatus({ type: 'verifying', message: '🔍 Vérification manuelle en cours...' });
 
     try {
-      const { data, error } = await supabase.functions.invoke('verify-transaction', {
+      const { data, error } = await supabase.functions.invoke('muana-validation', {
         body: {
-          userId,
-          planId,
-          planName,
-          amountCents,
-          payment_reference: paymentRef.trim(),
-          sender_number: '',
-          verification_mode: 'standard'
+          // Manual path: allow user to paste transaction ID OR still verify by number
+          sender_number: senderNumber.trim() || undefined,
+          user_id: userId,
+          plan_id: planId,
+          amount_cents: amountCents,
+          transaction_id: paymentRef.trim() || undefined
         }
       });
 
       if (error) throw new Error(error.message);
 
-      if (data.success) {
-        setStatus({ type: 'success', message: '✅ Transaction vérifiée avec succès ! Votre abonnement a été activé.', details: data });
-        toast.success('Transaction vérifiée et abonnement activé !');
-        // Pas de redirection automatique - l'utilisateur reste sur la page
-      } else {
-        // Gérer les différents cas d'échec
-        if (data.verification_method === 'manual_verification_already_verified') {
-          setStatus({ type: 'error', message: data.message, details: data });
-          toast.warning('Transaction déjà confirmée');
-        } else if (data.verification_method === 'manual_verification_used_by_other') {
-          setStatus({ type: 'error', message: data.message, details: data });
-          toast.error('Transaction utilisée par un autre utilisateur');
-        } else if (data.verification_method === 'manual_verification_already_associated') {
-          setStatus({ type: 'error', message: data.message, details: data });
-          toast.error('Transaction déjà associée');
-        } else if (data.verification_method === 'manual_verification_invalid_status') {
-          setStatus({ type: 'error', message: data.message, details: data });
-          toast.error('Statut de transaction invalide');
+      if (data?.success && data?.found && data?.verified) {
+        const already = data?.already_verified === true;
+        setStatus({ 
+          type: 'success', 
+          message: already 
+            ? '✅ Transaction déjà confirmée. Abonnement actif.' 
+            : '✅ Transaction confirmée ! Abonnement activé.', 
+          details: data 
+        });
+        already ? toast.info('Transaction déjà confirmée') : toast.success('Transaction vérifiée et abonnement activé !');
+      } else if (data?.success && !data?.found) {
+        if (data?.not_ready === true) {
+          setStatus({ 
+            type: 'listening', 
+            message: "⏳ ID reçu. Muana n'a pas encore synchronisé le SMS (1–3 min). Nous vérifions automatiquement...", 
+            details: data 
+          });
+          // Réutilise le listening mode pour re-checker périodiquement
+          startListeningMode();
         } else {
-          setStatus({ type: 'error', message: data.message || '❌ Transaction non trouvée', details: data });
-          toast.error('Transaction non trouvée');
+          setStatus({ type: 'error', message: 'Aucune transaction trouvée pour cet ID', details: data });
+          toast.error('Transaction introuvable');
         }
+      } else {
+        setStatus({ type: 'error', message: data?.message || '❌ Erreur lors de la vérification', details: data });
+        toast.error('Vérification échouée');
       }
     } catch (error: any) {
       console.error('Manual verification error:', error);

@@ -6,16 +6,19 @@ import { Plus, Building2, Crown, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth, useAuthStatus } from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
+import { getUserSubscription } from "@/services/subscriptionService";
 import ResponsiveLayout from "@/components/layout/ResponsiveLayout";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useTranslation } from "@/hooks/useTranslation";
+import PlanSummary from "@/components/subscription/PlanSummary";
 
 export default function MyAgenciesPage() {
   const { user, profile, initialized } = useAuth();
   const { isAuthenticated, isReady } = useAuthStatus();
   const [forceLoad, setForceLoad] = useState(false);
+  const [activeSubscription, setActiveSubscription] = useState<any>(null);
   const navigate = useNavigate();
   const { t } = useTranslation();
   
@@ -33,6 +36,9 @@ export default function MyAgenciesPage() {
         navigate('/');
         return;
       }
+
+      // Charger l'abonnement actif
+      getUserSubscription(user.id).then(({ subscription }) => setActiveSubscription(subscription)).catch(() => {});
     }
   }, [initialized, isAuthenticated, user, profile, navigate, t]);
 
@@ -215,6 +221,13 @@ export default function MyAgenciesPage() {
           </motion.div>
 
           {/* Action Buttons */}
+          {/* Active plan summary */}
+          {activeSubscription && (
+            <div className="max-w-3xl mx-auto mb-6">
+              <PlanSummary subscription={activeSubscription} />
+            </div>
+          )}
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -229,14 +242,16 @@ export default function MyAgenciesPage() {
               {t('agencies.newAgency')}
             </Button>
             
-            <Button
-              onClick={() => navigate('/pricing')}
-              variant="outline"
-              className="h-12 px-8 rounded-xl border-2 border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy shadow-lg hover:shadow-xl transition-all duration-300"
-            >
-              <Crown className="h-5 w-5 mr-2" />
-              {t('agencies.upgradeToPremium')}
-            </Button>
+            {!(activeSubscription?.plan_id && activeSubscription?.status === 'active' && activeSubscription?.subscription_plans?.price > 0) && (
+              <Button
+                onClick={() => navigate('/pricing')}
+                variant="outline"
+                className="h-12 px-8 rounded-xl border-2 border-immoo-gold text-immoo-gold hover:bg-immoo-gold hover:text-immoo-navy shadow-lg hover:shadow-xl transition-all duration-300"
+              >
+                <Crown className="h-5 w-5 mr-2" />
+                {t('agencies.upgradeToPremium')}
+              </Button>
+            )}
           </motion.div>
         </div>
       </section>

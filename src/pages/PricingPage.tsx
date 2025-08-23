@@ -18,6 +18,7 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import { useTranslation } from '@/hooks/useTranslation';
 import { MuanaPayClient } from '@muana/pay-sdk/supabase';
+import { getUserSubscription } from '@/services/subscriptionService';
 import { listSubscriptionPaymentMethods } from '@/services/subscription/paymentMethodService';
 import TransactionVerifier from '@/components/TransactionVerifier';
 
@@ -46,6 +47,7 @@ export default function PricingPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [paymentNumbers, setPaymentNumbers] = useState<{ provider: string; phone_number: string }[]>([]);
+  const [activeSubscription, setActiveSubscription] = useState<any>(null);
   const [currentUser, setCurrentUser] = useState<any>(null);
   const navigate = useNavigate();
 
@@ -60,6 +62,9 @@ export default function PricingPage() {
       const { data: userRes, error: userErr } = await supabase.auth.getUser();
       if (!userErr && userRes?.user) {
         setCurrentUser(userRes.user);
+        // Charger l'abonnement actif pour désactiver l'achat du plan en cours
+        const { subscription } = await getUserSubscription(userRes.user.id);
+        setActiveSubscription(subscription);
       }
     };
     getUser();
@@ -137,6 +142,13 @@ export default function PricingPage() {
   };
 
   const handlePlanSelect = (plan: PlanData) => {
+    // Visiteur: rediriger vers la création/connexion d'agence
+    if (!currentUser) {
+      toast.info('Connectez-vous ou créez un compte agence pour activer un plan');
+      navigate('/immo-agency');
+      return;
+    }
+
     if (plan.price === 0) {
       // Plan gratuit - pas besoin de contact
       toast.info('Le plan gratuit est déjà actif par défaut');
@@ -220,7 +232,16 @@ export default function PricingPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 max-w-7xl mx-auto px-4">
-            {plans.map((plan, index) => (
+            {plans.map((plan, index) => {
+              const isCurrentPlan = activeSubscription?.plan_id === plan.id && activeSubscription?.status === 'active';
+              const disablePurchase = isCurrentPlan;
+              const isVisitor = !currentUser;
+              const buttonLabel = isCurrentPlan
+                ? 'Plan actif'
+                : isVisitor
+                  ? 'Se connecter / Créer un compte agence'
+                  : plan.buttonText;
+              return (
               <div
                 key={plan.id}
                 className={`group relative transform transition-all duration-300 hover:scale-[1.02] md:hover:scale-105 ${
@@ -353,27 +374,28 @@ export default function PricingPage() {
                     
                     {/* Bouton compact pour mobile */}
                     <Button 
-                      onClick={() => handlePlanSelect(plan)}
+                      onClick={() => !disablePurchase && handlePlanSelect(plan)}
                       className={`w-full py-3 md:py-4 text-sm md:text-lg font-bold rounded-lg md:rounded-xl transition-all duration-300 transform hover:scale-[1.02] md:hover:scale-105 active:scale-95 relative overflow-hidden group/button ${
                         plan.popular 
                           ? 'bg-gradient-to-r from-amber-500 to-orange-500 md:from-gold md:via-yellow-500 md:to-orange-500 hover:from-orange-500 hover:to-amber-500 md:hover:from-yellow-500 md:hover:via-gold md:hover:to-yellow-600 text-white shadow-lg md:shadow-xl shadow-amber-300/50 md:shadow-gold/30 border-0' 
                           : plan.price === 0
                             ? 'bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-800 border border-gray-300 md:border-2 hover:border-gray-400'
-                            : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-blue-600 text-white shadow-lg md:shadow-xl shadow-blue-500/30 border-0'
+                            : `${disablePurchase ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : (isVisitor ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-blue-600 text-white shadow-lg md:shadow-xl shadow-blue-500/30 border-0')}`
                       }`}
+                      disabled={disablePurchase}
                     >
                       {/* Effet de brillance réduit sur mobile */}
                       <div className="hidden md:block absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover/button:translate-x-[100%] transition-transform duration-700" />
                       
                       <span className="relative z-10 flex items-center justify-center">
-                        {plan.price === 0 ? '🎯' : '⚡'} 
-                        <span className="ml-1 md:ml-2">{plan.buttonText}</span>
+                        {disablePurchase ? '✅' : (plan.price === 0 ? '🎯' : '⚡')} 
+                        <span className="ml-1 md:ml-2">{buttonLabel}</span>
                       </span>
                     </Button>
                   </CardContent>
                 </Card>
               </div>
-            ))}
+            );})}
           </div>
         )}
         

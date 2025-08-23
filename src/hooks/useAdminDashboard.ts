@@ -1,8 +1,9 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SupportTicketService } from '@/services/admin/supportTicketService';
+import { useQuery } from './useQueryCache';
 
 interface DashboardStats {
   totalUsers: number;
@@ -31,86 +32,85 @@ interface PendingItem {
 }
 
 export function useAdminDashboard() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [recentActivities, setRecentActivities] = useState<RecentActivity[]>([]);
-  const [pendingItems, setPendingItems] = useState<PendingItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  // Utiliser le système de cache pour les statistiques principales
+  const { 
+    data: dashboardData, 
+    isLoading, 
+    refetch 
+  } = useQuery(
+    'admin-dashboard-stats',
+    fetchDashboardData,
+    { 
+      staleTime: 2 * 60 * 1000, // 2 minutes
+      cacheTime: 10 * 60 * 1000 // 10 minutes
+    }
+  );
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
+  const stats = dashboardData?.stats || null;
+  const recentActivities = dashboardData?.recentActivities || [];
+  const pendingItems = dashboardData?.pendingItems || [];
 
-  const fetchDashboardData = async () => {
+  async function fetchDashboardData() {
     try {
-      setIsLoading(true);
+      // Optimisation: Faire toutes les requêtes en parallèle
+      const [
+        { count: userCount, error: userError },
+        { count: agencyCount, error: agencyError },
+        { count: propertyCount, error: propertyError },
+        { data: totalProperties, error: totalPropError },
+        { data: rentedProperties, error: rentedPropError },
+        { count: unverifiedAgencies },
+        { count: pendingProperties }
+      ] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact', head: true }),
+        supabase.from('agencies').select('*', { count: 'exact', head: true }),
+        supabase.from('properties').select('*', { count: 'exact', head: true }),
+        supabase.from('properties').select('id'),
+        supabase.from('properties').select('id').eq('status', 'rented'),
+        supabase.from('agencies').select('*', { count: 'exact', head: true }).eq('verified', false),
+        supabase.from('properties').select('*', { count: 'exact', head: true }).eq('status', 'pending')
+      ]);
       
-      // Fetch user count
-      const { count: userCount, error: userError } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-      
-      if (userError) throw userError;
-
-      // Fetch agency count
-      const { count: agencyCount, error: agencyError } = await supabase
-        .from('agencies')
-        .select('*', { count: 'exact', head: true });
-      
-      if (agencyError) throw agencyError;
-
-      // Fetch property count
-      const { count: propertyCount, error: propertyError } = await supabase
-        .from('properties')
-        .select('*', { count: 'exact', head: true });
-      
-      if (propertyError) throw propertyError;
-
-      // Calculate occupancy rate
-      const { data: totalProperties, error: totalPropError } = await supabase
-        .from('properties')
-        .select('id');
-      
-      const { data: rentedProperties, error: rentedPropError } = await supabase
-        .from('properties')
-        .select('id')
-        .eq('status', 'rented');
-      
-      if (totalPropError || rentedPropError) throw totalPropError || rentedPropError;
+      // Vérifier les erreurs
+      if (userError || agencyError || propertyError || totalPropError || rentedPropError) {
+        throw userError || agencyError || propertyError || totalPropError || rentedPropError;
+      }
 
       const occupancyRate = totalProperties?.length ? 
         Math.round((rentedProperties?.length || 0) / totalProperties.length * 100) : 0;
 
-      // Fetch recent activities - with error handling
+      // Fetch recent activities en parallèle avec les tickets de support
       let activities: any[] = [];
       let userProfiles: any[] = [];
+      let openTickets = 0;
       
-      try {
-        const { data: activitiesData, error: activitiesError } = await supabase
+      const [activitiesResult, ticketsResult] = await Promise.allSettled([
+        supabase
           .from('user_activities')
           .select('id, activity_type, description, created_at, user_id')
           .order('created_at', { ascending: false })
-          .limit(5);
+          .limit(5),
+        SupportTicketService.getOpenTicketsCount()
+      ]);
 
-        if (!activitiesError && activitiesData) {
-          activities = activitiesData;
-          
-          // Fetch user names separately for activities
+      if (activitiesResult.status === 'fulfilled' && !activitiesResult.value.error) {
+        activities = activitiesResult.value.data || [];
+        
+        // Fetch user names si on a des activités
+        if (activities.length > 0) {
           const userIds = activities.map(a => a.user_id).filter(Boolean);
-          
           if (userIds.length > 0) {
-            const { data: profiles, error: profilesError } = await supabase
+            const { data: profiles } = await supabase
               .from('profiles')
               .select('id, first_name, last_name, email')
               .in('id', userIds);
-            
-            if (!profilesError) {
-              userProfiles = profiles || [];
-            }
+            userProfiles = profiles || [];
           }
         }
-      } catch (activitiesError) {
-        console.warn('Could not fetch user activities:', activitiesError);
-        // Continue with empty activities array
+      }
+
+      if (ticketsResult.status === 'fulfilled') {
+        openTickets = ticketsResult.value;
       }
 
       // Transform activities with user names
@@ -128,27 +128,6 @@ export function useAdminDashboard() {
           status: getActivityStatus(activity.activity_type)
         };
       });
-
-      // Fetch pending verifications
-      const { count: unverifiedAgencies } = await supabase
-        .from('agencies')
-        .select('*', { count: 'exact', head: true })
-        .eq('verified', false);
-
-      // Fetch open support tickets using service
-      let openTickets = 0;
-      try {
-        openTickets = await SupportTicketService.getOpenTicketsCount();
-      } catch (ticketsError) {
-        console.warn('Could not fetch support tickets:', ticketsError);
-        // Continue with 0 tickets
-      }
-
-      // Fetch properties pending moderation
-      const { count: pendingProperties } = await supabase
-        .from('properties')
-        .select('*', { count: 'exact', head: true })
-        .eq('status', 'pending');
 
       const pendingItemsData: PendingItem[] = [
         {
@@ -171,27 +150,28 @@ export function useAdminDashboard() {
         }
       ].filter(item => item.count > 0);
 
-      setStats({
-        totalUsers: userCount || 0,
-        totalAgencies: agencyCount || 0,
-        totalProperties: propertyCount || 0,
-        occupancyRate,
-        usersTrend: '+12.5%',
-        agenciesTrend: '+4.3%',
-        propertiesTrend: '+7.8%',
-        occupancyTrend: occupancyRate > 90 ? '+2.1%' : '-1.2%'
-      });
-      
-      setRecentActivities(transformedActivities);
-      setPendingItems(pendingItemsData);
+      // Retourner toutes les données ensemble pour le cache
+      return {
+        stats: {
+          totalUsers: userCount || 0,
+          totalAgencies: agencyCount || 0,
+          totalProperties: propertyCount || 0,
+          occupancyRate,
+          usersTrend: '+12.5%',
+          agenciesTrend: '+4.3%',
+          propertiesTrend: '+7.8%',
+          occupancyTrend: occupancyRate > 90 ? '+2.1%' : '-1.2%'
+        },
+        recentActivities: transformedActivities,
+        pendingItems: pendingItemsData
+      };
 
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast.error('Erreur lors du chargement des données du dashboard');
-    } finally {
-      setIsLoading(false);
+      throw error;
     }
-  };
+  }
 
   const getRelativeTime = (date: Date): string => {
     const now = new Date();
@@ -229,6 +209,6 @@ export function useAdminDashboard() {
     recentActivities,
     pendingItems,
     isLoading,
-    refreshData: fetchDashboardData
+    refreshData: refetch
   };
 }
