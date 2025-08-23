@@ -50,7 +50,7 @@ export async function assignAdminRole(userId: string, adminRole: string) {
     const { error: profileError } = await supabase
       .from('profiles')
       .update({ role: adminRole })
-      .eq('id', userId);
+      .eq('user_id', userId);
     
     if (profileError) {
       console.error('Error updating profile role:', profileError);
@@ -81,7 +81,7 @@ export async function revokeAdminRole(userId: string) {
     const { error: profileError } = await supabase
       .from('profiles')
       .update({ role: 'public' })
-      .eq('id', userId);
+      .eq('user_id', userId);
     
     if (profileError) {
       console.error('Error updating profile role:', profileError);

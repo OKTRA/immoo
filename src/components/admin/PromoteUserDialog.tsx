@@ -24,7 +24,7 @@ import { assignAdminRole } from '@/services/adminRoleService';
 import { Loader2, Search } from 'lucide-react';
 
 interface Profile {
-  id: string;
+  user_id: string;
   email: string;
   first_name: string | null;
   last_name: string | null;
@@ -75,7 +75,7 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
       // Récupérer tous les profils depuis la table profiles avec une requête simple
       const { data: profilesData, error: profilesError } = await supabase
         .from('profiles')
-        .select('*')
+        .select('user_id, email, first_name, last_name, role')
         .order('email');
 
       if (profilesError) {
@@ -110,8 +110,8 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
       
       // Filtrer les profils pour exclure ceux qui sont déjà admin
       const nonAdminProfiles = profilesData.filter(profile => {
-        const isAdmin = adminUserIds.includes(profile.id);
-        console.log(`Profil ${profile.id} (${profile.email}) - Est admin: ${isAdmin}`);
+        const isAdmin = adminUserIds.includes(profile.user_id);
+        console.log(`Profil ${profile.user_id} (${profile.email}) - Est admin: ${isAdmin}`);
         return !isAdmin;
       });
 
@@ -146,7 +146,7 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
         throw new Error(error?.message || 'Erreur lors de la promotion');
       }
       
-      const selectedProfile = profiles.find(p => p.id === selectedUserId);
+      const selectedProfile = profiles.find(p => p.user_id === selectedUserId);
       const userName = selectedProfile 
         ? `${selectedProfile.first_name || ''} ${selectedProfile.last_name || ''}`.trim() || selectedProfile.email
         : 'Utilisateur';
@@ -170,7 +170,7 @@ export function PromoteUserDialog({ isOpen, onClose, onUserPromoted }: PromoteUs
     onClose();
   };
 
-  const selectedProfile = profiles.find(p => p.id === selectedUserId);
+  const selectedProfile = profiles.find(p => p.user_id === selectedUserId);
 
   const getDisplayName = (profile: Profile) => {
     const fullName = `${profile.first_name || ''} ${profile.last_name || ''}`.trim();

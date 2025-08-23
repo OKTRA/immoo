@@ -106,11 +106,11 @@ export function useAdminUsers(options: PaginationOptions = {}) {
       const start = (page - 1) * pageSize;
       const end = start + pageSize - 1;
 
-      // Requête pour les données
+      // Requête pour les données - utiliser user_id au lieu de id
       const { data, error } = await supabase
         .from('profiles')
         .select(`
-          id,
+          user_id,
           email,
           first_name,
           last_name,
@@ -130,8 +130,19 @@ export function useAdminUsers(options: PaginationOptions = {}) {
         throw error || countError;
       }
 
+      // Transformer les données pour utiliser id au lieu de user_id
+      const transformedData = data?.map(profile => ({
+        id: profile.user_id,
+        email: profile.email,
+        first_name: profile.first_name,
+        last_name: profile.last_name,
+        role: profile.role,
+        created_at: profile.created_at,
+        updated_at: profile.updated_at
+      })) || [];
+
       return {
-        data: data || [],
+        data: transformedData,
         total: count || 0,
         page,
         pageSize,

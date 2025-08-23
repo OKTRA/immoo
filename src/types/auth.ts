@@ -9,7 +9,7 @@ export interface UserProfile {
   email: string;
   first_name?: string;
   last_name?: string;
-  role: 'admin' | 'agency' | 'visiteur';
+  role: 'admin' | 'agency' | 'owner' | 'public' | 'visiteur';
   agency_id?: string;
   phone?: string;
   avatar_url?: string;

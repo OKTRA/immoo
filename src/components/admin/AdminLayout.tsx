@@ -39,7 +39,7 @@ export default function AdminLayout() {
           const { data: profileData } = await supabase
             .from('profiles')
             .select('role')
-            .eq('id', currentUser.id)
+            .eq('user_id', currentUser.id)
             .single();
           
           if (profileData) {
