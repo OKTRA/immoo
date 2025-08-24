@@ -78,15 +78,15 @@ export default function FeatureSection() {
   // Map icon string to icon component
   const getIconComponent = (iconName: string) => {
     const iconMap: Record<string, React.ReactNode> = {
-      Building2: <Building2 className="h-full w-full" />,
-      Users2: <Users2 className="h-full w-full" />,
-      Briefcase: <Briefcase className="h-full w-full" />,
-      BarChart3: <BarChart3 className="h-full w-full" />,
-      FileText: <FileText className="h-full w-full" />,
-      Shield: <Shield className="h-full w-full" />,
-      Calculator: <Calculator className="h-full w-full" />,
-      Calendar: <Calendar className="h-full w-full" />,
-      Smartphone: <Smartphone className="h-full w-full" />
+      Building2: <Building2 className="h-4 w-4 sm:h-5 sm:w-5" />,
+      Users2: <Users2 className="h-4 w-4 sm:h-5 sm:w-5" />,
+      Briefcase: <Briefcase className="h-4 w-4 sm:h-5 sm:w-5" />,
+      BarChart3: <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5" />,
+      FileText: <FileText className="h-4 w-4 sm:h-5 sm:w-5" />,
+      Shield: <Shield className="h-4 w-4 sm:h-5 sm:w-5" />,
+      Calculator: <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />,
+      Calendar: <Calendar className="h-4 w-4 sm:h-5 sm:w-5" />,
+      Smartphone: <Smartphone className="h-4 w-4 sm:h-5 sm:w-5" />
     };
     
     return iconMap[iconName] || null;
@@ -117,30 +117,30 @@ export default function FeatureSection() {
   };
 
   return (
-    <section className="py-16 sm:py-20 md:py-24 bg-white" id="features">
+    <section className="py-8 sm:py-12 md:py-16 bg-gray-50" id="features">
 
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Section */}
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6">
+        {/* Header Section - Mobile Optimized */}
         <motion.div 
           ref={featureRef}
-          className="max-w-4xl mx-auto text-center mb-16"
+          className="max-w-3xl mx-auto text-center mb-6 sm:mb-8 lg:mb-10"
           initial="hidden"
           animate={isFeatureInView ? "visible" : "hidden"}
           variants={containerVariants}
         >
-          <motion.h2 variants={itemVariants} className="text-3xl sm:text-4xl lg:text-5xl font-light mb-6 text-gray-900 tracking-tight">
+          <motion.h2 variants={itemVariants} className="text-xl sm:text-2xl lg:text-3xl font-semibold mb-3 sm:mb-4 text-gray-900 tracking-tight">
             {t('features.sectionTitle')}
           </motion.h2>
           
-          <motion.p variants={itemVariants} className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <motion.p variants={itemVariants} className="text-sm sm:text-base text-gray-600 max-w-xl mx-auto leading-relaxed px-2">
             {t('features.sectionSubtitle')}
           </motion.p>
           
         </motion.div>
 
-        {/* Features Grid */}
+        {/* Features Grid - Mobile Optimized */}
         <motion.div 
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5"
           initial="hidden"
           animate={isFeatureInView ? "visible" : "hidden"}
           variants={containerVariants}
@@ -149,36 +149,38 @@ export default function FeatureSection() {
             <motion.div
               key={index}
               variants={itemVariants}
-              className="group text-center"
+              className="group bg-white rounded-lg p-3 sm:p-4 border border-gray-100 hover:border-blue-200 hover:shadow-md transition-all duration-300 text-center"
             >
-              <div className="w-16 h-16 mx-auto mb-6 rounded-2xl bg-gray-50 flex items-center justify-center text-gray-700 group-hover:bg-gray-100 transition-colors duration-200">
-                {getIconComponent(feature.icon)}
+              <div className="flex items-center justify-center mb-2 sm:mb-3">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-gradient-to-br from-blue-50 to-blue-100 flex items-center justify-center text-blue-600 group-hover:from-blue-100 group-hover:to-blue-200 group-hover:scale-105 transition-all duration-300">
+                  {getIconComponent(feature.icon)}
+                </div>
               </div>
-              <h3 className="text-xl font-semibold mb-4 text-gray-900">{feature.title}</h3>
-              <p className="text-gray-600 leading-relaxed">{feature.description}</p>
+              <h3 className="text-xs sm:text-sm lg:text-base font-semibold mb-1 sm:mb-2 text-gray-900 leading-tight">{feature.title}</h3>
+              <p className="text-xs sm:text-sm text-gray-600 leading-relaxed line-clamp-2 hidden sm:block">{feature.description}</p>
             </motion.div>
           ))}
         </motion.div>
 
-        {/* CTA Section */}
+        {/* CTA Section - Mobile Optimized */}
         <motion.div 
-          className="text-center mt-16"
+          className="text-center mt-6 sm:mt-8 lg:mt-10 px-2"
           initial="hidden"
           animate={isFeatureInView ? "visible" : "hidden"}
           variants={itemVariants}
         >
-          <h3 className="text-2xl font-semibold mb-4 text-gray-900">
+          <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3 text-gray-900">
             {t('features.ctaTitle')}
           </h3>
-          <p className="text-gray-600 mb-8 max-w-md mx-auto">
+          <p className="text-xs sm:text-sm text-gray-600 mb-4 sm:mb-6 max-w-sm mx-auto leading-relaxed">
             {t('features.ctaSubtitle')}
           </p>
           <Button 
             onClick={() => setShowAgencyDialog(true)}
-            className="bg-gray-900 hover:bg-gray-800 text-white px-8 py-3 rounded-lg font-medium transition-colors duration-200 inline-flex items-center"
+            className="px-4 sm:px-6 py-2 sm:py-2.5 text-xs sm:text-sm bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105"
           >
             {t('features.ctaButton')}
-            <ArrowRight className="ml-2 h-4 w-4" />
+            <ArrowRight className="ml-1 h-3 w-3 sm:h-4 sm:w-4" />
           </Button>
         </motion.div>
       </div>
