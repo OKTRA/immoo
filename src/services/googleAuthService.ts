@@ -15,14 +15,31 @@ export interface GoogleUserMetadata {
   avatar_url?: string;
 }
 
+// Fonction pour obtenir l'URL de redirection correcte
+const getRedirectUrl = (): string => {
+  // En production, utiliser l'URL de production définie dans les variables d'environnement
+  const productionUrl = import.meta.env.VITE_PRODUCTION_URL;
+  const isDevelopment = import.meta.env.DEV;
+  
+  if (!isDevelopment && productionUrl) {
+    return `${productionUrl}/auth/callback`;
+  }
+  
+  // En développement ou si pas d'URL de production définie, utiliser l'origine actuelle
+  return `${window.location.origin}/auth/callback`;
+};
+
 export const signInWithGoogle = async (): Promise<GoogleAuthResult> => {
   try {
     console.log('🔐 Initiating Google sign in...');
     
+    const redirectUrl = getRedirectUrl();
+    console.log('🔗 Redirect URL:', redirectUrl);
+    
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: redirectUrl,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',

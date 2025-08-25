@@ -108,10 +108,14 @@ export class MobileAuthService {
    */
   private async signInWithGoogleWeb(): Promise<GoogleAuthResult> {
     try {
+      // Utiliser la même logique de redirection que getMobileRedirectUrl pour le web
+      const redirectUrl = this.getMobileRedirectUrl();
+      console.log('🔗 Mobile Web Redirect URL:', redirectUrl);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: redirectUrl,
           queryParams: {
             access_type: 'offline',
             prompt: 'consent',
@@ -154,6 +158,15 @@ export class MobileAuthService {
       // Pour Capacitor, on utilise un scheme personnalisé
       return 'pro.immoo.app://auth/callback';
     }
+    
+    // Pour le web mobile, utiliser la même logique que le service principal
+    const productionUrl = import.meta.env.VITE_PRODUCTION_URL;
+    const isDevelopment = import.meta.env.DEV;
+    
+    if (!isDevelopment && productionUrl) {
+      return `${productionUrl}/auth/callback`;
+    }
+    
     return `${window.location.origin}/auth/callback`;
   }
 
